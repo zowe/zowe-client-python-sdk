@@ -2,7 +2,7 @@
 
 Zeepy is an open-source Python library for z/OSMF REST API. It allows you to leverage mainframe capabilities from your python programs with minimum effort!
 
-![]("./img/zeepy.gif")
+![](./img/zeepy.gif)
 
 # Requirements
 
