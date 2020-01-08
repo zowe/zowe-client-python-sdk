@@ -1,5 +1,7 @@
 # Zeepy
 
+![](https://img.shields.io/hexpm/l/plug) 
+
 Zeepy is an open-source Python library for z/OSMF REST API. It allows you to leverage mainframe capabilities from your python programs with minimum effort!
 
 ![](./img/zeepy.gif)
@@ -19,6 +21,8 @@ z = Zeepy(zosmf_host='<your zosmf host address>', zosmf_user='<your zosmf user>'
 ```
 
 # Available options
+
+Currently the avaiable interfaces are
 
 1. Issue console command:
 ```python
@@ -52,3 +56,7 @@ result = z.job.submit_from_plaintext(jcl)
 
 ```
 
+# Acknowledgments 
+
+* Make sure to check out the [Zowe project](https://github.com/zowe)! 
+* For further information on z/OSMF REST API, click [HERE](https://www.ibm.com/support/knowledgecenter/SSLTBW_2.1.0/com.ibm.zos.v2r1.izua700/IZUHPINFO_RESTServices.htm)
