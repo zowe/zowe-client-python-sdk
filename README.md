@@ -1,14 +1,14 @@
 # Zeepy
 
-![](https://img.shields.io/hexpm/l/plug) 
+![](https://img.shields.io/hexpm/l/plug) ![](https://img.shields.io/badge/version-0.1.0-yellow)
 
-Zeepy is an open-source Python library for z/OSMF REST API. It allows you to leverage mainframe capabilities from your python programs with minimum effort!
+Zeepy is an open-source Python package for z/OSMF REST API. It allows you to leverage mainframe capabilities from your python programs with minimum effort!
 
 ![](./img/zeepy.gif)
 
 # Requirements
 
-This library uses `requests-2.22`
+This package uses `requests-2.22`
 
 # Quick start
 
