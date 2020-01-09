@@ -12,13 +12,23 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and 
 limitations under the License. 
 '''
-from .response_handler import ResponseHandler
+from .request_handler import RequestHandler
+from .constants import constants
 
 class ZosmfApi:
 
     def __init__(self, connection, default_url):
         self.connection = connection
+        self.constants = constants
         self.default_service_url = default_url
         self.default_headers = {'Content-type': 'application/json'}
         self.request_endpoint = "https://{base_url}{service}".format(base_url=self.connection.zosmf_host, service=self.default_service_url)
-        self.response_handler = ResponseHandler()
+        self.request_arguments = {'url': self.request_endpoint, 
+                                  'auth': (self.connection.zosmf_user, self.connection.zosmf_password),
+                                  'headers': self.default_headers,
+                                  'verify': self.connection.ssl_verification,
+                                  'timeout': 30
+                                 }
+        self.request_handler = RequestHandler()
+
+        

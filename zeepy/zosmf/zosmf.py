@@ -12,9 +12,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and 
 limitations under the License. 
 '''
-
 from ..utilities import ZosmfApi
-import requests
 
 class Zosmf(ZosmfApi):
 
@@ -22,9 +20,5 @@ class Zosmf(ZosmfApi):
         super().__init__(connection, '/zosmf/info')
 
     def get_info(self):
-        response = requests.get(self.request_endpoint, 
-                                verify=self.connection.ssl_verification,
-                                timeout=30)
-        return self.response_handler.validate_response(response, 200)
-
-        
+        response_json = self.request_handler.perform_request('get', self.request_arguments)
+        return response_json

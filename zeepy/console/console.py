@@ -12,9 +12,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and 
 limitations under the License. 
 '''
-
 from ..utilities import ZosmfApi
-import requests
 
 class Console(ZosmfApi):
 
@@ -23,16 +21,6 @@ class Console(ZosmfApi):
     
     def issue_command(self, command, console=None):
         request_body = '{"cmd": "%s"}' % (command)
-        response = requests.put(self.request_endpoint, 
-                                data=request_body, 
-                                auth=(self.connection.zosmf_user, self.connection.zosmf_password), 
-                                headers=self.default_headers, 
-                                verify=self.connection.ssl_verification,
-                                timeout=30)
-
-        return self.response_handler.validate_response(response)
-
-        
-
-
-    
+        self.request_arguments['data'] = request_body
+        response_json = self.request_handler.perform_request('put', self.request_arguments)
+        return response_json

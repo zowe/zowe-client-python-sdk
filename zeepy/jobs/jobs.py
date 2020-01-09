@@ -12,9 +12,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and 
 limitations under the License. 
 '''
-
 from ..utilities import ZosmfApi
-import requests 
 import os
 
 class Jobs(ZosmfApi):
@@ -25,12 +23,10 @@ class Jobs(ZosmfApi):
     def get_job_status(self, jobname, jobid):
         job_url = '{}/{}'.format(jobname, jobid)
         request_url = "{}{}".format(self.request_endpoint, job_url)
-        response = requests.get(request_url,
-                                auth=(self.connection.zosmf_user, self.connection.zosmf_password),
-                                headers=self.default_headers, 
-                                verify=self.connection.ssl_verification,
-                                timeout=30)
-        return self.response_handler.validate_response(response)
+        custom_args = self.request_arguments.copy()
+        custom_args['url'] = request_url
+        response_json = self.request_handler.perform_request('get', custom_args)
+        return response_json
 
     def list_jobs(self, owner=None, prefix='*', max_jobs=1000, user_correlator=None):
         if owner:
@@ -39,22 +35,17 @@ class Jobs(ZosmfApi):
             params = {'owner': self.connection.zosmf_user, 'prefix': prefix, 'max-jobs': max_jobs}
         if user_correlator:
             params['user-correlator'] = user_correlator
-        response = requests.get(self.request_endpoint,
-                                auth=(self.connection.zosmf_user, self.connection.zosmf_password),
-                                headers=self.default_headers, 
-                                verify=self.connection.ssl_verification,
-                                timeout=30)
-        return self.response_handler.validate_response(response)
+        custom_args = self.request_arguments.copy()
+        custom_args['params'] = params
+        response_json = self.request_handler.perform_request('get', custom_args)
+        return response_json
 
     def submit_from_mainframe(self, jcl_path):
         request_body = '{"file": "//\'%s\'"}' % (jcl_path)
-        response = requests.put(self.request_endpoint,
-                                data=request_body,
-                                auth=(self.connection.zosmf_user, self.connection.zosmf_password),
-                                headers=self.default_headers, 
-                                verify=self.connection.ssl_verification,
-                                timeout=30)
-        return self.response_handler.validate_response(response, 201)
+        custom_args = self.request_arguments.copy()
+        custom_args['data'] = request_body
+        response_json = self.request_handler.perform_request('put', custom_args, expected_code=201)
+        return response_json
 
     def submit_from_local_file(self, jcl_path):
         if os.path.isfile(jcl_path):
@@ -66,10 +57,8 @@ class Jobs(ZosmfApi):
             raise FileNotFoundError("Provided argument is not a file path {}".format(jcl_path))
 
     def submit_plaintext(self, jcl):
-        response = requests.put(self.request_endpoint,
-                                data=str(jcl),
-                                auth=(self.connection.zosmf_user, self.connection.zosmf_password),
-                                headers={'Content-Type': 'text/plain'}, 
-                                verify=self.connection.ssl_verification,
-                                timeout=30)
-        return self.response_handler.validate_response(response, 201)
+        custom_args = self.request_arguments.copy()
+        custom_args['data'] = str(jcl)
+        custom_args['headers'] = {'Content-Type': 'text/plain'}
+        response_json = self.request_handler.perform_request('put', custom_args, expected_code=201)
+        return response_json
