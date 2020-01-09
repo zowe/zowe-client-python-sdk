@@ -21,7 +21,7 @@ Start by importing the Zeepy class and create a object that will be the handler 
 ```python
 from zeepy import Zeepy
 
-z = Zeepy(zosmf_host='<your zosmf host address>', zosmf_user='<your zosmf user>', zosmf_password='<your zosmf password>'
+z = Zeepy(zosmf_host='<host address>', zosmf_user='<zosmf user>', zosmf_password='<zosmf password>')
 ```
 
 # Available options
@@ -38,25 +38,35 @@ result = z.console.issue_command("<command>")
 result = z.zosmf.get_info()
 ```
 
-3. Submit a job from a dataset:
+3. Retrieve the status of a job on JES
 ```python
-result = z.job.submit_from_mainframe("YOUR.DATASET")
+result = z.jobs.get_job_status("JOBNAME", "JOBID")
 ```
 
-4. Submit a job from a local file:
+4. Retrieve list of jobs in JES spool
 ```python
-result = z.job.submit_from_local_file("./local_file")
+result = z.jobs.list_jobs(owner="USER", prefix="JOB*")
 ```
 
-5. Submit from plain text:
+5. Submit a job from a dataset:
+```python
+result = z.jobs.submit_from_mainframe("YOUR.DATASET")
 ```
+
+6. Submit a job from a local file:
+```python
+result = z.jobs.submit_from_local_file("./local_file")
+```
+
+7. Submit from plain text:
+```python
 jcl = '''
 //IEFBR14Q JOB (AUTOMATION),CLASS=A,MSGCLASS=0,
 //             MSGLEVEL=(1,1),REGION=0M,NOTIFY=&SYSUID
 //STEP1    EXEC PGM=IEFBR14
 '''
 
-result = z.job.submit_from_plaintext(jcl)
+result = z.jobs.submit_from_plaintext(jcl)
 
 ```
 
