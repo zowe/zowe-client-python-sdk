@@ -1,10 +1,6 @@
 # Zeepy
 
-<<<<<<< HEAD
-![](https://img.shields.io/hexpm/l/plug)
-=======
 ![](https://img.shields.io/hexpm/l/plug) 
->>>>>>> 7e99ea1be3a66b96936ec6bf286524ac39142685
 
 Zeepy is an open-source Python library for z/OSMF REST API. It allows you to leverage mainframe capabilities from your python programs with minimum effort!
 
