@@ -20,7 +20,8 @@ class Console(ZosmfApi):
         super().__init__(connection, '/zosmf/restconsoles/consoles/defcn')
     
     def issue_command(self, command, console=None):
+        custom_args = self.create_custom_request_arguments()
         request_body = '{"cmd": "%s"}' % (command)
-        self.request_arguments['data'] = request_body
-        response_json = self.request_handler.perform_request('put', self.request_arguments)
+        custom_args['data'] = request_body
+        response_json = self.request_handler.perform_request('PUT', custom_args)
         return response_json

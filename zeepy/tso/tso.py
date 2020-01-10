@@ -25,25 +25,28 @@ class Tso(ZosmfApi):
         pass
 
     def start_tso_session(self, proc='IZUFPROC',chset='697',cpage='1047',rows='204',cols='160',rsize='4096',acct='DEFAULT'):
+        custom_args = self.create_custom_request_arguments()
         params = {'proc': proc, 'chset': chset, 'cpage': cpage, 'rows': rows, 'cols': cols, 'rsize': rsize, 'acct': acct}
-        self.request_arguments['params'] = params
-        response_json = self.request_handler.perform_request('post', self.request_arguments)
+        custom_args['params'] = params
+        response_json = self.request_handler.perform_request('POST', custom_args)
         return response_json['servletKey']
 
     def send_tso_message(self, session_key, message):
         pass
 
     def ping_tso_session(self, session_key):
+        custom_args = self.create_custom_request_arguments()
         request_url = '{}/{}/{}'.format(self.request_endpoint, 'ping', session_key)
-        self.request_arguments['url'] = request_url
-        response_json = self.request_handler.perform_request('put', self.request_arguments)
+        custom_args['url'] = request_url
+        response_json = self.request_handler.perform_request('PUT', custom_args)
         message_id_list = self.parse_message_ids(response_json)
         return "Ping successful" if self.session_not_found not in message_id_list else "Ping failed"
 
     def end_tso_session(self, session_key):
+        custom_args = self.create_custom_request_arguments()        
         request_url = '{}/{}'.format(self.request_endpoint, session_key)
-        self.request_arguments['url'] = request_url
-        response_json = self.request_handler.perform_request('delete', self.request_arguments)
+        custom_args['url'] = request_url
+        response_json = self.request_handler.perform_request('DELETE', custom_args)
         message_id_list = self.parse_message_ids(response_json)
         return "Session ended" if self.session_not_found not in message_id_list else "Session already ended"
 

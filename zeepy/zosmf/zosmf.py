@@ -20,5 +20,5 @@ class Zosmf(ZosmfApi):
         super().__init__(connection, '/zosmf/info')
 
     def get_info(self):
-        response_json = self.request_handler.perform_request('get', self.request_arguments)
+        response_json = self.request_handler.perform_request('GET', self.request_arguments)
         return response_json

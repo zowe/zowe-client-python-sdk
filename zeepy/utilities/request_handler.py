@@ -22,20 +22,19 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 class RequestHandler():
 
+    def __init__(self, session_arguments):
+        self.session_arguments = session_arguments
+
     def perform_request(self, method, request_arguments, expected_code=200):
-        if method == 'get':
-            self.response = requests.get(**request_arguments)
-        elif method == 'post':
-            self.response = requests.post(**request_arguments)
-        elif method == 'put':
-
-            self.response = requests.put(**request_arguments)
-        elif method == 'delete':
-            self.response = requests.delete(**request_arguments)
-        else:
+        valid_requests = ['GET', 'POST', 'PUT', 'DELETE']
+        if method not in valid_requests:
             raise InvalidRequestMethod(method)
+        else:
+            session = requests.Session()
+            request_object = requests.Request(method=method, **request_arguments)
+            prepared = session.prepare_request(request_object)
+            self.response = session.send(prepared, **self.session_arguments)
         return self.validate_response(expected_code)
-
 
     def validate_response(self, expected_code):
         # Automatically checks if status code is between 200 and 400
