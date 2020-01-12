@@ -69,7 +69,7 @@ To submit a job from a local file:
 result = z.jobs.submit_from_local_file("<file-path>")
 ```
 
-To Submit from plain text:
+To submit from plain text:
 ```python
 jcl = '''
 //IEFBR14Q JOB (AUTOMATION),CLASS=A,MSGCLASS=0,
@@ -98,7 +98,7 @@ session_parameters = {
 
 session_key = z.tso.start_tso_session(**session_parameters)
 ```
-If you don't provide any session parameter Zeepy will attenpt to start a session with default parameters.
+If you don't provide any session parameter Zeepy will attempt to start a session with default parameters.
 
 To end a TSO address space
 ```python
