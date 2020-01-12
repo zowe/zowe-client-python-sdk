@@ -22,39 +22,54 @@ z = Zeepy(zosmf_host='<host address>', zosmf_user='<zosmf user>', zosmf_password
 
 # Available options
 
-Currently the avaiable interfaces are
+Currently Zeepy support's the following interfaces:
 
-1. Issue console command:
+* Console commands
+* z/OSMF Information retrival
+* Submit job from dataset
+* Submit job from local file
+* Submit job as plain text JCL
+* Retrieve job status
+* Retrieve job list from JES spool
+* Start/End TSO address space
+* Ping TSO address space
+* Issue TSO command
+
+## Console
+
+Usage of the console api on Zeepy
 ```python
 result = z.console.issue_command("<command>")
 ```
+The result will be a JSON object containing the result from z/OSMF
 
-2. Retrieve z/OSMF information
+## Job
+
+To retrieve the status of a job on JES
 ```python
-result = z.zosmf.get_info()
+result = z.jobs.get_job_status("<jobname>", "<jobid>")
 ```
 
-3. Retrieve the status of a job on JES
+To retrieve list of jobs in JES spool
 ```python
-result = z.jobs.get_job_status("JOBNAME", "JOBID")
+result = z.jobs.list_jobs(owner="<user>", prefix="<job-prefix>")
+```
+Additional parameters available are:
+
+* max_jobs
+* user_correlator
+
+To submit a job from a dataset:
+```python
+result = z.jobs.submit_from_mainframe("<dataset-name>")
 ```
 
-4. Retrieve list of jobs in JES spool
+To submit a job from a local file:
 ```python
-result = z.jobs.list_jobs(owner="USER", prefix="JOB*")
+result = z.jobs.submit_from_local_file("<file-path>")
 ```
 
-5. Submit a job from a dataset:
-```python
-result = z.jobs.submit_from_mainframe("YOUR.DATASET")
-```
-
-6. Submit a job from a local file:
-```python
-result = z.jobs.submit_from_local_file("./local_file")
-```
-
-7. Submit from plain text:
+To Submit from plain text:
 ```python
 jcl = '''
 //IEFBR14Q JOB (AUTOMATION),CLASS=A,MSGCLASS=0,
@@ -65,6 +80,43 @@ jcl = '''
 result = z.jobs.submit_from_plaintext(jcl)
 
 ```
+
+## TSO
+
+Starting a TSO address space
+```python
+
+session_parameters = {
+     'proc': 'IZUFPROC',
+     'chset': '697',
+     'cpage': '1047',
+     'rows': '204',
+     'cols': '160',
+     'rsize': '4096',
+     'acct': 'DEFAULT'
+}
+
+session_key = z.tso.start_tso_session(**session_parameters)
+```
+If you don't provide any session parameter Zeepy will attenpt to start a session with default parameters.
+
+To end a TSO address space
+```python
+z.tso.end_tso_session("<session-key>")
+``` 
+
+In order to issue a TSO command
+```python
+tso_output  =  z.tso.issue_command("<tso-command>")
+```
+
+## z/OSMF
+Usage of the z/OSMF api on Zeepy
+```python
+result = z.zosmf.get_info()
+```
+The result will be a JSON object containing z/OSMF information
+
 
 # Acknowledgments 
 
