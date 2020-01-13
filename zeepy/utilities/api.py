@@ -21,11 +21,9 @@ class ZosmfApi:
         self.request_endpoint = "https://{base_url}{service}".format(base_url=self.connection.zosmf_host, service=self.default_service_url)
         self.request_arguments = {'url': self.request_endpoint, 
                                   'auth': (self.connection.zosmf_user, self.connection.zosmf_password),
-                                  'headers': self.default_headers
-                                  }
+                                  'headers': self.default_headers}
         self.session_arguments = {'verify': self.connection.ssl_verification,
-                                  'timeout': 30
-                                  }
+                                  'timeout': 30}
         self.request_handler = RequestHandler(self.session_arguments)
 
     def create_custom_request_arguments(self):

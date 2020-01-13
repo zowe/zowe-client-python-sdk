@@ -14,6 +14,7 @@ from .console import Console
 from .zosmf import Zosmf
 from .jobs import Jobs
 from .tso import Tso
+from .files import Files
 class Zeepy:
 
     def __init__(self, zosmf_host, zosmf_user, zosmf_password, ssl_verification=True):
@@ -22,5 +23,6 @@ class Zeepy:
         self.zosmf = Zosmf(self.connection)
         self.jobs = Jobs(self.connection)
         self.tso = Tso(self.connection)
+        self.files = Files(self.connection)
 
 

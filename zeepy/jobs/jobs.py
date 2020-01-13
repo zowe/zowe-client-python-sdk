@@ -26,12 +26,9 @@ class Jobs(ZosmfApi):
 
     def list_jobs(self, owner=None, prefix='*', max_jobs=1000, user_correlator=None):
         custom_args = self.create_custom_request_arguments()
-        if owner:
-            params = {'owner': owner, 'prefix': prefix, 'max-jobs': max_jobs}
-        else:
-            params = {'owner': self.connection.zosmf_user, 'prefix': prefix, 'max-jobs': max_jobs}
-        if user_correlator:
-            params['user-correlator'] = user_correlator
+        params = {'prefix': prefix, 'max-jobs': max_jobs}
+        params['owner'] = owner if owner else self.connection.zosmf_user
+        if user_correlator: params['user-correlator'] = user_correlator 
         custom_args['params'] = params
         response_json = self.request_handler.perform_request('GET', custom_args)
         return response_json

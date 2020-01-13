@@ -38,7 +38,10 @@ class RequestHandler():
             if self.response.status_code != expected_code:
                 raise UnexpectedStatus(expected_code, self.response.status_code, self.response.text)
             else:
-                return self.response.json()
+                try:
+                    return self.response.json()
+                except:
+                    return self.response.text
         else:
             output_str = str(self.response.request.url)
             output_str += "\n" + str(self.response.request.headers)
