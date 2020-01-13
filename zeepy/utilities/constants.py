@@ -12,5 +12,3 @@ Copyright Contributors to the Zeepy project.
 constants = {
     "TsoSessionNotFound": "IZUG1126E"
 }
-
-    

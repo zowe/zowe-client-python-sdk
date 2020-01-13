@@ -15,14 +15,14 @@ from .zosmf import Zosmf
 from .jobs import Jobs
 from .tso import Tso
 from .files import Files
+
+
 class Zeepy:
 
-    def __init__(self, zosmf_host, zosmf_user, zosmf_password, ssl_verification=True):
-        self.connection = ZosmfConnection(zosmf_host,zosmf_user,zosmf_password,ssl_verification)
+    def __init__(self, zosmf_host: str, zosmf_user: str, zosmf_password: str, ssl_verification: bool = True):
+        self.connection = ZosmfConnection(zosmf_host, zosmf_user, zosmf_password, ssl_verification)
         self.console = Console(self.connection)
         self.zosmf = Zosmf(self.connection)
         self.jobs = Jobs(self.connection)
         self.tso = Tso(self.connection)
-        self.files = Files(self.connection)
-
-
+        self.files = Files(self.connections)

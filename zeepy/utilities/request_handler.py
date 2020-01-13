@@ -12,16 +12,17 @@ Copyright Contributors to the Zeepy project.
 from .exceptions import UnexpectedStatus
 from .exceptions import RequestFailed
 from .exceptions import InvalidRequestMethod
-import requests 
+import requests
 import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
+
 class RequestHandler():
 
-    def __init__(self, session_arguments):
+    def __init__(self, session_arguments: dict):
         self.session_arguments = session_arguments
 
-    def perform_request(self, method, request_arguments, expected_code=200):
+    def perform_request(self, method: str, request_arguments: dict, expected_code: int = 200) -> dict:
         valid_requests = ['GET', 'POST', 'PUT', 'DELETE']
         if method not in valid_requests:
             raise InvalidRequestMethod(method)
@@ -32,7 +33,7 @@ class RequestHandler():
             self.response = session.send(prepared, **self.session_arguments)
         return self.validate_response(expected_code)
 
-    def validate_response(self, expected_code):
+    def validate_response(self, expected_code: int) -> dict:
         # Automatically checks if status code is between 200 and 400
         if self.response:
             if self.response.status_code != expected_code:
@@ -41,11 +42,9 @@ class RequestHandler():
                 try:
                     return self.response.json()
                 except:
-                    return self.response.text
+                    return {'response': self.response.text}
         else:
             output_str = str(self.response.request.url)
             output_str += "\n" + str(self.response.request.headers)
-            output_str += "\n" +  str(self.response.request.body)
+            output_str += "\n" + str(self.response.request.body)
             raise RequestFailed(self.response.status_code, output_str)
-
-

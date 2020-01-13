@@ -9,10 +9,10 @@ SPDX-License-Identifier: EPL-2.0
 Copyright Contributors to the Zeepy project.
 '''
 
+
 class ZosmfConnection:
 
-    def __init__(self, zosmf_host, zosmf_user, zosmf_password, ssl_verification):
-        
+    def __init__(self, zosmf_host: str, zosmf_user: str, zosmf_password: str, ssl_verification: bool):
         self.zosmf_host = zosmf_host
         self.zosmf_user = zosmf_user
         self.zosmf_password = zosmf_password

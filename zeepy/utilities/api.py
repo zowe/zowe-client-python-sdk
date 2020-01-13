@@ -11,6 +11,7 @@ Copyright Contributors to the Zeepy project.
 from .request_handler import RequestHandler
 from .constants import constants
 
+
 class ZosmfApi:
 
     def __init__(self, connection, default_url):
@@ -28,5 +29,3 @@ class ZosmfApi:
 
     def create_custom_request_arguments(self):
         return self.request_arguments.copy()
-
-        

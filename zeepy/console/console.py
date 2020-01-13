@@ -10,12 +10,13 @@ Copyright Contributors to the Zeepy project.
 '''
 from ..utilities import ZosmfApi
 
+
 class Console(ZosmfApi):
 
     def __init__(self, connection):
         super().__init__(connection, '/zosmf/restconsoles/consoles/defcn')
-    
-    def issue_command(self, command, console=None):
+
+    def issue_command(self, command: str, console: str = None) -> dict:
         custom_args = self.create_custom_request_arguments()
         request_body = '{"cmd": "%s"}' % (command)
         custom_args['data'] = request_body
