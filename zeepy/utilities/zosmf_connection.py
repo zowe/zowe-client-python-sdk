@@ -13,10 +13,10 @@ Copyright Contributors to the Zeepy project.
 class ZosmfConnection:
     def __init__(
         self,
-        zosmf_host: str,
-        zosmf_user: str,
-        zosmf_password: str,
-        ssl_verification: bool,
+        zosmf_host,
+        zosmf_user,
+        zosmf_password,
+        ssl_verification
     ):
         """Base class for z/OSMF connection parameters"""
         self.zosmf_host = zosmf_host

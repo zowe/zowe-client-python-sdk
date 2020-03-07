@@ -11,7 +11,7 @@ Copyright Contributors to the Zeepy project.
 
 
 class InvalidRequestMethod(Exception):
-    def __init__(self, input_method: str):
+    def __init__(self, input_method):
         super().__init__("Invalid HTTP method input {}".format(input_method))
 
 

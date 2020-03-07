@@ -17,7 +17,7 @@ class Jobs(ZosmfApi):
     def __init__(self, connection):
         super().__init__(connection, "/zosmf/restjobs/jobs/")
 
-    def get_job_status(self, jobname: str, jobid: str) -> dict:
+    def get_job_status(self, jobname, jobid):
         """Retrieve the status of a given job on JES"""
         custom_args = self.create_custom_request_arguments()
         job_url = "{}/{}".format(jobname, jobid)
@@ -26,13 +26,7 @@ class Jobs(ZosmfApi):
         response_json = self.request_handler.perform_request("GET", custom_args)
         return response_json
 
-    def list_jobs(
-        self,
-        owner: str = None,
-        prefix: str = "*",
-        max_jobs: int = 1000,
-        user_correlator: str = None,
-    ) -> dict:
+    def list_jobs(self, owner=None,  prefix="*", max_jobs=1000, user_correlator=None):
         """Returns a list of jobs on JES based on the provided arguments"""
         custom_args = self.create_custom_request_arguments()
         params = {"prefix": prefix, "max-jobs": max_jobs}
@@ -43,17 +37,17 @@ class Jobs(ZosmfApi):
         response_json = self.request_handler.perform_request("GET", custom_args)
         return response_json
 
-    def submit_from_mainframe(self, jcl_path: str) -> dict:
+    def submit_from_mainframe(self, jcl_path):
         """Submit a job from a given dataset"""
         custom_args = self.create_custom_request_arguments()
         request_body = '{"file": "//\'%s\'"}' % (jcl_path)
         custom_args["data"] = request_body
         response_json = self.request_handler.perform_request(
-            "PUT", custom_args, expected_code=201
+            "PUT", custom_args, expected_code=[201]
         )
         return response_json
 
-    def submit_from_local_file(self, jcl_path: str) -> dict:
+    def submit_from_local_file(self, jcl_path):
         """Submit a job from local file"""
         if os.path.isfile(jcl_path):
             jcl_file = open(jcl_path, "r")
@@ -61,16 +55,14 @@ class Jobs(ZosmfApi):
             jcl_file.close()
             return self.submit_plaintext(file_content)
         else:
-            raise FileNotFoundError(
-                "Provided argument is not a file path {}".format(jcl_path)
-            )
+            raise FileNotFoundError("Provided argument is not a file path {}".format(jcl_path))
 
-    def submit_plaintext(self, jcl: str) -> dict:
+    def submit_plaintext(self, jcl):
         """Submit a job from plain text"""
         custom_args = self.create_custom_request_arguments()
         custom_args["data"] = str(jcl)
         custom_args["headers"] = {"Content-Type": "text/plain"}
         response_json = self.request_handler.perform_request(
-            "PUT", custom_args, expected_code=201
+            "PUT", custom_args, expected_code=[201]
         )
         return response_json

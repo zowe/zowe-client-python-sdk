@@ -13,16 +13,16 @@ from ..utilities import ZosmfApi
 
 
 class Tso(ZosmfApi):
-    """Base class for TSO API"""    
+    """Base class for TSO API"""
     def __init__(self, connection):
         super().__init__(connection, "/zosmf/tsoApp/tso")
         self.session_not_found = self.constants["TsoSessionNotFound"]
 
-    def issue_command(self, command: str) -> str:
+    def issue_command(self, command):
         session_key = self.start_tso_session()
         command_output = self.send_tso_message(session_key, command)
         tso_messages = self.retrieve_tso_messages(command_output)
-        end_status = self.end_tso_session(session_key)
+        self.end_tso_session(session_key)
         return tso_messages
 
     def start_tso_session(
@@ -48,7 +48,7 @@ class Tso(ZosmfApi):
         response_json = self.request_handler.perform_request("POST", custom_args)
         return response_json["servletKey"]
 
-    def send_tso_message(self, session_key: str, message: str) -> str:
+    def send_tso_message(self, session_key, message):
         custom_args = self.create_custom_request_arguments()
         custom_args["url"] = "{}/{}".format(self.request_endpoint, str(session_key))
         custom_args["data"] = '{"TSO RESPONSE":{"VERSION":"0100","DATA":"%s"}}' % (
@@ -57,7 +57,7 @@ class Tso(ZosmfApi):
         response_json = self.request_handler.perform_request("PUT", custom_args)
         return response_json["tsoData"]
 
-    def ping_tso_session(self, session_key: str) -> str:
+    def ping_tso_session(self, session_key):
         custom_args = self.create_custom_request_arguments()
         custom_args["url"] = "{}/{}/{}".format(
             self.request_endpoint, "ping", str(session_key)
@@ -70,7 +70,7 @@ class Tso(ZosmfApi):
             else "Ping failed"
         )
 
-    def end_tso_session(self, session_key: str) -> str:
+    def end_tso_session(self, session_key):
         custom_args = self.create_custom_request_arguments()
         custom_args["url"] = "{}/{}".format(self.request_endpoint, session_key)
         response_json = self.request_handler.perform_request("DELETE", custom_args)
@@ -81,14 +81,14 @@ class Tso(ZosmfApi):
             else "Session already ended"
         )
 
-    def parse_message_ids(self, response_json: dict) -> list:
+    def parse_message_ids(self, response_json):
         return (
             [message["messageId"] for message in response_json["msgData"]]
             if "msgData" in response_json
             else []
         )
 
-    def retrieve_tso_messages(self, response_json: dict) -> list:
+    def retrieve_tso_messages(self, response_json):
         return [
             message["TSO MESSAGE"]["DATA"]
             for message in response_json

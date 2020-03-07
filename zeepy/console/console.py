@@ -16,7 +16,7 @@ class Console(ZosmfApi):
     def __init__(self, connection):
         super().__init__(connection, "/zosmf/restconsoles/consoles/defcn")
 
-    def issue_command(self, command: str, console: str = None) -> dict:
+    def issue_command(self, command, console=None):
         """Issues a command on z/OS Console"""
         custom_args = self.create_custom_request_arguments()
         request_body = '{"cmd": "%s"}' % (command)

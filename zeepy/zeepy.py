@@ -21,10 +21,10 @@ class Zeepy:
     """Main class for Zeepy"""
     def __init__(
         self,
-        zosmf_host: str,
-        zosmf_user: str,
-        zosmf_password: str,
-        ssl_verification: bool = True,
+        zosmf_host,
+        zosmf_user,
+        zosmf_password,
+        ssl_verification=True
     ):
         self.connection = ZosmfConnection(
             zosmf_host, zosmf_user, zosmf_password, ssl_verification
@@ -33,4 +33,4 @@ class Zeepy:
         self.zosmf = Zosmf(self.connection)
         self.jobs = Jobs(self.connection)
         self.tso = Tso(self.connection)
-        self.files = Files(self.connections)
+        self.files = Files(self.connection)
