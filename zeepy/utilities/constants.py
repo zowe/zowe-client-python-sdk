@@ -9,4 +9,8 @@ SPDX-License-Identifier: EPL-2.0
 Copyright Contributors to the Zeepy project.
 """
 
-constants = {"TsoSessionNotFound": "IZUG1126E"}
+constants = {
+    "SecureValuePrefix": "managed by ",
+    "TsoSessionNotFound": "IZUG1126E",
+    "ZoweCredentialKey": "Zowe-Plugin",
+}

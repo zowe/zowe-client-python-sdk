@@ -1,8 +1,8 @@
-# Zowe Python Client SDK 
+# Zowe Python Client SDK
 
 ![](https://img.shields.io/badge/license-EPL--2.0-blue) ![](https://img.shields.io/badge/version-0.1.0-yellow)
 
-The Zowe Python Client SDK is an open-source Python package for z/OSMF REST API. It allows you to leverage mainframe capabilities from your python programs with minimum effort.
+The Zowe Python Client SDK is an open-source Python package for z/OSMF REST API. It allows you to leverage mainframe capabilities from your Python programs with minimum effort.
 
 ![](./img/zeepy.gif)
 
@@ -12,7 +12,7 @@ This package uses `requests-2.22`
 
 # Quick start
 
-Start by importing the Zeepy class and create a object that will be the handler for all z/OSMF requests:
+Start by importing the Zeepy class and create an object that will be the handler for all z/OSMF requests:
 
 ```python
 from zeepy import Zeepy
@@ -22,7 +22,7 @@ z = Zeepy(zosmf_host='<host address>', zosmf_user='<zosmf user>', zosmf_password
 
 # Available options
 
-Currently Zeepy support's the following interfaces:
+Currently Zeepy supports the following interfaces:
 
 * Console commands
 * z/OSMF Information retrival
@@ -103,7 +103,7 @@ If you don't provide any session parameter Zeepy will attempt to start a session
 To end a TSO address space
 ```python
 z.tso.end_tso_session("<session-key>")
-``` 
+```
 
 In order to issue a TSO command
 ```python
@@ -118,7 +118,7 @@ result = z.zosmf.get_info()
 The result will be a JSON object containing z/OSMF information
 
 
-# Acknowledgments 
+# Acknowledgments
 
-* Make sure to check out the [Zowe project](https://github.com/zowe)! 
+* Make sure to check out the [Zowe project](https://github.com/zowe)!
 * For further information on z/OSMF REST API, click [HERE](https://www.ibm.com/support/knowledgecenter/SSLTBW_2.1.0/com.ibm.zos.v2r1.izua700/IZUHPINFO_RESTServices.htm)
