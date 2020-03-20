@@ -14,11 +14,15 @@ from .constants import constants
 
 class ZosmfApi:
     """Abstract class for z/OSMF API classes"""
+
     def __init__(self, connection, default_url):
         self.connection = connection
         self.constants = constants
         self.default_service_url = default_url
-        self.default_headers = {"Content-type": "application/json"}
+        self.default_headers = {
+            "Content-type": "application/json",
+            "X-CSRF-ZOSMF-HEADER": "",
+        }
         self.request_endpoint = "https://{base_url}{service}".format(
             base_url=self.connection.zosmf_host, service=self.default_service_url
         )
