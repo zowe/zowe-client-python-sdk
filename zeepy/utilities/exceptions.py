@@ -31,3 +31,12 @@ class RequestFailed(Exception):
                 status_code, request_output
             )
         )
+
+
+class FileNotFound(Exception):
+    def __init__(self, input_path):
+        super()._init__(
+            "The path {} provided is not a file.".format(
+                input_path
+            )
+        )

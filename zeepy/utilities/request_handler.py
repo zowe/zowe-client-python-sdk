@@ -60,6 +60,7 @@ class RequestHandler:
             output_str = str(self.response.request.url)
             output_str += "\n" + str(self.response.request.headers)
             output_str += "\n" + str(self.response.request.body)
+            output_str += "\n" + str(self.response.text)
             raise RequestFailed(self.response.status_code, output_str)
 
     def normalize_response(self):

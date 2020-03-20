@@ -259,3 +259,9 @@ dmypy.json
 .vscode
 sample.py
 jcl.txt
+out.txt
+tests/validation_tests/__init__.py/local_configuration.py
+in.txt
+.noseids
+tests/validation_tests/*
+config.py
