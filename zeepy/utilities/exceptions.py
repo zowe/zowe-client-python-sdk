@@ -35,8 +35,20 @@ class RequestFailed(Exception):
 
 class FileNotFound(Exception):
     def __init__(self, input_path):
-        super()._init__(
-            "The path {} provided is not a file.".format(
-                input_path
-            )
+        super()._init__("The path {} provided is not a file.".format(input_path))
+
+
+class MissingConnectionArgs(Exception):
+    def __init__(self):
+        super().__init__(
+            "You must provide host, user, and password for a z/OSMF "
+            "connection, or the name of a z/OSMF profile that exists on your "
+            "system."
+        )
+
+
+class SecureProfileLoadFailed(Exception):
+    def __init__(self, profile_name, error_msg):
+        super().__init__(
+            "Failed to load secure profile {}: {}".format(profile_name, error_msg)
         )
