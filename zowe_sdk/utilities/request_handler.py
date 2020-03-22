@@ -6,7 +6,7 @@ https://www.eclipse.org/legal/epl-v20.html
 
 SPDX-License-Identifier: EPL-2.0
 
-Copyright Contributors to the Zeepy project.
+Copyright Contributors to the Zowe Project.
 """
 
 from .exceptions import UnexpectedStatus

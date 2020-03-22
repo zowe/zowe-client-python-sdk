@@ -6,7 +6,7 @@ https://www.eclipse.org/legal/epl-v20.html
 
 SPDX-License-Identifier: EPL-2.0
 
-Copyright Contributors to the Zeepy project.
+Copyright Contributors to the Zowe Project.
 """
 
 from .console import Console
@@ -17,8 +17,8 @@ from .utilities import MissingConnectionArgs, ZosmfConnection, ZosmfProfile
 from .zosmf import Zosmf
 
 
-class Zeepy:
-    """Main class for Zeepy"""
+class ZoweSDK:
+    """Main class for Zowe Python Client SDK"""
 
     def __init__(
         self,

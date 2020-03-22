@@ -6,7 +6,7 @@ https://www.eclipse.org/legal/epl-v20.html
 
 SPDX-License-Identifier: EPL-2.0
 
-Copyright Contributors to the Zeepy project.
+Copyright Contributors to the Zowe Project.
 """
 
 import base64
@@ -57,7 +57,7 @@ class ZosmfProfile:
 
         zosmf_ssl_verification = True
         if "rejectUnauthorized" in profile_yaml:
-            zosmf_ssl_verification = not profile_yaml["rejectUnauthorized"]
+            zosmf_ssl_verification = profile_yaml["rejectUnauthorized"]
 
         return ZosmfConnection(
             zosmf_host, zosmf_user, zosmf_password, zosmf_ssl_verification
