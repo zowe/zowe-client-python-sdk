@@ -14,7 +14,7 @@ keyring
 pyyaml
 ```
 
-# Quick start
+# Quickstart
 
 Start by importing the **ZoweSDK** class and create an object that will be the handler for all z/OSMF requests. The SDK supports both manual authentication and Zowe CLI z/OSMF profile.
 
@@ -32,16 +32,16 @@ from zowe_sdk import ZoweSDK
 z = ZoweSDK(zosmf_profile='<profile name>')
 ```
 
-**Important**: If your z/OSMF profile uses a credentials manager this approach will only work on a Windows workstation due to [this](https://github.com/jaraco/keyring/issues/402) issue.
+**Important**: If your z/OSMF profile uses a credentials manager, this approach will only work on a Windows workstation due to [this](https://github.com/jaraco/keyring/issues/402) issue.
 
 
 # Available options
 
-Currently the Zowe Python SDK supports the following interfaces:
+Currently, the Zowe Python SDK supports the following interfaces:
 
 * Console commands
-* z/OSMF Information retrival
-* Submit job from dataset
+* z/OSMF Information retrieval
+* Submit job from a dataset
 * Submit job from local file
 * Submit job as plain text JCL
 * Retrieve job status
