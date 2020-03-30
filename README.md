@@ -32,7 +32,7 @@ from zowe_sdk import ZoweSDK
 z = ZoweSDK(zosmf_profile='<profile name>')
 ```
 
-**Important**: If your z/OSMF profile uses a credentials manager, this approach will only work on a Windows workstation due to [this](https://github.com/jaraco/keyring/issues/402) issue.
+**Important**: If your z/OSMF profile uses a credentials manager, this approach may not work depending on your operating system. Support for loading secure profiles has only been tested on Windows and Ubuntu so far.
 
 
 # Available options
