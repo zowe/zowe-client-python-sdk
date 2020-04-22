@@ -1,4 +1,5 @@
-"""
+"""Zowe Python Client SDK.
+
 This program and the accompanying materials are made available under the terms of the
 Eclipse Public License v2.0 which accompanies this distribution, and is available at
 
@@ -26,17 +27,49 @@ except ImportError:
 
 
 class ZosmfProfile:
+    """
+    Class used to represent a Zowe z/OSMF profile.
+
+    ...
+
+    Attributes
+    ----------
+    profile_name
+        zowe z/osmf profile name
+
+    Methods
+    -------
+    profiles_dir()
+        Returns the path for the Zowe z/OSMF profiles directory
+    load()
+        Process the Zowe z/OSMF profile file and returns a z/OSMF connection object
+    """
+
     def __init__(self, profile_name):
-        """Base class for z/OSMF profile"""
+        """
+        Construct a ZosmfProfile object.
+
+        Parameters
+        ----------
+        profile_name
+            The name of the Zowe z/OSMF profile
+        """
         self.profile_name = profile_name
 
     @property
     def profiles_dir(self):
+        """Returns the os path for the Zowe z/OSMF profiles."""
         home_dir = os.path.expanduser("~")
         return os.path.join(home_dir, ".zowe", "profiles", "zosmf")
 
     def load(self):
-        """Load z/OSMF connection details from a z/OSMF profile"""
+        """Load z/OSMF connection details from a z/OSMF profile.
+
+        Returns
+        -------
+        zosmf_connection
+            z/osmf connection object
+        """
         profile_file = os.path.join(
             self.profiles_dir, "{}.yaml".format(self.profile_name)
         )
@@ -80,7 +113,7 @@ class ZosmfProfile:
         return secret_value
 
     def __load_secure_credentials(self):
-        """Load secure credentials for a z/OSMF profile"""
+        """Load secure credentials for a z/OSMF profile."""
         if not HAS_KEYRING:
             raise SecureProfileLoadFailed(
                 self.profile_name, "Keyring module not installed"
@@ -100,6 +133,15 @@ if HAS_KEYRING and sys.platform.startswith("linux"):
     from keyring.backends import SecretService
 
     class KeyringBackend(SecretService.Keyring):
+        """
+        Class used to handle secured profiles.
+
+        Methods
+        -------
+        get_password(service, username)
+            Get the decoded password
+        """
+
         def __get_password(self, service, username, collection):
             items = collection.search_items({"account": username, "service": service})
             for item in items:
@@ -109,7 +151,7 @@ if HAS_KEYRING and sys.platform.startswith("linux"):
                 return item.get_secret().decode("utf-8")
 
         def get_password(self, service, username):
-            """Get password of the username for the service"""
+            """Get password of the username for the service."""
             collection = self.get_preferred_collection()
             if hasattr(collection, "connection"):
                 with closing(collection.connection):
