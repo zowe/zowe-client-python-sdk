@@ -1,4 +1,5 @@
-"""
+"""Zowe Python Client SDK.
+
 This program and the accompanying materials are made available under the terms of the
 Eclipse Public License v2.0 which accompanies this distribution, and is available at
 
@@ -18,7 +19,36 @@ from .zosmf import Zosmf
 
 
 class ZoweSDK:
-    """Main class for Zowe Python Client SDK"""
+    """
+    Main class for Zowe Python Client SDK.
+
+    ...
+
+    Attributes
+    ----------
+    zosmf_host
+        zosmf host address
+    zosmf_user
+        zosmf rest api user
+    zosmf_password
+        zosmf rest api password
+    ssl_verification
+        request ssl verification parameter (default True)
+    zosmf_profile
+        zosmf profile name to be loaded (default None)
+    connection
+        zosmf connection object
+    console
+        z/osmf console base api
+    zosmf
+        z/osmf base api
+    jobs
+        z/osmf jobs base api
+    tso
+        z/osmf tso base api
+    files
+        z/osmf files base api
+    """
 
     def __init__(
         self,
@@ -28,6 +58,27 @@ class ZoweSDK:
         ssl_verification=True,
         zosmf_profile=None,
     ):
+        """
+        Construct a ZoweSDK object.
+
+        Parameters
+        ----------
+        zosmf_host
+            The z/OSMF host address (default is None)
+        zosmf_user
+            The user for the z/OSMF REST API (default is None)
+        zosmf_password
+            The password for the z/OSMF REST API (default is None)
+        ssl_verification
+            The value for the requests ssl verification parameter (default is True)
+        zosmf_profile
+            The Zowe z/OSMF profile name in case it already exists (default is None)
+
+        Raises
+        ------
+        MissingConnectionArgs
+            If no connection argument is passed (In-line connection or Zowe z/OSMF profile)
+        """
         if zosmf_profile:
             self.connection = ZosmfProfile(zosmf_profile).load()
         else:
