@@ -57,7 +57,7 @@ class Files(ZosmfApi):
 
         Returns
         -------
-        reseponse_json
+        response_json
             A JSON with a list of dataset names matching the given pattern
         """
         custom_args = self.create_custom_request_arguments()
@@ -71,7 +71,7 @@ class Files(ZosmfApi):
 
         Returns
         -------
-        reseponse_json
+        response_json
             A JSON with a list of members from a given PDS/PDSE
         """
         custom_args = self.create_custom_request_arguments()
@@ -84,7 +84,7 @@ class Files(ZosmfApi):
 
         Returns
         -------
-        reseponse_json
+        response_json
             A JSON with the contents of a given dataset
         """
         custom_args = self.create_custom_request_arguments()
