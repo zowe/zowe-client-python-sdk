@@ -52,7 +52,7 @@ class Console(ZosmfApi):
 
         Returns
         -------
-        reseponse_json
+        response_json
             A JSON containing the response from the console command
         """
         custom_args = self.create_custom_request_arguments()
