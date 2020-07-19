@@ -26,15 +26,15 @@ class ZoweSDK:
 
     Attributes
     ----------
-    zosmf_host
+    zosmf_host: str
         zosmf host address
-    zosmf_user
+    zosmf_user: str
         zosmf rest api user
-    zosmf_password
+    zosmf_password: str
         zosmf rest api password
-    ssl_verification
+    ssl_verification: bool
         request ssl verification parameter (default True)
-    zosmf_profile
+    zosmf_profile: str
         zosmf profile name to be loaded (default None)
     connection
         zosmf connection object
