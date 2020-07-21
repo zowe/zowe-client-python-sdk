@@ -9,7 +9,6 @@ setup(
     author_email="gcartier94@gmail.com",
     license="EPL-2.0",
     classifiers=[
-        "License :: OSI Approved :: Eclipse Public License v2.0",
         "Programming Language :: Python :: 3"],
     install_requires=['zowe.core_for_zowe_sdk'],
     packages=find_namespace_packages(include=['zowe.*'])
