@@ -9,7 +9,7 @@ SPDX-License-Identifier: EPL-2.0
 
 Copyright Contributors to the Zowe project.
 """
-from zowe.core import SdkApi
+from zowe.core_for_zowe_sdk import SdkApi
 
 
 class Zosmf(SdkApi):
