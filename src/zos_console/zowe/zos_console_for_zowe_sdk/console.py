@@ -1,4 +1,4 @@
-from zowe.core import SdkApi
+from zowe.core_for_zowe_sdk import SdkApi
 
 class Console(SdkApi):
     """

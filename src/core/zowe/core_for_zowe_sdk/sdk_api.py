@@ -11,13 +11,14 @@ Copyright Contributors to the Zowe Project.
 """
 from .request_handler import RequestHandler
 from .constants import constants
+from .connection import ApiConnection
 
 
 class SdkApi:
 
     def __init__(self, connection, default_url):
 
-        self.connection = connection
+        self.connection = ApiConnection(**connection)
         self.constants = constants
         self.default_service_url = default_url
         self.default_headers = {

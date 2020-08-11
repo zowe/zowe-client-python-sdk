@@ -265,3 +265,4 @@ in.txt
 .noseids
 tests/validation_tests/*
 config.py
+test.py
