@@ -12,13 +12,18 @@ Copyright Contributors to the Zowe Project.
 from .request_handler import RequestHandler
 from .constants import constants
 from .connection import ApiConnection
+from .zosmf_profile import ZosmfProfile
 
 
 class SdkApi:
 
     def __init__(self, connection, default_url):
 
-        self.connection = ApiConnection(**connection)
+        if "plugin_profile" in connection:
+            self.connection = ZosmfProfile(connection['plugin_profile']).load()
+        else:
+            self.connection = ApiConnection(**connection)
+
         self.constants = constants
         self.default_service_url = default_url
         self.default_headers = {
