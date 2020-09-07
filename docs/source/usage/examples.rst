@@ -1,2 +1,2 @@
-Basic Usage
+Basic usage
 ============

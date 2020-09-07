@@ -6,6 +6,7 @@ Welcome to Zowe Client Python SDK's documentation!
    :caption: Contents:
 
    usage/getting-started
+   about/about
+   packages/packages
    classes/classes
-
-
+   contributing/contributing

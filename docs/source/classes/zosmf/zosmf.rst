@@ -1,4 +1,4 @@
-z/OSMF Classes
+z/OSMF classes
 ================
 
 .. toctree::
