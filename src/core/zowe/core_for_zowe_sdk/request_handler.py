@@ -21,29 +21,12 @@ class RequestHandler:
     """
     Class used to handle HTTP/HTTPS requests.
 
-    ...
-
     Attributes
     ----------
-    session_arguments
-        zowe sdk session arguments
-    valid_methods
-        list of supported request methods
-
-    Methods
-    -------
-    handle_ssl_warnings()
-        Turn off urllib3 warnings if ssl verification is off
-    perform_request(method, request_arguments, expected_code=[200])
-        Prepares and execute a request based on given parameters
-    validate_method()
-        Validates if request method is supported
-    send_request()
-        Creates a session and execute an HTTP/HTTPS request
-    validate_response()
-        Validates the request response based on expected response codes
-    normalize_response()
-        Normalizes the request response object to a JSON format
+    session_arguments: dict
+        Zowe SDK session arguments
+    valid_methods: list
+        List of supported request methods
     """
 
     def __init__(self, session_arguments):
@@ -69,16 +52,16 @@ class RequestHandler:
 
         Parameters
         ----------
-        method
+        method: str
             The request method that should be used
-        request_arguments
+        request_arguments: dict
             The dictionary containing the required arguments for the execution of the request
-        expected_code
+        expected_code: int
             The list containing the acceptable response codes (default is [200])
 
         Returns
         -------
-        normalized_response
+        normalized_response: json
             normalized request response in json (dictionary)
         """
         self.method = method

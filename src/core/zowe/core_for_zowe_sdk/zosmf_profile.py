@@ -30,19 +30,16 @@ class ZosmfProfile:
     """
     Class used to represent a Zowe z/OSMF profile.
 
-    ...
+    Description
+    -----------
+    This class is only used when there is already a Zowe z/OSMF profile created 
+    and the user opted to use the profile instead of passing the credentials directly 
+    in the object constructor.
 
     Attributes
     ----------
-    profile_name
-        zowe z/osmf profile name
-
-    Methods
-    -------
-    profiles_dir()
-        Returns the path for the Zowe z/OSMF profiles directory
-    load()
-        Process the Zowe z/OSMF profile file and returns a z/OSMF connection object
+    profile_name: str
+        Zowe z/OSMF profile name
     """
 
     def __init__(self, profile_name):
@@ -58,7 +55,7 @@ class ZosmfProfile:
 
     @property
     def profiles_dir(self):
-        """Returns the os path for the Zowe z/OSMF profiles."""
+        """Return the os path for the Zowe z/OSMF profiles."""
         home_dir = os.path.expanduser("~")
         return os.path.join(home_dir, ".zowe", "profiles", "zosmf")
 
@@ -68,7 +65,7 @@ class ZosmfProfile:
         Returns
         -------
         zosmf_connection
-            z/osmf connection object
+            z/OSMF connection object
         """
         profile_file = os.path.join(
             self.profiles_dir, "{}.yaml".format(self.profile_name)
