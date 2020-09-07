@@ -17,25 +17,10 @@ class Jobs(SdkApi):
     """
     Class used to represent the base z/OSMF Jobs API.
 
-    ...
-
     Attributes
     ----------
     connection
-        connection object
-
-    Methods
-    -------
-    get_job_status(jobname, jobid)
-        Retrieve the status of a given job on JES
-    list_jobs(owner=None, prefix="*", max_jobs=1000, user_correlator=None)
-        Return a list of jobs on JES based on the provided arguments
-    submit_from_mainframe(jcl_path)
-        Submit a job from a given dataset
-    submit_from_local_file(jcl_path)
-        Submit a job from a given local file
-    submit_plaintext(jcl)
-        Submit a job from a given plain text jcl
+        Connection object
     """
 
     def __init__(self, connection):
@@ -54,9 +39,9 @@ class Jobs(SdkApi):
 
         Parameters
         ----------
-        jobname
+        jobname: str
             The name of the job
-        jobid
+        jobid: str
             The job id on JES
 
         Returns
@@ -76,19 +61,19 @@ class Jobs(SdkApi):
 
         Parameters
         ----------
-        owner
+        owner: str, optional
             The job owner (default is None)
-        prefix
-            The job name prefix (default is *)
-        max_jobs
+        prefix: str, optional
+            The job name prefix (default is `*`)
+        max_jobs: int, optional
             The maximum number of jobs in the output (default is 1000)
-        user_correlator
+        user_correlator: str, optional
             The z/OSMF user correlator attribute (default is None)
 
         Returns
         -------
-        response_json
-            A JSON containing a list of jobs on JES queue based on the given prameters
+        json
+            A JSON containing a list of jobs on JES queue based on the given parameters
         """
         custom_args = self.create_custom_request_arguments()
         params = {"prefix": prefix, "max-jobs": max_jobs}
@@ -104,12 +89,12 @@ class Jobs(SdkApi):
 
         Parameters
         ----------
-        jcl_path
+        jcl_path: str
             The dataset where the JCL is located
 
         Returns
         -------
-        response_json
+        json
             A JSON containing the result of the request execution
         """
         custom_args = self.create_custom_request_arguments()
@@ -129,7 +114,7 @@ class Jobs(SdkApi):
 
         Parameters
         ----------
-        jcl_path
+        jcl_path: str
             Path to the local file where the JCL is located
 
         Raises
@@ -139,7 +124,7 @@ class Jobs(SdkApi):
 
         Returns
         -------
-        response_json
+        json
             A JSON containing the result of the request execution
         """
         if os.path.isfile(jcl_path):
@@ -155,12 +140,12 @@ class Jobs(SdkApi):
 
         Parameters
         ----------
-        jcl
+        jcl: str
             The plain text JCL to be submitted
 
         Returns
         -------
-        response_json
+        json
             A JSON containing the result of the request execution
         """
         custom_args = self.create_custom_request_arguments()

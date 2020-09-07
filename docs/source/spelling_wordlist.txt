@@ -18,5 +18,15 @@ jcl
 correlator
 tso
 proc
+namespace
+subpackage
 sdk
+api
+rest
+REST
+API
+url
+uri
+URI
+URL 
 

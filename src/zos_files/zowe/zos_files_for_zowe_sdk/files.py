@@ -25,21 +25,6 @@ class Files(SdkApi):
     ----------
     connection
         connection object
-
-    Methods
-    -------
-    list_dsn(name_pattern)
-        Return a list of datasets based on the provided pattern
-    list_dsn_members(dataset_name)
-        Return a list of members on a given PDS/PDSE
-    get_dsn_content(dataset_name)
-        Return the content of a given dataset
-    write_to_dsn(dataset_name, data)
-        Writes data to a given dataset
-    download_dsn(dataset_name, output_file)
-        Downloads a given dataset to a given output file
-    upload_file_to_dsn(input_file, dataset_name)
-        Upload contents of a given file and uploads it to a dataset
     """
 
     def __init__(self, connection):
@@ -58,7 +43,7 @@ class Files(SdkApi):
 
         Returns
         -------
-        response_json
+        json
             A JSON with a list of dataset names matching the given pattern
         """
         custom_args = self.create_custom_request_arguments()
@@ -72,7 +57,7 @@ class Files(SdkApi):
 
         Returns
         -------
-        response_json
+        json
             A JSON with a list of members from a given PDS/PDSE
         """
         custom_args = self.create_custom_request_arguments()
@@ -85,7 +70,7 @@ class Files(SdkApi):
 
         Returns
         -------
-        response_json
+        json
             A JSON with the contents of a given dataset
         """
         custom_args = self.create_custom_request_arguments()
@@ -98,7 +83,7 @@ class Files(SdkApi):
 
         Returns
         -------
-        response_json
+        json
             A JSON containing the result of the operation
         """
         custom_args = self.create_custom_request_arguments()

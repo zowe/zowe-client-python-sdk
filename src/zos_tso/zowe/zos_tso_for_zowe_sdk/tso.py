@@ -22,26 +22,9 @@ class Tso(SdkApi):
     Attributes
     ----------
     connection
-        connection object
+        Connection object
     session_not_found
-        constant for the session not found tso message id
-
-    Methods
-    -------
-    issue_command(command)
-        Executes a TSO command
-    start_tso_session(...)
-        Starts a TSO session based on given parameters
-    send_tso_message(session_key, message)
-        Send a message to an existing TSO session
-    ping_tso_session(session_key)
-        Test if tso session is still available
-    end_tso_session(session_key)
-        Terminates an existing TSO session
-    parse_message_ids(response_json)
-        Parses the TSO message ids from response
-    retrieve_tso_messages(response_json)
-        Parses the TSO response messages
+        Constant for the session not found tso message id
     """
 
     def __init__(self, connection):
@@ -64,12 +47,12 @@ class Tso(SdkApi):
 
         Parameters
         ----------
-        command
+        command: str
             TSO command to be executed
 
         Returns
         -------
-        tso_messages
+        list
             A list containing the output from the TSO command
         """
         session_key = self.start_tso_session()
@@ -92,25 +75,25 @@ class Tso(SdkApi):
 
         Parameters
         ----------
-        proc
+        proc: str, optional
             Proc parameter for the TSO session (default is "IZUFPROC")
-        chset
+        chset: str, optional
             Chset parameter for the TSO session (default is "697")
-        cpage
+        cpage: str, optional
             Cpage parameter for the TSO session (default is "1047")
-        rows
+        rows: str, optional
             Rows parameter for the TSO session (default is "204")
-        cols
+        cols: str, optional
             Cols parameter for the TSO session (default is "160")
-        rsize
+        rsize: str, optional
             Rsize parameter for the TSO session (default is "4096")
-        acct
+        acctL str, optional
             Acct parameter for the TSO session (default is "DEFAULT")
 
         Returns
         -------
-        servletKey
-            The key for the created session (if successful)
+        str
+            The 'servletKey' key for the created session (if successful)
         """
         custom_args = self.create_custom_request_arguments()
         custom_args["params"] = {
@@ -130,14 +113,14 @@ class Tso(SdkApi):
 
         Parameters
         ----------
-        session_key
+        session_key: str
             The session key of an existing TSO session
-        message
+        message: str
             The message/command to be sent to the TSO session
 
         Returns
         -------
-        tsoData
+        list
             A non-normalized list from TSO containing the result from the command
         """
         custom_args = self.create_custom_request_arguments()
@@ -153,13 +136,14 @@ class Tso(SdkApi):
 
         Parameters
         ----------
-        session_key
+        session_key: str
             The session key of an existing TSO session
 
         Returns
         -------
-        ping_result
-            A string informing if the ping was successful or not
+        str
+            A string informing if the ping was successful or not.
+            Where the options are: 'Ping successful' or 'Ping failed'
         """
         custom_args = self.create_custom_request_arguments()
         custom_args["url"] = "{}/{}/{}".format(
@@ -178,12 +162,12 @@ class Tso(SdkApi):
 
         Parameters
         ----------
-        session_key
+        session_key: str
             The session key of an existing TSO session
 
         Returns
         -------
-        function_result
+        str
             A string informing if the session was terminated successfully or not
         """
         custom_args = self.create_custom_request_arguments()
@@ -201,12 +185,12 @@ class Tso(SdkApi):
 
         Parameters
         ----------
-        response_json
+        response_json: dict
             The JSON containing the TSO response
 
         Returns
         -------
-        message_ids
+        list
             A list containing the TSO response message ids
         """
         return (
@@ -220,12 +204,12 @@ class Tso(SdkApi):
 
         Parameters
         ----------
-        response_json
+        response_json: dict
             The JSON containing the TSO response
 
         Returns
         -------
-        tso_messages
+        list
             A list containing the TSO response messages
         """
         return [

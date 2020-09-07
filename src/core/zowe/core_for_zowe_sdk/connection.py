@@ -13,6 +13,19 @@ from .exceptions import MissingConnectionArgs
 
 
 class ApiConnection:
+    """
+    Class used to represent a connection with a REST API.
+
+    Attributes
+    ----------
+    host_url: str
+        The base url of the rest api host
+    user: str
+        The user of the rest api
+    password: str
+        The password for the user
+    ssl_verification: bool
+    """
 
     def __init__(self,
                  host_url,

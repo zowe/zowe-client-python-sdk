@@ -9,12 +9,7 @@ class Console(SdkApi):
     Attributes
     ----------
     connection
-        connection object
-
-    Methods
-    -------
-    issue_command(command, console=None)
-        Execute a z/OS console command and return a JSON with the response.
+        Connection object
     """
 
     def __init__(self, connection):
@@ -40,7 +35,7 @@ class Console(SdkApi):
 
         Returns
         -------
-        response_json
+        json
             A JSON containing the response from the console command
         """
         custom_args = self.create_custom_request_arguments()

@@ -18,7 +18,7 @@ class InvalidRequestMethod(Exception):
         """
         Parameters
         ----------
-        input_method
+        input_method: str
             The invalid HTTP method used
         """
         super().__init__("Invalid HTTP method input {}".format(input_method))
