@@ -16,17 +16,10 @@ class Zosmf(SdkApi):
     """
     Class used to represent the base z/OSMF API.
 
-    ...
-
     Attributes
     ----------
     connection
-        connection object
-
-    Methods
-    -------
-    get_info()
-        Returns a JSON containing the results from the z/OSMF info endpoint.
+        Connection object
     """
 
     def __init__(self, connection):
@@ -45,7 +38,7 @@ class Zosmf(SdkApi):
 
         Returns
         -------
-        response_json
+        json
             A JSON containing the z/OSMF Info REST API data
         """
         response_json = self.request_handler.perform_request(

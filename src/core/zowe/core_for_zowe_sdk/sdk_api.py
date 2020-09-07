@@ -16,9 +16,18 @@ from .zosmf_profile import ZosmfProfile
 
 
 class SdkApi:
+    """
+    Abstract class used to represent the base SDK API.
+
+    Attributes
+    ----------
+    connection: dict
+        A dictionary containing the connection arguments
+    default_url: str
+        The default endpoint for the API
+    """
 
     def __init__(self, connection, default_url):
-
         if "plugin_profile" in connection:
             self.connection = ZosmfProfile(connection['plugin_profile']).load()
         else:
