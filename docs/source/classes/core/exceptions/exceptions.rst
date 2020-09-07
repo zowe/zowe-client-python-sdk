@@ -1,5 +1,5 @@
-Core Exceptions
-================
+Exception classes
+==================
 
 .. toctree::
    :maxdepth: 2

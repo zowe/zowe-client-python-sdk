@@ -1,4 +1,4 @@
-z/OS Jobs Classes
+z/OS Jobs classes
 ==================
 
 .. toctree::

@@ -1,4 +1,4 @@
-z/OS TSO Classes
+z/OS TSO classes
 =================
 
 .. toctree::
