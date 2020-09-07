@@ -1,4 +1,4 @@
-z/OS Files Classes
+z/OS Files classes
 ===================
 
 .. toctree::

@@ -1,4 +1,4 @@
-z/OS Console Classes
+z/OS Console classes
 =====================
 
 .. toctree::
