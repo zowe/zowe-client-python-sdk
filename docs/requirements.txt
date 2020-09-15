@@ -1,1 +1,2 @@
 sphinxcontrib-spelling>=5.4.0
+sphinxcontrib-napoleon
