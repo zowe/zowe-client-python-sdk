@@ -6,7 +6,9 @@ Contains the z/OSMF Jobs REST API functionalities.
 Installing
 ----------
 
-To install this package ...
+.. code-block::
+
+   pip install zowe.zos_jobs_for_zowe_sdk
 
 
 Reference

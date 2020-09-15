@@ -6,7 +6,9 @@ Contains the z/OSMF Console REST API functionalities.
 Installing
 ----------
 
-To install this package ...
+.. code-block::
+
+   pip install zowe.zos_console_for_zowe_sdk
 
 Reference
 ---------

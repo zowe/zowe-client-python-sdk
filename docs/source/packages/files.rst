@@ -6,7 +6,9 @@ Contains the z/OSMF Files REST API functionalities.
 Installing
 ----------
 
-To install this package ...
+.. code-block::
+
+   pip install zowe.zos_files_for_zowe_sdk
 
 
 Reference
