@@ -16,5 +16,4 @@ formats: []
 python:
   version: 3.6
   install:
-    - method: pip
     - requirements: docs/requirements.txt
