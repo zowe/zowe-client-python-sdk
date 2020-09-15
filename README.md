@@ -1,6 +1,8 @@
 # Zowe Python Client SDK
 
-![](https://img.shields.io/badge/license-EPL--2.0-blue) ![](https://img.shields.io/badge/version-0.1.0-yellow)
+![](https://img.shields.io/badge/license-EPL--2.0-blue) 
+
+[![Documentation Status](https://readthedocs.org/projects/zowe-client-python-sdk/badge/?version=latest)](https://zowe-client-python-sdk.readthedocs.io/en/latest/?badge=latest)
 
 The Zowe Python Client SDK is an open-source Python package for z/OSMF REST API. It allows you to leverage mainframe capabilities from your Python programs with minimum effort.
 
