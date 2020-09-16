@@ -22,7 +22,7 @@ copyright = '2020, Contributors to the Zowe Project'
 author = 'Contributors to the Zowe Project'
 
 # The full version, including alpha/beta/rc tags
-release = '0.5.0'
+release = '0.0.1'
 
 
 # -- General configuration ---------------------------------------------------
