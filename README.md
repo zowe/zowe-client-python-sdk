@@ -46,6 +46,7 @@ The Zowe core package has dependencies on the below packages:
 requests>=2.22
 keyring
 pyyaml
+urllib3
 ```
 
 
