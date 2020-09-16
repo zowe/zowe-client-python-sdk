@@ -1,6 +1,6 @@
 # Zowe Python Client SDK
 
-![](https://img.shields.io/badge/license-EPL--2.0-blue) ![](https://img.shields.io/badge/dynamic/json?color=informational&label=version&query=info.version&url=https%3A%2F%2Fpypi.org%2Fpypi%2Fzowe%2Fjson) [![Documentation Status](https://readthedocs.org/projects/zowe-client-python-sdk/badge/?version=latest)](https://zowe-client-python-sdk.readthedocs.io/en/latest/?badge=latest)
+![](https://img.shields.io/badge/license-EPL--2.0-blue) ![](https://img.shields.io/badge/dynamic/json?color=informational&label=version&query=info.version&url=https%3A%2F%2Fpypi.org%2Fpypi%2Fzowe%2Fjson) [![Documentation Status](https://readthedocs.org/projects/zowe-client-python-sdk/badge/?version=latest)](https://zowe-client-python-sdk.readthedocs.io/en/latest/index.html)
 
 The Zowe Client Python SDK, is a set of Python packages designed to allow programmatic 
 interactions with z/OS REST API interfaces with minimum effort.
