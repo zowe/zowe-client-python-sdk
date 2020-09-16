@@ -1,3 +1,0 @@
-keyring
-pyyaml
-requests>=2.22
