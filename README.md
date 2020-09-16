@@ -60,7 +60,7 @@ Create a dictionary to handle communication with the plug-in:
 ```python
     from zowe.zos_console_for_zowe_sdk import Console
     connection = {
-        "host_url": "'<host address>'",
+        "host_url": "<host address>",
         "user": "<user>",
         "password": "<password>",
     }
