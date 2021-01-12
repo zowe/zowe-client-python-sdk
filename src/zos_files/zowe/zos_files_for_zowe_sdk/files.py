@@ -38,6 +38,21 @@ class Files(SdkApi):
         """
         super().__init__(connection, "/zosmf/restfiles/")
 
+        
+    def list_files(self, path):
+        """Retrieve a list of USS files based on a given pattern.
+
+        Returns
+        -------
+        json
+            A JSON with a list of dataset names matching the given pattern
+        """
+        custom_args = self.create_custom_request_arguments()
+        custom_args["params"] = {"path": path}
+        custom_args["url"] = "{}fs".format(self.request_endpoint)
+        response_json = self.request_handler.perform_request("GET", custom_args)
+        return response_json
+
     def list_dsn(self, name_pattern):
         """Retrieve a list of datasets based on a given pattern.
 

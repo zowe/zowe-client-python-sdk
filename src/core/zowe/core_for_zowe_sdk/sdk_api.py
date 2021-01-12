@@ -36,7 +36,8 @@ class SdkApi:
         self.constants = constants
         self.default_service_url = default_url
         self.default_headers = {
-            "Content-type": "application/json"
+            "Content-type": "application/json",
+            "X-CSRF-ZOSMF-HEADER": "" 
         }
         self.request_endpoint = "https://{base_url}{service}".format(
             base_url=self.connection.host_url, service=self.default_service_url
@@ -51,6 +52,12 @@ class SdkApi:
             "timeout": 30
         }
         self.request_handler = RequestHandler(self.session_arguments)
+
+    def set_default_header(self, headers):
+        self.default_headers = headers
+        self.request_arguments["headers"] = self.default_headers
+        print("Set the default headers to",headers,self.request_arguments["headers"])
+
 
     def create_custom_request_arguments(self):
         """Create a copy of the default request arguments dictionary.
