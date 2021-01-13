@@ -243,7 +243,7 @@ class Jobs(SdkApi):
         status: json
             The response json describing the job to be used. (i.e. from the last get_status call)
 
-        output_dir: str
+        output_dir: str 
             The output directory where the output files will be stored. The directory does not have to exist yet
 
         Returns
