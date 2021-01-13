@@ -18,6 +18,7 @@ for ds in datasets:
 
 # -----------------------------------------------------
 # Now try the uss side... Not in the SDK in GitHub yet
+
 # ----------------------------------------------------- 
 print("...files in /etc\n")
 my_file_list = my_files.list_files("/etc")
@@ -25,10 +26,10 @@ files = my_file_list["items"]
 for file in files:
     print(file["name"], file["mode"])
 
-
 # -----------------------------------------------------
 # Get the content of one of the files.
 # ----------------------------------------------------- 
 print("...content of a file\n")
 my_file_content = my_files.get_file_content("/z/tm891807/file.txt")
 print(my_file_content["response"])
+
