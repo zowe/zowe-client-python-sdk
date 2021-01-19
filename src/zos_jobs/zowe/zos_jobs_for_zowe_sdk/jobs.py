@@ -150,7 +150,7 @@ class Jobs(SdkApi):
         """
         custom_args = self.create_custom_request_arguments()
         custom_args["data"] = str(jcl)
-        custom_args["headers"] = {"Content-Type": "text/plain"}
+        custom_args['headers']['Content-Type'] = 'text/plain'
         response_json = self.request_handler.perform_request(
             "PUT", custom_args, expected_code=[201]
         )
