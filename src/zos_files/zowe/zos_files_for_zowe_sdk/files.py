@@ -52,7 +52,7 @@ class Files(SdkApi):
         response_json = self.request_handler.perform_request("GET", custom_args)
         return response_json
 
-    def list_dsn_members(self, dataset_name):
+    def list_dsn_members(self, dataset_name, member_pattern=None, member_start=None, limit=1000):
         """Retrieve the list of members on a given PDS/PDSE.
 
         Returns
@@ -61,7 +61,18 @@ class Files(SdkApi):
             A JSON with a list of members from a given PDS/PDSE
         """
         custom_args = self.create_custom_request_arguments()
-        custom_args["url"] = "{}ds/{}/member".format(self.request_endpoint, dataset_name)
+        additional_parms = {}
+        if member_start is not None:
+            additional_parms['start'] = member_start
+        if member_pattern is not None:
+            additional_parms['pattern'] = member_pattern
+        url = "{}ds/{}/member".format(self.request_endpoint, dataset_name)
+        separator = '?'
+        for k,v in additional_parms.items():
+            url = "{}{}{}={}".format(url,separator,k,v)
+            separator = '&'
+        custom_args['url'] = url
+        custom_args["headers"]["X-IBM-Max-Items"] = "{}".format(limit)
         response_json = self.request_handler.perform_request("GET", custom_args)
         return response_json['items']
 
