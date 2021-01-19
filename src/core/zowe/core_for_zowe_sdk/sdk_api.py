@@ -36,7 +36,8 @@ class SdkApi:
         self.constants = constants
         self.default_service_url = default_url
         self.default_headers = {
-            "Content-type": "application/json"
+            "Content-type": "application/json",
+            "X-CSRF-ZOSMF-HEADER": ""
         }
         self.request_endpoint = "https://{base_url}{service}".format(
             base_url=self.connection.host_url, service=self.default_service_url

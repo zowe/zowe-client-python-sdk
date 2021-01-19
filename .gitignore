@@ -266,3 +266,8 @@ in.txt
 tests/validation_tests/*
 config.py
 test.py
+
+
+
+# IDE stuff
+/.idea/
