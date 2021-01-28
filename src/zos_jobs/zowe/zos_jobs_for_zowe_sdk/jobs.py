@@ -62,7 +62,7 @@ class Jobs(SdkApi):
         Parameters
         ----------
         owner: str, optional
-            The job owner (default is None)
+            The job owner (default is zosmf user)
         prefix: str, optional
             The job name prefix (default is `*`)
         max_jobs: int, optional
@@ -77,7 +77,7 @@ class Jobs(SdkApi):
         """
         custom_args = self.__create_custom_request_arguments()
         params = {"prefix": prefix, "max-jobs": max_jobs}
-        params["owner"] = owner if owner else self.connection.zosmf_user
+        params["owner"] = owner if owner else self.connection.user
         if user_correlator:
             params["user-correlator"] = user_correlator
         custom_args["params"] = params

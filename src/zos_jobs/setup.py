@@ -2,7 +2,7 @@ from setuptools import setup, find_namespace_packages
 
 setup(
     name='zowe_zos_jobs_for_zowe_sdk',
-    version='0.5.1',
+    version='0.5.2',
     description='Zowe Python SDK - z/OS Jobs package',
     url="https://github.com/zowe/zowe-client-python-sdk",
     author="Guilherme Cartier",
