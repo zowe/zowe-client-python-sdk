@@ -95,7 +95,7 @@ class Tso(SdkApi):
         str
             The 'servletKey' key for the created session (if successful)
         """
-        custom_args = self.create_custom_request_arguments()
+        custom_args = self.__create_custom_request_arguments()
         custom_args["params"] = {
             "proc": proc,
             "chset": chset,
@@ -123,7 +123,7 @@ class Tso(SdkApi):
         list
             A non-normalized list from TSO containing the result from the command
         """
-        custom_args = self.create_custom_request_arguments()
+        custom_args = self.__create_custom_request_arguments()
         custom_args["url"] = "{}/{}".format(self.request_endpoint, str(session_key))
         custom_args["data"] = '{"TSO RESPONSE":{"VERSION":"0100","DATA":"%s"}}' % (
             str(message)
@@ -145,7 +145,7 @@ class Tso(SdkApi):
             A string informing if the ping was successful or not.
             Where the options are: 'Ping successful' or 'Ping failed'
         """
-        custom_args = self.create_custom_request_arguments()
+        custom_args = self.__create_custom_request_arguments()
         custom_args["url"] = "{}/{}/{}".format(
             self.request_endpoint, "ping", str(session_key)
         )
@@ -170,7 +170,7 @@ class Tso(SdkApi):
         str
             A string informing if the session was terminated successfully or not
         """
-        custom_args = self.create_custom_request_arguments()
+        custom_args = self.__create_custom_request_arguments()
         custom_args["url"] = "{}/{}".format(self.request_endpoint, session_key)
         response_json = self.request_handler.perform_request("DELETE", custom_args)
         message_id_list = self.parse_message_ids(response_json)

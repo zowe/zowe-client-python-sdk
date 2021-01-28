@@ -49,7 +49,7 @@ class Jobs(SdkApi):
         response_json
             A JSON object containing the status of the job on JES
         """
-        custom_args = self.create_custom_request_arguments()
+        custom_args = self.__create_custom_request_arguments()
         job_url = "{}/{}".format(jobname, jobid)
         request_url = "{}{}".format(self.request_endpoint, job_url)
         custom_args["url"] = request_url
@@ -75,7 +75,7 @@ class Jobs(SdkApi):
         json
             A JSON containing a list of jobs on JES queue based on the given parameters
         """
-        custom_args = self.create_custom_request_arguments()
+        custom_args = self.__create_custom_request_arguments()
         params = {"prefix": prefix, "max-jobs": max_jobs}
         params["owner"] = owner if owner else self.connection.zosmf_user
         if user_correlator:
@@ -97,7 +97,7 @@ class Jobs(SdkApi):
         json
             A JSON containing the result of the request execution
         """
-        custom_args = self.create_custom_request_arguments()
+        custom_args = self.__create_custom_request_arguments()
         request_body = '{"file": "//\'%s\'"}' % (jcl_path)
         custom_args["data"] = request_body
         response_json = self.request_handler.perform_request(
@@ -148,7 +148,7 @@ class Jobs(SdkApi):
         json
             A JSON containing the result of the request execution
         """
-        custom_args = self.create_custom_request_arguments()
+        custom_args = self.__create_custom_request_arguments()
         custom_args["data"] = str(jcl)
         custom_args['headers']['Content-Type'] = 'text/plain'
         response_json = self.request_handler.perform_request(
