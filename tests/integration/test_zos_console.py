@@ -1,6 +1,8 @@
+"""Integration tests for the Zowe Python SDK z/OS Console package."""
 from decouple import config
 import unittest
 from zowe.zos_console_for_zowe_sdk import Console
+
 
 class TestConsoleIntegration(unittest.TestCase):
     """Console class integration tests."""

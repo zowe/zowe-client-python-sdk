@@ -1,3 +1,4 @@
+"""Integration tests for the Zowe Python SDK z/OS Files package."""
 from decouple import config
 import unittest
 import json
@@ -6,8 +7,6 @@ from zowe.zos_files_for_zowe_sdk import Files
 
 FIXTURES_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),'fixtures')
 FILES_FIXTURES_PATH = os.path.join(FIXTURES_PATH, 'files.json')
-
-
 
 
 class TestFilesIntegration(unittest.TestCase):
