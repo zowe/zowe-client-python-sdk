@@ -6,7 +6,7 @@ import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import unittest
-from src.core.zowe.core_for_zowe_sdk import ApiConnection, SdkApi
+from src.core.zowe.core_for_zowe_sdk import ApiConnection, SdkApi, RequestHandler
 from src.core.zowe.core_for_zowe_sdk import exceptions
 
 
@@ -54,3 +54,16 @@ class TestSdkApiClass(unittest.TestCase):
         """Created object should be instance of SdkApi class."""
         sdk_api = SdkApi(self.connection_dict, self.default_url)
         self.assertIsInstance(sdk_api, SdkApi)
+
+
+class TestRequestHandlerClass(unittest.TestCase):
+    """RequestHandler class unit tests."""
+
+    def setUp(self):
+        """Setup fixtures for RequestHandler class."""
+        self.session_arguments = {'verify': False}
+
+    def test_object_should_be_instance_of_class(self):
+        """Created object should be instance of RequestHandler class."""
+        request_handler = RequestHandler(self.session_arguments)
+        self.assertIsInstance(request_handler, RequestHandler)
