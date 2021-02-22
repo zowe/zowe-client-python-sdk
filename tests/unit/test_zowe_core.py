@@ -6,7 +6,7 @@ import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import unittest
-from src.core.zowe.core_for_zowe_sdk import ApiConnection
+from src.core.zowe.core_for_zowe_sdk import ApiConnection, SdkApi
 from src.core.zowe.core_for_zowe_sdk import exceptions
 
 
@@ -38,3 +38,19 @@ class TestApiConnectionClass(unittest.TestCase):
         """Instantiation of ApiConnection object should raise MissingConnectionArgs if password is blank."""
         with self.assertRaises(exceptions.MissingConnectionArgs):
             ApiConnection(host_url=self.url, user=self.user, password='')
+
+
+class TestSdkApiClass(unittest.TestCase):
+    """SdkApi class unit tests."""
+
+    def setUp(self):
+        """Setup fixtures for SdkApi class."""
+        self.connection_dict = {"host_url": "https://mock-url.com",
+                                "user": "Username",
+                                "password": "Password"}
+        self.default_url = 'https://default-api.com/'
+
+    def test_object_should_be_instance_of_class(self):
+        """Created object should be instance of SdkApi class."""
+        sdk_api = SdkApi(self.connection_dict, self.default_url)
+        self.assertIsInstance(sdk_api, SdkApi)
