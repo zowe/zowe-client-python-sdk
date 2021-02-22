@@ -6,7 +6,7 @@ import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import unittest
-from src.core.zowe.core_for_zowe_sdk import ApiConnection, SdkApi, RequestHandler
+from src.core.zowe.core_for_zowe_sdk import ApiConnection, SdkApi, RequestHandler, ZosmfProfile
 from src.core.zowe.core_for_zowe_sdk import exceptions
 
 
@@ -67,3 +67,16 @@ class TestRequestHandlerClass(unittest.TestCase):
         """Created object should be instance of RequestHandler class."""
         request_handler = RequestHandler(self.session_arguments)
         self.assertIsInstance(request_handler, RequestHandler)
+
+
+class TestZosmfProfileClass(unittest.TestCase):
+    """ZosmfProfile class unit tests."""
+
+    def setUp(self):
+        """Setup fixtures for ZosmfProfile class."""
+        self.profile_name = "MOCK"
+
+    def test_object_should_be_instance_of_class(self):
+        """Created object should be instance of ZosmfProfile class."""
+        zosmf_profile = ZosmfProfile(self.profile_name)
+        self.assertIsInstance(zosmf_profile, ZosmfProfile)
