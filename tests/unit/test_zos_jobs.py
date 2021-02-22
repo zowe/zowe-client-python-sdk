@@ -1,4 +1,4 @@
-"""Unit tests for the Zowe Python SDK z/OS z/OS Jobs package."""
+"""Unit tests for the Zowe Python SDK z/OS Jobs package."""
 
 # Including necessary paths
 import sys
