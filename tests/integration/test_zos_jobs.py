@@ -1,4 +1,4 @@
-"""Integration tests for the Zowe Python SDK z/OS Files package."""
+"""Integration tests for the Zowe Python SDK z/OS Jobs package."""
 from decouple import config
 import unittest
 import json
