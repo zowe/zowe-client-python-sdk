@@ -116,10 +116,14 @@ class RequestHandler:
 
         Returns
         -------
-        json
-            A normalized JSON for the request response
+        json or bytes
+            A bytes object if the response content type is application/octet-stream,
+            a normalized JSON for the request response otherwise
         """
-        try:
-            return self.response.json()
-        except:
-            return {"response": self.response.text}
+        if self.response.headers['Content-Type'] == 'application/octet-stream':
+            return self.response.content
+        else:
+            try:
+                return self.response.json()
+            except:
+                return {"response": self.response.text}

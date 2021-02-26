@@ -89,6 +89,30 @@ class Files(SdkApi):
         response_json = self.request_handler.perform_request("GET", custom_args)
         return response_json
 
+    def get_dsn_binary_content(self, dataset_name, with_prefixes=False):
+        """
+        Retrieve the contents of a given dataset as a binary bytes object.
+
+        Parameters
+        ----------
+        dataset_name: str - Name of the dataset to retrieve
+        with_prefixes: boolean - if True include a 4 byte big endian record len prefix
+                                 default: False 
+        Returns
+        -------
+        bytes
+            The contents of the dataset with no transformation
+        """
+        custom_args = self.create_custom_request_arguments()
+        custom_args["url"] = "{}ds/{}".format(self.request_endpoint, dataset_name)
+        custom_args["headers"]["Accept"] = "application/octet-stream"
+        if with_prefixes:
+            custom_args["headers"]["X-IBM-Data-Type"] = 'record'
+        else:
+            custom_args["headers"]["X-IBM-Data-Type"] = 'binary'
+        content = self.request_handler.perform_request("GET", custom_args)
+        return content
+
     def write_to_dsn(self, dataset_name, data):
         """Write content to an existing dataset.
 
@@ -112,6 +136,26 @@ class Files(SdkApi):
         dataset_content = response_json['response']
         out_file = open(output_file, 'w')
         out_file.write(dataset_content)
+        out_file.close()
+
+    def download_binary_dsn(self, dataset_name, output_file, with_prefixes=False):
+        """Retrieve the contents of a binary dataset and saves it to a given file. 
+        
+        Parameters
+        ----------
+        dataset_name:str - Name of the dataset to download
+        output_file:str - Name of the local file to create
+        with_prefixes:boolean - If true, include a four big endian bytes record length prefix.
+                                The default is False
+
+        Returns
+        -------
+        bytes
+            Binary content of the dataset.
+        """
+        content = self.get_dsn_binary_content(dataset_name, with_prefixes=with_prefixes)
+        out_file = open(output_file, 'wb')
+        out_file.write(content)
         out_file.close()
 
     def upload_file_to_dsn(self, input_file, dataset_name):
