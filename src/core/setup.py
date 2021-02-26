@@ -2,7 +2,7 @@ from setuptools import setup, find_namespace_packages
 
 setup(
     name='zowe_core_for_zowe_sdk',
-    version='0.0.1',
+    version='0.5.0',
     description='Zowe Python SDK - Core package',
     url="https://github.com/zowe/zowe-client-python-sdk",
     author="Guilherme Cartier",

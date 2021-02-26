@@ -18,11 +18,11 @@ sys.path.insert(0, os.path.abspath('../../src'))
 # -- Project information -----------------------------------------------------
 
 project = 'Zowe Client Python SDK'
-copyright = '2020, Contributors to the Zowe Project'
+copyright = '2021, Contributors to the Zowe Project'
 author = 'Contributors to the Zowe Project'
 
 # The full version, including alpha/beta/rc tags
-release = '0.0.1'
+release = '0.2.0'
 
 
 # -- General configuration ---------------------------------------------------
