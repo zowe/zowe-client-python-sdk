@@ -14,6 +14,7 @@ from zowe.core_for_zowe_sdk import SdkApi
 from zowe.core_for_zowe_sdk.exceptions import FileNotFound
 import os
 
+_ZOWE_FILES_DEFAULT_ENCODING='iso-8859-1'
 
 class Files(SdkApi):
     """
@@ -143,7 +144,7 @@ class Files(SdkApi):
         content = self.request_handler.perform_request("GET", custom_args)
         return content
 
-    def write_to_dsn(self, dataset_name, data):
+    def write_to_dsn(self, dataset_name, data, encoding=_ZOWE_FILES_DEFAULT_ENCODING):
         """Write content to an existing dataset.
 
         Returns
@@ -154,7 +155,7 @@ class Files(SdkApi):
         custom_args = self.create_custom_request_arguments()
         custom_args["url"] = "{}ds/{}".format(self.request_endpoint, dataset_name)
         custom_args["data"] = data
-        custom_args['headers']['Content-Type'] = 'text/plain'
+        custom_args['headers']['Content-Type'] = 'text/plain; charset={}'.format(encoding)
         response_json = self.request_handler.perform_request(
             "PUT", custom_args, expected_code=[204, 201]
         )
@@ -188,7 +189,7 @@ class Files(SdkApi):
         out_file.write(content)
         out_file.close()
 
-    def upload_file_to_dsn(self, input_file, dataset_name):
+    def upload_file_to_dsn(self, input_file, dataset_name, encoding=_ZOWE_FILES_DEFAULT_ENCODING):
         """Upload contents of a given file and uploads it to a dataset."""
         if os.path.isfile(input_file):
             in_file = open(input_file, 'r')
