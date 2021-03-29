@@ -83,7 +83,8 @@ class Files(SdkApi):
         response_json = self.request_handler.perform_request("GET", custom_args)
         return response_json
 
-    def list_dsn_members(self, dataset_name, member_pattern=None, member_start=None, limit=1000):
+    def list_dsn_members(self, dataset_name, member_pattern=None, 
+                         member_start=None, limit=1000, attributes='member'):
         """Retrieve the list of members on a given PDS/PDSE.
 
         Returns
@@ -103,7 +104,8 @@ class Files(SdkApi):
             url = "{}{}{}={}".format(url,separator,k,v)
             separator = '&'
         custom_args['url'] = url
-        custom_args["headers"]["X-IBM-Max-Items"] = "{}".format(limit)
+        custom_args["headers"]["X-IBM-Max-Items"]  = "{}".format(limit)
+        custom_args["headers"]["X-IBM-Attributes"] = attributes
         response_json = self.request_handler.perform_request("GET", custom_args)
         return response_json['items']
 
