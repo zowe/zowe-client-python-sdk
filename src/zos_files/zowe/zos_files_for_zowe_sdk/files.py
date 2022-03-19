@@ -208,7 +208,7 @@ class Files(SdkApi):
             A JSON containing the result of the operation
         """
         custom_args = self.create_custom_request_arguments()
-        custom_args["url"] = "{}fs/{}".format(self.request_endpoint, filepath_name)
+        custom_args["url"] = "{}fs/{}".format(self.request_endpoint, filepath_name.lstrip("/"))
         custom_args["data"] = data
         custom_args['headers']['Content-Type'] = 'text/plain; charset={}'.format(encoding)
         response_json = self.request_handler.perform_request(
