@@ -122,6 +122,20 @@ class Files(SdkApi):
         response_json = self.request_handler.perform_request("GET", custom_args)
         return response_json
 
+    def get_dsn_content_streamed(self, dataset_name):
+        """Retrieve the contents of a given dataset streamed.
+
+        Returns
+        -------
+        json
+            A JSON with the contents of a given dataset
+        """
+        custom_args = self.create_custom_request_arguments()
+        custom_args["url"] = "{}ds/{}".format(self.request_endpoint, dataset_name)
+        custom_args["stream"] = True
+        response_json = self.request_handler.perform_request("GET", custom_args)
+        return response_json
+
     def get_dsn_binary_content(self, dataset_name, with_prefixes=False):
         """
         Retrieve the contents of a given dataset as a binary bytes object.
@@ -165,7 +179,7 @@ class Files(SdkApi):
 
     def download_dsn(self, dataset_name, output_file):
         """Retrieve the contents of a dataset and saves it to a given file."""
-        response_json = self.get_dsn_content(dataset_name)
+        response_json = self.get_dsn_content_streamed(dataset_name)
         dataset_content = response_json['response']
         out_file = open(output_file, 'w')
         out_file.write(dataset_content)
