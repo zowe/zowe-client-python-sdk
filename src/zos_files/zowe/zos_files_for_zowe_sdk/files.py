@@ -13,6 +13,7 @@ Copyright Contributors to the Zowe Project.
 from zowe.core_for_zowe_sdk import SdkApi
 from zowe.core_for_zowe_sdk.exceptions import FileNotFound
 import os
+import shutil
 
 _ZOWE_FILES_DEFAULT_ENCODING='utf-8'
 
@@ -204,11 +205,9 @@ class Files(SdkApi):
 
     def download_dsn(self, dataset_name, output_file):
         """Retrieve the contents of a dataset and saves it to a given file."""
-        response_json = self.get_dsn_content_streamed(dataset_name)
-        dataset_content = response_json['response']
-        out_file = open(output_file, 'w')
-        out_file.write(dataset_content)
-        out_file.close()
+        raw_response = self.get_dsn_content_streamed(dataset_name)
+        with open(output_file, 'w') as f:
+            shutil.copyfileobj(raw_response, f)
 
     def download_binary_dsn(self, dataset_name, output_file, with_prefixes=False):
         """Retrieve the contents of a binary dataset and saves it to a given file. 
@@ -226,14 +225,13 @@ class Files(SdkApi):
             Binary content of the dataset.
         """
         content = self.get_dsn_binary_content_streamed(dataset_name, with_prefixes=with_prefixes)
-        out_file = open(output_file, 'wb')
-        out_file.write(content)
-        out_file.close()
+        with open(output_file, 'wb') as f:
+            shutil.copyfileobj(content, f)
 
     def upload_file_to_dsn(self, input_file, dataset_name, encoding=_ZOWE_FILES_DEFAULT_ENCODING):
         """Upload contents of a given file and uploads it to a dataset."""
         if os.path.isfile(input_file):
-            with open(input_file, 'r') as file_contents:
-                response_json = self.write_to_dsn(dataset_name, file_contents)
+            with open(input_file, 'r') as in_file:
+                response_json = self.write_to_dsn(dataset_name, in_file)
         else:
             raise FileNotFound(input_file)

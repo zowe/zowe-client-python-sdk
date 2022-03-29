@@ -116,10 +116,12 @@ class RequestHandler:
 
         Returns
         -------
-        json or bytes
+        a raw response or json or bytes
             A bytes object if the response content type is application/octet-stream,
             a normalized JSON for the request response otherwise
         """
+        if 'stream' in self.request_arguments and self.request_arguments['stream'] == True:
+            return self.response.raw
         if self.response.headers['Content-Type'] == 'application/octet-stream':
             return self.response.content
         else:
