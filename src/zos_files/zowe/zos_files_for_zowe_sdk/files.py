@@ -14,6 +14,7 @@ from zowe.core_for_zowe_sdk import SdkApi
 from zowe.core_for_zowe_sdk.exceptions import FileNotFound
 import os
 
+_ZOWE_FILES_DEFAULT_ENCODING='utf-8'
 
 class Files(SdkApi):
     """
@@ -38,6 +39,36 @@ class Files(SdkApi):
         """
         super().__init__(connection, "/zosmf/restfiles/")
 
+        
+    def list_files(self, path):
+        """Retrieve a list of USS files based on a given pattern.
+
+        Returns
+        -------
+        json
+            A JSON with a list of dataset names matching the given pattern
+        """
+        custom_args = self.__create_custom_request_arguments()
+        custom_args["params"] = {"path": path}
+        custom_args["url"] = "{}fs".format(self.request_endpoint)
+        response_json = self.request_handler.perform_request("GET", custom_args)
+        return response_json
+        
+    def get_file_content(self, filepath_name):
+        """Retrieve the content of a filename. The complete path must be specified.
+
+        Returns
+        -------
+        json
+            A JSON with the contents of the specified USS file
+        """
+        custom_args = self.__create_custom_request_arguments()
+        #custom_args["params"] = {"filepath-name": filepath_name}
+        custom_args["url"] = "{}fs{}".format(self.request_endpoint,filepath_name)
+        response_json = self.request_handler.perform_request("GET", custom_args)
+        return response_json
+
+
     def list_dsn(self, name_pattern):
         """Retrieve a list of datasets based on a given pattern.
 
@@ -52,7 +83,8 @@ class Files(SdkApi):
         response_json = self.request_handler.perform_request("GET", custom_args)
         return response_json
 
-    def list_dsn_members(self, dataset_name):
+    def list_dsn_members(self, dataset_name, member_pattern=None, 
+                         member_start=None, limit=1000, attributes='member'):
         """Retrieve the list of members on a given PDS/PDSE.
 
         Returns
@@ -61,7 +93,19 @@ class Files(SdkApi):
             A JSON with a list of members from a given PDS/PDSE
         """
         custom_args = self.__create_custom_request_arguments()
-        custom_args["url"] = "{}ds/{}/member".format(self.request_endpoint, dataset_name)
+        additional_parms = {}
+        if member_start is not None:
+            additional_parms['start'] = member_start
+        if member_pattern is not None:
+            additional_parms['pattern'] = member_pattern
+        url = "{}ds/{}/member".format(self.request_endpoint, dataset_name)
+        separator = '?'
+        for k,v in additional_parms.items():
+            url = "{}{}{}={}".format(url,separator,k,v)
+            separator = '&'
+        custom_args['url'] = url
+        custom_args["headers"]["X-IBM-Max-Items"]  = "{}".format(limit)
+        custom_args["headers"]["X-IBM-Attributes"] = attributes
         response_json = self.request_handler.perform_request("GET", custom_args)
         return response_json['items']
 
@@ -78,7 +122,31 @@ class Files(SdkApi):
         response_json = self.request_handler.perform_request("GET", custom_args)
         return response_json
 
-    def write_to_dsn(self, dataset_name, data):
+    def get_dsn_binary_content(self, dataset_name, with_prefixes=False):
+        """
+        Retrieve the contents of a given dataset as a binary bytes object.
+
+        Parameters
+        ----------
+        dataset_name: str - Name of the dataset to retrieve
+        with_prefixes: boolean - if True include a 4 byte big endian record len prefix
+                                 default: False 
+        Returns
+        -------
+        bytes
+            The contents of the dataset with no transformation
+        """
+        custom_args = self.__create_custom_request_arguments()
+        custom_args["url"] = "{}ds/{}".format(self.request_endpoint, dataset_name)
+        custom_args["headers"]["Accept"] = "application/octet-stream"
+        if with_prefixes:
+            custom_args["headers"]["X-IBM-Data-Type"] = 'record'
+        else:
+            custom_args["headers"]["X-IBM-Data-Type"] = 'binary'
+        content = self.request_handler.perform_request("GET", custom_args)
+        return content
+
+    def write_to_dsn(self, dataset_name, data, encoding=_ZOWE_FILES_DEFAULT_ENCODING):
         """Write content to an existing dataset.
 
         Returns
@@ -89,7 +157,7 @@ class Files(SdkApi):
         custom_args = self.__create_custom_request_arguments()
         custom_args["url"] = "{}ds/{}".format(self.request_endpoint, dataset_name)
         custom_args["data"] = data
-        custom_args['headers']['Content-Type'] = 'text/plain'
+        custom_args['headers']['Content-Type'] = 'text/plain; charset={}'.format(encoding)
         response_json = self.request_handler.perform_request(
             "PUT", custom_args, expected_code=[204, 201]
         )
@@ -103,7 +171,27 @@ class Files(SdkApi):
         out_file.write(dataset_content)
         out_file.close()
 
-    def upload_file_to_dsn(self, input_file, dataset_name):
+    def download_binary_dsn(self, dataset_name, output_file, with_prefixes=False):
+        """Retrieve the contents of a binary dataset and saves it to a given file. 
+        
+        Parameters
+        ----------
+        dataset_name:str - Name of the dataset to download
+        output_file:str - Name of the local file to create
+        with_prefixes:boolean - If true, include a four big endian bytes record length prefix.
+                                The default is False
+
+        Returns
+        -------
+        bytes
+            Binary content of the dataset.
+        """
+        content = self.get_dsn_binary_content(dataset_name, with_prefixes=with_prefixes)
+        out_file = open(output_file, 'wb')
+        out_file.write(content)
+        out_file.close()
+
+    def upload_file_to_dsn(self, input_file, dataset_name, encoding=_ZOWE_FILES_DEFAULT_ENCODING):
         """Upload contents of a given file and uploads it to a dataset."""
         if os.path.isfile(input_file):
             in_file = open(input_file, 'r')
