@@ -49,7 +49,7 @@ class Files(SdkApi):
         json
             A JSON with a list of dataset names matching the given pattern
         """
-        custom_args = self.create_custom_request_arguments()
+        custom_args = self.__create_custom_request_arguments()
         custom_args["params"] = {"path": path}
         custom_args["url"] = "{}fs".format(self.request_endpoint)
         response_json = self.request_handler.perform_request("GET", custom_args)
@@ -63,7 +63,7 @@ class Files(SdkApi):
         json
             A JSON with the contents of the specified USS file
         """
-        custom_args = self.create_custom_request_arguments()
+        custom_args = self.__create_custom_request_arguments()
         #custom_args["params"] = {"filepath-name": filepath_name}
         custom_args["url"] = "{}fs{}".format(self.request_endpoint,filepath_name)
         response_json = self.request_handler.perform_request("GET", custom_args)
@@ -78,7 +78,7 @@ class Files(SdkApi):
         json
             A JSON with a list of dataset names matching the given pattern
         """
-        custom_args = self.create_custom_request_arguments()
+        custom_args = self.__create_custom_request_arguments()
         custom_args["params"] = {"dslevel": name_pattern}
         custom_args["url"] = "{}ds".format(self.request_endpoint)
         response_json = self.request_handler.perform_request("GET", custom_args)
@@ -93,7 +93,7 @@ class Files(SdkApi):
         json
             A JSON with a list of members from a given PDS/PDSE
         """
-        custom_args = self.create_custom_request_arguments()
+        custom_args = self.__create_custom_request_arguments()
         additional_parms = {}
         if member_start is not None:
             additional_parms['start'] = member_start
@@ -118,7 +118,7 @@ class Files(SdkApi):
         json
             A JSON with the contents of a given dataset
         """
-        custom_args = self.create_custom_request_arguments()
+        custom_args = self.__create_custom_request_arguments()
         custom_args["url"] = "{}ds/{}".format(self.request_endpoint, dataset_name)
         response_json = self.request_handler.perform_request("GET", custom_args)
         return response_json
@@ -151,7 +151,7 @@ class Files(SdkApi):
         bytes
             The contents of the dataset with no transformation
         """
-        custom_args = self.create_custom_request_arguments()
+        custom_args = self.__create_custom_request_arguments()
         custom_args["url"] = "{}ds/{}".format(self.request_endpoint, dataset_name)
         custom_args["headers"]["Accept"] = "application/octet-stream"
         if with_prefixes:
@@ -194,7 +194,7 @@ class Files(SdkApi):
         json
             A JSON containing the result of the operation
         """
-        custom_args = self.create_custom_request_arguments()
+        custom_args = self.__create_custom_request_arguments()
         custom_args["url"] = "{}ds/{}".format(self.request_endpoint, dataset_name)
         custom_args["data"] = data
         custom_args['headers']['Content-Type'] = 'text/plain; charset={}'.format(encoding)
