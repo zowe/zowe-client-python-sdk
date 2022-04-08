@@ -128,14 +128,14 @@ class Files(SdkApi):
 
         Returns
         -------
-        json
-            A JSON with the contents of a given dataset
+        raw
+            A raw socket response
         """
-        custom_args = self.create_custom_request_arguments()
+        custom_args = self.__create_custom_request_arguments()
         custom_args["url"] = "{}ds/{}".format(self.request_endpoint, dataset_name)
         custom_args["stream"] = True
-        response_json = self.request_handler.perform_request("GET", custom_args)
-        return response_json
+        raw_response = self.request_handler.perform_request("GET", custom_args)
+        return raw_response
 
     def get_dsn_binary_content(self, dataset_name, with_prefixes=False):
         """
@@ -172,10 +172,10 @@ class Files(SdkApi):
                                  default: False 
         Returns
         -------
-        bytes
-            The contents of the dataset with no transformation
+        raw
+            The raw socket response
         """
-        custom_args = self.create_custom_request_arguments()
+        custom_args = self.__create_custom_request_arguments()
         custom_args["url"] = "{}ds/{}".format(self.request_endpoint, dataset_name)
         custom_args["headers"]["Accept"] = "application/octet-stream"
         if with_prefixes:
