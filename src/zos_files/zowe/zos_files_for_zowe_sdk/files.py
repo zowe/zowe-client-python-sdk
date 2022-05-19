@@ -39,7 +39,7 @@ class Files(SdkApi):
         """
         super().__init__(connection, "/zosmf/restfiles/")
 
-        
+
     def list_files(self, path):
         """Retrieve a list of USS files based on a given pattern.
 
@@ -53,7 +53,7 @@ class Files(SdkApi):
         custom_args["url"] = "{}fs".format(self.request_endpoint)
         response_json = self.request_handler.perform_request("GET", custom_args)
         return response_json
-        
+
     def get_file_content(self, filepath_name):
         """Retrieve the content of a filename. The complete path must be specified.
 
@@ -66,6 +66,24 @@ class Files(SdkApi):
         #custom_args["params"] = {"filepath-name": filepath_name}
         custom_args["url"] = "{}fs{}".format(self.request_endpoint,filepath_name)
         response_json = self.request_handler.perform_request("GET", custom_args)
+        return response_json
+
+    def delete_uss(self, filepath):
+        """
+        Delete a file or directory
+
+        Parameters
+        ----------
+        filepath of the file to be deleted
+
+        Returns
+        -------
+        204
+            HTTP Response for No Content
+        """
+        custom_args = self.create_custom_request_arguments()
+        custom_args["url"] = "{}fs{}".format(self.request_endpoint,filepath_name)
+        response_json = self.request_handler.perform_request("DELETE", custom_args)
         return response_json
 
 
@@ -83,7 +101,7 @@ class Files(SdkApi):
         response_json = self.request_handler.perform_request("GET", custom_args)
         return response_json
 
-    def list_dsn_members(self, dataset_name, member_pattern=None, 
+    def list_dsn_members(self, dataset_name, member_pattern=None,
                          member_start=None, limit=1000, attributes='member'):
         """Retrieve the list of members on a given PDS/PDSE.
 
@@ -130,7 +148,7 @@ class Files(SdkApi):
         ----------
         dataset_name: str - Name of the dataset to retrieve
         with_prefixes: boolean - if True include a 4 byte big endian record len prefix
-                                 default: False 
+                                 default: False
         Returns
         -------
         bytes
@@ -172,8 +190,8 @@ class Files(SdkApi):
         out_file.close()
 
     def download_binary_dsn(self, dataset_name, output_file, with_prefixes=False):
-        """Retrieve the contents of a binary dataset and saves it to a given file. 
-        
+        """Retrieve the contents of a binary dataset and saves it to a given file.
+
         Parameters
         ----------
         dataset_name:str - Name of the dataset to download
