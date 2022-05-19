@@ -68,7 +68,7 @@ class Files(SdkApi):
         response_json = self.request_handler.perform_request("GET", custom_args)
         return response_json
 
-        def delete_uss(self, filepath_name):
+    def delete_uss(self, filepath_name):
         """
         Delete a file or directory
 
