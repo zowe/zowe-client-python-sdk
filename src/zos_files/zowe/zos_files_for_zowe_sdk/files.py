@@ -93,7 +93,6 @@ class Files(SdkApi):
             "type": type,
             "mode": mode
         }
-        
         custom_args = self.create_custom_request_arguments()
         custom_args["params"] = data
         custom_args["url"] = "{}fs/{}".format(self.request_endpoint, file_path.lstrip("/"))
