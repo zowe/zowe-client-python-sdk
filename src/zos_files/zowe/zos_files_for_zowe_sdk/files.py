@@ -199,3 +199,16 @@ class Files(SdkApi):
             response_json = self.write_to_dsn(dataset_name, file_contents)
         else:
             raise FileNotFound(input_file)
+
+    def delete_data_set(self, dataset_name, volume=None, member_name=None):
+        """Deletes a sequential or partitioned data."""
+        custom_args = self.__create_custom_request_arguments()        
+        if member_name is not None:
+            dataset_name = f'{dataset_name}({member_name})'
+        url = "{}ds/{}".format(self.request_endpoint, dataset_name)
+        if volume is not None:
+            url = "{}ds/-{}/{}".format(self.request_endpoint, volume, dataset_name)
+        custom_args["url"] = url
+        response_json = self.request_handler.perform_request(
+            "DELETE", custom_args, expected_code=[200, 202, 204])
+        return response_json
