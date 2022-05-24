@@ -97,7 +97,7 @@ class Files(SdkApi):
         custom_args = self.create_custom_request_arguments()
         custom_args["params"] = data
         custom_args["url"] = "{}fs/{}".format(self.request_endpoint, file_path.lstrip("/"))
-        response_json = self.request_handler.perform_request("DELETE", custom_args, expected_code = [201])
+        response_json = self.request_handler.perform_request("POST", custom_args, expected_code = [201])
         return response_json
     
     def write_to_dsn(self, dataset_name, data):
