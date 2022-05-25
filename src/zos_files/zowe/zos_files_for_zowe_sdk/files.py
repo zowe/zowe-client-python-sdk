@@ -80,12 +80,13 @@ class Files(SdkApi):
 
     def create_data_set(self, dataset_name, options = 
         {
-            "volster": "zmf046",
+            "volser": "zmf046",
             "unit": "3390",
             "dsorg": "PS",
             "alcunit": "TRK",
             "primary": "10",
             "secondary": 5,
+            "dirblk": 10,
             "avgblk": 500,
             "recfm": "FB",
             "blksize": 400,
@@ -103,12 +104,13 @@ class Files(SdkApi):
         """
 
         option = {
-            "volster": options["volster"],
+            "volser": options["volser"],
             "unit": options["unit"],
             "dsorg": options["dsorg"],
             "alcunit": options["alcunit"],
             "primary": options["primary"],
             "secondary": options["secondary"],
+            "dirblk": options["dirblk"],
             "avgblk": options["avgblk"],
             "recfm": options["recfm"],
             "blksize": options["blksize"],
