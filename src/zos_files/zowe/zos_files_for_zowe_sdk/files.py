@@ -78,6 +78,49 @@ class Files(SdkApi):
         response_json = self.request_handler.perform_request("GET", custom_args)
         return response_json
 
+    def create_data_set(self, dataset_name, options = 
+        {
+            "volster": "zmf046",
+            "unit": "3390",
+            "dsorg": "PS",
+            "alcunit": "TRK",
+            "primary": "10",
+            "secondary": 5,
+            "avgblk": 500,
+            "recfm": "FB",
+            "blksize": 400,
+            "lrecl": 80
+        }):
+
+        """
+        Create a sequential or partitioned dataset.
+        Parameters
+        ----------
+            dataset_name
+        Returns
+        -------
+        json
+        """
+
+        option = {
+            "volster": options["volster"],
+            "unit": options["unit"],
+            "dsorg": options["dsorg"],
+            "alcunit": options["alcunit"],
+            "primary": options["primary"],
+            "secondary": options["secondary"],
+            "avgblk": options["avgblk"],
+            "recfm": options["recfm"],
+            "blksize": options["blksize"],
+            "lrecl": options["lrecl"]
+        }
+
+        custom_args = self.create_custom_request_arguments()
+        custom_args["url"] = "{}ds/{}".format(self.request_endpoint, dataset_name)
+        custom_args["params"] = option
+        response_json = self.request_handler.perform_request("POST", custom_args, expected_code = [201])
+        return response_json
+        
     def write_to_dsn(self, dataset_name, data):
         """Write content to an existing dataset.
 
