@@ -90,7 +90,8 @@ class Files(SdkApi):
             "avgblk": 500,
             "recfm": "FB",
             "blksize": 400,
-            "lrecl": 80
+            "lrecl": 80,
+            "dsntype":"LIBRARY"
         }):
 
         """
@@ -114,7 +115,8 @@ class Files(SdkApi):
             "avgblk": options["avgblk"],
             "recfm": options["recfm"],
             "blksize": options["blksize"],
-            "lrecl": options["lrecl"]
+            "lrecl": options["lrecl"],
+            "dsntype": options["LIBRARY"]
         }
 
         custom_args = self.create_custom_request_arguments()
