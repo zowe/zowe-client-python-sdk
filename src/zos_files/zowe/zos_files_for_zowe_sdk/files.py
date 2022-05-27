@@ -10,6 +10,7 @@ SPDX-License-Identifier: EPL-2.0
 Copyright Contributors to the Zowe Project.
 """
 
+from logging import raiseExceptions
 from zowe.core_for_zowe_sdk import SdkApi
 from zowe.core_for_zowe_sdk.exceptions import FileNotFound
 import os
@@ -84,7 +85,7 @@ class Files(SdkApi):
             "unit": "3390",
             "dsorg": "PS",
             "alcunit": "TRK",
-            "primary": "10",
+            "primary": 10,
             "secondary": 5,
             "dirblk": 10,
             "avgblk": 500,
@@ -103,6 +104,60 @@ class Files(SdkApi):
         -------
         json
         """
+        
+        for opt in options:
+            if opt == "volser":
+                if options[opt] == None:
+                    options[opt] == "zmf046"
+                elif options[opt] != "zmf046":
+                    raise KeyError
+            if opt == "unit":
+                if options[opt] == None:
+                    options[opt] = "3390"
+            if opt == "dsorg":
+                if options[opt] == None:
+                    options[opt] = "PS"
+                else:
+                    if options[opt] not in ("PO", "PS"):
+                        raise KeyError
+            if opt == "alcunit":
+                if options[opt] == None:
+                    options[opt] = "TRK"
+                else:
+                    if options[opt] not in ("CYL", "TRK"):
+                        raise KeyError
+            if opt == "primary":
+                if options[opt] == None:
+                    options[opt] = 10
+            if opt == "secondary":
+                if options[opt] == None:
+                    options[opt] = 5
+            if opt == "dirblk":
+                if options[opt] == None:
+                    options[opt] = 10
+            if opt == "avgblk":
+                if options[opt] == None:
+                    options[opt] = 500
+            if opt == "recfm":
+                if options[opt] == None:
+                    options[opt] = "FB"
+                else:
+                    if options[opt] not in ("F", "FB", "V", "VB", "U"):
+                        raise KeyError
+            if opt == "blksize":
+                if options[opt] == None:
+                    options[opt] = 400
+            if opt == "lrecl":
+                if options[opt] == None:
+                    options[opt] = 80
+            if opt == "dsntype":
+                if options[opt] == None:
+                    options[opt] = "LIBRARY"
+                else:
+                    if options[opt] not in ("BASIC", "EXTPREF", "EXTREQ", "HFS", "LARGE", "PDS", "LIBRARY", "PIPE"):
+                        raise KeyError
+            
+
 
         option = {
             "volser": options["volser"],
