@@ -10,7 +10,8 @@ SPDX-License-Identifier: EPL-2.0
 Copyright Contributors to the Zowe Project.
 """
 
-from logging import raiseExceptions
+
+from distutils.log import error
 from zowe.core_for_zowe_sdk import SdkApi
 from zowe.core_for_zowe_sdk.exceptions import FileNotFound
 import os
@@ -79,21 +80,7 @@ class Files(SdkApi):
         response_json = self.request_handler.perform_request("GET", custom_args)
         return response_json
 
-    def create_data_set(self, dataset_name, options = 
-        {
-            "volser": "zmf046",
-            "unit": "3390",
-            "dsorg": "PS",
-            "alcunit": "TRK",
-            "primary": 10,
-            "secondary": 5,
-            "dirblk": 10,
-            "avgblk": 500,
-            "recfm": "FB",
-            "blksize": 400,
-            "lrecl": 80,
-            "dsntype":"LIBRARY"
-        }):
+    def create_data_set(self, dataset_name, options = ( {} )):
 
         """
         Create a sequential or partitioned dataset.
@@ -105,57 +92,54 @@ class Files(SdkApi):
         json
         """
         
-        for opt in options:
-            if opt == "volser":
-                if options[opt] == None:
-                    options[opt] == "zmf046"
-                elif options[opt] != "zmf046":
-                    raise KeyError
-            if opt == "unit":
-                if options[opt] == None:
-                    options[opt] = "3390"
+        for opt in ("volser", "unit", "dsorg", "alcunit", 
+            "primary", "secondary", "dirblk", "avgblk", "recfm", 
+            "blksize", "lrecl", "storclass", "mgntclass", "dataclass", 
+            "dsntype", "like"):
+            
             if opt == "dsorg":
-                if options[opt] == None:
-                    options[opt] = "PS"
-                else:
+                if options.get(opt) is not None:
                     if options[opt] not in ("PO", "PS"):
                         raise KeyError
+
             if opt == "alcunit":
-                if options[opt] == None:
+                if options.get(opt) is None:
                     options[opt] = "TRK"
                 else:
                     if options[opt] not in ("CYL", "TRK"):
                         raise KeyError
+
             if opt == "primary":
-                if options[opt] == None:
-                    options[opt] = 10
+                if options.get(opt) is not None:
+                    if options["primary"] > 16777215:
+                        raise ValueError
+
             if opt == "secondary":
-                if options[opt] == None:
-                    options[opt] = 5
+                if options.get("primary") is not None:
+                    if options["secondary"] > 16777215:
+                        raise ValueError
+                    if options.get(opt) is None:
+                        options["scondary"] = int(options["primary"] / 10)
+
             if opt == "dirblk":
-                if options[opt] == None:
-                    options[opt] = 10
-            if opt == "avgblk":
-                if options[opt] == None:
-                    options[opt] = 500
+                if options[opt] is not None:
+                    if options["dsorg"] == "PS":
+                        if options["dirblk"] != 0:
+                            raise ValueError
+                    if options["dsorg"] == "PO":
+                        if options["dirblk"] == 0:
+                            raise ValueError
+
             if opt == "recfm":
-                if options[opt] == None:
-                    options[opt] = "FB"
+                if options.get(opt) is None:
+                    options[opt] = "F"
                 else:
                     if options[opt] not in ("F", "FB", "V", "VB", "U"):
                         raise KeyError
+
             if opt == "blksize":
-                if options[opt] == None:
-                    options[opt] = 400
-            if opt == "lrecl":
-                if options[opt] == None:
-                    options[opt] = 80
-            if opt == "dsntype":
-                if options[opt] == None:
-                    options[opt] = "LIBRARY"
-                else:
-                    if options[opt] not in ("BASIC", "EXTPREF", "EXTREQ", "HFS", "LARGE", "PDS", "LIBRARY", "PIPE"):
-                        raise KeyError
+                if options[opt] is None and options["lrecl"] is not None:
+                    options[opt] = options["lrecl"]
             
 
 
@@ -171,7 +155,11 @@ class Files(SdkApi):
             "recfm": options["recfm"],
             "blksize": options["blksize"],
             "lrecl": options["lrecl"],
-            "dsntype": options["LIBRARY"]
+            "dsntype": options["LIBRARY"],
+            "storclass": options["storclass"],
+            "mgntclass": options["mgntclass"],
+            "dataclass": options["dataclass"],
+            "like": options["like"]
         }
 
         custom_args = self.create_custom_request_arguments()
