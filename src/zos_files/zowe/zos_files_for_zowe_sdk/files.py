@@ -138,31 +138,10 @@ class Files(SdkApi):
             if opt == "blksize":
                 if options[opt] is None and options["lrecl"] is not None:
                     options[opt] = options["lrecl"]
-            
-
-
-        option = {
-            "volser": options["volser"],
-            "unit": options["unit"],
-            "dsorg": options["dsorg"],
-            "alcunit": options["alcunit"],
-            "primary": options["primary"],
-            "secondary": options["secondary"],
-            "dirblk": options["dirblk"],
-            "avgblk": options["avgblk"],
-            "recfm": options["recfm"],
-            "blksize": options["blksize"],
-            "lrecl": options["lrecl"],
-            "dsntype": options["LIBRARY"],
-            "storclass": options["storclass"],
-            "mgntclass": options["mgntclass"],
-            "dataclass": options["dataclass"],
-            "like": options["like"]
-        }
 
         custom_args = self.create_custom_request_arguments()
         custom_args["url"] = "{}ds/{}".format(self.request_endpoint, dataset_name)
-        custom_args["params"] = option
+        custom_args["params"] = options
         response_json = self.request_handler.perform_request("POST", custom_args, expected_code = [201])
         return response_json
         
