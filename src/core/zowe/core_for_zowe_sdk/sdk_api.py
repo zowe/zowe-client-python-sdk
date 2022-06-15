@@ -53,7 +53,7 @@ class SdkApi:
         }
         self.request_handler = RequestHandler(self.session_arguments)
 
-    def __create_custom_request_arguments(self):
+    def _create_custom_request_arguments(self):
         """Create a copy of the default request arguments dictionary.
 
         This method is required because the way that Python handles
