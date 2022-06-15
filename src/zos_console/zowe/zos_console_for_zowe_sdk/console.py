@@ -38,7 +38,7 @@ class Console(SdkApi):
         json
             A JSON containing the response from the console command
         """
-        custom_args = self.__create_custom_request_arguments()
+        custom_args = self._create_custom_request_arguments()
         request_body = '{"cmd": "%s"}' % (command)
         custom_args["data"] = request_body
         response_json = self.request_handler.perform_request("PUT", custom_args)
