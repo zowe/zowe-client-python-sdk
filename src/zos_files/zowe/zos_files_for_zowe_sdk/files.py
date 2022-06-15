@@ -149,8 +149,8 @@ class Files(SdkApi):
         Add a file or directory
         Parameters
         ----------
-        file_name of the file to add
-        type = "file"
+        file_path of the file to add
+        type = "file" or "dir"
         mode Ex:- rwxr-xr-x
 
         """
@@ -161,7 +161,7 @@ class Files(SdkApi):
         }
         
         custom_args = self._create_custom_request_arguments()
-        custom_args["params"] = data
+        custom_args["json"] = data
         custom_args["url"] = "{}fs/{}".format(self.request_endpoint, file_path.lstrip("/"))
         response_json = self.request_handler.perform_request("POST", custom_args, expected_code = [201])
         return response_json

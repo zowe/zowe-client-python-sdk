@@ -143,8 +143,8 @@ class Jobs(SdkApi):
             A JSON containing the result of the request execution
         """
         custom_args = self._create_custom_request_arguments()
-        request_body = '{"file": "//\'%s\'"}' % (jcl_path)
-        custom_args["data"] = request_body
+        request_body = {"file": "//\'%s\'" % jcl_path}
+        custom_args["json"] = request_body
         response_json = self.request_handler.perform_request(
             "PUT", custom_args, expected_code=[201]
         )

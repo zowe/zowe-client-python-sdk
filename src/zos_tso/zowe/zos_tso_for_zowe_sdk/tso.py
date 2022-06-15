@@ -125,9 +125,7 @@ class Tso(SdkApi):
         """
         custom_args = self._create_custom_request_arguments()
         custom_args["url"] = "{}/{}".format(self.request_endpoint, str(session_key))
-        custom_args["data"] = '{"TSO RESPONSE":{"VERSION":"0100","DATA":"%s"}}' % (
-            str(message)
-        )
+        custom_args["json"] = {"TSO RESPONSE":{"VERSION":"0100","DATA":str(message)}}
         response_json = self.request_handler.perform_request("PUT", custom_args)
         return response_json["tsoData"]
 
