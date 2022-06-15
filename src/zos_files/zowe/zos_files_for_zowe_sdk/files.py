@@ -152,7 +152,7 @@ class Files(SdkApi):
         raw
             A raw socket response
         """
-        custom_args = self.__create_custom_request_arguments()
+        custom_args = self._create_custom_request_arguments()
         custom_args["url"] = "{}ds/{}".format(self.request_endpoint, dataset_name)
         custom_args["stream"] = True
         raw_response = self.request_handler.perform_request("GET", custom_args)
@@ -196,7 +196,7 @@ class Files(SdkApi):
         raw
             The raw socket response
         """
-        custom_args = self.__create_custom_request_arguments()
+        custom_args = self._create_custom_request_arguments()
         custom_args["url"] = "{}ds/{}".format(self.request_endpoint, dataset_name)
         custom_args["headers"]["Accept"] = "application/octet-stream"
         if with_prefixes:
