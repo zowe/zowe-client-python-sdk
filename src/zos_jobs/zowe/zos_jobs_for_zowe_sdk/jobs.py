@@ -58,7 +58,7 @@ class Jobs(SdkApi):
 
     def cancel_job(self, jobname, jobid):
         """Cancels the a job
-        
+
         Parameters
         ----------
         jobname: str
@@ -66,6 +66,8 @@ class Jobs(SdkApi):
         jobid: str
             The job id on JES
 
+        Returns
+        -------
         response_json
             A JSON containing the result of the request execution
         """
@@ -77,6 +79,27 @@ class Jobs(SdkApi):
         response_json = self.request_handler.perform_request("PUT", custom_args, expected_code = [202])
         return response_json
 
+    def delete_job(self, jobname, jobid):
+        """Delete the given job on JES.
+
+        Parameters
+        ----------
+        jobname: str
+            The name of the job
+        jobid: str
+            The job id on JES
+
+        Returns
+        -------
+        response_json
+            A JSON containing the result of the request execution
+        """
+        custom_args = self.__create_custom_request_arguments()
+        job_url = "{}/{}".format(jobname, jobid)
+        request_url = "{}{}".format(self.request_endpoint, job_url)
+        custom_args["url"] = request_url
+        response_json = self.request_handler.perform_request("DELETE", custom_args, expected_code = [202])
+        return response_json
 
     def list_jobs(self, owner=None,  prefix="*", max_jobs=1000, user_correlator=None):
         """Retrieve list of jobs on JES based on the provided arguments.
