@@ -84,9 +84,9 @@ class Files(SdkApi):
         204
             HTTP Response for No Content
         """
-        custom_args = self.create_custom_request_arguments()
+        custom_args = self._create_custom_request_arguments()
         custom_args["url"] = "{}fs/{}".format(self.request_endpoint, filepath_name.lstrip("/"))
-        response_json = self.request_handler.perform_request("DELETE", custom_args, expected_code=204)
+        response_json = self.request_handler.perform_request("DELETE", custom_args, expected_code=[204])
         return response_json
 
 
