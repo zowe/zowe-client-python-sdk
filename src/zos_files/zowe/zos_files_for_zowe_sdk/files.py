@@ -160,7 +160,7 @@ class Files(SdkApi):
             "mode": mode
         }
         
-        custom_args = self.create_custom_request_arguments()
+        custom_args = self._create_custom_request_arguments()
         custom_args["params"] = data
         custom_args["url"] = "{}fs/{}".format(self.request_endpoint, file_path.lstrip("/"))
         response_json = self.request_handler.perform_request("POST", custom_args, expected_code = [201])
@@ -306,7 +306,7 @@ class Files(SdkApi):
 
     def delete_data_set(self, dataset_name, volume=None, member_name=None):
         """Deletes a sequential or partitioned data."""
-        custom_args = self.__create_custom_request_arguments()        
+        custom_args = self._create_custom_request_arguments()
         if member_name is not None:
             dataset_name = f'{dataset_name}({member_name})'
         url = "{}ds/{}".format(self.request_endpoint, dataset_name)

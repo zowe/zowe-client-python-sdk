@@ -72,7 +72,7 @@ class Jobs(SdkApi):
             A JSON containing the result of the request execution
         """
 
-        custom_args = self.__create_custom_request_arguments()
+        custom_args = self._create_custom_request_arguments()
         job_url = "{}/{}".format(jobname, jobid)
         request_url = "{}{}".format(self.request_endpoint, job_url)
         custom_args["url"] = request_url
@@ -94,7 +94,7 @@ class Jobs(SdkApi):
         response_json
             A JSON containing the result of the request execution
         """
-        custom_args = self.__create_custom_request_arguments()
+        custom_args = self._create_custom_request_arguments()
         job_url = "{}/{}".format(jobname, jobid)
         request_url = "{}{}".format(self.request_endpoint, job_url)
         custom_args["url"] = request_url
