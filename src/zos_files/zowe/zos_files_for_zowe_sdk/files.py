@@ -13,6 +13,7 @@ Copyright Contributors to the Zowe Project.
 from zowe.core_for_zowe_sdk import SdkApi
 from zowe.core_for_zowe_sdk.exceptions import FileNotFound
 import os
+import shutil
 
 _ZOWE_FILES_DEFAULT_ENCODING='utf-8'
 
@@ -143,6 +144,20 @@ class Files(SdkApi):
         response_json = self.request_handler.perform_request("GET", custom_args)
         return response_json
 
+    def get_dsn_content_streamed(self, dataset_name):
+        """Retrieve the contents of a given dataset streamed.
+
+        Returns
+        -------
+        raw
+            A raw socket response
+        """
+        custom_args = self.__create_custom_request_arguments()
+        custom_args["url"] = "{}ds/{}".format(self.request_endpoint, dataset_name)
+        custom_args["stream"] = True
+        raw_response = self.request_handler.perform_request("GET", custom_args)
+        return raw_response
+
     def get_dsn_binary_content(self, dataset_name, with_prefixes=False):
         """
         Retrieve the contents of a given dataset as a binary bytes object.
@@ -167,6 +182,31 @@ class Files(SdkApi):
         content = self.request_handler.perform_request("GET", custom_args)
         return content
 
+    def get_dsn_binary_content_streamed(self, dataset_name, with_prefixes=False):
+        """
+        Retrieve the contents of a given dataset as a binary bytes object streamed.
+
+        Parameters
+        ----------
+        dataset_name: str - Name of the dataset to retrieve
+        with_prefixes: boolean - if True include a 4 byte big endian record len prefix
+                                 default: False 
+        Returns
+        -------
+        raw
+            The raw socket response
+        """
+        custom_args = self.__create_custom_request_arguments()
+        custom_args["url"] = "{}ds/{}".format(self.request_endpoint, dataset_name)
+        custom_args["headers"]["Accept"] = "application/octet-stream"
+        if with_prefixes:
+            custom_args["headers"]["X-IBM-Data-Type"] = 'record'
+        else:
+            custom_args["headers"]["X-IBM-Data-Type"] = 'binary'
+        custom_args["stream"] = True
+        content = self.request_handler.perform_request("GET", custom_args)
+        return content
+
     def write_to_dsn(self, dataset_name, data, encoding=_ZOWE_FILES_DEFAULT_ENCODING):
         """Write content to an existing dataset.
 
@@ -186,11 +226,9 @@ class Files(SdkApi):
 
     def download_dsn(self, dataset_name, output_file):
         """Retrieve the contents of a dataset and saves it to a given file."""
-        response_json = self.get_dsn_content(dataset_name)
-        dataset_content = response_json['response']
-        out_file = open(output_file, 'w')
-        out_file.write(dataset_content)
-        out_file.close()
+        raw_response = self.get_dsn_content_streamed(dataset_name)
+        with open(output_file, 'w') as f:
+            shutil.copyfileobj(raw_response, f)
 
     def download_binary_dsn(self, dataset_name, output_file, with_prefixes=False):
         """Retrieve the contents of a binary dataset and saves it to a given file.
@@ -207,17 +245,15 @@ class Files(SdkApi):
         bytes
             Binary content of the dataset.
         """
-        content = self.get_dsn_binary_content(dataset_name, with_prefixes=with_prefixes)
-        out_file = open(output_file, 'wb')
-        out_file.write(content)
-        out_file.close()
+        content = self.get_dsn_binary_content_streamed(dataset_name, with_prefixes=with_prefixes)
+        with open(output_file, 'wb') as f:
+            shutil.copyfileobj(content, f)
 
     def upload_file_to_dsn(self, input_file, dataset_name, encoding=_ZOWE_FILES_DEFAULT_ENCODING):
         """Upload contents of a given file and uploads it to a dataset."""
         if os.path.isfile(input_file):
-            in_file = open(input_file, 'r')
-            file_contents = in_file.read()
-            response_json = self.write_to_dsn(dataset_name, file_contents)
+            with open(input_file, 'r') as in_file:
+                response_json = self.write_to_dsn(dataset_name, in_file)
         else:
             raise FileNotFound(input_file)
 

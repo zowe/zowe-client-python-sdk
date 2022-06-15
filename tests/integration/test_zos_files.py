@@ -4,6 +4,7 @@ import unittest
 import json
 import os
 from zowe.zos_files_for_zowe_sdk import Files
+import urllib3
 
 FIXTURES_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),'fixtures')
 FILES_FIXTURES_PATH = os.path.join(FIXTURES_PATH, 'files.json')
@@ -36,6 +37,16 @@ class TestFilesIntegration(unittest.TestCase):
         """Executing get_dsn_content should return content from dataset."""
         command_output = self.files.get_dsn_content(self.test_member_jcl)
         self.assertIsInstance(command_output['response'], str)
+
+    def test_get_dsn_content_streamed_should_return_a_raw_response_content(self):
+        """Executing get_dsn_content_streamed should return raw socket response from the server."""
+        command_output = self.files.get_dsn_content_streamed(self.test_member_jcl)
+        self.assertIsInstance(command_output, urllib3.response.HTTPResponse)
+
+    def test_get_dsn_binary_content_streamed_should_return_a_raw_response_content(self):
+        """Executing get_dsn_binary_content_streamed should return raw socket response from the server."""
+        command_output = self.files.get_dsn_binary_content_streamed(self.test_member_jcl)
+        self.assertIsInstance(command_output, urllib3.response.HTTPResponse)
 
     def test_write_to_dsn_should_be_possible(self):
         """Executing write_to_dsn should be possible."""
