@@ -199,3 +199,28 @@ class Files(SdkApi):
             response_json = self.write_to_dsn(dataset_name, file_contents)
         else:
             raise FileNotFound(input_file)
+
+    def write_to_uss(self, filepath_name, data, encoding=_ZOWE_FILES_DEFAULT_ENCODING):
+        """Write content to an existing UNIX file.
+        Returns
+        -------
+        json
+            A JSON containing the result of the operation
+        """
+        custom_args = self.create_custom_request_arguments()
+        custom_args["url"] = "{}fs/{}".format(self.request_endpoint, filepath_name.lstrip("/"))
+        custom_args["data"] = data
+        custom_args['headers']['Content-Type'] = 'text/plain; charset={}'.format(encoding)
+        response_json = self.request_handler.perform_request(
+            "PUT", custom_args, expected_code=[204, 201]
+        )
+        return response_json
+
+    def upload_file_to_uss(self, input_file, filepath_name, encoding=_ZOWE_FILES_DEFAULT_ENCODING):
+        """Upload contents of a given file and uploads it to UNIX file"""
+        if os.path.isfile(input_file):
+            in_file = open(input_file, 'r')
+            file_contents = in_file.read()
+            response_json = self.write_to_uss(filepath_name, file_contents)
+        else:
+            raise FileNotFound(input_file)
