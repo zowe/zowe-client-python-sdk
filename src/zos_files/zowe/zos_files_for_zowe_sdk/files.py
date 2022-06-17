@@ -144,7 +144,7 @@ class Files(SdkApi):
         response_json = self.request_handler.perform_request("GET", custom_args)
         return response_json
 
-    def create_data_set(self, dataset_name, options = ( {} )):
+    def create_data_set(self, dataset_name, options = {}):
 
         """
         Create a sequential or partitioned dataset.
@@ -162,9 +162,8 @@ class Files(SdkApi):
             "dsntype", "like"):
 
             if opt == "dsorg":
-                if options.get(opt) is not None:
-                    if options[opt] not in ("PO", "PS"):
-                        raise KeyError
+                if options.get(opt) is not None and options[opt] not in ("PO", "PS"):
+                    raise KeyError
 
             if opt == "alcunit":
                 if options.get(opt) is None:
@@ -180,17 +179,17 @@ class Files(SdkApi):
 
             if opt == "secondary":
                 if options.get("primary") is not None:
+                    if options.get(opt) is None:
+                        options["secondary"] = int(options["primary"] / 10)
                     if options["secondary"] > 16777215:
                         raise ValueError
-                    if options.get(opt) is None:
-                        options["scondary"] = int(options["primary"] / 10)
 
             if opt == "dirblk":
-                if options[opt] is not None:
-                    if options["dsorg"] == "PS":
+                if options.get(opt) is not None:
+                    if options.get("dsorg") == "PS":
                         if options["dirblk"] != 0:
                             raise ValueError
-                    if options["dsorg"] == "PO":
+                    elif options.get("dsorg") == "PO":
                         if options["dirblk"] == 0:
                             raise ValueError
 
@@ -202,12 +201,12 @@ class Files(SdkApi):
                         raise KeyError
 
             if opt == "blksize":
-                if options[opt] is None and options["lrecl"] is not None:
+                if options.get(opt) is None and options.get("lrecl") is not None:
                     options[opt] = options["lrecl"]
 
-        custom_args = self.create_custom_request_arguments()
+        custom_args = self._create_custom_request_arguments()
         custom_args["url"] = "{}ds/{}".format(self.request_endpoint, dataset_name)
-        custom_args["params"] = options
+        custom_args["json"] = options
         response_json = self.request_handler.perform_request("POST", custom_args, expected_code = [201])
         return response_json
 

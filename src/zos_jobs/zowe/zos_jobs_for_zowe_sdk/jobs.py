@@ -76,6 +76,7 @@ class Jobs(SdkApi):
         job_url = "{}/{}".format(jobname, jobid)
         request_url = "{}{}".format(self.request_endpoint, job_url)
         custom_args["url"] = request_url
+        custom_args["json"] = {"request": "cancel"}
         response_json = self.request_handler.perform_request("PUT", custom_args, expected_code = [202])
         return response_json
 
