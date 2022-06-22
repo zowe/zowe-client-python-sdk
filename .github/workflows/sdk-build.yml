@@ -3,11 +3,7 @@
 
 name: Zowe SDK Build
 
-on:
-  push:
-    branches: [ develop ]
-  pull_request:
-    branches: [ master ]
+on: [push, pull_request]
 
 jobs:
   build:
@@ -32,4 +28,16 @@ jobs:
         flake8 ./src --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Test with green
       run: |
-        green -vvv ./tests/unit
+        green -vvv -r ./tests/unit
+    - name: Generate a coverage xml file
+      run: |
+        coverage xml
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v2
+      with:
+        directory: ./
+        fail_ci_if_error: true
+        files: ./coverage.xml
+        flags: unittests
+        name: codecov-umbrella
+        verbose: true

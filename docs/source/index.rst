@@ -14,3 +14,5 @@ Python developers can leverage the Zowe SDK in order to create powerful scripts/
    packages/packages
    classes/classes
    contributing/contributing
+   testing/testing
+   
