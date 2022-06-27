@@ -48,6 +48,6 @@ class TestJobsIntegration(unittest.TestCase):
 
     def test_submit_plaintext_should_execute_properly(self):
         """Executing the submit_plaintext method should execute successfully."""
-        command_output = self.jobs.submit_plaintext(self.jobs_fixtures_json['TEST_JCL_CODE'])
+        command_output = self.jobs.submit_plaintext('\n'.join(self.jobs_fixtures_json['TEST_JCL_CODE']))
         jobid = command_output['jobid']
         self.assertIsNotNone(jobid)
