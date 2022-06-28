@@ -72,6 +72,30 @@ class RequestHandler:
         self.__validate_response()
         return self.__normalize_response()
 
+    def perform_streamed_request(self, method, request_arguments, expected_code=[200]):
+        """Execute a streamed HTTP/HTTPS requests from given arguments and return a raw response.
+
+        Parameters
+        ----------
+        method: str
+            The request method that should be used
+        request_arguments: dict
+            The dictionary containing the required arguments for the execution of the request
+        expected_code: int
+            The list containing the acceptable response codes (default is [200])
+
+        Returns
+        -------
+        A raw response data
+        """
+        self.method = method
+        self.request_arguments = request_arguments
+        self.expected_code = expected_code
+        self.__validate_method()
+        self.__send_stream_request()
+        self.__validate_response()
+        return self.response.raw
+
     def __validate_method(self):
         """Check if the input request method for the request is supported.
 
@@ -89,6 +113,13 @@ class RequestHandler:
         request_object = requests.Request(method=self.method, **self.request_arguments)
         prepared = session.prepare_request(request_object)
         self.response = session.send(prepared, **self.session_arguments)
+
+    def __send_stream_request(self):
+        """Build a custom session object, prepare it with a custom request and send it."""
+        session = requests.Session()
+        request_object = requests.Request(method=self.method, **self.request_arguments)
+        prepared = session.prepare_request(request_object)
+        self.response = session.send(prepared, **self.session_arguments, stream=True)
 
     def __validate_response(self):
         """Validate if request response is acceptable based on expected code list.
@@ -116,12 +147,9 @@ class RequestHandler:
 
         Returns
         -------
-        a raw response or json or bytes
-            A bytes object if the response content type is application/octet-stream,
-            a normalized JSON for the request response otherwise
-        """
-        if 'stream' in self.request_arguments and self.request_arguments['stream'] == True:
-            return self.response.raw
+        A bytes object if the response content type is application/octet-stream,
+        a normalized JSON for the request response otherwise
+        """  
         if self.response.headers['Content-Type'] == 'application/octet-stream':
             return self.response.content
         else:
