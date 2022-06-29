@@ -92,7 +92,7 @@ class RequestHandler:
         self.request_arguments = request_arguments
         self.expected_code = expected_code
         self.__validate_method()
-        self.__send_stream_request()
+        self.__send_request(stream=True)
         self.__validate_response()
         return self.response.raw
 
@@ -107,19 +107,12 @@ class RequestHandler:
         if self.method not in self.valid_methods:
             raise InvalidRequestMethod(self.method)
 
-    def __send_request(self):
+    def __send_request(self, stream=False):
         """Build a custom session object, prepare it with a custom request and send it."""
         session = requests.Session()
         request_object = requests.Request(method=self.method, **self.request_arguments)
         prepared = session.prepare_request(request_object)
         self.response = session.send(prepared, **self.session_arguments)
-
-    def __send_stream_request(self):
-        """Build a custom session object, prepare it with a custom request and send it."""
-        session = requests.Session()
-        request_object = requests.Request(method=self.method, **self.request_arguments)
-        prepared = session.prepare_request(request_object)
-        self.response = session.send(prepared, **self.session_arguments, stream=True)
 
     def __validate_response(self):
         """Validate if request response is acceptable based on expected code list.
