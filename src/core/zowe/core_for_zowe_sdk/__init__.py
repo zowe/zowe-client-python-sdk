@@ -9,3 +9,4 @@ from .exceptions import (
 )
 from .request_handler import RequestHandler
 from .zosmf_profile import ZosmfProfile
+from .zosmf_profile2 import ProfileManager
