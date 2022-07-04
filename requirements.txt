@@ -6,11 +6,14 @@ flake8==3.8.4
 green==3.2.5
 idna==2.10
 importlib-metadata==3.6.0
+jsoncparser==1.0.4
+keyring==23.6.0
 lxml==4.7.1
 mccabe==0.6.1
 nose2==0.10.0
 pycodestyle==2.6.0
 pydocstyle==5.1.1
+pyfakefs==4.5.6
 pyflakes==2.2.0
 pylama==7.7.1
 python-decouple==3.4
