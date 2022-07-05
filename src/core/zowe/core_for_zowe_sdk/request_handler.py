@@ -112,7 +112,7 @@ class RequestHandler:
         session = requests.Session()
         request_object = requests.Request(method=self.method, **self.request_arguments)
         prepared = session.prepare_request(request_object)
-        self.response = session.send(prepared, **self.session_arguments)
+        self.response = session.send(prepared, stream=stream, **self.session_arguments)
 
     def __validate_response(self):
         """Validate if request response is acceptable based on expected code list.
