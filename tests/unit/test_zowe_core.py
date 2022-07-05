@@ -1,13 +1,8 @@
 """Unit tests for the Zowe Python SDK Core package."""
 
-# Including necessary paths
-import sys
-import os
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
 import unittest
-from src.core.zowe.core_for_zowe_sdk import ApiConnection, SdkApi, RequestHandler, ZosmfProfile
-from src.core.zowe.core_for_zowe_sdk import exceptions
+from zowe.core_for_zowe_sdk import ApiConnection, SdkApi, RequestHandler, ZosmfProfile
+from zowe.core_for_zowe_sdk import exceptions
 
 
 class TestApiConnectionClass(unittest.TestCase):

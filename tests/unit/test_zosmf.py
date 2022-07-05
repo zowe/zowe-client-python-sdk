@@ -1,12 +1,7 @@
 """Unit tests for the Zowe Python SDK z/OSMF package."""
 
-# Including necessary paths
-import sys
-import os
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
 import unittest
-from src.zosmf.zowe.zosmf_for_zowe_sdk import Zosmf
+from zowe.zosmf_for_zowe_sdk import Zosmf
 
 
 class TestZosmfClass(unittest.TestCase):
