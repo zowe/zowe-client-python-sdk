@@ -103,3 +103,19 @@ class SecureProfileLoadFailed(Exception):
         super().__init__(
             "Failed to load secure profile {}: {}".format(profile_name, error_msg)
         )
+
+class ProfileNotFound(Exception):
+    """Class used to represent a profile load failure exception."""
+
+    def __init__(self, profile_name, error_msg):
+        """
+        Parameters
+        ----------
+        profile_name
+            The name of the profile it failed to load
+        error_msg
+            The error message received while trying to load the profile
+        """
+        super().__init__(
+            "Failed to load profile {}: {}".format(profile_name, error_msg)
+        )
