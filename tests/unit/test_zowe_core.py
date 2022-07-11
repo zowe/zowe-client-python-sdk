@@ -6,6 +6,7 @@ import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import unittest
+from unittest import mock
 from src.core.zowe.core_for_zowe_sdk import ApiConnection, SdkApi, RequestHandler, ZosmfProfile
 from src.core.zowe.core_for_zowe_sdk import exceptions
 
@@ -67,6 +68,15 @@ class TestRequestHandlerClass(unittest.TestCase):
         """Created object should be instance of RequestHandler class."""
         request_handler = RequestHandler(self.session_arguments)
         self.assertIsInstance(request_handler, RequestHandler)
+
+    @mock.patch('requests.Session.send')
+    def test_perform_streamed_request(self, mock_send_request):
+        """Performing a streamed request should call 'send_request' method"""
+        mock_send_request.return_value = mock.Mock(status_code=200)
+        request_handler = RequestHandler(self.session_arguments)
+        request_handler.perform_streamed_request("GET", {'url': 'https://www.zowe.org'})
+        mock_send_request.assert_called_once()
+        self.assertTrue(mock_send_request.call_args[1]["stream"])
 
 
 class TestZosmfProfileClass(unittest.TestCase):
