@@ -10,9 +10,8 @@ SPDX-License-Identifier: EPL-2.0
 Copyright Contributors to the Zowe Project.
 """
 from .request_handler import RequestHandler
-from .constants import constants
-from .connection import ApiConnection
-from .zosmf_profile import ZosmfProfile
+from .profile_manager import ProfileManager
+from .session import Session
 
 
 class SdkApi:
@@ -21,34 +20,35 @@ class SdkApi:
 
     Attributes
     ----------
-    connection: dict
+    profile: dict
         A dictionary containing the connection arguments
-    default_url: str
-        The default endpoint for the API
     """
 
-    def __init__(self, connection, default_url):
-        if "plugin_profile" in connection:
-            self.connection = ZosmfProfile(connection['plugin_profile']).load()
-        else:
-            self.connection = ApiConnection(**connection)
+    def __init__(self, profile, default_url):
+        self.profile = ProfileManager.load("my_zosmf", "zosmf")
+        self.session = Session(**profile)
 
-        self.constants = constants
         self.default_service_url = default_url
         self.default_headers = {
             "Content-type": "application/json",
-            "X-CSRF-ZOSMF-HEADER": ""
+            "X-CSRF-ZOSMF-HEADER": "",
+            "Authorization": f"Bearer {Session.tokenValue}"
         }
         self.request_endpoint = "https://{base_url}{service}".format(
-            base_url=self.connection.host_url, service=self.default_service_url
+            base_url=self.profile.host_url, service=self.default_service_url
         )
         self.request_arguments = {
             "url": self.request_endpoint,
-            "auth": (self.connection.user, self.connection.password),
+            "auth": (self.profile.user, self.profile.password),
             "headers": self.default_headers
         }
+        if self.session.type is "basic":
+            self.request_arguments["auth"] = (self.profile.user, self.profile.password),
+        elif self.session.type is "token":
+            self.request_arguments["auth"] = self.default_headers["Authorization"]
+
         self.session_arguments = {
-            "verify": self.connection.ssl_verification,
+            "verify": self.profile.ssl_verification,
             "timeout": 30
         }
         self.request_handler = RequestHandler(self.session_arguments)
