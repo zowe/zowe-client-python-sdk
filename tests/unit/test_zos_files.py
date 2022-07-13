@@ -1,12 +1,7 @@
 """Unit tests for the Zowe Python SDK z/OS Files package."""
 
-# Including necessary paths
-import sys
-import os
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
 import unittest
-from src.zos_files.zowe.zos_files_for_zowe_sdk import Files
+from zowe.zos_files_for_zowe_sdk import Files
 
 
 class TestFilesClass(unittest.TestCase):
