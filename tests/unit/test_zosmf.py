@@ -9,7 +9,7 @@ from zos_files.zowe.zos_files_for_zowe_sdk.files import Files
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import unittest
-from src.zosmf.zowe.zosmf_for_zowe_sdk import Zosmf
+from zowe.zosmf_for_zowe_sdk import Zosmf
 
 
 class TestZosmfClass(unittest.TestCase):

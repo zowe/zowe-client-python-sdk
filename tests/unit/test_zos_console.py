@@ -1,12 +1,7 @@
 """Unit tests for the Zowe Python SDK z/OS Console package."""
 
-# Including necessary paths
-import sys
-import os
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
 import unittest
-from src.zos_console.zowe.zos_console_for_zowe_sdk import Console
+from zowe.zos_console_for_zowe_sdk import Console
 
 
 class TestConsoleClass(unittest.TestCase):

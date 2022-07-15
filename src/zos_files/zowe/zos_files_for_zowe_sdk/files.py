@@ -242,8 +242,7 @@ class Files(SdkApi):
         """
         custom_args = self._create_custom_request_arguments()
         custom_args["url"] = "{}ds/{}".format(self.request_endpoint, dataset_name)
-        custom_args["stream"] = True
-        raw_response = self.request_handler.perform_request("GET", custom_args)
+        raw_response = self.request_handler.perform_streamed_request("GET", custom_args)
         return raw_response
 
     def get_dsn_binary_content(self, dataset_name, with_prefixes=False):
@@ -291,8 +290,7 @@ class Files(SdkApi):
             custom_args["headers"]["X-IBM-Data-Type"] = 'record'
         else:
             custom_args["headers"]["X-IBM-Data-Type"] = 'binary'
-        custom_args["stream"] = True
-        content = self.request_handler.perform_request("GET", custom_args)
+        content = self.request_handler.perform_streamed_request("GET", custom_args)
         return content
 
     def write_to_dsn(self, dataset_name, data, encoding=_ZOWE_FILES_DEFAULT_ENCODING):
