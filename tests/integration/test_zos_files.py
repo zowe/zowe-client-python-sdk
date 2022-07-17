@@ -53,4 +53,8 @@ class TestFilesIntegration(unittest.TestCase):
         command_output = self.files.write_to_dsn(self.test_member_generic, "HELLO WORLD")
         self.assertTrue(command_output['response'] == '')
 
+    def test_create_zFS_file_system(self):
+        """Executing create_zFS_file_system should be possible"""
+        command_output = self.files.create_zFS_file_system(self.test_member_jcl)
+
     #TODO implement tests for download/upload datasets

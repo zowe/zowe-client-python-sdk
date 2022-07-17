@@ -10,9 +10,11 @@ SPDX-License-Identifier: EPL-2.0
 Copyright Contributors to the Zowe Project.
 """
 
-constants = {
-    "SecureValuePrefix": "managed by ",
-    "TsoSessionNotFound": "IZUG1126E",
-    "ZoweCredentialKey": "Zowe-Plugin",
-    "MaxAllocationQuantity": 16777215
+from .constants import constants
+
+
+messages = {
+    "MaxAllocationQuantityExceeded": f"Maximum allocation quantity of " \
+                                        f"{constants['MaxAllocationQuantity']} exceeded",
+    "InvalidPermsOption": "Invalid zos-files create command 'perms' option: "
 }
