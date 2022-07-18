@@ -71,19 +71,21 @@ class ProfileManager:
     def config_filename(self, filename: str) -> None:
         """Set filename for the Zowe z/OSMF Team Profile Config
 
-        If config_dir is not set, we use current working directory
+        If config_dir is set, we check for its existence in that directory,
+        If config_dir is not set, we rely on autodiscover_config_dir() while
+        loading profile to check the existence of the file and raise exceptions
         """
-        if self._config_dir is None:
-            self._config_dir = os.getcwd()
+        if self._config_dir is not None:
+            path = os.path.join(self._config_dir, filename)
 
-        path = os.path.join(self._config_dir, filename)
-
-        if os.path.isfile(path):
-            self._config_filename = filename
+            if os.path.isfile(path):
+                self._config_filename = filename
+            else:
+                raise FileNotFoundError(
+                    f"file not found on path {path} or set directory path first"
+                )
         else:
-            raise FileNotFoundError(
-                f"file not found on path {path} or set directory path first"
-            )
+            self._config_filename = filename
 
     @property
     def config_filepath(self) -> Union[str, None]:

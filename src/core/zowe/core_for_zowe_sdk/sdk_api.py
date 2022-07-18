@@ -13,7 +13,7 @@ from .request_handler import RequestHandler
 from .constants import constants
 from .session import Session, ISession
 from .zosmf_profile2 import ProfileManager
-from .import session_constants
+from . import session_constants
 
 
 class SdkApi:
@@ -29,7 +29,7 @@ class SdkApi:
         self.default_service_url = default_url
         self.default_headers = {
             "Content-type": "application/json",
-            "X-CSRF-ZOSMF-HEADER": ""
+            "X-CSRF-ZOSMF-HEADER": "",
         }
 
         self.request_endpoint = "https://{base_url}{service}".format(
@@ -37,14 +37,14 @@ class SdkApi:
         )
         self.request_arguments = {
             "url": self.request_endpoint,
-            "headers": self.default_headers
+            "headers": self.default_headers,
         }
         self.session_arguments = {
             "verify": self.connection.ssl_verification,
-            "timeout": 30
+            "timeout": 30,
         }
         self.request_handler = RequestHandler(self.session_arguments)
-        
+
         if self.session.type == session_constants.AUTH_TYPE_BASIC:
             self.request_arguments["auth"] = (self.session.user, self.session.user)
         elif self.session.type == session_constants.AUTH_TYPE_TOKEN:

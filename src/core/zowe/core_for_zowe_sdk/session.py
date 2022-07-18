@@ -12,6 +12,8 @@ Copyright Contributors to the Zowe Project.
 
 from dataclasses import dataclass
 from typing import Union
+
+from zowe.core_for_zowe_sdk.zosmf_profile2 import ProfileManager
 from .import session_constants
 
 

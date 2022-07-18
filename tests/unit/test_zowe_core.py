@@ -29,6 +29,9 @@ def keyring_get_password(serviceName: str, username: str):
     global SECURE_CONFIG_PROPS
     return SECURE_CONFIG_PROPS
 
+def keyring_get_password_exception():
+    raise Exception
+
 
 class TestApiConnectionClass(unittest.TestCase):
     """ApiConnection class unit tests."""
@@ -153,11 +156,14 @@ class TestZosmfProfileManager(TestCase):
         also load by profile_type correctly populating fields from base profile
         and secure credentials
         """
+
+        # Setup - copy profile to fake filesystem created by pyfakefs
         cwd_up_dir_path = os.path.dirname(CWD)
         cwd_up_file_path = os.path.join(cwd_up_dir_path, "zowe.config.json")
         os.chdir(CWD)
         shutil.copy(self.original_file_path, cwd_up_file_path)
 
+        # Test
         prof_manager = ProfileManager()
         props: dict = prof_manager.load(profile_type="base")
         expected_props = {
@@ -175,9 +181,11 @@ class TestZosmfProfileManager(TestCase):
         also load by profile_name correctly populating fields from base profile
         and secure credentials
         """
+        # Setup - copy profile to fake filesystem created by pyfakefs
         custom_file_path = os.path.join(self.custom_dir, self.custom_filename)
         shutil.copy(self.original_file_path, custom_file_path)
 
+        # Test
         prof_manager = ProfileManager()
         prof_manager.config_dir = self.custom_dir
         prof_manager.config_filename = self.custom_filename
@@ -190,3 +198,41 @@ class TestZosmfProfileManager(TestCase):
             "port": 10443,
         }
         self.assertEqual(props, expected_props)
+
+    @patch("keyring.get_password", side_effect=keyring_get_password)
+    def test_profile_loading_exception(self, get_pass_func):
+        """
+        Test correct exceptions are being thrown when a profile is
+        not found.
+
+        Only the filename will be set
+        """
+        with self.assertRaises(exceptions.ProfileNotFound):
+            # Setup
+            cwd_up_dir_path = os.path.dirname(CWD)
+            cwd_up_file_path = os.path.join(cwd_up_dir_path, "zowe_custom_name.config.json")
+            os.chdir(CWD)
+            shutil.copy(self.original_file_path, cwd_up_file_path)
+
+            # Test
+            prof_manager = ProfileManager()
+            prof_manager.config_filename = "zowe_custom_name.config.json"
+            props: dict = prof_manager.load("non_existent_profile")
+
+    @patch("keyring.get_password", side_effect=keyring_get_password_exception)
+    def test_secure_props_loading_exception(self, get_pass_func):
+        """
+        Test correct exceptions are being thrown when secure properties
+        are not found in keyring.
+
+        Only the config folder will be set
+        """
+        with self.assertRaises(exceptions.SecureProfileLoadFailed):
+            # Setup
+            custom_file_path = os.path.join(self.custom_dir, "zowe.config.json")
+            shutil.copy(self.original_file_path, custom_file_path)
+
+            # Test
+            prof_manager = ProfileManager()
+            prof_manager.config_dir = self.custom_dir
+            props: dict = prof_manager.load("base")
