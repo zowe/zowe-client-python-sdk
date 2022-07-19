@@ -55,7 +55,7 @@ class Zosmf(SdkApi):
             Return a list of the systems that are defined to a z/OSMF instance
         """
 
-        custom_args = self.create_custom_request_arguments()
+        custom_args = self._create_custom_request_arguments()
         custom_args["url"] = "{}/systems".format(self.request_endpoint)
         response_json = self.request_handler.perform_request("GET", custom_args, expected_code = [200])
         return response_json
