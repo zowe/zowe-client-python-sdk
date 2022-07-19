@@ -1,12 +1,7 @@
 """Unit tests for the Zowe Python SDK z/OSMF package."""
 
 # Including necessary paths
-import sys
-import os
 from unittest import mock
-
-from zos_files.zowe.zos_files_for_zowe_sdk.files import Files
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import unittest
 from zowe.zosmf_for_zowe_sdk import Zosmf
@@ -30,5 +25,4 @@ class TestZosmfClass(unittest.TestCase):
     def test_list_systems(self, mock_send_request):
         """Listing z/OSMF systems should send a REST request"""
         mock_send_request.return_value = mock.Mock(status_code=200)
-        Files({"plugin_profile": "test"}).list_systems()
         mock_send_request.assert_called_once()
