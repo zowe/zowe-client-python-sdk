@@ -17,6 +17,7 @@ from zowe.core_for_zowe_sdk import (
     SdkApi,
     ZosmfProfile,
     exceptions,
+    session
 )
 
 FIXTURES_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fixtures")
@@ -63,21 +64,56 @@ class TestApiConnectionClass(unittest.TestCase):
             ApiConnection(host_url=self.url, user=self.user, password="")
 
 
-class TestSdkApiClass(unittest.TestCase):
+class TestSdkApiClass(TestCase):
     """SdkApi class unit tests."""
 
     def setUp(self):
         """Setup fixtures for SdkApi class."""
-        self.connection_dict = {
-            "host_url": "https://mock-url.com",
-            "user": "Username",
-            "password": "Password",
-        }
+        # setup pyfakefs
+        # Add the contents of config file to fs
+        self.setUpPyfakefs()
+        self.original_file_path = os.path.join(FIXTURES_PATH, "zowe.config.json")
+        self.fs.add_real_file(self.original_file_path)
+
+        # Setup custom config file
+        self.custom_dir = os.path.dirname(FIXTURES_PATH)
+        self.custom_filename = "zowe_abcd.config.json"
+        custom_file_path = os.path.join(self.custom_dir, self.custom_filename)
+
+        custom_file_path = os.path.join(self.custom_dir, self.custom_filename)
+        shutil.copy(self.original_file_path, custom_file_path)
+
+        prof_manager = ProfileManager()
+        prof_manager.config_dir = self.custom_dir
+        prof_manager.config_filename = self.custom_filename
+        props: dict = prof_manager.load(profile_type="tso")
+        sesh = session(props)
+
         self.default_url = "https://default-api.com/"
 
-    def test_object_should_be_instance_of_class(self):
+        # setup keyring
+        home = os.path.expanduser("~")
+        global_config_path = os.path.join(home, ".zowe", "zowe.config.json")
+
+        global CRED_DICT
+        CRED_DICT = {
+            custom_file_path: {
+                "profiles.zosmf.properties.user": "user",
+                "profiles.zosmf.properties.password": "password",
+            },
+            global_config_path: {
+                "profiles.base.properties.user": "user",
+                "profiles.base.properties.password": "password",
+            },
+        }
+
+        global SECURE_CONFIG_PROPS
+        SECURE_CONFIG_PROPS = base64.b64encode((json.dumps(CRED_DICT)).encode("utf-8"))
+
+    @patch("keyring.get_password", side_effect=keyring_get_password)
+    def test_object_should_be_instance_of_class(self, get_pass_func):
         """Created object should be instance of SdkApi class."""
-        sdk_api = SdkApi(self.connection_dict, self.default_url)
+        sdk_api = SdkApi(self.default_url)
         self.assertIsInstance(sdk_api, SdkApi)
 
 
