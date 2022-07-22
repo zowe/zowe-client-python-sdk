@@ -21,10 +21,8 @@ class SdkApi:
     Abstract class used to represent the base SDK API.
     """
 
-    def __init__(self, default_url):
-        self.profile = ProfileManager()
-        self.profile_props = self.profile.load()
-        self.session: ISession = Session(self.profile_props)
+    def __init__(self, default_url, session):
+        self.session: ISession = session
 
         self.default_service_url = default_url
         self.default_headers = {

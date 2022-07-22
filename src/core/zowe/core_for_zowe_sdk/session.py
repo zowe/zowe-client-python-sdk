@@ -41,11 +41,11 @@ class Session:
     Class used to represent connection details
     """
 
-    def __init__(self, props: dict) -> ISession:
+    def __init__(self, props: dict) -> None:
         # set hostname and port
-        if props["hostname"] is not None and props["port"] is not None:
+        if props["host"] is not None and props["port"] is not None:
             self.session: ISession = ISession(
-                hostname=props["hostname"], port=props["port"]
+                hostname=props["host"], port=props["port"]
             )
         else:
             raise "Hostname and Port must be supplied"
@@ -62,6 +62,7 @@ class Session:
         else:
             raise "An authentication method must be supplied"
 
+    def load(self) -> ISession:
         return self.session
 
     @property

@@ -17,7 +17,7 @@ from zowe.core_for_zowe_sdk import (
     SdkApi,
     ZosmfProfile,
     exceptions,
-    session
+    Session
 )
 
 FIXTURES_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fixtures")
@@ -79,17 +79,7 @@ class TestSdkApiClass(TestCase):
         self.custom_dir = os.path.dirname(FIXTURES_PATH)
         self.custom_filename = "zowe_abcd.config.json"
         custom_file_path = os.path.join(self.custom_dir, self.custom_filename)
-
-        custom_file_path = os.path.join(self.custom_dir, self.custom_filename)
         shutil.copy(self.original_file_path, custom_file_path)
-
-        prof_manager = ProfileManager()
-        prof_manager.config_dir = self.custom_dir
-        prof_manager.config_filename = self.custom_filename
-        props: dict = prof_manager.load(profile_type="tso")
-        sesh = session(props)
-
-        self.default_url = "https://default-api.com/"
 
         # setup keyring
         home = os.path.expanduser("~")
@@ -113,7 +103,16 @@ class TestSdkApiClass(TestCase):
     @patch("keyring.get_password", side_effect=keyring_get_password)
     def test_object_should_be_instance_of_class(self, get_pass_func):
         """Created object should be instance of SdkApi class."""
-        sdk_api = SdkApi(self.default_url)
+        prof_manager = ProfileManager()
+        prof_manager.config_dir = self.custom_dir
+        prof_manager.config_filename = self.custom_filename
+        props: dict = prof_manager.load(profile_type="zosmf")
+        session = Session(props=props)
+        session_details = session.load()
+
+        self.default_url = "https://default-api.com/"
+
+        sdk_api = SdkApi(self.default_url, session=session_details)
         self.assertIsInstance(sdk_api, SdkApi)
 
 
