@@ -31,14 +31,14 @@ class SdkApi:
         }
 
         self.request_endpoint = "https://{base_url}{service}".format(
-            base_url=self.connection.host_url, service=self.default_service_url
+            base_url=Session.host_url, service=self.default_service_url
         )
         self.request_arguments = {
             "url": self.request_endpoint,
             "headers": self.default_headers,
         }
         self.session_arguments = {
-            "verify": self.connection.ssl_verification,
+            "verify": self.session.rejectUnauthorised,
             "timeout": 30,
         }
         self.request_handler = RequestHandler(self.session_arguments)
