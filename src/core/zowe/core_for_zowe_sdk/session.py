@@ -54,6 +54,7 @@ class Session:
         if props["user"] is not None and props["password"] is not None:
             self.session.user = props["user"]
             self.session.password = props["password"]
+            self.session.rejectUnauthorised = props["rejectUnauthorised"]
             self.session.type = session_constants.AUTH_TYPE_BASIC
         elif props["tokenType"] is not None and props["tokenValue"] is not None:
             self.session.tokenType = props["tokenType"]

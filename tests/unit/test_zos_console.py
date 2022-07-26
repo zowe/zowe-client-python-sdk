@@ -9,11 +9,14 @@ class TestConsoleClass(unittest.TestCase):
 
     def setUp(self):
         """Setup fixtures for Console class."""
-        self.connection_dict = {"host_url": "https://mock-url.com",
+        self.session_details = {"host": "https://mock-url.com",
                                 "user": "Username",
-                                "password": "Password"}
+                                "password": "Password",
+                                "port": 443,
+                                "rejectUnauthorised": True
+                                }
 
     def test_object_should_be_instance_of_class(self):
         """Created object should be instance of Console class."""
-        console = Console(self.connection_dict)
+        console = Console(self.session_details)
         self.assertIsInstance(console, Console)

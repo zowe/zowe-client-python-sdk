@@ -69,50 +69,21 @@ class TestSdkApiClass(TestCase):
 
     def setUp(self):
         """Setup fixtures for SdkApi class."""
-        # setup pyfakefs
-        # Add the contents of config file to fs
-        self.setUpPyfakefs()
-        self.original_file_path = os.path.join(FIXTURES_PATH, "zowe.config.json")
-        self.fs.add_real_file(self.original_file_path)
-
-        # Setup custom config file
-        self.custom_dir = os.path.dirname(FIXTURES_PATH)
-        self.custom_filename = "zowe_abcd.config.json"
-        custom_file_path = os.path.join(self.custom_dir, self.custom_filename)
-        shutil.copy(self.original_file_path, custom_file_path)
-
-        # setup keyring
-        home = os.path.expanduser("~")
-        global_config_path = os.path.join(home, ".zowe", "zowe.config.json")
-
-        global CRED_DICT
-        CRED_DICT = {
-            custom_file_path: {
-                "profiles.zosmf.properties.user": "user",
-                "profiles.zosmf.properties.password": "password",
-            },
-            global_config_path: {
-                "profiles.base.properties.user": "user",
-                "profiles.base.properties.password": "password",
-            },
+        self.props = {
+        "host": "https://mock-url.com",
+        "user": "Username",
+        "password": "Password",
+        "port": 443,
+        "rejectUnauthorised": True
         }
 
-        global SECURE_CONFIG_PROPS
-        SECURE_CONFIG_PROPS = base64.b64encode((json.dumps(CRED_DICT)).encode("utf-8"))
+        self.default_url = "https://default-api.com/"
 
     @patch("keyring.get_password", side_effect=keyring_get_password)
     def test_object_should_be_instance_of_class(self, get_pass_func):
         """Created object should be instance of SdkApi class."""
-        prof_manager = ProfileManager()
-        prof_manager.config_dir = self.custom_dir
-        prof_manager.config_filename = self.custom_filename
-        props: dict = prof_manager.load(profile_type="zosmf")
-        session = Session(props=props)
-        session_details = session.load()
 
-        self.default_url = "https://default-api.com/"
-
-        sdk_api = SdkApi(self.default_url, session=session_details)
+        sdk_api = SdkApi(self.props, self.default_url)
         self.assertIsInstance(sdk_api, SdkApi)
 
 

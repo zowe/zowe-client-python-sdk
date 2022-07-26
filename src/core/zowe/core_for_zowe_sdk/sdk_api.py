@@ -10,9 +10,7 @@ SPDX-License-Identifier: EPL-2.0
 Copyright Contributors to the Zowe Project.
 """
 from .request_handler import RequestHandler
-from .constants import constants
 from .session import Session, ISession
-from .zosmf_profile2 import ProfileManager
 from . import session_constants
 
 
@@ -21,8 +19,9 @@ class SdkApi:
     Abstract class used to represent the base SDK API.
     """
 
-    def __init__(self, default_url, session):
-        self.session: ISession = session
+    def __init__(self, profile, default_url):  
+        self.profile = profile
+        self.session: ISession = Session(profile).load()
 
         self.default_service_url = default_url
         self.default_headers = {

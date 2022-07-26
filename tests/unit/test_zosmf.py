@@ -9,9 +9,12 @@ class TestZosmfClass(unittest.TestCase):
 
     def setUp(self):
         """Setup fixtures for Zosmf class."""
-        self.connection_dict = {"host_url": "https://mock-url.com",
+        self.connection_dict = {"host": "https://mock-url.com",
                                 "user": "Username",
-                                "password": "Password"}
+                                "password": "Password",
+                                "port": 443,
+                                "rejectUnauthorised": True
+                                }
 
     def test_object_should_be_instance_of_class(self):
         """Created object should be instance of Zosmf class."""

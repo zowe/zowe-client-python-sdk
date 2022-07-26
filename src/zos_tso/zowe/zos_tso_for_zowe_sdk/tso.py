@@ -10,7 +10,7 @@ SPDX-License-Identifier: EPL-2.0
 Copyright Contributors to the Zowe Project.
 """
 
-from zowe.core_for_zowe_sdk import SdkApi
+from zowe.core_for_zowe_sdk import SdkApi, constants
 
 
 class Tso(SdkApi):
@@ -37,7 +37,8 @@ class Tso(SdkApi):
             The connection object
         """
         super().__init__(connection, "/zosmf/tsoApp/tso")
-        self.session_not_found = self.constants["TsoSessionNotFound"]
+        # self.session_not_found = self.constants["TsoSessionNotFound"]
+        self.session_not_found = constants["TsoSessionNotFound"]
 
     def issue_command(self, command):
         """Issues a TSO command.
