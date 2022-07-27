@@ -37,7 +37,6 @@ class Tso(SdkApi):
             The connection object
         """
         super().__init__(connection, "/zosmf/tsoApp/tso")
-        # self.session_not_found = self.constants["TsoSessionNotFound"]
         self.session_not_found = constants["TsoSessionNotFound"]
 
     def issue_command(self, command):

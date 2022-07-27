@@ -172,3 +172,7 @@ test.py
 
 # ignore direnv config
 .envrc
+
+# Team config files
+zowe.config.json
+zowe.schema.json
