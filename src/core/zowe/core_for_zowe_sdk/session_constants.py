@@ -18,3 +18,8 @@ AUTH_TYPE_TOKEN = "token"
 # Session type property value for certificate authentication,
 # which uses a certificate file and key file.
 AUTH_TYPE_CERT_PEM = "cert-pem"
+
+
+# https protocol defaults
+DEFAULT_HTTPS_PORT = 443
+HTTPS_PROTOCOL = "https"

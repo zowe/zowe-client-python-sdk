@@ -75,7 +75,7 @@ class TestSdkApiClass(TestCase):
             "user": "Username",
             "password": "Password",
             "port": 443,
-            "rejectUnauthorised": True,
+            "rejectUnauthorized": True,
         }
 
         self.default_url = "https://default-api.com/"

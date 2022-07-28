@@ -13,7 +13,7 @@ class TestFilesClass(unittest.TestCase):
                                 "user": "Username",
                                 "password": "Password",
                                 "port": 443,
-                                "rejectUnauthorised": True
+                                "rejectUnauthorized": True
                                 }
 
     def test_object_should_be_instance_of_class(self):

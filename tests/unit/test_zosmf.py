@@ -13,11 +13,10 @@ class TestZosmfClass(unittest.TestCase):
                                 "user": "Username",
                                 "password": "Password",
                                 "port": 443,
-                                "rejectUnauthorised": True
+                                "rejectUnauthorized": True
                                 }
 
     def test_object_should_be_instance_of_class(self):
         """Created object should be instance of Zosmf class."""
         zosmf = Zosmf(self.connection_dict)
         self.assertIsInstance(zosmf, Zosmf)
-        
