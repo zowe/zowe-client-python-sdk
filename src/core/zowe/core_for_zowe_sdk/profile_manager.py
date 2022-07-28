@@ -263,7 +263,7 @@ class ProfileManager:
             if sys.platform == "win32":
                 service_name += "/" + constants["ZoweAccountName"]
 
-            secure_config = keyring.get_password(
+            secret_value = keyring.get_password(
                 service_name, constants["ZoweAccountName"]
             )
 
@@ -271,6 +271,12 @@ class ProfileManager:
             raise SecureProfileLoadFailed(
                 constants["ZoweServiceName"], error_msg=str(exc)
             ) from exc
+
+        secure_config: str
+        if sys.platform == "win32":
+            secure_config = secret_value.encode("utf-16")
+        else:
+            secure_config = secret_value
 
         secure_config_json = jsonc.loads(base64.b64decode(secure_config).decode())
 
