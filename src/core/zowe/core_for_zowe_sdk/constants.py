@@ -15,5 +15,5 @@ constants = {
     "TsoSessionNotFound": "IZUG1126E",
     "ZoweCredentialKey": "Zowe-Plugin",
     "ZoweServiceName": "Zowe",
-    "ZoweUsername": "secure_config_props",
+    "ZoweAccountName": "secure_config_props",
 }

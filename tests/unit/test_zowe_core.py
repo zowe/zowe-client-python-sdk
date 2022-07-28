@@ -17,7 +17,7 @@ from zowe.core_for_zowe_sdk import (
     SdkApi,
     ZosmfProfile,
     exceptions,
-    Session
+    Session,
 )
 
 FIXTURES_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fixtures")
@@ -29,6 +29,7 @@ SECURE_CONFIG_PROPS: bytes
 def keyring_get_password(serviceName: str, username: str):
     global SECURE_CONFIG_PROPS
     return SECURE_CONFIG_PROPS
+
 
 def keyring_get_password_exception():
     raise Exception
@@ -70,11 +71,11 @@ class TestSdkApiClass(TestCase):
     def setUp(self):
         """Setup fixtures for SdkApi class."""
         self.props = {
-        "host": "https://mock-url.com",
-        "user": "Username",
-        "password": "Password",
-        "port": 443,
-        "rejectUnauthorised": True
+            "host": "https://mock-url.com",
+            "user": "Username",
+            "password": "Password",
+            "port": 443,
+            "rejectUnauthorised": True,
         }
 
         self.default_url = "https://default-api.com/"
@@ -133,7 +134,8 @@ class TestZosmfProfileManager(TestCase):
         self.fs.add_real_file(self.original_file_path)
 
         self.custom_dir = os.path.dirname(FIXTURES_PATH)
-        self.custom_filename = "zowe_abcd.config.json"
+        self.custom_appname = "zowe_abcd"
+        self.custom_filename = f"{self.custom_appname}.config.json"
         custom_file_path = os.path.join(self.custom_dir, self.custom_filename)
 
         # setup keyring
@@ -192,9 +194,8 @@ class TestZosmfProfileManager(TestCase):
         shutil.copy(self.original_file_path, custom_file_path)
 
         # Test
-        prof_manager = ProfileManager()
+        prof_manager = ProfileManager(appname=self.custom_appname)
         prof_manager.config_dir = self.custom_dir
-        prof_manager.config_filename = self.custom_filename
         props: dict = prof_manager.load(profile_name="zosmf")
         expected_props = {
             "host": "zowe.test.cloud",
@@ -216,13 +217,14 @@ class TestZosmfProfileManager(TestCase):
         with self.assertRaises(exceptions.ProfileNotFound):
             # Setup
             cwd_up_dir_path = os.path.dirname(CWD)
-            cwd_up_file_path = os.path.join(cwd_up_dir_path, "zowe_custom_name.config.json")
+            cwd_up_file_path = os.path.join(
+                cwd_up_dir_path, f"{self.custom_appname}.config.json"
+            )
             os.chdir(CWD)
             shutil.copy(self.original_file_path, cwd_up_file_path)
 
             # Test
-            prof_manager = ProfileManager()
-            prof_manager.config_filename = "zowe_custom_name.config.json"
+            prof_manager = ProfileManager(appname=self.custom_appname)
             props: dict = prof_manager.load("non_existent_profile")
 
     @patch("keyring.get_password", side_effect=keyring_get_password_exception)

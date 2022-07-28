@@ -13,7 +13,6 @@ Copyright Contributors to the Zowe Project.
 from dataclasses import dataclass
 from typing import Union
 
-from zowe.core_for_zowe_sdk.zosmf_profile2 import ProfileManager
 from . import session_constants
 
 
@@ -24,11 +23,11 @@ class ISession:
     """
 
     hostname: str
-    port: int
+    port: int = 443
     rejectUnauthorised: bool = True
     user: Union[str, None] = None
     password: Union[str, None] = None
-    protocol: Union[str, None] = None
+    protocol: str = "https"
     basePath: Union[str, None] = None
     type: Union[str, None] = None
     base64EncodeAuth: Union[str, None] = None

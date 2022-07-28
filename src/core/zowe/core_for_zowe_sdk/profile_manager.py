@@ -44,10 +44,16 @@ class ProfileManager:
         Zowe z/OSMF profile name
     """
 
-    def __init__(self):
+    def __init__(self, appname: str = "zowe"):
+        self._appname = appname
         self._config_dir = None
-        self._config_filename = "zowe.config.json"
+        self._config_filename = f"{self._appname}.config.json"
         self._config_filepath = None
+
+    @property
+    def config_appname(self) -> str:
+        """Returns the app name"""
+        return self._appname
 
     @property
     def config_dir(self) -> Union[str, None]:
@@ -66,26 +72,6 @@ class ProfileManager:
     def config_filename(self) -> str:
         """Return the filename for Zowe z/OSMF Team Profile Config"""
         return self._config_filename
-
-    @config_filename.setter
-    def config_filename(self, filename: str) -> None:
-        """Set filename for the Zowe z/OSMF Team Profile Config
-
-        If config_dir is set, we check for its existence in that directory,
-        If config_dir is not set, we rely on autodiscover_config_dir() while
-        loading profile to check the existence of the file and raise exceptions
-        """
-        if self._config_dir is not None:
-            path = os.path.join(self._config_dir, filename)
-
-            if os.path.isfile(path):
-                self._config_filename = filename
-            else:
-                raise FileNotFoundError(
-                    f"file not found on path {path} or set directory path first"
-                )
-        else:
-            self._config_filename = filename
 
     @property
     def config_filepath(self) -> Union[str, None]:
@@ -272,7 +258,7 @@ class ProfileManager:
 
         try:
             secure_config = keyring.get_password(
-                constants["ZoweServiceName"], constants["ZoweUsername"]
+                constants["ZoweServiceName"], constants["ZoweAccountName"]
             )
         except Exception as exc:
             raise SecureProfileLoadFailed(

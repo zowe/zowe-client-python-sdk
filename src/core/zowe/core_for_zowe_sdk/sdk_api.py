@@ -19,7 +19,7 @@ class SdkApi:
     Abstract class used to represent the base SDK API.
     """
 
-    def __init__(self, profile, default_url):  
+    def __init__(self, profile, default_url):
         self.profile = profile
         self.session: ISession = Session(profile).load()
 
@@ -31,7 +31,7 @@ class SdkApi:
 
         self.request_endpoint = "https://{base_url}{service}".format(
             base_url=f"{self.session.protocol}://{self.session.hostname}:{self.session.port}",
-                        service=self.default_service_url
+            service=self.default_service_url,
         )
         self.request_arguments = {
             "url": self.request_endpoint,
