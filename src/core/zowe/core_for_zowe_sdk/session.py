@@ -22,7 +22,7 @@ class ISession:
     Class to represent session parameters
     """
 
-    hostname: str
+    host: str
     port: int = session_constants.DEFAULT_HTTPS_PORT
     rejectUnauthorized: bool = True
     user: Union[str, None] = None
@@ -40,21 +40,21 @@ class Session:
     """
 
     def __init__(self, props: dict) -> None:
-        # set hostname and port
-        if props["host"] is not None:
-            self.session: ISession = ISession(hostname=props["host"])
+        # set host and port
+        if props.get("host") is not None:
+            self.session: ISession = ISession(host=props.get("host"))
         else:
-            raise "Hostname and Port must be supplied"
+            raise "host and Port must be supplied"
 
         # determine authentication type
-        if props["user"] is not None and props["password"] is not None:
-            self.session.user = props["user"]
-            self.session.password = props["password"]
-            self.session.rejectUnauthorized = props["rejectUnauthorized"]
+        if props.get("user") is not None and props.get("password") is not None:
+            self.session.user = props.get("user")
+            self.session.password = props.get("password")
+            self.session.rejectUnauthorized = props.get("rejectUnauthorized")
             self.session.type = session_constants.AUTH_TYPE_BASIC
-        elif props["tokenType"] is not None and props["tokenValue"] is not None:
-            self.session.tokenType = props["tokenType"]
-            self.session.tokenValue = props["tokenValue"]
+        elif props.get("tokenType") is not None and props.get("tokenValue") is not None:
+            self.session.tokenType = props.get("tokenType")
+            self.session.tokenValue = props.get("tokenValue")
             self.session.type = session_constants.AUTH_TYPE_TOKEN
         else:
             raise "An authentication method must be supplied"

@@ -30,7 +30,7 @@ class SdkApi:
         }
 
         self.request_endpoint = "https://{base_url}{service}".format(
-            base_url=f"{self.session.protocol}://{self.session.hostname}:{self.session.port}",
+            base_url=f"{self.session.protocol}://{self.session.host}:{self.session.port}",
             service=self.default_service_url,
         )
         self.request_arguments = {
