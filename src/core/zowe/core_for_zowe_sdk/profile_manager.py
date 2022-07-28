@@ -15,6 +15,7 @@ import os.path
 import re
 import warnings
 from typing import Union
+import sys
 
 import jsonc
 
@@ -257,9 +258,15 @@ class ProfileManager:
         credentials: dict = {}
 
         try:
+            service_name = constants["ZoweServiceName"]
+
+            if sys.platform == "win32":
+                service_name += "/" + constants["ZoweAccountName"]
+
             secure_config = keyring.get_password(
-                constants["ZoweServiceName"], constants["ZoweAccountName"]
+                service_name, constants["ZoweAccountName"]
             )
+
         except Exception as exc:
             raise SecureProfileLoadFailed(
                 constants["ZoweServiceName"], error_msg=str(exc)
