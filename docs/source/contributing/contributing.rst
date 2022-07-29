@@ -7,6 +7,7 @@ Notice that the Python SDK is still in early development stages, meaning that ma
 
 * :ref:`git-branch`
 * :ref:`pull-requests`
+* :ref:`running-tests`
 * :ref:`code-standards`
 
 .. _git-branch:
@@ -26,6 +27,30 @@ Consider the following when you interact with pull requests:
 * Pull request reviewers should be assigned to a same-team member.
 * Pull requests should remain open for at least 24 hours, or until close of the business next business day (accounting for weekends and holidays).
 * Anyone can comment on a pull request to request delay on merging or to get questions answered.
+
+.. _running-tests:
+
+Running Tests
+-------------
+
+The project's test suite can be run with the python test runner, `green`
+
+.. code-block::
+
+  green -vvv  ./tests/unit
+
+In order to run the integration test, one will need to have a zowe profile
+and configure the `.env` file: `ZOWE_TEST_PROFILE='<myProfile>'`. If zowe cli is
+installed, the test profile lives in `~/.zowe/profiles/zosmf/<myProfile>.yaml`.
+
+.. code-block::
+
+  host: example.com
+  port: 443
+  user: XXXXX
+  password: XXXXX
+  rejectUnauthorized: false
+  protocol: https
 
 .. _code-standards:
 
