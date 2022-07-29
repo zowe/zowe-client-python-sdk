@@ -60,5 +60,5 @@ class Console(SdkApi):
         custom_args = self._create_custom_request_arguments()
         request_url = "{}/{}".format(sol_msgs, Ckey_number)
         custom_args["url"] = "{}{}".format(self.request_endpoint, request_url)
-        response_json = self.request_handler.perform_request("PUT", custom_args)
+        response_json = self.request_handler.perform_request("GET", custom_args)
         return response_json
