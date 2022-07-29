@@ -17,7 +17,6 @@ from zowe.core_for_zowe_sdk import (
     SdkApi,
     ZosmfProfile,
     exceptions,
-    Session,
 )
 
 FIXTURES_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fixtures")
@@ -147,6 +146,8 @@ class TestZosmfProfileManager(TestCase):
             custom_file_path: {
                 "profiles.zosmf.properties.user": "user",
                 "profiles.zosmf.properties.password": "password",
+                "profiles.base.properties.user": "user",
+                "profiles.base.properties.password": "password",
             },
             global_config_path: {
                 "profiles.base.properties.user": "user",
@@ -244,3 +245,21 @@ class TestZosmfProfileManager(TestCase):
             prof_manager = ProfileManager()
             prof_manager.config_dir = self.custom_dir
             props: dict = prof_manager.load("base")
+
+    @patch("keyring.get_password", side_effect=keyring_get_password)
+    def test_secure_values_loading_exception(self, get_pass_func):
+        """
+        Test correct exceptions are being thrown when secure properties
+        are not found in keyring.
+
+        Only the config folder will be set
+        """
+        with self.assertRaises(exceptions.SecureValuesNotFound):
+            # Setup
+            custom_file_path = os.path.join(self.custom_dir, "zowe.config.json")
+            shutil.copy(self.original_file_path, custom_file_path)
+
+            # Test
+            prof_manager = ProfileManager()
+            prof_manager.config_dir = self.custom_dir
+            props: dict = prof_manager.load("ssh")

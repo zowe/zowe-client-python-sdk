@@ -20,7 +20,7 @@ import sys
 import jsonc
 
 from .constants import constants
-from .exceptions import ProfileNotFound, SecureProfileLoadFailed
+from .exceptions import ProfileNotFound, SecureProfileLoadFailed, SecureValuesNotFound
 
 HAS_KEYRING = True
 try:
@@ -149,11 +149,18 @@ class ProfileManager:
 
         secure_props = self.load_credentials()
 
+        secure_fields: list = profile_jsonc["profiles"][profile_name].get("secure", [])
+
         # load properties with key as profile.{profile_name}.properties.{*}
         for (key, value) in secure_props.items():
             if re.match("profiles\\." + profile_name + "\\.properties\\.[a-z]+", key):
                 property_name = key.split(".")[3]
-                props[property_name] = value
+                if property_name in secure_fields:
+                    props[property_name] = value
+                    secure_fields.remove(property_name)
+
+        if len(secure_fields) > 0:
+            raise SecureValuesNotFound(secure_fields)
 
         return props
 
@@ -177,13 +184,22 @@ class ProfileManager:
 
         secure_props = self.load_credentials()
 
+        secure_fields: list = profile_jsonc["profiles"][base_profile_name].get(
+            "secure", []
+        )
+
         # load properties with key as profile.{profile_name}.properties.{*}
         for (key, value) in secure_props.items():
             if re.match(
                 "profiles\\." + base_profile_name + "\\.properties\\.[a-z]+", key
             ):
                 property_name = key.split(".")[3]
-                base_props[property_name] = value
+                if property_name in secure_fields:
+                    base_props[property_name] = value
+                    secure_fields.remove(property_name)
+
+        if len(secure_fields) > 0:
+            raise SecureValuesNotFound(secure_fields)
 
         return base_props
 
