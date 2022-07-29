@@ -43,3 +43,22 @@ class Console(SdkApi):
         custom_args["data"] = request_body
         response_json = self.request_handler.perform_request("PUT", custom_args)
         return response_json
+
+    def get_response(self, sol_msgs, Ckey_number):
+        """Get a command response on z/OS Console.
+
+        Parameters
+        ----------
+        Ckey_number
+            The command response key from the Issue Command request.
+
+        Returns
+        -------
+        json
+            A JSON containing the response to the command
+        """
+        custom_args = self._create_custom_request_arguments()
+        request_url = "{}/{}".format(sol_msgs, Ckey_number)
+        custom_args["url"] = "{}{}".format(self.request_endpoint, request_url)
+        response_json = self.request_handler.perform_request("PUT", custom_args)
+        return response_json
