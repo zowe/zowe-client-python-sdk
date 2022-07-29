@@ -12,17 +12,18 @@
 #
 import os
 import sys
+from datetime import date
 sys.path.insert(0, os.path.abspath('../../src'))
 
 
 # -- Project information -----------------------------------------------------
 
 project = 'Zowe Client Python SDK'
-copyright = '2021, Contributors to the Zowe Project'
+copyright = f'{date.today().year}, Contributors to the Zowe Project'
 author = 'Contributors to the Zowe Project'
 
 # The full version, including alpha/beta/rc tags
-release = '0.2.0'
+release = '1.0.0a1'
 
 
 # -- General configuration ---------------------------------------------------
