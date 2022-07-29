@@ -1,2 +1,3 @@
+sphinx-rtd-theme
 sphinxcontrib-spelling==5.4.0
-zowe>=0.0.1
+-e ./src

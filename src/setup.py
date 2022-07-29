@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='zowe',
-    version='0.2.1',
+    version='1.0.0a1',
     description='Zowe Python SDK',
     url="https://github.com/zowe/zowe-client-python-sdk",
     author="Guilherme Cartier",
