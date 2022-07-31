@@ -36,7 +36,8 @@ class ISession:
 
 class Session:
     """
-    Class used to represent connection details
+    Class used to set connection details received from a ProfileManager or
+    manually set by passing and ISession object
     """
 
     def __init__(self, props: dict) -> None:
@@ -44,7 +45,7 @@ class Session:
         if props.get("host") is not None:
             self.session: ISession = ISession(host=props.get("host"))
         else:
-            raise "host and Port must be supplied"
+            raise "Host must be supplied"
 
         # determine authentication type
         if props.get("user") is not None and props.get("password") is not None:
@@ -60,11 +61,17 @@ class Session:
             raise "An authentication method must be supplied"
 
         # set additional parameters
-        self.session.rejectUnauthorized = props.get("rejectUnauthorized", True)
+        self.session.basePath = props.get("basePath")
+        self.session.port = props.get("port", self.session.port)
+        self.session.protocol = props.get("protocol", self.session.protocol)
+        self.session.rejectUnauthorized = props.get(
+            "rejectUnauthorized", self.session.rejectUnauthorized
+        )
 
     def load(self) -> ISession:
         return self.session
 
     @property
     def host_url(self) -> str:
-        return f"{self.session.protocol}://{self.session.host}:{self.session.port}"
+        basePath = self.session.basePath or ""
+        return f"{self.session.protocol}://{self.session.host}:{self.session.port}{basePath}"
