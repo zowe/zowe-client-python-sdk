@@ -9,6 +9,8 @@ SPDX-License-Identifier: EPL-2.0
 
 Copyright Contributors to the Zowe Project.
 """
+
+from .exceptions import UnsupportedAuthType
 from .request_handler import RequestHandler
 from .session import Session, ISession
 from . import session_constants
@@ -26,7 +28,7 @@ class SdkApi:
 
         self.default_service_url = default_url
         self.default_headers = {
-            "Content-type": "application/json",
+            "Content-Type": "application/json",
             "X-CSRF-ZOSMF-HEADER": "",
         }
 
@@ -44,9 +46,12 @@ class SdkApi:
 
         if self.session.type == session_constants.AUTH_TYPE_BASIC:
             self.request_arguments["auth"] = (self.session.user, self.session.password)
-        elif self.session.type == session_constants.AUTH_TYPE_TOKEN:
+        elif self.session.type == session_constants.AUTH_TYPE_BEARER:
             self.default_headers["Authorization"] = f"Bearer {self.session.tokenValue}"
-            self.request_arguments["auth"] = self.default_headers["Authorization"]
+        elif self.session.type == session_constants.AUTH_TYPE_TOKEN:
+            self.default_headers["Cookie"] = f"{self.session.tokenType}={self.session.tokenValue}"
+        else:
+            raise UnsupportedAuthType(self.session.type)
 
     def _create_custom_request_arguments(self):
         """Create a copy of the default request arguments dictionary.

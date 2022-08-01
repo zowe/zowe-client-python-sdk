@@ -57,6 +57,9 @@ class Session:
             self.session.tokenType = props.get("tokenType")
             self.session.tokenValue = props.get("tokenValue")
             self.session.type = session_constants.AUTH_TYPE_TOKEN
+        elif props.get("tokenValue") is not None:
+            self.session.tokenValue = props.get("tokenValue")
+            self.session.type = session_constants.AUTH_TYPE_BEARER
         else:
             raise "An authentication method must be supplied"
 

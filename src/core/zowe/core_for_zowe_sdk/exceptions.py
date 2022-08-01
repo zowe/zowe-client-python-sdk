@@ -129,10 +129,21 @@ class SecureValuesNotFound(Exception):
         """
         Parameters
         ----------
-        profile_name
-            The name of the profile it failed to load
-        error_msg
-            The error message received while trying to load the profile
+        values
+            The list of secure values not found
         """
         listToStr = ", ".join(map(str, values))
         super().__init__("Failed to load secure values: {}".format(listToStr))
+
+
+class UnsupportedAuthType(Exception):
+    """Class used to represent an unsupported authentication type exception."""
+
+    def __init__(self, auth_type: str):
+        """
+        Parameters
+        ----------
+        auth_type
+            The type of authentication on the session
+        """
+        super().__init__("Unsupported authentication type: {}".format(auth_type))
