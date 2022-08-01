@@ -18,6 +18,7 @@ from zowe.core_for_zowe_sdk import (
     SdkApi,
     ZosmfProfile,
     exceptions,
+    session_constants,
 )
 
 FIXTURES_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fixtures")
@@ -70,22 +71,52 @@ class TestSdkApiClass(TestCase):
 
     def setUp(self):
         """Setup fixtures for SdkApi class."""
-        self.props = {
+        common_props = {
             "host": "https://mock-url.com",
-            "user": "Username",
-            "password": "Password",
             "port": 443,
-            "rejectUnauthorized": True,
+            "rejectUnauthorized": True
         }
-
+        self.basic_props = {
+            **common_props,
+            "user": "Username",
+            "password": "Password"
+        }
+        self.bearer_props = {
+            **common_props,
+            "tokenValue": "BearerToken"
+        }
+        self.token_props = {
+            **common_props,
+            "tokenType": "MyToken",
+            "tokenValue": "TokenValue"
+        }
         self.default_url = "https://default-api.com/"
 
-    @patch("keyring.get_password", side_effect=keyring_get_password)
-    def test_object_should_be_instance_of_class(self, get_pass_func):
+    def test_object_should_be_instance_of_class(self):
         """Created object should be instance of SdkApi class."""
-
-        sdk_api = SdkApi(self.props, self.default_url)
+        sdk_api = SdkApi(self.basic_props, self.default_url)
         self.assertIsInstance(sdk_api, SdkApi)
+
+    def test_should_handle_basic_auth(self):
+        """Created object should handle basic authentication."""
+        sdk_api = SdkApi(self.basic_props, self.default_url)
+        self.assertEqual(sdk_api.session.type, session_constants.AUTH_TYPE_BASIC)
+        self.assertEqual(sdk_api.request_arguments["auth"],
+            (self.basic_props["user"], self.basic_props["password"]))
+
+    def test_should_handle_bearer_auth(self):
+        """Created object should handle bearer authentication."""
+        sdk_api = SdkApi(self.bearer_props, self.default_url)
+        self.assertEqual(sdk_api.session.type, session_constants.AUTH_TYPE_BEARER)
+        self.assertEqual(sdk_api.default_headers["Authorization"],
+            "Bearer " + self.bearer_props["tokenValue"])
+
+    def test_should_handle_token_auth(self):
+        """Created object should handle token authentication."""
+        sdk_api = SdkApi(self.token_props, self.default_url)
+        self.assertEqual(sdk_api.session.type, session_constants.AUTH_TYPE_TOKEN)
+        self.assertEqual(sdk_api.default_headers["Cookie"],
+            self.token_props["tokenType"] + "=" + self.token_props["tokenValue"])
 
 
 class TestRequestHandlerClass(unittest.TestCase):
