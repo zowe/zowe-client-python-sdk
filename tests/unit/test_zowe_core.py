@@ -5,6 +5,7 @@ import base64
 import json
 import os
 import shutil
+import sys
 import unittest
 from unittest import mock
 from unittest.mock import patch
@@ -157,6 +158,8 @@ class TestZosmfProfileManager(TestCase):
 
         global SECURE_CONFIG_PROPS
         SECURE_CONFIG_PROPS = base64.b64encode((json.dumps(CRED_DICT)).encode("utf-8"))
+        if sys.platform == "win32":
+            SECURE_CONFIG_PROPS = SECURE_CONFIG_PROPS.decode("utf-16")
 
     @patch("keyring.get_password", side_effect=keyring_get_password)
     def test_autodiscovery_and_base_profile_loading(self, get_pass_func):
