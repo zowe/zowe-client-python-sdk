@@ -19,9 +19,10 @@ class SdkApi:
     Abstract class used to represent the base SDK API.
     """
 
-    def __init__(self, profile, default_url):
+    def __init__(self, profile, default_url):  
         self.profile = profile
-        self.session: ISession = Session(profile).load()
+        session = Session(profile)
+        self.session: ISession = session.load()
 
         self.default_service_url = default_url
         self.default_headers = {
@@ -29,22 +30,20 @@ class SdkApi:
             "X-CSRF-ZOSMF-HEADER": "",
         }
 
-        self.request_endpoint = "https://{base_url}{service}".format(
-            base_url=f"{self.session.protocol}://{self.session.host}:{self.session.port}",
-            service=self.default_service_url,
-        )
+        self.request_endpoint = session.host_url + self.default_service_url
+
         self.request_arguments = {
             "url": self.request_endpoint,
             "headers": self.default_headers,
         }
         self.session_arguments = {
-            "verify": self.session.rejectUnauthorized,
+            "verify": self.session.rejectUnauthorised,
             "timeout": 30,
         }
         self.request_handler = RequestHandler(self.session_arguments)
 
         if self.session.type == session_constants.AUTH_TYPE_BASIC:
-            self.request_arguments["auth"] = (self.session.user, self.session.user)
+            self.request_arguments["auth"] = (self.session.user, self.session.password)
         elif self.session.type == session_constants.AUTH_TYPE_TOKEN:
             self.default_headers["Authorization"] = f"Bearer {self.session.tokenValue}"
             self.request_arguments["auth"] = self.default_headers["Authorization"]
