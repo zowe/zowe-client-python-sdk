@@ -1,9 +1,9 @@
 """Integration tests for the Zowe Python SDK z/OS Jobs package."""
-from decouple import config
 import unittest
 import json
 import os
 from zowe.zos_jobs_for_zowe_sdk import Jobs
+from zowe.core_for_zowe_sdk import ProfileManager
 
 FIXTURES_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),'fixtures')
 JOBS_FIXTURES_JSON_JSON_PATH = os.path.join(FIXTURES_PATH, 'jobs.json')
@@ -15,11 +15,10 @@ class TestJobsIntegration(unittest.TestCase):
 
     def setUp(self):
         """Setup fixtures for Jobs class."""
-        test_profile = config('ZOWE_TEST_PROFILE')
-        self.connection_dict = {"plugin_profile": test_profile}
+        test_profile = ProfileManager().load(profile_type="zosmf")
         with open(JOBS_FIXTURES_JSON_JSON_PATH, 'r') as fixtures_json:
             self.jobs_fixtures_json = json.load(fixtures_json)
-        self.jobs = Jobs(self.connection_dict)
+        self.jobs = Jobs(test_profile)
 
     def test_get_job_status_should_return_the_status_of_a_job(self):
         """Executing the get_job_status method should return the status of a given job"""

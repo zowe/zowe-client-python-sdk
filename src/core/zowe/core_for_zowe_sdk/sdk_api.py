@@ -37,7 +37,7 @@ class SdkApi:
             "headers": self.default_headers,
         }
         self.session_arguments = {
-            "verify": self.session.rejectUnauthorised,
+            "verify": self.session.rejectUnauthorized,
             "timeout": 30,
         }
         self.request_handler = RequestHandler(self.session_arguments)
