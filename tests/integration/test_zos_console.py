@@ -1,7 +1,7 @@
 """Integration tests for the Zowe Python SDK z/OS Console package."""
-from decouple import config
 import unittest
 from zowe.zos_console_for_zowe_sdk import Console
+from zowe.core_for_zowe_sdk import ProfileManager
 
 
 class TestConsoleIntegration(unittest.TestCase):
@@ -9,9 +9,8 @@ class TestConsoleIntegration(unittest.TestCase):
 
     def setUp(self):
         """Setup fixtures for Console class."""
-        test_profile = config('ZOWE_TEST_PROFILE')
-        self.connection_dict = {"plugin_profile": test_profile}
-        self.console = Console(self.connection_dict)
+        test_profile = ProfileManager().load(profile_type="zosmf")
+        self.console = Console(test_profile)
     
     def test_console_command_time_should_return_time(self):
         """Test the execution of the time command should return the current time"""
