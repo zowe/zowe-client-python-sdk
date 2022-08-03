@@ -103,3 +103,47 @@ class SecureProfileLoadFailed(Exception):
         super().__init__(
             "Failed to load secure profile {}: {}".format(profile_name, error_msg)
         )
+
+
+class ProfileNotFound(Exception):
+    """Class used to represent a profile load failure exception."""
+
+    def __init__(self, profile_name, error_msg):
+        """
+        Parameters
+        ----------
+        profile_name
+            The name of the profile it failed to load
+        error_msg
+            The error message received while trying to load the profile
+        """
+        super().__init__(
+            "Failed to load profile {}: {}".format(profile_name, error_msg)
+        )
+
+
+class SecureValuesNotFound(Exception):
+    """Class used to represent a profile load failure exception."""
+
+    def __init__(self, values: list):
+        """
+        Parameters
+        ----------
+        values
+            The list of secure values not found
+        """
+        listToStr = ", ".join(map(str, values))
+        super().__init__("Failed to load secure values: {}".format(listToStr))
+
+
+class UnsupportedAuthType(Exception):
+    """Class used to represent an unsupported authentication type exception."""
+
+    def __init__(self, auth_type: str):
+        """
+        Parameters
+        ----------
+        auth_type
+            The type of authentication on the session
+        """
+        super().__init__("Unsupported authentication type: {}".format(auth_type))

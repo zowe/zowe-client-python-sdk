@@ -1,7 +1,7 @@
 """Integration tests for the Zowe Python SDK z/OS Tso package."""
-from decouple import config
 import unittest
 from zowe.zos_tso_for_zowe_sdk import Tso
+from zowe.core_for_zowe_sdk import ProfileManager
 
 
 class TestTsoIntegration(unittest.TestCase):
@@ -9,9 +9,8 @@ class TestTsoIntegration(unittest.TestCase):
 
     def setUp(self):
         """Setup fixtures for Tso class."""
-        test_profile = config('ZOWE_TEST_PROFILE')
-        self.connection_dict = {"plugin_profile": test_profile}
-        self.tso = Tso(self.connection_dict)
+        test_profile = ProfileManager().load(profile_type="zosmf")
+        self.tso = Tso(test_profile)
 
     def test_issue_command_should_return_valid_response(self):
         """Executing the issue_command method should return a valid response from TSO"""

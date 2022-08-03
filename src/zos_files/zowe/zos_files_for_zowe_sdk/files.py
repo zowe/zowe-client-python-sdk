@@ -338,7 +338,7 @@ class Files(SdkApi):
     def upload_file_to_dsn(self, input_file, dataset_name, encoding=_ZOWE_FILES_DEFAULT_ENCODING):
         """Upload contents of a given file and uploads it to a dataset."""
         if os.path.isfile(input_file):
-            with open(input_file, 'r') as in_file:
+            with open(input_file, 'rb') as in_file:
                 response_json = self.write_to_dsn(dataset_name, in_file)
         else:
             raise FileNotFound(input_file)
