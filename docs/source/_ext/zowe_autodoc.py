@@ -76,7 +76,7 @@ def main():
                 rst_name = f"{module_name}/index.rst"
                 rst_contents = render_template(INDEX_TEMPLATE, {
                     "filelist": "\n   ".join(name[:-4] for name in child_rst_names),
-                    "header": f"{module_name.capitalize()} classes",
+                    "header": f"{module_name.replace('_', ' ').title()} classes",
                     "maxdepth": 2
                 })
                 with open(f"docs/source/classes/{sdk_name}/{rst_name}", 'w', encoding="utf-8") as f:
