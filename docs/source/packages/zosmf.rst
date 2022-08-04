@@ -16,4 +16,4 @@ Reference
 .. toctree::
    :maxdepth: 2
 
-   ../classes/zosmf/zosmf
+   ../classes/zosmf/index

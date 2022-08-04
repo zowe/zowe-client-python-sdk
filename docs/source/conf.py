@@ -14,6 +14,7 @@ import os
 import sys
 from datetime import date
 sys.path.insert(0, os.path.abspath('../../src'))
+sys.path.append(os.path.abspath('./_ext'))
 
 
 # -- Project information -----------------------------------------------------
@@ -34,7 +35,8 @@ release = '1.0.0a1'
 extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.coverage',
               'sphinx.ext.napoleon',
-              'sphinxcontrib.spelling']
+              'sphinxcontrib.spelling',
+              'zowe_autodoc']
 
 # Napoleon options
 napoleon_google_docstring = False
