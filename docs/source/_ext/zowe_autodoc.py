@@ -33,7 +33,7 @@ def main():
         shutil.rmtree("docs/source/classes")
     os.mkdir("docs/source/classes")
 
-    for sdk_dir in sdk_dirs:
+    for sdk_dir in sorted(sdk_dirs):
         sdk_name = os.path.basename(sdk_dir)
         if sdk_name == "__pycache__" or sdk_name.endswith(".egg-info"):
             continue
@@ -44,7 +44,7 @@ def main():
         rst_names = []
         parent_rst_names = []
 
-        for py_file in py_files:
+        for py_file in sorted(py_files):
             py_name = os.path.basename(py_file)
             if py_name == "__init__.py":
                 continue
