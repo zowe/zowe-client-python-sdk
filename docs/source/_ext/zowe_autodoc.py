@@ -27,10 +27,8 @@ def render_template(template, context):
 
 
 def main():
-    os.chdir(os.path.join(os.path.dirname(os.path.realpath(__file__)), "../../.."))
     sdk_dirs = [path for path in glob.iglob("src/*") if os.path.isdir(path)]
     sdk_names = []
-
     if os.path.isdir("docs/source/classes"):
         shutil.rmtree("docs/source/classes")
     os.mkdir("docs/source/classes")
@@ -40,7 +38,7 @@ def main():
         if sdk_name == "__pycache__" or sdk_name.endswith(".egg-info"):
             continue
         pkg_name = f"zowe.{sdk_name}_for_zowe_sdk"
-        print(f"Generating documentation for {pkg_name}")
+        print(f"building class docs for {pkg_name}... ", end="")
         os.mkdir(f"docs/source/classes/{sdk_name}")
         py_files = glob.glob(f"src/{sdk_name}/{pkg_name.replace('.', '/')}/*.py")
         rst_names = []
@@ -54,7 +52,6 @@ def main():
                 py_contents = f.read()
             class_names = re.findall(r"^class (\w+)\b", py_contents, re.MULTILINE)
             if len(class_names) == 1:
-                print(f"Found 1 class: {class_names[0]}")
                 rst_name = f"{py_name[:-3]}.rst"
                 rst_contents = render_template(CLASS_TEMPLATE, {
                     "fullname": f"{sdk_name}.{pkg_name}.{class_names[0]}",
@@ -64,7 +61,6 @@ def main():
                     f.write(rst_contents)
                 rst_names.append(rst_name)
             elif len(class_names) > 1:
-                print(f"Found {len(class_names)} classes: " + ", ".join(class_names))
                 module_name = py_name[:-3]
                 os.mkdir(f"docs/source/classes/{sdk_name}/{module_name}")
                 child_rst_names = []
@@ -95,7 +91,7 @@ def main():
         with open(f"docs/source/classes/{sdk_name}/index.rst", 'w', encoding="utf-8") as f:
             f.write(rst_contents)
         sdk_names.append(sdk_name)
-        print()
+        print("done")
 
     rst_contents = render_template(INDEX_TEMPLATE, {
         "filelist": "\n   ".join(f"{name}/index" for name in sdk_names),
@@ -107,4 +103,9 @@ def main():
 
 
 def setup(app):
-    main()
+    old_cwd = os.getcwd()
+    os.chdir(os.path.join(os.path.dirname(os.path.realpath(__file__)), "../../.."))
+    try:
+        main()
+    finally:
+        os.chdir(old_cwd)
