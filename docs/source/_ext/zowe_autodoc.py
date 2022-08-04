@@ -1,3 +1,7 @@
+"""
+Sphinx extension to automatically generate .rst files for each class
+"""
+
 import glob
 import os
 import re
@@ -22,7 +26,7 @@ def render_template(template, context):
         value = str(value)
         if key == "header":
             value += f"\n{'=' * len(value)}"
-        template = template.replace("{{" + key + "}}", str(value))
+        template = template.replace("{{" + key + "}}", value)
     return template
 
 
