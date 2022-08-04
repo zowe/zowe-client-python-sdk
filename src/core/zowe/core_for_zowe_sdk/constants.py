@@ -14,5 +14,7 @@ constants = {
     "SecureValuePrefix": "managed by ",
     "TsoSessionNotFound": "IZUG1126E",
     "ZoweCredentialKey": "Zowe-Plugin",
-    "MaxAllocationQuantity": 16777215
+    "MaxAllocationQuantity": 16777215,
+    "ZoweServiceName": "Zowe",
+    "ZoweAccountName": "secure_config_props",
 }

@@ -169,3 +169,10 @@ in.txt
 tests/validation_tests/*
 config.py
 test.py
+
+# ignore direnv config
+.envrc
+
+# Team config files
+zowe.config.json
+zowe.schema.json

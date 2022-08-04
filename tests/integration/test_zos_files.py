@@ -1,10 +1,10 @@
 """Integration tests for the Zowe Python SDK z/OS Files package."""
-from decouple import config
 import unittest
 import json
 import os
 from zowe.zos_files_for_zowe_sdk import Files
 import urllib3
+from zowe.core_for_zowe_sdk import ProfileManager
 
 FIXTURES_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),'fixtures')
 FILES_FIXTURES_PATH = os.path.join(FIXTURES_PATH, 'files.json')
@@ -15,11 +15,10 @@ class TestFilesIntegration(unittest.TestCase):
 
     def setUp(self):
         """Setup fixtures for Files class."""
-        test_profile = config('ZOWE_TEST_PROFILE')
-        self.connection_dict = {"plugin_profile": test_profile}
+        test_profile = ProfileManager().load(profile_type="zosmf")
         with open(FILES_FIXTURES_PATH, 'r') as fixtures_json:
             self.files_fixtures = json.load(fixtures_json)
-        self.files = Files(self.connection_dict)
+        self.files = Files(test_profile)
         self.test_member_jcl = f'{self.files_fixtures["TEST_PDS"]}({self.files_fixtures["TEST_MEMBER"]})'
         self.test_member_generic = f'{self.files_fixtures["TEST_PDS"]}(TEST)'
 
