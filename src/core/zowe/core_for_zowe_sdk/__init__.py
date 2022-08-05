@@ -1,7 +1,6 @@
 from .sdk_api import SdkApi
 from .connection import ApiConnection
 from .constants import constants
-from .messages import messages
 from .exceptions import (
     InvalidRequestMethod,
     MissingConnectionArgs,

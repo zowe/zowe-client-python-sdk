@@ -10,8 +10,8 @@ SPDX-License-Identifier: EPL-2.0
 Copyright Contributors to the Zowe Project.
 """
 
-from zowe.core_for_zowe_sdk import SdkApi, constants, messages
-from zowe.core_for_zowe_sdk.exceptions import FileNotFound
+from zowe.core_for_zowe_sdk import SdkApi, constants
+from zowe.core_for_zowe_sdk import exceptions
 import os
 import shutil
 
@@ -341,7 +341,7 @@ class Files(SdkApi):
             with open(input_file, 'rb') as in_file:
                 response_json = self.write_to_dsn(dataset_name, in_file)
         else:
-            raise FileNotFound(input_file)
+            raise exceptions.FileNotFound(input_file)
 
     def write_to_uss(self, filepath_name, data, encoding=_ZOWE_FILES_DEFAULT_ENCODING):
         """Write content to an existing UNIX file.
@@ -366,7 +366,7 @@ class Files(SdkApi):
             file_contents = in_file.read()
             response_json = self.write_to_uss(filepath_name, file_contents)
         else:
-            raise FileNotFound(input_file)
+            raise exceptions.FileNotFound(input_file)
 
     def delete_data_set(self, dataset_name, volume=None, member_name=None):
         """Deletes a sequential or partitioned data."""
@@ -395,10 +395,10 @@ class Files(SdkApi):
         """
         for key, value in options.items():
             if key == 'perms':
-                assert value >= 0 or value <= 777, f"{messages['InvalidPermsOption']} {value}"
+                assert value >= 0 or value <= 777, f"{exceptions.InvalidPermsOption(value)}"
             
             if key == "cylsPri" or key == "cylsSec":
-                assert value <= constants['MaxAllocationQuantity'], f"{messages['MaxAllocationQuantityExceeded']}"
+                assert value <= constants['MaxAllocationQuantity'], f"{exceptions.MaxAllocationQuantityExceeded}"
 
         custom_args = self._create_custom_request_arguments()
         custom_args["url"] = "{}mfs/zfs/{}".format(self.request_endpoint, file_system_name)
