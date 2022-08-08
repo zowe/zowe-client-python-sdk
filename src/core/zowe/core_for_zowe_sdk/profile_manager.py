@@ -47,9 +47,18 @@ class ProfileManager:
 
     def __init__(self, appname: str = "zowe"):
         self._appname = appname
+
+        # config directory
         self._config_dir = None
+        self._user_config_dir = None
+
+        # default config filenames
         self._config_filename = f"{self._appname}.config.json"
+        self._user_config_filename = f"{self._appname}.user.config.json"
+
+        # exact config paths
         self._config_filepath = None
+        self._user_config_filepath = None
 
     @property
     def config_appname(self) -> str:
@@ -63,9 +72,24 @@ class ProfileManager:
 
     @config_dir.setter
     def config_dir(self, dirname: str) -> None:
-        """Set directory/folder path to where Zowe z/OSMF Team Profile Config files are located"""
+        """
+        Set directory/folder path to where Zowe z/OSMF Team Profile Config files are located
+        """
         if os.path.isdir(dirname):
             self._config_dir = dirname
+        else:
+            raise FileNotFoundError(f"given path {dirname} is not valid")
+
+    @property
+    def user_config_dir(self) -> Union[str, None]:
+        """Returns the folder path to where the Zowe z/OSMF User Profile Config files are located."""
+        return self._user_config_dir
+
+    @user_config_dir.setter
+    def user_config_dir(self, dirname: str) -> None:
+        """Set directory/folder path to where Zowe z/OSMF User Profile Config files are located"""
+        if os.path.isdir(dirname):
+            self._user_config_dir = dirname
         else:
             raise FileNotFoundError(f"given path {dirname} is not valid")
 
@@ -80,10 +104,13 @@ class ProfileManager:
         return self._config_filepath
 
     def autodiscover_config_dir(self) -> None:
-        """Autodiscover Zowe z/OSMF Team Profile Config files by going up the path from
-        current working directory"""
+        """
+        Autodiscover Zowe z/OSMF Team Profile Config files by going up the path from
+        current working directory
+        """
 
         current_dir = os.getcwd()
+        print(current_dir)
 
         while self._config_dir is None:
             path = os.path.join(current_dir, self._config_filename)
@@ -99,6 +126,38 @@ class ProfileManager:
 
         if self._config_dir is None:
             raise FileNotFoundError(f"No config file found on path {current_dir}")
+
+    def autodiscover_user_config_dir(self) -> None:
+        """
+        Autodiscover Zowe z/OSMF User Profile Config files by
+        a. Trying to load from config_dir, if not found then
+        b. Try going up the path from current working directory
+        """
+
+        # try checking in config dir
+        path = os.path.join(self._config_dir, self._user_config_filename)
+
+        if os.path.isfile(path):
+            self._user_config_dir = self._config_dir
+            return
+
+        # try checking in current working directory or go up
+        current_dir = os.getcwd()
+
+        while self._user_config_dir is None:
+            path = os.path.join(current_dir, self._user_config_filename)
+
+            if os.path.isfile(path):
+                self._user_config_dir = current_dir
+
+            # check if have arrived at the root directory
+            if current_dir == os.path.dirname(current_dir):
+                break
+
+            current_dir = os.path.dirname(current_dir)
+
+        if self._user_config_dir is None:
+            warnings.warn("No user config file found")
 
     def get_profilename_from_profiletype(
         self, profile_jsonc: dict, profile_type: str
@@ -203,37 +262,13 @@ class ProfileManager:
 
         return base_props
 
-    def load(
+    def load_from_file(
         self,
+        filepath: str,
         profile_name: Union[str, None] = None,
         profile_type: Union[str, None] = None,
-        profile_args: Union[dict, None] = None,
     ) -> dict:
-        """Load z/OSMF connection details from a z/OSMF profile.
-
-        Returns
-        -------
-        zosmf_connection
-            z/OSMF connection object
-
-        We will be loading properties from a bottom up fashion,
-        the bottom being the base/default profile properties
-        and the up being the explicitly mentioned Profile.
-
-        Loading Order :
-            Base Profile Properties
-        Overriding Order:
-            Service Profile (profile explicitly mentioned) properties
-            Profile args
-        """
-
-        # load config file
-        if self._config_dir is None:
-            self.autodiscover_config_dir()
-
-        self._config_filepath = os.path.join(self._config_dir, self._config_filename)
-
-        with open(self._config_filepath, encoding="UTF-8", mode="r") as fileobj:
+        with open(filepath, encoding="UTF-8", mode="r") as fileobj:
             profile_jsonc = jsonc.load(fileobj)
 
         # load profile
@@ -260,12 +295,67 @@ class ProfileManager:
             profile_jsonc=profile_jsonc, profile_name=profile_name
         )
         service_profile.update(required_profile)
-
-        # apply profile args
-        if profile_args:
-            service_profile.update(profile_args)
-
         return service_profile
+
+    def load(
+        self,
+        profile_name: Union[str, None] = None,
+        profile_type: Union[str, None] = None,
+        profile_args: Union[dict, None] = None,
+    ) -> dict:
+        """Load z/OSMF connection details from a z/OSMF profile.
+
+        Returns
+        -------
+        zosmf_connection
+            z/OSMF connection object
+
+        We will be loading properties from a bottom up fashion,
+        the bottom being the base/default profile properties
+        and the up being the explicitly mentioned Profile.
+
+        Loading Order :
+            Base Profile Properties
+        Overriding Order:
+            Service Profile (profile explicitly mentioned) properties
+
+            User Defined Properties:
+                Base Profile in User Config
+                Service Profile in User Config
+
+            Profile args
+        """
+
+        # load from project config
+        project_profile_props = {}
+        if self._config_dir is None:
+            self.autodiscover_config_dir()
+
+        self._config_filepath = os.path.join(self._config_dir, self._config_filename)
+        project_profile_props = self.load_from_file(
+            filepath=self._config_filepath,
+            profile_name=profile_name,
+            profile_type=profile_type,
+        )
+
+        # load from user config
+        user_profile_props = {}
+        if self._user_config_dir is None:
+            self.autodiscover_user_config_dir()
+
+        if self._user_config_dir:
+            self._user_config_filepath = os.path.join(
+                self._user_config_dir, self._user_config_filename
+            )
+            user_profile_props = self.load_from_file(
+                filepath=self._user_config_filepath,
+                profile_name=profile_name,
+                profile_type=profile_type,
+            )
+
+        project_profile_props.update(user_profile_props)
+
+        return project_profile_props
 
     def load_credentials(self) -> dict:
         """
