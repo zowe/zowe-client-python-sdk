@@ -8,6 +8,7 @@ Notice that the Python SDK is still in early development stages, meaning that ma
 * :ref:`git-branch`
 * :ref:`pull-requests`
 * :ref:`running-tests`
+* :ref:`building-docs`
 * :ref:`code-standards`
 
 .. _git-branch:
@@ -51,6 +52,22 @@ installed, the test profile lives in `~/.zowe/profiles/zosmf/<myProfile>.yaml`.
   password: XXXXX
   rejectUnauthorized: false
   protocol: https
+
+.. _building-docs:
+
+Building Docs
+-------------
+
+The project's documentation is published on `ReadTheDocs.io <https://zowe-client-python-sdk.readthedocs.io/>`_.
+
+To build the docs from source locally, you need these prerequisites:
+
+* `Sphinx <https://www.sphinx-doc.org/en/master/usage/installation.html>`_ - Python Documentation Generator
+* Python packages - `pip install -r docs/requirements.txt`
+
+Run `make html` in the docs directory to generate HTML files in "docs/build/html" that can be previewed in your browser.
+
+Docs are generated from reStructuredText (.rst) files in "docs/source" and Python docstrings in the source code which also use reST markup. A quick reference for reStructuredText markup can be found `here <https://docutils.sourceforge.io/docs/user/rst/quickref.html>`_.
 
 .. _code-standards:
 
