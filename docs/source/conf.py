@@ -35,6 +35,7 @@ release = '1.0.0a1'
 extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.coverage',
               'sphinx.ext.napoleon',
+              'sphinx_rtd_theme',
               'sphinxcontrib.spelling',
               'zowe_autodoc']
 
