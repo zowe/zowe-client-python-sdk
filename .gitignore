@@ -170,6 +170,9 @@ tests/validation_tests/*
 config.py
 test.py
 
+# Auto-generated docs
+docs/source/classes
+
 # ignore direnv config
 .envrc
 

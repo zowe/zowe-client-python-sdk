@@ -16,4 +16,4 @@ Reference
 .. toctree::
    :maxdepth: 2
 
-   ../classes/console/console
+   ../classes/zos_console/index

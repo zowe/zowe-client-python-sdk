@@ -8,8 +8,8 @@ Notice that the Python SDK is still in early development stages, meaning that ma
   - [Git branching model](#git-branching-model)
   - [Pull requests](#pull-requests)
   - [Running Tests](#running-tests)
+  - [Building Docs](#building-docs)
   - [Code standards](#code-standards)
-
 
 Git branching model
 -------------------
@@ -27,6 +27,7 @@ Consider the following when you interact with pull requests:
 
 Running Tests
 -------------
+
 The project's test suite can be run with the python test runner, `green`
 ```
 green -vvv  ./tests/unit
@@ -42,6 +43,21 @@ password: XXXXX
 rejectUnauthorized: false
 protocol: https
 ```
+
+Building Docs
+-------------
+
+The project's documentation is published on [ReadTheDocs.io](https://zowe-client-python-sdk.readthedocs.io/).
+
+To build the docs from source locally, you need these prerequisites:
+
+* [Sphinx](https://www.sphinx-doc.org/en/master/usage/installation.html) - Python Documentation Generator
+* Python packages - `pip install -r docs/requirements.txt`
+
+Run `make html` in the docs directory to generate HTML files in "docs/build/html" that can be previewed in your browser.
+
+Docs are generated from reStructuredText (.rst) files in "docs/source" and Python docstrings in the source code which also use reST markup. A quick reference for reStructuredText markup can be found [here](https://docutils.sourceforge.io/docs/user/rst/quickref.html).
+
 Code standards
 --------------
 

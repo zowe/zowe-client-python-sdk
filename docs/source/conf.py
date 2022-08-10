@@ -12,17 +12,19 @@
 #
 import os
 import sys
+from datetime import date
 sys.path.insert(0, os.path.abspath('../../src'))
+sys.path.append(os.path.abspath('./_ext'))
 
 
 # -- Project information -----------------------------------------------------
 
 project = 'Zowe Client Python SDK'
-copyright = '2021, Contributors to the Zowe Project'
+copyright = f'{date.today().year}, Contributors to the Zowe Project'
 author = 'Contributors to the Zowe Project'
 
 # The full version, including alpha/beta/rc tags
-release = '0.2.0'
+release = '1.0.0a1'
 
 
 # -- General configuration ---------------------------------------------------
@@ -33,7 +35,9 @@ release = '0.2.0'
 extensions = ['sphinx.ext.autodoc',
               'sphinx.ext.coverage',
               'sphinx.ext.napoleon',
-              'sphinxcontrib.spelling']
+              'sphinx_rtd_theme',
+              'sphinxcontrib.spelling',
+              'zowe_autodoc']
 
 # Napoleon options
 napoleon_google_docstring = False
