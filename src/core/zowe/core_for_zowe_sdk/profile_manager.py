@@ -103,20 +103,23 @@ class ProfileManager:
         """Get the full Zowe z/OSMF Team Config filepath"""
         return self._config_filepath
 
-    def autodiscover_config_dir(self) -> None:
+    def autodiscover_config_dir(filename: str) -> Union[str, None]:
         """
-        Autodiscover Zowe z/OSMF Team Profile Config files by going up the path from
+        Autodiscover Zowe z/OSMF Team Config files by going up the path from
         current working directory
+
+        Return path if it finds the config directory,
+        Else, it returns None
         """
 
         current_dir = os.getcwd()
-        print(current_dir)
+        config_dir = None
 
-        while self._config_dir is None:
-            path = os.path.join(current_dir, self._config_filename)
+        while config_dir is None:
+            path = os.path.join(current_dir, filename)
 
             if os.path.isfile(path):
-                self._config_dir = current_dir
+                config_dir = current_dir
 
             # check if have arrived at the root directory
             if current_dir == os.path.dirname(current_dir):
@@ -124,31 +127,25 @@ class ProfileManager:
 
             current_dir = os.path.dirname(current_dir)
 
-        if self._config_dir is None:
-            raise FileNotFoundError(f"No config file found on path {current_dir}")
+        return config_dir
 
-    def autodiscover_user_config_dir(self) -> None:
+    def autodiscover_user_config_dir(self, filename: str) -> Union[str, None]:
         """
         Autodiscover Zowe z/OSMF User Profile Config files by
-        a. Trying to load from config_dir, if not found then
-        b. Try going up the path from current working directory
+        a. Try going up the path from current working directory
+        b. Trying to load from config_dir, if not found then
         """
-
-        # try checking in config dir
-        path = os.path.join(self._config_dir, self._user_config_filename)
-
-        if os.path.isfile(path):
-            self._user_config_dir = self._config_dir
-            return
 
         # try checking in current working directory or go up
         current_dir = os.getcwd()
+        user_config_dir = None
 
-        while self._user_config_dir is None:
-            path = os.path.join(current_dir, self._user_config_filename)
+        while user_config_dir is None:
+            path = os.path.join(current_dir, filename)
 
             if os.path.isfile(path):
-                self._user_config_dir = current_dir
+                user_config_dir = current_dir
+                return user_config_dir
 
             # check if have arrived at the root directory
             if current_dir == os.path.dirname(current_dir):
@@ -156,8 +153,14 @@ class ProfileManager:
 
             current_dir = os.path.dirname(current_dir)
 
-        if self._user_config_dir is None:
-            warnings.warn("No user config file found")
+        # try checking in config dir
+        path = os.path.join(self._config_dir, filename)
+
+        if os.path.isfile(path):
+            user_config_dir = self._config_dir
+            return user_config_dir
+
+        return user_config_dir
 
     def get_profilename_from_profiletype(
         self, profile_jsonc: dict, profile_type: str
@@ -177,7 +180,7 @@ class ProfileManager:
             else:
                 return profilename
 
-            # iterate through the profile and check if profile is found
+            # iterate through the profiles and check if profile is found
             for (key, value) in profile_jsonc["profiles"].items():
                 try:
                     temp_profile_type = value["type"]
