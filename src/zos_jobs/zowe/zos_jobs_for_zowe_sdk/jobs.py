@@ -56,7 +56,7 @@ class Jobs(SdkApi):
         response_json = self.request_handler.perform_request("GET", custom_args)
         return response_json
 
-    def cancel_job(self, jobname, jobid):
+    def cancel_job(self, jobname, jobid, modifyVersion="1.0"):
         """Cancels the a job
 
         Parameters
@@ -76,7 +76,7 @@ class Jobs(SdkApi):
         job_url = "{}/{}".format(jobname, jobid)
         request_url = "{}{}".format(self.request_endpoint, job_url)
         custom_args["url"] = request_url
-        custom_args["json"] = {"request": "cancel"}
+        custom_args["json"] = {"request": "cancel", "version": modifyVersion}
         response_json = self.request_handler.perform_request("PUT", custom_args, expected_code = [202])
         return response_json
 
