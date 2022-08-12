@@ -17,6 +17,11 @@ jobs:
       uses: actions/setup-python@v2
       with:
         python-version: 3.7
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
     - name: Increment alpha version
       id: update-version
@@ -26,8 +31,9 @@ jobs:
         import sys
         sys.path.append(os.path.abspath("src"))
         from _version import __version__
-        version_segments = __version__.split("dev")
-        new_version = version_segments[0] + "dev" + str(int(version_segments[1]) + 1)
+        version_segments = __version__.split(".")
+        prerelease_tag = "dev"
+        new_version = __version__[:__version__.rindex(".") + 1] + prerelease_tag + str(int(version_segments[-1][len(prerelease_tag):]) + 1)
         with open("src/_version.py", 'w', encoding="utf-8") as f:
           f.write("__version__ = \"" + new_version + "\"\n")
         print("::set-output name=version::" + new_version)
