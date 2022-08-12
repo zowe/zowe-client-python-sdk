@@ -1,0 +1,50 @@
+name: Zowe SDK Release
+
+on:
+  push:
+    branches:
+      - next
+      - test-prerelease  # TODO Delete me
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Python 3.7
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.7
+
+    - name: Increment alpha version
+      id: update-version
+      shell: python
+      run: |
+        import os.path
+        import sys
+        sys.path.append(os.path.abspath("src"))
+        from _version import __version__
+        version_segments = __version__.split("dev")
+        new_version = version_segments[0] + "dev" + str(int(version_segments[1]) + 1)
+        with open("src/_version.py", 'w', encoding="utf-8") as f:
+          f.write("__version__ = \"" + new_version + "\"\n")
+        print("::set-output name=version::" + new_version)
+
+    - name: Build dist wheels
+      run: bash build.sh
+
+    - name: Commit version update
+      uses: stefanzweifel/git-auto-commit-action@v4
+      with:
+        commit_author: ${{ secrets.ZOWE_ROBOT_USER }} <${{ secrets.ZOWE_ROBOT_EMAIL }}>
+        commit_message: 'Bump version to ${{ steps.update-version.outputs.version }} [ci skip]'
+        commit_options: '--signoff'
+        file_pattern: 'src/_version.py'
+
+    - uses: softprops/action-gh-release@v1
+      with:
+        draft: true
+        files: 'dist/*.whl'
+        tag_name: v${{ steps.update-version.outputs.version }}
