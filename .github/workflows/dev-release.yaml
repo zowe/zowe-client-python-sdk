@@ -4,7 +4,8 @@ on:
   push:
     branches:
       - next
-      - test-prerelease  # TODO Delete me
+    paths:
+      - 'src/**'
 
 jobs:
   release:
@@ -27,13 +28,12 @@ jobs:
       id: update-version
       shell: python
       run: |
-        import os.path
         import sys
-        sys.path.append(os.path.abspath("src"))
+        sys.path.append("src")
         from _version import __version__
-        version_segments = __version__.split(".")
         prerelease_tag = "dev"
-        new_version = __version__[:__version__.rindex(".") + 1] + prerelease_tag + str(int(version_segments[-1][len(prerelease_tag):]) + 1)
+        tag_end_index = __version__.index(prerelease_tag) + len(prerelease_tag)
+        new_version = __version__[:tag_end_index] + str(int(__version__[tag_end_index:]) + 1)
         with open("src/_version.py", 'w', encoding="utf-8") as f:
           f.write("__version__ = \"" + new_version + "\"\n")
         print("::set-output name=version::" + new_version)
@@ -53,6 +53,5 @@ jobs:
 
     - uses: softprops/action-gh-release@v1
       with:
-        draft: true
         files: 'dist/*.whl'
         tag_name: v${{ steps.update-version.outputs.version }}
