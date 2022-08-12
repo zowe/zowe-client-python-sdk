@@ -1,9 +1,11 @@
-from pkg_resources import get_distribution
+import sys
 from setuptools import setup, find_namespace_packages
+sys.path.append("..")
+from _version import __version__
 
 setup(
     name='zowe_zosmf_for_zowe_sdk',
-    version=get_distribution("zowe").version,
+    version=__version__,
     description='Zowe Python SDK - z/OSMF package',
     url="https://github.com/zowe/zowe-client-python-sdk",
     author="Guilherme Cartier",
