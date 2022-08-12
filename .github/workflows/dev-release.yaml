@@ -51,7 +51,8 @@ jobs:
         file_pattern: 'src/_version.py'
         tagging_message: v${{ steps.update-version.outputs.version }}
 
-    - uses: softprops/action-gh-release@v1
+    - name: Create GitHub release
+      uses: softprops/action-gh-release@v1
       with:
         files: 'dist/*.whl'
         tag_name: v${{ steps.update-version.outputs.version }}
