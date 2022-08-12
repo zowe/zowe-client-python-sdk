@@ -28,8 +28,9 @@ Consider the following when you interact with pull requests:
 Running Tests
 -------------
 The project's test suite can be run with the python test runner, `pytest`.  
+All test and regular dependencies are included here:
 ```
-pip install -U pytest
+pip install -r requirements.txt
 ```  
 Commands for running all unit/integration tests from their respective folder:  
 ```
