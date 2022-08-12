@@ -23,7 +23,7 @@ jobs:
         python -m pip install --upgrade pip
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
-    - name: Increment alpha version
+    - name: Increment dev version
       id: update-version
       shell: python
       run: |
@@ -44,10 +44,12 @@ jobs:
     - name: Commit version update
       uses: stefanzweifel/git-auto-commit-action@v4
       with:
-        commit_author: ${{ secrets.ZOWE_ROBOT_USER }} <${{ secrets.ZOWE_ROBOT_EMAIL }}>
         commit_message: 'Bump version to ${{ steps.update-version.outputs.version }} [ci skip]'
         commit_options: '--signoff'
+        commit_user_name: ${{ secrets.ZOWE_ROBOT_USER }}
+        commit_user_email: ${{ secrets.ZOWE_ROBOT_EMAIL }}
         file_pattern: 'src/_version.py'
+        tagging_message: v${{ steps.update-version.outputs.version }}
 
     - uses: softprops/action-gh-release@v1
       with:
