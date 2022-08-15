@@ -395,10 +395,12 @@ class Files(SdkApi):
         """
         for key, value in options.items():
             if key == 'perms':
-                assert value >= 0 or value <= 777, f"{exceptions.InvalidPermsOption(value)}"
+                if value < 0 or value > 777:
+                    raise exceptions.InvalidPermsOption(value)
             
             if key == "cylsPri" or key == "cylsSec":
-                assert value <= constants['MaxAllocationQuantity'], f"{exceptions.MaxAllocationQuantityExceeded}"
+                if value > constants['MaxAllocationQuantity']:
+                    raise exceptions.MaxAllocationQuantityExceeded
 
         custom_args = self._create_custom_request_arguments()
         custom_args["url"] = "{}mfs/zfs/{}".format(self.request_endpoint, file_system_name)
