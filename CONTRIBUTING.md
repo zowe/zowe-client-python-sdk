@@ -27,22 +27,24 @@ Consider the following when you interact with pull requests:
 
 Running Tests
 -------------
+The project's test suite can be run with the python test runner, `pytest`.  
+All test and regular dependencies are included here:
+```
+pip install -r requirements.txt
+```  
+Commands for running all unit/integration tests from their respective folder:  
+```
+pytest tests/unit
+```  
+```
+pytest tests/integration
+```  
+More information on pytest's usage can be found [here](https://docs.pytest.org/en/7.1.x/how-to/usage.html).
 
-The project's test suite can be run with the python test runner, `green`
-```
-green -vvv  ./tests/unit
-```
+In order to run integration tests, you will need to have a mainframe account and team profile configuration files properly set up.  
+Information on creating team profile configuration files can be found [here](https://docs.zowe.org/stable/user-guide/cli-using-using-team-profiles).
 
-In order to run the integration test, one will need to have a zowe profile and configure the `.env` file – `ZOWE_TEST_PROFILE='<myProfile>'`. If zowe cli is installed, the test profile lives in `~/.zowe/profiles/zosmf/<myProfile>.yaml`.
-
-```
-host: example.com
-port: 443
-user: XXXXX
-password: XXXXX
-rejectUnauthorized: false
-protocol: https
-```
+You will also need to update the [zowe.config.json](https://docs.zowe.org/stable/user-guide/cli-using-team-configuration-application-developers/#editing-team-profiles) file with the neccessary information.
 
 Building Docs
 -------------
