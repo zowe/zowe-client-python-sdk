@@ -1,0 +1,58 @@
+name: Zowe SDK Release
+
+on:
+  push:
+    branches:
+      - next
+    paths:
+      - 'src/**'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Python 3.7
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.7
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+    - name: Increment dev version
+      id: update-version
+      shell: python
+      run: |
+        import sys
+        sys.path.append("src")
+        from _version import __version__
+        prerelease_tag = "dev"
+        tag_end_index = __version__.index(prerelease_tag) + len(prerelease_tag)
+        new_version = __version__[:tag_end_index] + str(int(__version__[tag_end_index:]) + 1)
+        with open("src/_version.py", 'w', encoding="utf-8") as f:
+          f.write("__version__ = \"" + new_version + "\"\n")
+        print("::set-output name=version::" + new_version)
+
+    - name: Build dist wheels
+      run: bash build.sh
+
+    - name: Commit version update
+      uses: stefanzweifel/git-auto-commit-action@v4
+      with:
+        commit_message: 'Bump version to ${{ steps.update-version.outputs.version }} [ci skip]'
+        commit_options: '--signoff'
+        commit_user_name: ${{ secrets.ZOWE_ROBOT_USER }}
+        commit_user_email: ${{ secrets.ZOWE_ROBOT_EMAIL }}
+        file_pattern: 'src/_version.py'
+        tagging_message: v${{ steps.update-version.outputs.version }}
+
+    - name: Create GitHub release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: 'dist/*.whl'
+        tag_name: v${{ steps.update-version.outputs.version }}

@@ -15,6 +15,7 @@ import sys
 from datetime import date
 sys.path.insert(0, os.path.abspath('../../src'))
 sys.path.append(os.path.abspath('./_ext'))
+from _version import __version__
 
 
 # -- Project information -----------------------------------------------------
@@ -24,7 +25,7 @@ copyright = f'{date.today().year}, Contributors to the Zowe Project'
 author = 'Contributors to the Zowe Project'
 
 # The full version, including alpha/beta/rc tags
-release = '1.0.0a1'
+release = __version__
 
 
 # -- General configuration ---------------------------------------------------
