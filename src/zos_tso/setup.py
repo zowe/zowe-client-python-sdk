@@ -15,6 +15,6 @@ setup(
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.7",
         "License :: OSI Approved :: Eclipse Public License 2.0 (EPL-2.0)"],
-    install_requires=['zowe.core_for_zowe_sdk'],
+    install_requires=['zowe.core_for_zowe_sdk~=' + __version__],
     packages=find_namespace_packages(include=['zowe.*'])
 )
