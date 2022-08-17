@@ -4,8 +4,8 @@ on:
   push:
     branches:
       - next
-    paths:
-      - 'src/**'
+    # paths:
+    #   - 'src/**'
 
 jobs:
   release:
