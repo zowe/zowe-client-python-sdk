@@ -13,6 +13,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+      with:
+        token: ${{ secrets.ZOWE_ROBOT_TOKEN }}
 
     - name: Set up Python 3.7
       uses: actions/setup-python@v2
