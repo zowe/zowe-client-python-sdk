@@ -156,6 +156,10 @@ class Files(SdkApi):
         json
         """
 
+        if options.get("like") is None:
+            if options.get("primary") is None and options.get("lrecl") is None:
+                raise KeyError
+
         for opt in ("volser", "unit", "dsorg", "alcunit", 
             "primary", "secondary", "dirblk", "avgblk", "recfm", 
             "blksize", "lrecl", "storclass", "mgntclass", "dataclass", 
@@ -209,6 +213,90 @@ class Files(SdkApi):
         custom_args["json"] = options
         response_json = self.request_handler.perform_request("POST", custom_args, expected_code = [201])
         return response_json
+
+    def create_default_data_set(self, dataset_name, default_type):
+        """
+        Create a dataset with default options set.
+        Default options depend on the requested type.
+
+        Parameters
+        ----------
+            dataset_name
+            default_type: "partitioned" or "sequential" or "classic" or "c" or "binary" or "vsam"
+
+        Returns
+        -------
+        json
+            A JSON containing the result of the operation
+        """
+
+        if default_type not in ("partitioned", "sequential", "classic", "c", "binary", "vsam"):
+            raise TypeError
+
+        options = {}
+
+        if default_type == "partitioned":
+            options = {
+                "alcunit": "CYL",
+                "dsorg": "PO",
+                "primary": 1,
+                "dirblk": 5,
+                "recfm": "FB",
+                "blksize": 6160,
+                "lrecl": 80
+            },
+        elif default_type == "sequential":
+            options = {
+                "alcunit": "CYL",
+                "dsorg": "PS",
+                "primary": 1,
+                "recfm": "FB",
+                "blksize": 6160,
+                "lrecl": 80
+            },
+        elif default_type == "classic":
+            options = {
+                "alcunit": "CYL",
+                "dsorg": "PO",
+                "primary": 1,
+                "recfm": "FB",
+                "blksize": 6160,
+                "lrecl": 80,
+                "dirblk": 25
+            }
+        elif default_type == "c":
+            options = {
+                "dsorg": "PO",
+                "alcunit": "CYL",
+                "primary": 1,
+                "recfm": "VB",
+                "blksize": 32760,
+                "lrecl": 260,
+                "dirblk": 25
+            }
+        elif default_type == "binary":
+            options = {
+                "dsorg": "PO",
+                "alcunit": "CYL",
+                "primary": 10,
+                "recfm": "U",
+                "blksize": 27998,
+                "lrecl": 27998,
+                "dirblk": 25
+            }
+        elif default_type == "vsam":
+            options = {
+                "dsorg": "INDEXED",
+                "alcunit": "KB",
+                "primary": 840
+            }
+
+        custom_args = self._create_custom_request_arguments()
+        custom_args["url"] = "{}ds/{}".format(self.request_endpoint, dataset_name)
+        custom_args["json"] = options
+        response_json = self.request_handler.perform_request("POST", custom_args, expected_code=[201])
+        return response_json
+
 
     def create_uss(self, file_path, type, mode = None):
         """

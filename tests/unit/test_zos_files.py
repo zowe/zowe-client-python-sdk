@@ -20,3 +20,19 @@ class TestFilesClass(unittest.TestCase):
         """Created object should be instance of Files class."""
         files = Files(self.connection_dict)
         self.assertIsInstance(files, Files)
+
+    def test_create_data_set_raises_error_without_required_arguments(self):
+        """Not providing required arguments should raise error."""
+        with self.assertRaises(KeyError):
+            obj = Files(self.connection_dict).create_data_set("DSNAME123", options={
+                "alcunit": "CYL",
+                "dsorg": "PO",
+                "recfm": "FB",
+                "blksize": 6160,
+                "dirblk": 25
+            })
+
+    def test_create_default_data_set_raises_error_for_unsupported_types(self):
+        """Attempting to create a data set that is not part of the suggested list should raise error."""
+        with self.assertRaises(TypeError):
+            obj = Files(self.connection_dict).create_default_data_set("DSNAME123", "unsuporrted_type")
