@@ -149,7 +149,7 @@ class ConfigFile:
         """
         try:
             props = self.profiles[profile_name]["properties"]
-        except KeyError as exc:
+        except Exception as exc:
             return {}
 
         secure_fields: list = self.profiles[profile_name].get("secure", [])
@@ -303,7 +303,7 @@ class ProfileManager:
         self,
         profile_name: Union[str, None] = None,
         profile_type: Union[str, None] = None,
-    ):
+    ) -> dict:
         if profile_name is None and profile_type is None:
             raise ProfileNotFound(
                 "Could not find profile as both profile_name and profile_type is not set."
@@ -321,18 +321,42 @@ class ProfileManager:
         # global_profile: dict = self.global_config.load_profile_properties(
         #     profile_name=profile_name, profile_type=profile_type
         # )
-        # global_base_profile: dict = self.global_config.load_profile_properties(
-        #     profile_type=profile_type
-        # )
 
-        global_user_profile: dict = self.global_user_config.get_profile(
-            profile_name=profile_name, profile_type=profile_type
-        )
+        self.global_config.init_from_file()
+        if profile_name:
+            global_base_profile: dict = self.global_config.load_profile_properties(
+                profile_name=profile_name
+            )
+        else:
+            try:
+                gb_profile_name = self.global_config.get_profilename_from_profiletype(
+                    profile_type=profile_type
+                )
+                global_base_profile: dict = self.global_config.load_profile_properties(
+                    profile_name=gb_profile_name
+                )
+                service_profile.update(global_base_profile)
+            except Exception:
+                warnings.warn("Could not find global base profile")
+
+        self.global_user_config.init_from_file()
+        if profile_name:
+            global_user_profile: dict = self.global_config.load_profile_properties(
+                profile_name=profile_name
+            )
+        else:
+            try:
+                gu_profile_name = self.global_config.get_profilename_from_profiletype(
+                    profile_type=profile_type
+                )
+                global_user_profile: dict = self.global_config.load_profile_properties(
+                    profile_name=gu_profile_name
+                )
+                service_profile.update(global_user_profile)
+            except Exception:
+                warnings.warn("Could not find global user profile")
 
         service_profile.update(project_profile)
         service_profile.update(project_user_profile)
-
-        # service_profile.update(global_base_profile)
-        service_profile.update(global_user_profile)
 
         return service_profile
