@@ -9,7 +9,6 @@ SPDX-License-Identifier: EPL-2.0
 
 Copyright Contributors to the Zowe Project.
 """
-from .constants import constants
 
 
 class InvalidRequestMethod(Exception):
@@ -148,23 +147,3 @@ class UnsupportedAuthType(Exception):
             The type of authentication on the session
         """
         super().__init__("Unsupported authentication type: {}".format(auth_type))
-
-
-class InvalidPermsOption(Exception):
-    """Class used to represent an invalid permission value."""
-
-    def __init__(self, value: int):
-        """
-        Parameters
-        ----------
-        value
-            The value of the permission option
-        """
-        super().__init__("Invalid zos-files create command 'perms' option: {}".format(value))
-
-
-class MaxAllocationQuantityExceeded(Exception):
-    """Class used to represent an invalid allocation quantity."""
-
-    def __init__(self):
-        super().__init__("Maximum allocation quantity of {} exceeded".format(constants['MaxAllocationQuantity']))

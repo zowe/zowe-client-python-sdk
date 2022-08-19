@@ -10,8 +10,9 @@ SPDX-License-Identifier: EPL-2.0
 Copyright Contributors to the Zowe Project.
 """
 
-from zowe.core_for_zowe_sdk import SdkApi, constants
-from zowe.core_for_zowe_sdk import exceptions
+from zowe.core_for_zowe_sdk import SdkApi
+from zowe.core_for_zowe_sdk.exceptions import FileNotFound
+from zowe.zos_files_for_zowe_sdk import exceptions, constants
 import os
 import shutil
 
@@ -129,7 +130,7 @@ class Files(SdkApi):
         custom_args["headers"]["X-IBM-Max-Items"]  = "{}".format(limit)
         custom_args["headers"]["X-IBM-Attributes"] = attributes
         response_json = self.request_handler.perform_request("GET", custom_args)
-        return response_json['items']
+        return response_json['items']  # type: ignore
 
     def get_dsn_content(self, dataset_name):
         """Retrieve the contents of a given dataset.
@@ -341,7 +342,7 @@ class Files(SdkApi):
             with open(input_file, 'rb') as in_file:
                 response_json = self.write_to_dsn(dataset_name, in_file)
         else:
-            raise exceptions.FileNotFound(input_file)
+            raise FileNotFound(input_file)
 
     def write_to_uss(self, filepath_name, data, encoding=_ZOWE_FILES_DEFAULT_ENCODING):
         """Write content to an existing UNIX file.
@@ -366,7 +367,7 @@ class Files(SdkApi):
             file_contents = in_file.read()
             response_json = self.write_to_uss(filepath_name, file_contents)
         else:
-            raise exceptions.FileNotFound(input_file)
+            raise FileNotFound(input_file)
 
     def delete_data_set(self, dataset_name, volume=None, member_name=None):
         """Deletes a sequential or partitioned data."""
@@ -399,7 +400,7 @@ class Files(SdkApi):
                     raise exceptions.InvalidPermsOption(value)
             
             if key == "cylsPri" or key == "cylsSec":
-                if value > constants['MaxAllocationQuantity']:
+                if value > constants.zos_file_constants['MaxAllocationQuantity']:
                     raise exceptions.MaxAllocationQuantityExceeded
 
         custom_args = self._create_custom_request_arguments()
