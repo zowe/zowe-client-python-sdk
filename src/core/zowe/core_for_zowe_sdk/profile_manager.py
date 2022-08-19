@@ -31,7 +31,10 @@ except ImportError:
     HAS_KEYRING = False
 
 HOME = os.path.expanduser("~")
-GLOBAL_CONFIG_PATH = os.path.join(HOME, ".zowe", f"{GLOBAL_CONFIG_NAME}.config.json")
+GLOBAl_CONFIG_LOCATION = os.path.join(HOME, ".zowe")
+GLOBAL_CONFIG_PATH = os.path.join(
+    GLOBAl_CONFIG_LOCATION, f"{GLOBAL_CONFIG_NAME}.config.json"
+)
 CURRENT_DIR = os.getcwd()
 
 
@@ -55,7 +58,7 @@ class ConfigFile:
 
     type: str
     name: str
-    location: Union[str, None] = None
+    _location: Union[str, None] = None
     profiles: Union[dict, None] = None
     defaults: Union[dict, None] = None
     secure_props: Union[dict, None] = None
@@ -78,12 +81,20 @@ class ConfigFile:
         print(self.filename, self.location)
         return os.path.join(self.location, self.filename)
 
+    @property
+    def location(self) -> Union[str, None]:
+        return self._location
+
+    @location.setter
+    def location(self, dirname: str) -> None:
+        if os.path.isdir(dirname):
+            self._location = dirname
+        else:
+            raise FileNotFoundError(f"given path {dirname} is not valid")
+
     def init_from_file(self) -> dict:
         if self.filepath is None:
             self.autodiscover_config_dir()
-
-        if self.filepath is None:
-            raise FileNotFoundError(f"Could not find the file {self.filename}")
 
         with open(self.filepath, encoding="UTF-8", mode="r") as fileobj:
             profile_jsonc = jsonc.load(fileobj)
@@ -96,7 +107,7 @@ class ConfigFile:
 
     def get_profile(
         self, profile_name: Union[str, None], profile_type: Union[str, None]
-    ):
+    ) -> tuple[dict, str]:
         if self.profiles is None:
             self.init_from_file()
 
@@ -121,7 +132,7 @@ class ConfigFile:
             base_props = self.load_profile_properties(profile_name=base_profile)
             props.update(base_props)
 
-        return props
+        return props, profile_name
 
     def autodiscover_config_dir(self):
         """
@@ -133,13 +144,12 @@ class ConfigFile:
         """
 
         current_dir = CURRENT_DIR
-        config_dir = None
 
-        while config_dir is None:
+        while True:
             path = os.path.join(current_dir, self.filename)
 
             if os.path.isfile(path):
-                config_dir = current_dir
+                self.location = current_dir
 
             # check if have arrived at the root directory
             if current_dir == os.path.dirname(current_dir):
@@ -147,7 +157,7 @@ class ConfigFile:
 
             current_dir = os.path.dirname(current_dir)
 
-        self.location = config_dir
+        raise FileNotFoundError(f"Could not find the file {self.filename}")
 
     def get_profilename_from_profiletype(self, profile_type: str) -> str:
         """
@@ -156,31 +166,28 @@ class ConfigFile:
         First tries to look into the defaults, if not found,
         then it tries to iterate through the profiles
         """
+        # try to get the profilename from defaults
         try:
-            # try to get the profilename from defaults
+            profilename = self.defaults[profile_type]
+        except KeyError:
+            warnings.warn("Given profile type has no default profilename")
+        else:
+            return profilename
+
+        # iterate through the profiles and check if profile is found
+        for (key, value) in self.profiles.items():
             try:
-                profilename = self.defaults[profile_type]
+                temp_profile_type = value["type"]
+                if profile_type == temp_profile_type:
+                    return key
             except KeyError:
-                warnings.warn("Given profile type has no default profilename")
-            else:
-                return profilename
+                warnings.warn(f"Profile {key} has no type attribute")
 
-            # iterate through the profiles and check if profile is found
-            for (key, value) in self.profiles.items():
-                try:
-                    temp_profile_type = value["type"]
-                    if profile_type == temp_profile_type:
-                        return key
-                except KeyError:
-                    warnings.warn(f"Profile {key} has no type attribute")
-
-            # if no profile with matching type found, we raise an exception
-            raise ProfileNotFound(
-                profile_name=profile_type,
-                error_msg=f"No profile with matching profile_type {profile_type} found",
-            )
-        except ProfileNotFound as exc:
-            raise exc
+        # if no profile with matching type found, we raise an exception
+        raise ProfileNotFound(
+            profile_name=profile_type,
+            error_msg=f"No profile with matching profile_type {profile_type} found",
+        )
 
     def load_profile_properties(self, profile_name: str) -> dict:
         """
@@ -265,7 +272,18 @@ class ProfileManager:
         self.project_user_config = ConfigFile(type=USER_CONFIG, name=appname)
 
         self.global_config = ConfigFile(type=TEAM_CONFIG, name=GLOBAL_CONFIG_NAME)
+        try:
+            self.global_config.location = GLOBAl_CONFIG_LOCATION
+        except Exception:
+            warnings.warn("Could not find Global Config Directory, please provide one.")
+
         self.global_user_config = ConfigFile(type=USER_CONFIG, name=GLOBAL_CONFIG_NAME)
+        try:
+            self.global_user_config.location = GLOBAl_CONFIG_LOCATION
+        except Exception:
+            warnings.warn(
+                "Could not find Global User Config Directory, please provide one."
+            )
 
     @property
     def config_appname(self) -> str:
@@ -282,10 +300,8 @@ class ProfileManager:
         """
         Set directory/folder path to where Zowe z/OSMF Team Project Config files are located
         """
-        if os.path.isdir(dirname):
-            self.project_config.location = dirname
-        else:
-            raise FileNotFoundError(f"given path {dirname} is not valid")
+        self.project_config.location = dirname
+        self.project_user_config.location = dirname
 
     @property
     def user_config_dir(self) -> Union[str, None]:
@@ -295,10 +311,7 @@ class ProfileManager:
     @user_config_dir.setter
     def user_config_dir(self, dirname: str) -> None:
         """Set directory/folder path to where Zowe z/OSMF User Project Config files are located"""
-        if os.path.isdir(dirname):
-            self.project_user_config.location = dirname
-        else:
-            raise FileNotFoundError(f"given path {dirname} is not valid")
+        self.project_user_config.location = dirname
 
     @property
     def config_filename(self) -> str:
@@ -321,49 +334,60 @@ class ProfileManager:
             )
 
         service_profile: dict = {}
+        project_profile: dict = {}
+        global_profile: dict = {}
+        project_profile_name: Union[str, None] = None
+        global_profile_name: Union[str, None] = None
 
-        project_profile: dict = self.project_config.get_profile(
-            profile_name=profile_name, profile_type=profile_type
-        )
-        project_user_profile: dict = self.project_user_config.get_profile(
-            profile_name=profile_name, profile_type=profile_type
-        )
+        # get Project Profile
+        try:
+            project_profile, project_profile_name = self.project_config.get_profile(
+                profile_name=profile_name, profile_type=profile_type
+            )
+        except Exception:
+            warnings.warn(f"Could not load Project Config {self.project_config.name}")
 
-        self.global_config.init_from_file()
-        if profile_name:
-            global_base_profile: dict = self.global_config.load_profile_properties(
-                profile_name=profile_name
+        # get Project User Profile
+        try:
+            (
+                project_user_profile,
+                project_user_profile_name,
+            ) = self.project_user_config.get_profile(
+                profile_name=profile_name, profile_type=profile_type
+            )
+        except Exception:
+            warnings.warn(f"Could not load Project Config {self.project_config.name}")
+        else:
+            project_profile.update(project_user_profile)
+
+        # get Global Profile
+        try:
+            self.global_config.init_from_file()
+            global_profile, global_profile_name = self.global_config.get_profile(
+                profile_name=profile_name, profile_type=profile_type
+            )
+        except Exception:
+            warnings.warn(f"Could not load Global Config {self.global_config.name}")
+
+        # get Global User Profile
+        try:
+            self.global_user_config.init_from_file()
+            (
+                global_user_profile,
+                global_user_profile_name,
+            ) = self.global_user_config.get_profile(
+                profile_name=profile_name, profile_type=profile_type
+            )
+        except Exception:
+            warnings.warn(
+                f"Could not load Global User Config {self.global_user_config.name}"
             )
         else:
-            try:
-                gb_profile_name = self.global_config.get_profilename_from_profiletype(
-                    profile_type=profile_type
-                )
-                global_base_profile: dict = self.global_config.load_profile_properties(
-                    profile_name=gb_profile_name
-                )
-                service_profile.update(global_base_profile)
-            except Exception:
-                warnings.warn("Could not find global base profile")
+            global_profile.update(global_user_profile)
 
-        self.global_user_config.init_from_file()
-        if profile_name:
-            global_user_profile: dict = self.global_config.load_profile_properties(
-                profile_name=profile_name
-            )
-        else:
-            try:
-                gu_profile_name = self.global_config.get_profilename_from_profiletype(
-                    profile_type=profile_type
-                )
-                global_user_profile: dict = self.global_config.load_profile_properties(
-                    profile_name=gu_profile_name
-                )
-                service_profile.update(global_user_profile)
-            except Exception:
-                warnings.warn("Could not find global user profile")
+        if global_profile_name != project_profile_name:
+            service_profile.update(global_profile)
 
         service_profile.update(project_profile)
-        service_profile.update(project_user_profile)
 
         return service_profile
