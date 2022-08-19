@@ -78,7 +78,6 @@ class ConfigFile:
         if not self.location:
             return None
 
-        print(self.filename, self.location)
         return os.path.join(self.location, self.filename)
 
     @property
@@ -150,6 +149,7 @@ class ConfigFile:
 
             if os.path.isfile(path):
                 self.location = current_dir
+                return
 
             # check if have arrived at the root directory
             if current_dir == os.path.dirname(current_dir):
@@ -265,7 +265,6 @@ class ConfigFile:
 
 class ProfileManager:
     def __init__(self, appname: str = "zowe"):
-        print(CURRENT_DIR)
         self._appname = appname
 
         self.project_config = ConfigFile(type=TEAM_CONFIG, name=appname)
@@ -293,7 +292,7 @@ class ProfileManager:
     @property
     def config_dir(self) -> Union[str, None]:
         """Returns the folder path to where the Zowe z/OSMF Team Project Config files are located."""
-        return self.project_config.directory
+        return self.project_config.location
 
     @config_dir.setter
     def config_dir(self, dirname: str) -> None:
@@ -344,7 +343,7 @@ class ProfileManager:
             project_profile, project_profile_name = self.project_config.get_profile(
                 profile_name=profile_name, profile_type=profile_type
             )
-        except Exception:
+        except Exception as exc:
             warnings.warn(f"Could not load Project Config {self.project_config.name}")
 
         # get Project User Profile
