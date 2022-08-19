@@ -105,7 +105,9 @@ class ConfigFile:
         self.load_secure_props()
 
     def get_profile(
-        self, profile_name: Union[str, None] = None, profile_type: Union[str, None] = None
+        self,
+        profile_name: Union[str, None] = None,
+        profile_type: Union[str, None] = None,
     ) -> tuple[dict, str]:
         if self.profiles is None:
             self.init_from_file()
@@ -335,6 +337,7 @@ class ProfileManager:
         service_profile: dict = {}
         project_profile: dict = {}
         global_profile: dict = {}
+        global_base_profile: dict = {}
         project_profile_name: Union[str, None] = None
         global_profile_name: Union[str, None] = None
 
@@ -358,6 +361,30 @@ class ProfileManager:
             warnings.warn(f"Could not load Project Config {self.project_config.name}")
         else:
             project_profile.update(project_user_profile)
+
+        # get Global Base Profile
+        try:
+            self.global_config.init_from_file()
+            (
+                global_base_profile,
+                global_base_profile_name,
+            ) = self.global_config.get_profile(profile_type="base")
+        except Exception:
+            warnings.warn(f"Could not load Global Config {self.global_config.name}")
+
+        # get Global Base User Profile
+        try:
+            self.global_user_config.init_from_file()
+            (
+                global_base_user_profile,
+                global_base_user_profile_name,
+            ) = self.global_user_config.get_profile(profile_type="base")
+        except Exception:
+            warnings.warn(
+                f"Could not load Global User Config {self.global_user_config.name}"
+            )
+        else:
+            global_base_profile.update(global_base_user_profile)
 
         # get Global Profile
         try:
@@ -383,6 +410,9 @@ class ProfileManager:
             )
         else:
             global_profile.update(global_user_profile)
+
+        # now update service profile
+        service_profile.update(global_base_profile)
 
         if global_profile_name != project_profile_name:
             service_profile.update(global_profile)
