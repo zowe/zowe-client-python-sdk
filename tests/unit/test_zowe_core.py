@@ -13,6 +13,7 @@ from unittest.mock import patch
 from pyfakefs.fake_filesystem_unittest import TestCase
 from zowe.core_for_zowe_sdk import (
     ApiConnection,
+    ConfigFile,
     ProfileManager,
     RequestHandler,
     SdkApi,
@@ -259,8 +260,8 @@ class TestZosmfProfileManager(TestCase):
             shutil.copy(self.original_file_path, cwd_up_file_path)
 
             # Test
-            prof_manager = ProfileManager(appname=self.custom_appname)
-            props: dict = prof_manager.load("non_existent_profile")
+            config_file = ConfigFile(name=self.custom_appname, type="team_config")
+            props: dict = config_file.get_profile(profile_name="non_existent_profile")
 
     @patch("keyring.get_password", side_effect=keyring_get_password_exception)
     def test_secure_props_loading_exception(self, get_pass_func):

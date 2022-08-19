@@ -105,7 +105,7 @@ class ConfigFile:
         self.load_secure_props()
 
     def get_profile(
-        self, profile_name: Union[str, None], profile_type: Union[str, None]
+        self, profile_name: Union[str, None] = None, profile_type: Union[str, None] = None
     ) -> tuple[dict, str]:
         if self.profiles is None:
             self.init_from_file()
@@ -197,7 +197,7 @@ class ConfigFile:
         try:
             props = self.profiles[profile_name]["properties"]
         except Exception as exc:
-            return {}
+            raise ProfileNotFound("Profile {profile_name} not found", error_msg=exc)
 
         secure_fields: list = self.profiles[profile_name].get("secure", [])
 
