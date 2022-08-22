@@ -12,6 +12,7 @@ Copyright Contributors to the Zowe Project.
 
 from zowe.core_for_zowe_sdk import SdkApi
 from zowe.core_for_zowe_sdk.exceptions import FileNotFound
+from zowe.zos_files_for_zowe_sdk import exceptions, constants
 import os
 import shutil
 
@@ -129,7 +130,7 @@ class Files(SdkApi):
         custom_args["headers"]["X-IBM-Max-Items"]  = "{}".format(limit)
         custom_args["headers"]["X-IBM-Attributes"] = attributes
         response_json = self.request_handler.perform_request("GET", custom_args)
-        return response_json['items']
+        return response_json['items']  # type: ignore
 
     def get_dsn_content(self, dataset_name):
         """Retrieve the contents of a given dataset.
@@ -379,4 +380,40 @@ class Files(SdkApi):
         custom_args["url"] = url
         response_json = self.request_handler.perform_request(
             "DELETE", custom_args, expected_code=[200, 202, 204])
+        return response_json
+
+    def create_zFS_file_system(self, file_system_name, options={}):
+        """
+        Create a z/OS UNIX zFS Filesystem.
+        
+        Parameter
+        ---------
+        file_system_name: str - the name for the file system
+        
+        Returns
+        -------
+        json - A JSON containing the result of the operation
+        """
+        for key, value in options.items():
+            if key == 'perms':
+                if value < 0 or value > 777:
+                    raise exceptions.InvalidPermsOption(value)
+            
+            if key == "cylsPri" or key == "cylsSec":
+                if value > constants.zos_file_constants['MaxAllocationQuantity']:
+                    raise exceptions.MaxAllocationQuantityExceeded
+
+        custom_args = self._create_custom_request_arguments()
+        custom_args["url"] = "{}mfs/zfs/{}".format(self.request_endpoint, file_system_name)
+        custom_args["json"] = options
+        response_json = self.request_handler.perform_request("POST", custom_args, expected_code = [201])
+        return response_json
+
+    def delete_zFS_file_system(self, file_system_name):
+        """
+        Deletes a zFS Filesystem
+        """
+        custom_args = self._create_custom_request_arguments()
+        custom_args["url"] = "{}mfs/zfs/{}".format(self.request_endpoint, file_system_name)
+        response_json = self.request_handler.perform_request("DELETE", custom_args, expected_code=[204])
         return response_json
