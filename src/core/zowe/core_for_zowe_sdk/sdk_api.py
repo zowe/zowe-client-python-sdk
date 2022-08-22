@@ -30,6 +30,7 @@ class SdkApi:
         self.default_headers = {
             "Content-Type": "application/json",
             "X-CSRF-ZOSMF-HEADER": "",
+            "X-IBM-Option": "",
         }
 
         self.request_endpoint = session.host_url + self.default_service_url
