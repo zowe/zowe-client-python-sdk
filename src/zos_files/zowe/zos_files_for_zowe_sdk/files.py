@@ -14,6 +14,8 @@ from zowe.core_for_zowe_sdk import SdkApi
 from zowe.core_for_zowe_sdk.exceptions import FileNotFound
 import os
 import shutil
+from zowe.zos_files_for_zowe_sdk import exceptions
+from zowe.zos_files_for_zowe_sdk.constants import zos_file_constants
 
 _ZOWE_FILES_DEFAULT_ENCODING='utf-8'
 
@@ -230,8 +232,8 @@ class Files(SdkApi):
             A JSON containing the result of the operation
         """
 
-        if default_type not in ("partitioned", "sequential", "classic", "c", "binary", "vsam"):
-            raise TypeError
+        if default_type not in zos_file_constants["SupportedDefaultDataSets"]:
+            raise exceptions.UnsupportedDefaultDataSetRequested
 
         options = {}
 
