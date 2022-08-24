@@ -27,7 +27,7 @@ def validate_config_json(path_config_json: str, path_schema_json: str):
 
     Returns
     -------
-        None if config file matches schema.
+        Confirms if the config.json matches schema or provides appropriate details if it doesn't.
     """
 
     config_json = ""
@@ -39,8 +39,8 @@ def validate_config_json(path_config_json: str, path_schema_json: str):
     with open(path_schema_json) as f:
         schema_json = json.load(f)
 
+    result = validate(instance=config_json, schema=schema_json)
+    if not result:
+        return "config.json matches schema.json"
 
-    return validate(
-                instance=config_json,
-                schema=schema_json
-                )
+    return result
