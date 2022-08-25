@@ -91,7 +91,7 @@ class Files(SdkApi):
         custom_args = self._create_custom_request_arguments()
         custom_args["url"] = "{}fs/{}".format(self.request_endpoint, filepath_name.lstrip("/"))
         if recursive:
-            self.default_headers["X-IBM-Option"] = "recursive"
+            custom_args["headers"]["X-IBM-Option"] = "recursive"
 
         response_json = self.request_handler.perform_request("DELETE", custom_args, expected_code=[204])
         return response_json
