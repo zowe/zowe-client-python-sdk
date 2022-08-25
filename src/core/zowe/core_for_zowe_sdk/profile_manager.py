@@ -18,7 +18,7 @@ import warnings
 from dataclasses import dataclass
 from typing import Union
 
-import jsonc
+import commentjson
 
 from .constants import constants
 from .exceptions import ProfileNotFound, SecureProfileLoadFailed, SecureValuesNotFound
@@ -96,7 +96,7 @@ class ConfigFile:
             self.autodiscover_config_dir()
 
         with open(self.filepath, encoding="UTF-8", mode="r") as fileobj:
-            profile_jsonc = jsonc.load(fileobj)
+            profile_jsonc = commentjson.load(fileobj)
 
         print(profile_jsonc)
         self.profiles = profile_jsonc["profiles"]
@@ -246,7 +246,7 @@ class ConfigFile:
         else:
             secure_config = secret_value
 
-        secure_config_json = jsonc.loads(base64.b64decode(secure_config).decode())
+        secure_config_json = commentjson.loads(base64.b64decode(secure_config).decode())
 
         # first look for credentials stored for currently loaded config
         # then look for default credential stored for user_directory/.zowe/zowe.config.json

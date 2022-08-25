@@ -4,7 +4,7 @@
         "zosmf": {
             "type": "zosmf",
             "properties": {
-                "port": 10443
+                "port": 10443 // setting ports
             },
             "secure": []
         },
@@ -40,7 +40,7 @@
             },
             "secure": [
                 "user",
-                "password"
+                "password" // this is just a password
             ]
         }
     },

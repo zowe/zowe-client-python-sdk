@@ -6,7 +6,7 @@ flake8==3.8.4
 pytest==7.1.2
 idna==2.10
 importlib-metadata==3.6.0
-jsoncparser
+commentjson
 keyring
 lxml==4.7.1
 mccabe==0.6.1
