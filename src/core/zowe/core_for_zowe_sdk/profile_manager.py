@@ -16,7 +16,7 @@ import re
 import sys
 import warnings
 from dataclasses import dataclass
-from typing import Union
+from typing import Union, Tuple
 
 import commentjson
 
@@ -98,7 +98,6 @@ class ConfigFile:
         with open(self.filepath, encoding="UTF-8", mode="r") as fileobj:
             profile_jsonc = commentjson.load(fileobj)
 
-        print(profile_jsonc)
         self.profiles = profile_jsonc["profiles"]
         self.defaults = profile_jsonc["defaults"]
 
@@ -108,7 +107,7 @@ class ConfigFile:
         self,
         profile_name: Union[str, None] = None,
         profile_type: Union[str, None] = None,
-    ) -> tuple[dict, str]:
+    ) -> Tuple[dict, str]:
         if self.profiles is None:
             self.init_from_file()
 
