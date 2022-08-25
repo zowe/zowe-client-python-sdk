@@ -16,7 +16,7 @@ import re
 import sys
 import warnings
 from dataclasses import dataclass
-from typing import Union, Tuple
+from typing import Tuple, Union
 
 import commentjson
 
@@ -91,7 +91,7 @@ class ConfigFile:
         else:
             raise FileNotFoundError(f"given path {dirname} is not valid")
 
-    def init_from_file(self) -> dict:
+    def init_from_file(self) -> None:
         if self.filepath is None:
             self.autodiscover_config_dir()
 
