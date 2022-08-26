@@ -25,7 +25,7 @@ class TestFilesClass(TestCase):
         """Test deleting a directory recursively sends a request"""
         mock_send_request.return_value = mock.Mock(headers={"Content-Type": "application/json"}, status_code=204)
 
-        Files(self.connection_dict).delete_uss("filepath_name", recursive=True)
+        Files(self.test_profile).delete_uss("filepath_name", recursive=True)
         mock_send_request.assert_called_once()
 
     @mock.patch('requests.Session.send')
