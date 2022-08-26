@@ -15,6 +15,7 @@ from zowe.core_for_zowe_sdk.exceptions import FileNotFound
 from zowe.zos_files_for_zowe_sdk import exceptions, constants
 import os
 import shutil
+import json
 
 _ZOWE_FILES_DEFAULT_ENCODING='utf-8'
 
@@ -209,6 +210,39 @@ class Files(SdkApi):
         custom_args["url"] = "{}ds/{}".format(self.request_endpoint, dataset_name)
         custom_args["json"] = options
         response_json = self.request_handler.perform_request("POST", custom_args, expected_code = [201])
+        return response_json
+
+    def migrate_data_set(self, dataset_name, wait=False):
+        """
+        Migrates the data set.
+
+        Parameters
+        ----------
+        dataset_name
+            Name of the data set
+        
+        wait
+            If true, the function waits for completion of the request, otherwise the request is queued.
+
+        Returns
+        -------
+        json
+            A JSON containing the result of the operation
+        """
+
+        data = {
+            "request": "hmigrate",
+            "wait": json.dumps(False)
+        }
+
+        if wait:
+            data["wait"] = json.dumps(True)
+
+        custom_args = self._create_custom_request_arguments()
+        custom_args["json"] = data
+        custom_args["url"] = "{}ds/{}".format(self.request_endpoint, dataset_name)
+
+        response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[204])
         return response_json
 
     def create_uss(self, file_path, type, mode = None):
