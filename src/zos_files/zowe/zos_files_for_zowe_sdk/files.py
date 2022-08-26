@@ -10,11 +10,13 @@ SPDX-License-Identifier: EPL-2.0
 Copyright Contributors to the Zowe Project.
 """
 
+from marshal import dumps
 from zowe.core_for_zowe_sdk import SdkApi
 from zowe.core_for_zowe_sdk.exceptions import FileNotFound
 from zowe.zos_files_for_zowe_sdk import exceptions, constants
 import os
 import shutil
+import json
 
 _ZOWE_FILES_DEFAULT_ENCODING='utf-8'
 
@@ -416,4 +418,37 @@ class Files(SdkApi):
         custom_args = self._create_custom_request_arguments()
         custom_args["url"] = "{}mfs/zfs/{}".format(self.request_endpoint, file_system_name)
         response_json = self.request_handler.perform_request("DELETE", custom_args, expected_code=[204])
+        return response_json
+
+    def recall_migrated_dataset(self, dataset_name, wait=False):
+        """
+        Recalls a migrated data set
+
+        Parameters
+        ----------
+        dataset_name
+            Name of the data set
+        
+        wait
+            If true, the function waits for completion of the request, otherwise the request is queued
+
+        Returns
+        -------
+        json
+            A JSON containing the result of the operation
+        """
+
+        data = {
+            "request": "hrecall",
+            "wait": json.dumps(False)
+        }
+
+        if wait:
+            data["wait"] = json.dumps(True)
+
+        custom_args = self._create_custom_request_arguments()
+        custom_args["json"] = data
+        custom_args["url"] = "{}ds/{}".format(self.request_endpoint, dataset_name)
+
+        response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[204])
         return response_json

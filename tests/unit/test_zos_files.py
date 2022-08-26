@@ -47,3 +47,11 @@ class TestFilesClass(TestCase):
         with self.assertRaises(exceptions.MaxAllocationQuantityExceeded) as e_info:
             Files(self.test_profile).create_zFS_file_system("file_system_name", {"perms": 775, "cylsPri": 1677755513, "cylsSec": 16777215})
         self.assertEqual(str(e_info.exception), "Maximum allocation quantity of 16777215 exceeded")
+    
+    @mock.patch('requests.Session.send')
+    def test_recall_migrated_dataset(self, mock_send_request):
+        """Test recalling migrated data set sends a request"""
+        mock_send_request.return_value = mock.Mock(headers={"Content-Type": "application/json"}, status_code=204)
+
+        Files(self.test_profile).recall_migrated_dataset("dataset_name")
+        mock_send_request.assert_called_once()
