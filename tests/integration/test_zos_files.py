@@ -16,11 +16,14 @@ class TestFilesIntegration(unittest.TestCase):
     def setUp(self):
         """Setup fixtures for Files class."""
         test_profile = ProfileManager().load(profile_type="zosmf")
+        self.user_name = test_profile["user"]
         with open(FILES_FIXTURES_PATH, 'r') as fixtures_json:
             self.files_fixtures = json.load(fixtures_json)
         self.files = Files(test_profile)
         self.test_member_jcl = f'{self.files_fixtures["TEST_PDS"]}({self.files_fixtures["TEST_MEMBER"]})'
         self.test_member_generic = f'{self.files_fixtures["TEST_PDS"]}(TEST)'
+        self.test_zfs_file_system = f'{self.user_name}.{self.files_fixtures["TEST_ZFS"]}'
+        self.create_zfs_options = {"perms": 755,"cylsPri": 10,"cylsSec": 2,"timeout": 20, "volumes": ["VPMVSC"]}
 
     def test_list_dsn_should_return_a_list_of_datasets(self):
         """Executing list_dsn method should return a list of found datasets."""
@@ -50,6 +53,15 @@ class TestFilesIntegration(unittest.TestCase):
     def test_write_to_dsn_should_be_possible(self):
         """Executing write_to_dsn should be possible."""
         command_output = self.files.write_to_dsn(self.test_member_generic, "HELLO WORLD")
+        self.assertTrue(command_output['response'] == '')
+
+    def test_create_delete_zFS_file_system(self):
+        """
+        Executing create_zFS_file_system and delete_zFS_file_system should be possible
+        """
+        command_output = self.files.create_zFS_file_system(self.test_zfs_file_system, self.create_zfs_options)
+        self.assertTrue(command_output['response'] == '')
+        command_output = self.files.delete_zFS_file_system(self.test_zfs_file_system)
         self.assertTrue(command_output['response'] == '')
 
     #TODO implement tests for download/upload datasets

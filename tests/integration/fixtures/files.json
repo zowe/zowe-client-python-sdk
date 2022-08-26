@@ -1,5 +1,6 @@
 {
     "TEST_HLQ": "ZOWE",
     "TEST_PDS": "ZOWE.TESTS.JCL",
-    "TEST_MEMBER": "IEFBR14T"
+    "TEST_MEMBER": "IEFBR14T",
+    "TEST_ZFS": "TEST.ZFS"
 }
