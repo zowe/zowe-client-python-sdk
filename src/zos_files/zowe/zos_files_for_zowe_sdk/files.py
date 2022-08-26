@@ -441,6 +441,7 @@ class Files(SdkApi):
 
     def unmount_file_system(self, file_system_name, options={}, encoding=_ZOWE_FILES_DEFAULT_ENCODING):
         """Unmounts a z/OS UNIX file system on a specified directory.
+
         Parameter
         ---------
         file_system_name: str - the name for the file system
@@ -456,4 +457,25 @@ class Files(SdkApi):
         custom_args["json"] = options
         custom_args['headers']['Content-Type'] = 'text/plain; charset={}'.format(encoding)
         response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[204])
+        return response_json
+
+    def list_unix_file_systems(self, file_path_name=None, file_system_name=None):
+        """
+        list all mounted filesystems, or the specific filesystem mounted at a given path, or the
+        filesystem with a given Filesystem name.
+
+        Parameter
+        ---------
+        file_path: str - the UNIX directory that contains the files and directories to be listed.
+        file_system_name: str - the name for the file system to be listed
+        
+        Returns
+        -------
+        json - A JSON containing the result of the operation
+        """
+        custom_args = self._create_custom_request_arguments()
+
+        custom_args["params"] = {"path":file_path_name, "fsname": file_system_name}
+        custom_args["url"] = "{}mfs".format(self.request_endpoint)
+        response_json = self.request_handler.perform_request("GET", custom_args, expected_code=[200])
         return response_json
