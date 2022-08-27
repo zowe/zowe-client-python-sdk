@@ -21,6 +21,14 @@ class TestFilesClass(TestCase):
         self.assertIsInstance(files, Files)
 
     @mock.patch('requests.Session.send')
+    def test_delete_uss(self, mock_send_request):
+        """Test deleting a directory recursively sends a request"""
+        mock_send_request.return_value = mock.Mock(headers={"Content-Type": "application/json"}, status_code=204)
+
+        Files(self.test_profile).delete_uss("filepath_name", recursive=True)
+        mock_send_request.assert_called_once()
+
+    @mock.patch('requests.Session.send')
     def test_create_zFS_file_system(self, mock_send_request):
         """Test creating a zfs sends a request"""
         mock_send_request.return_value = mock.Mock(headers={"Content-Type": "application/json"}, status_code=201)
