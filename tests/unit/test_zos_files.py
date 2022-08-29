@@ -79,3 +79,11 @@ class TestFilesClass(TestCase):
 
         Files(self.test_profile).list_unix_file_systems("file_system_name")
         mock_send_request.assert_called_once()
+
+    @mock.patch('requests.Session.send')
+    def test_delete_migrated_data_set(self, mock_send_request):
+        """Test deleting a migrated data set sends a request"""
+        mock_send_request.return_value = mock.Mock(headers={"Content-Type": "application/json"}, status_code=200)
+
+        Files(self.test_profile).delete_migrated_data_set("dataset_name")
+        mock_send_request.assert_called_once()
