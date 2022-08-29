@@ -51,7 +51,7 @@ class TestFilesClass(TestCase):
     @mock.patch('requests.Session.send')
     def test_migrate_data_set(self, mock_send_request):
         """Test migrating a data set sends a request"""
-        mock_send_request.return_value = mock.Mock(headers={"Content-Type": "application/json"}, status_code=204)
+        mock_send_request.return_value = mock.Mock(headers={"Content-Type": "application/json"}, status_code=200)
 
         Files(self.test_profile).migrate_data_set("dataset_name")
         mock_send_request.assert_called_once()
