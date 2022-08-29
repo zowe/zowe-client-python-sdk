@@ -12,6 +12,7 @@ Copyright Contributors to the Zowe Project.
 
 from zowe.core_for_zowe_sdk import SdkApi
 from zowe.core_for_zowe_sdk.exceptions import FileNotFound
+from zowe.zos_files_for_zowe_sdk import exceptions, constants
 import os
 import shutil
 from zowe.zos_files_for_zowe_sdk import exceptions
@@ -74,13 +75,16 @@ class Files(SdkApi):
         response_json = self.request_handler.perform_request("GET", custom_args)
         return response_json
 
-    def delete_uss(self, filepath_name):
+    def delete_uss(self, filepath_name, recursive=False):
         """
         Delete a file or directory
 
         Parameters
         ----------
         filepath of the file to be deleted
+
+        recursive
+            If specified as True, all the files and sub-directories will be deleted.
 
         Returns
         -------
@@ -89,6 +93,9 @@ class Files(SdkApi):
         """
         custom_args = self._create_custom_request_arguments()
         custom_args["url"] = "{}fs/{}".format(self.request_endpoint, filepath_name.lstrip("/"))
+        if recursive:
+            custom_args["headers"]["X-IBM-Option"] = "recursive"
+
         response_json = self.request_handler.perform_request("DELETE", custom_args, expected_code=[204])
         return response_json
 
@@ -131,7 +138,7 @@ class Files(SdkApi):
         custom_args["headers"]["X-IBM-Max-Items"]  = "{}".format(limit)
         custom_args["headers"]["X-IBM-Attributes"] = attributes
         response_json = self.request_handler.perform_request("GET", custom_args)
-        return response_json['items']
+        return response_json['items']  # type: ignore
 
     def get_dsn_content(self, dataset_name):
         """Retrieve the contents of a given dataset.
@@ -159,7 +166,7 @@ class Files(SdkApi):
         """
 
         if options.get("like") is None:
-            if options.get("primary") is None and options.get("lrecl") is None:
+            if options.get("primary") is None or options.get("lrecl") is None:
                 raise KeyError
 
         for opt in ("volser", "unit", "dsorg", "alcunit", 
@@ -469,4 +476,102 @@ class Files(SdkApi):
         custom_args["url"] = url
         response_json = self.request_handler.perform_request(
             "DELETE", custom_args, expected_code=[200, 202, 204])
+        return response_json
+
+    def create_zFS_file_system(self, file_system_name, options={}):
+        """
+        Create a z/OS UNIX zFS Filesystem.
+        
+        Parameter
+        ---------
+        file_system_name: str - the name for the file system
+        
+        Returns
+        -------
+        json - A JSON containing the result of the operation
+        """
+        for key, value in options.items():
+            if key == 'perms':
+                if value < 0 or value > 777:
+                    raise exceptions.InvalidPermsOption(value)
+            
+            if key == "cylsPri" or key == "cylsSec":
+                if value > constants.zos_file_constants['MaxAllocationQuantity']:
+                    raise exceptions.MaxAllocationQuantityExceeded
+
+        custom_args = self._create_custom_request_arguments()
+        custom_args["url"] = "{}mfs/zfs/{}".format(self.request_endpoint, file_system_name)
+        custom_args["json"] = options
+        response_json = self.request_handler.perform_request("POST", custom_args, expected_code = [201])
+        return response_json
+
+    def delete_zFS_file_system(self, file_system_name):
+        """
+        Deletes a zFS Filesystem
+        """
+        custom_args = self._create_custom_request_arguments()
+        custom_args["url"] = "{}mfs/zfs/{}".format(self.request_endpoint, file_system_name)
+        response_json = self.request_handler.perform_request("DELETE", custom_args, expected_code=[204])
+        return response_json
+    
+    def mount_file_system(self, file_system_name, mount_point, options={}, encoding=_ZOWE_FILES_DEFAULT_ENCODING):
+        """Mounts a z/OS UNIX file system on a specified directory.
+        Parameter
+        ---------
+        file_system_name: str - the name for the file system
+        mount_point: str - mount point to be used for mounting the UNIX file system
+        options: dict - A JSON of request body options
+
+        Returns
+        -------
+        json - A JSON containing the result of the operation
+        """
+        options["action"] = "mount"
+        options["mount-point"] = mount_point
+        custom_args = self._create_custom_request_arguments()
+        custom_args["url"] = "{}mfs/{}".format(self.request_endpoint, file_system_name)
+        custom_args["json"] = options
+        custom_args['headers']['Content-Type'] = 'text/plain; charset={}'.format(encoding)
+        response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[204])
+        return response_json
+
+    def unmount_file_system(self, file_system_name, options={}, encoding=_ZOWE_FILES_DEFAULT_ENCODING):
+        """Unmounts a z/OS UNIX file system on a specified directory.
+
+        Parameter
+        ---------
+        file_system_name: str - the name for the file system
+        options: dict - A JSON of request body options
+        
+        Returns
+        -------
+        json - A JSON containing the result of the operation
+        """
+        options["action"] = "unmount"
+        custom_args = self._create_custom_request_arguments()
+        custom_args["url"] = "{}mfs/{}".format(self.request_endpoint, file_system_name)
+        custom_args["json"] = options
+        custom_args['headers']['Content-Type'] = 'text/plain; charset={}'.format(encoding)
+        response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[204])
+        return response_json
+
+    def list_unix_file_systems(self, file_path_name=None, file_system_name=None):
+        """
+        list all mounted filesystems, or the specific filesystem mounted at a given path, or the
+        filesystem with a given Filesystem name.
+
+        Parameter
+        ---------
+        file_path: str - the UNIX directory that contains the files and directories to be listed.
+        file_system_name: str - the name for the file system to be listed
+        
+        Returns
+        -------
+        json - A JSON containing the result of the operation
+        """
+        custom_args = self._create_custom_request_arguments()
+
+        custom_args["params"] = {"path":file_path_name, "fsname": file_system_name}
+        custom_args["url"] = "{}mfs".format(self.request_endpoint)
+        response_json = self.request_handler.perform_request("GET", custom_args, expected_code=[200])
         return response_json
