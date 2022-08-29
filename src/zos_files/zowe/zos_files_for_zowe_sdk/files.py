@@ -485,3 +485,40 @@ class Files(SdkApi):
         custom_args["url"] = "{}mfs".format(self.request_endpoint)
         response_json = self.request_handler.perform_request("GET", custom_args, expected_code=[200])
         return response_json
+
+    def rename_dataset(self, before_dataset_name: str, after_dataset_name: str, before_member_name=""):
+        """
+        Renames the data set.
+
+        Parameters
+        ----------
+        before_dataset_name
+            The source data set name.
+
+        after_dataset_name
+            New name of the data set.
+
+        before_member_name
+            The source member name. This should only be used when renaming a dataset member.        
+
+        Returns
+        -------
+        json
+            A JSON containing the result of the operation
+        """
+        data = {
+            "request": "rename",
+            "from-dataset": {
+                "dsn": before_dataset_name
+            }
+        }
+
+        if not before_member_name=="":
+            data["from-dataset"]["member"] = before_member_name
+
+        custom_args = self._create_custom_request_arguments()
+        custom_args["json"] = data
+        custom_args["url"] = "{}ds/{}".format(self.request_endpoint, after_dataset_name)
+
+        response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[200])
+        return response_json
