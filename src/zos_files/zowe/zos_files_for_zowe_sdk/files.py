@@ -242,7 +242,7 @@ class Files(SdkApi):
         custom_args["json"] = data
         custom_args["url"] = "{}ds/{}".format(self.request_endpoint, dataset_name)
 
-        response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[204])
+        response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[200])
         return response_json
 
     def create_uss(self, file_path, type, mode = None):
