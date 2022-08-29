@@ -83,7 +83,7 @@ class TestFilesClass(TestCase):
     def test_create_data_set_raises_error_without_required_arguments(self):
         """Not providing required arguments should raise error."""
         with self.assertRaises(KeyError):
-            obj = Files(self.connection_dict).create_data_set("DSNAME123", options={
+            obj = Files(self.test_profile).create_data_set("DSNAME123", options={
                 "alcunit": "CYL",
                 "dsorg": "PO",
                 "recfm": "FB",
@@ -94,7 +94,7 @@ class TestFilesClass(TestCase):
     def test_create_default_data_set_raises_error_for_unsupported_types(self):
         """Attempting to create a data set that is not part of the suggested list should raise error."""
         with self.assertRaises(exceptions.UnsupportedDefaultDataSetRequested) as e_info:
-            obj = Files(self.connection_dict).create_default_data_set("DSNAME123", "unsuporrted_type")
+            obj = Files(self.test_profile).create_default_data_set("DSNAME123", "unsuporrted_type")
         
         expected = "Invalid request. The following default options are available: partitioned, sequential, classic, c, binary, vsam."
         self.assertEqual(str(e_info.exception), expected)
@@ -104,5 +104,5 @@ class TestFilesClass(TestCase):
         """Test creating a partitioned data set sends a request"""
         mock_send_request.return_value = mock.Mock(headers={"Content-Type": "application/json"}, status_code=201)
 
-        Files(self.connection_dict).create_default_data_set("dataset_name", "partitioned")
+        Files(self.test_profile).create_default_data_set("dataset_name", "partitioned")
         mock_send_request.assert_called_once()
