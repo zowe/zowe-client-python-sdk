@@ -10,7 +10,7 @@ SPDX-License-Identifier: EPL-2.0
 Copyright Contributors to the Zowe Project.
 """
 
-from marshal import dumps
+
 from zowe.core_for_zowe_sdk import SdkApi
 from zowe.core_for_zowe_sdk.exceptions import FileNotFound
 from zowe.zos_files_for_zowe_sdk import exceptions, constants
@@ -450,5 +450,5 @@ class Files(SdkApi):
         custom_args["json"] = data
         custom_args["url"] = "{}ds/{}".format(self.request_endpoint, dataset_name)
 
-        response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[204])
+        response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[200])
         return response_json
