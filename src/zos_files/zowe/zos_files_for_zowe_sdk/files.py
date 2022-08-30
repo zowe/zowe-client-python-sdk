@@ -509,7 +509,7 @@ class Files(SdkApi):
         """
 
         data = {
-            "request": "hmigrate",
+            "request": "hdelete",
             "wait": json.dumps(False),
             "purge": json.dumps(False),
         }
