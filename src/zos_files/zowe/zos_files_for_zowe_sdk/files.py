@@ -510,15 +510,9 @@ class Files(SdkApi):
 
         data = {
             "request": "hdelete",
-            "wait": json.dumps(False),
-            "purge": json.dumps(False),
+            "wait": json.dumps(wait),
+            "purge": json.dumps(purge),
         }
-
-        if wait:
-            data["wait"] = json.dumps(True)
-        
-        if purge:
-            data["purge"]: json.dumps(True)
 
         custom_args = self._create_custom_request_arguments()
         custom_args["json"] = data
