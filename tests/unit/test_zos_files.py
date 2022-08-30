@@ -79,3 +79,26 @@ class TestFilesClass(TestCase):
 
         Files(self.test_profile).list_unix_file_systems("file_system_name")
         mock_send_request.assert_called_once()
+
+    @mock.patch('requests.Session.send')
+    def test_rename_dataset(self, mock_send_request):
+        """Test renaming dataset sends a request"""
+        mock_send_request.return_value = mock.Mock(headers={"Content-Type": "application/json"}, status_code=200)
+
+        Files(self.test_profile).rename_dataset("MY.OLD.DSN", "MY.NEW.DSN")
+        mock_send_request.assert_called_once()
+
+    @mock.patch('requests.Session.send')
+    def test_rename_dataset_member(self, mock_send_request):
+        """Test renaming dataset member sends a request"""
+        mock_send_request.return_value = mock.Mock(headers={"Content-Type": "application/json"}, status_code=200)
+
+        Files(self.test_profile).rename_dataset_member("MY.DS.NAME", "MEMBEROLD", "MEMBERNEW")
+        mock_send_request.assert_called_once()
+
+    def test_rename_dataset_member_raises_exception(self):
+        """Test renaming a dataset member raises error when assigning invalid values to enq parameter."""
+        with self.assertRaises(exceptions.InvalidValuesForEnq) as e_info:
+            Files(self.test_profile).rename_dataset_member("MY.DS.NAME", "MEMBER1", "MEMBER1N", "RANDOM")
+
+        self.assertEqual(str(e_info.exception), "Invalid value. Valid options are SHRW or EXCLU.")

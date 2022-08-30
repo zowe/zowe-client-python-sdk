@@ -486,7 +486,7 @@ class Files(SdkApi):
         response_json = self.request_handler.perform_request("GET", custom_args, expected_code=[200])
         return response_json
 
-    def rename_dataset(self, before_dataset_name: str, after_dataset_name: str, before_member_name=""):
+    def rename_dataset(self, before_dataset_name: str, after_dataset_name: str):
         """
         Renames the data set.
 
@@ -496,11 +496,8 @@ class Files(SdkApi):
             The source data set name.
 
         after_dataset_name
-            New name of the data set.
-
-        before_member_name
-            The source member name. This should only be used when renaming a dataset member.        
-
+            New name for the source data set.
+    
         Returns
         -------
         json
@@ -509,16 +506,58 @@ class Files(SdkApi):
         data = {
             "request": "rename",
             "from-dataset": {
-                "dsn": before_dataset_name
+                "dsn": before_dataset_name.strip()
             }
         }
 
-        if not before_member_name=="":
-            data["from-dataset"]["member"] = before_member_name
-
         custom_args = self._create_custom_request_arguments()
         custom_args["json"] = data
-        custom_args["url"] = "{}ds/{}".format(self.request_endpoint, after_dataset_name)
+        custom_args["url"] = "{}ds/{}".format(self.request_endpoint, after_dataset_name.strip())
+
+        response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[200])
+        return response_json
+
+    def rename_dataset_member(self, dataset_name: str, before_member_name: str, after_member_name: str, enq=""):
+        """
+        Renames the data set member.
+
+        Parameters
+        ----------
+        dataset_name
+            Name of the data set.
+
+        before_member_name
+            The source member name.
+        
+        after_member_name
+            New name for the source member.
+        
+        enq
+            Values can be SHRW or EXCLU. SHRW is the default for PDS members, EXCLU otherwise.
+
+        Returns
+        -------
+        json
+            A JSON containing the result of the operation
+        """
+
+        data = {
+            "request": "rename",
+            "from-dataset": {
+                "dsn": dataset_name.strip(),
+                "member": before_member_name.strip(),
+            }
+        }
+
+        path_to_member = dataset_name.strip() + "(" + after_member_name.strip() + ")"
+        if not enq == "":
+            if not enq == "SHRW" or not enq == "EXCLU":
+                raise exceptions.InvalidValuesForEnq
+            data["from-dataset"]["enq"] = enq.strip()
+
+        custom_args = self._create_custom_request_arguments()
+        custom_args['json'] = data
+        custom_args["url"] = "{}ds/{}".format(self.request_endpoint, path_to_member)
 
         response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[200])
         return response_json
