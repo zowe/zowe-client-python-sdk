@@ -218,39 +218,6 @@ class Files(SdkApi):
         response_json = self.request_handler.perform_request("POST", custom_args, expected_code = [201])
         return response_json
 
-    def migrate_data_set(self, dataset_name, wait=False):
-        """
-        Migrates the data set.
-
-        Parameters
-        ----------
-        dataset_name
-            Name of the data set
-        
-        wait
-            If true, the function waits for completion of the request, otherwise the request is queued.
-
-        Returns
-        -------
-        json
-            A JSON containing the result of the operation
-        """
-
-        data = {
-            "request": "hmigrate",
-            "wait": json.dumps(False)
-        }
-
-        if wait:
-            data["wait"] = json.dumps(True)
-
-        custom_args = self._create_custom_request_arguments()
-        custom_args["json"] = data
-        custom_args["url"] = "{}ds/{}".format(self.request_endpoint, dataset_name)
-
-        response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[200])
-        return response_json
-
     def create_uss(self, file_path, type, mode = None):
         """
         Add a file or directory
@@ -518,4 +485,34 @@ class Files(SdkApi):
         custom_args["params"] = {"path":file_path_name, "fsname": file_system_name}
         custom_args["url"] = "{}mfs".format(self.request_endpoint)
         response_json = self.request_handler.perform_request("GET", custom_args, expected_code=[200])
+        return response_json
+
+    def migrate_data_set(self, dataset_name, wait=False):
+        """
+        Migrates the data set.
+
+        Parameters
+        ----------
+        dataset_name
+            Name of the data set
+        
+        wait
+            If true, the function waits for completion of the request, otherwise the request is queued.
+
+        Returns
+        -------
+        json
+            A JSON containing the result of the operation
+        """
+
+        data = {
+            "request": "hmigrate",
+            "wait": json.dumps(wait)
+        }
+
+        custom_args = self._create_custom_request_arguments()
+        custom_args["json"] = data
+        custom_args["url"] = "{}ds/{}".format(self.request_endpoint, dataset_name)
+
+        response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[200])
         return response_json
