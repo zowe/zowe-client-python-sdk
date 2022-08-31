@@ -231,7 +231,7 @@ class Files(SdkApi):
         Parameters
         ----------
             dataset_name
-            default_type: "partitioned" or "sequential" or "classic" or "c" or "binary" or "vsam"
+            default_type: "partitioned" or "sequential" or "classic" or "c" or "binary"
 
         Returns
         -------
@@ -292,12 +292,6 @@ class Files(SdkApi):
                 "blksize": 27998,
                 "lrecl": 27998,
                 "dirblk": 25
-            }
-        elif default_type == "vsam":
-            options = {
-                "dsorg": "INDEXED",
-                "alcunit": "KB",
-                "primary": 840
             }
 
         custom_args = self._create_custom_request_arguments()

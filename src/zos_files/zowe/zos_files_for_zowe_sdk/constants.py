@@ -17,7 +17,6 @@ zos_file_constants = {
         "sequential",
         "classic",
         "c",
-        "binary",
-        "vsam"
+        "binary"
     ),
 }
