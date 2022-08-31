@@ -102,7 +102,7 @@ class Jobs(SdkApi):
         request_url = "{}{}".format(self.request_endpoint, job_url)
         custom_args["url"] = request_url
         custom_args["headers"]["X-IBM-Job-Modify-Version"] = "2.0"
-        if modify_version == 1.0:
+        if modify_version == "1.0":
             custom_args["headers"]["X-IBM-Job-Modify-Version"] = "1.0"
 
         response_json = self.request_handler.perform_request("DELETE", custom_args, expected_code=[202, 200])
