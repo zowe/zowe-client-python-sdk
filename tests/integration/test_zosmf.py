@@ -16,3 +16,8 @@ class TestZosmfIntegration(unittest.TestCase):
         """Executing the get_info method should return a valid response."""
         command_output = self.zosmf.get_info()
         self.assertIsInstance(command_output, dict)
+
+    def test_list_systems_should_return_valid_response(self):
+        """Executing the list_systems method should return a valid response."""
+        command_output = self.zosmf.list_systems()
+        self.assertIsInstance(command_output, dict)
