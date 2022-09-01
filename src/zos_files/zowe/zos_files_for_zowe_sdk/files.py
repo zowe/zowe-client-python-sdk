@@ -169,53 +169,53 @@ class Files(SdkApi):
             if options.get("primary") is None or options.get("lrecl") is None:
                 raise KeyError
 
-        for opt in ("volser", "unit", "dsorg", "alcunit", 
-            "primary", "secondary", "dirblk", "avgblk", "recfm", 
-            "blksize", "lrecl", "storclass", "mgntclass", "dataclass", 
-            "dsntype", "like"):
+            for opt in ("volser", "unit", "dsorg", "alcunit", 
+                "primary", "secondary", "dirblk", "avgblk", "recfm", 
+                "blksize", "lrecl", "storclass", "mgntclass", "dataclass", 
+                "dsntype", "like"):
 
-            if opt == "dsorg":
-                if options.get(opt) is not None and options[opt] not in ("PO", "PS"):
-                    raise KeyError
-
-            if opt == "alcunit":
-                if options.get(opt) is None:
-                    options[opt] = "TRK"
-                else:
-                    if options[opt] not in ("CYL", "TRK"):
+                if opt == "dsorg":
+                    if options.get(opt) is not None and options[opt] not in ("PO", "PS"):
                         raise KeyError
 
-            if opt == "primary":
-                if options.get(opt) is not None:
-                    if options["primary"] > 16777215:
-                        raise ValueError
-
-            if opt == "secondary":
-                if options.get("primary") is not None:
+                if opt == "alcunit":
                     if options.get(opt) is None:
-                        options["secondary"] = int(options["primary"] / 10)
-                    if options["secondary"] > 16777215:
-                        raise ValueError
+                        options[opt] = "TRK"
+                    else:
+                        if options[opt] not in ("CYL", "TRK"):
+                            raise KeyError
 
-            if opt == "dirblk":
-                if options.get(opt) is not None:
-                    if options.get("dsorg") == "PS":
-                        if options["dirblk"] != 0:
-                            raise ValueError
-                    elif options.get("dsorg") == "PO":
-                        if options["dirblk"] == 0:
+                if opt == "primary":
+                    if options.get(opt) is not None:
+                        if options["primary"] > 16777215:
                             raise ValueError
 
-            if opt == "recfm":
-                if options.get(opt) is None:
-                    options[opt] = "F"
-                else:
-                    if options[opt] not in ("F", "FB", "V", "VB", "U"):
-                        raise KeyError
+                if opt == "secondary":
+                    if options.get("primary") is not None:
+                        if options.get(opt) is None:
+                            options["secondary"] = int(options["primary"] / 10)
+                        if options["secondary"] > 16777215:
+                            raise ValueError
 
-            if opt == "blksize":
-                if options.get(opt) is None and options.get("lrecl") is not None:
-                    options[opt] = options["lrecl"]
+                if opt == "dirblk":
+                    if options.get(opt) is not None:
+                        if options.get("dsorg") == "PS":
+                            if options["dirblk"] != 0:
+                                raise ValueError
+                        elif options.get("dsorg") == "PO":
+                            if options["dirblk"] == 0:
+                                raise ValueError
+
+                if opt == "recfm":
+                    if options.get(opt) is None:
+                        options[opt] = "F"
+                    else:
+                        if options[opt] not in ("F", "FB", "V", "VB", "U"):
+                            raise KeyError
+
+                if opt == "blksize":
+                    if options.get(opt) is None and options.get("lrecl") is not None:
+                        options[opt] = options["lrecl"]
 
         custom_args = self._create_custom_request_arguments()
         custom_args["url"] = "{}ds/{}".format(self.request_endpoint, dataset_name)
