@@ -96,7 +96,7 @@ class TestFilesClass(TestCase):
         with self.assertRaises(exceptions.UnsupportedDefaultDataSetRequested) as e_info:
             obj = Files(self.test_profile).create_default_data_set("DSNAME123", "unsuporrted_type")
         
-        expected = "Invalid request. The following default options are available: partitioned, sequential, classic, c, binary, vsam."
+        expected = "Invalid request. The following default options are available: partitioned, sequential, classic, c, binary."
         self.assertEqual(str(e_info.exception), expected)
 
     @mock.patch('requests.Session.send')
