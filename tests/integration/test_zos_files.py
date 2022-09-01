@@ -16,11 +16,16 @@ class TestFilesIntegration(unittest.TestCase):
     def setUp(self):
         """Setup fixtures for Files class."""
         test_profile = ProfileManager().load(profile_type="zosmf")
+        self.user_name = test_profile["user"]
         with open(FILES_FIXTURES_PATH, 'r') as fixtures_json:
             self.files_fixtures = json.load(fixtures_json)
         self.files = Files(test_profile)
         self.test_member_jcl = f'{self.files_fixtures["TEST_PDS"]}({self.files_fixtures["TEST_MEMBER"]})'
         self.test_member_generic = f'{self.files_fixtures["TEST_PDS"]}(TEST)'
+        self.test1_zfs_file_system = f'{self.user_name}.{self.files_fixtures["TEST1_ZFS"]}'
+        self.test2_zfs_file_system = f'{self.user_name}.{self.files_fixtures["TEST2_ZFS"]}'
+        self.create_zfs_options = {"perms": 755,"cylsPri": 10,"cylsSec": 2,"timeout": 20, "volumes": ["VPMVSC"]}
+        self.mount_zfs_file_system_options = {"fs-type": "ZFS", "mode": "rdonly"}
 
     def test_list_dsn_should_return_a_list_of_datasets(self):
         """Executing list_dsn method should return a list of found datasets."""
@@ -50,6 +55,31 @@ class TestFilesIntegration(unittest.TestCase):
     def test_write_to_dsn_should_be_possible(self):
         """Executing write_to_dsn should be possible."""
         command_output = self.files.write_to_dsn(self.test_member_generic, "HELLO WORLD")
+        self.assertTrue(command_output['response'] == '')
+    
+    def test_mount_unmount_zfs_file_system(self):
+        """Mounting a zfs filesystem should be possible"""
+        username = self.user_name.lower()
+        mount_point = f"/u/{username}/mount" # Assuming a dir called mount exist in zOS USS
+
+        # Create a zfs file system
+        zfs_file_system = self.files.create_zFS_file_system(self.test2_zfs_file_system, self.create_zfs_options)
+
+
+        # Mount file system
+        command_output = self.files.mount_file_system(self.test2_zfs_file_system, mount_point, self.mount_zfs_file_system_options)
+        self.assertTrue(command_output['response'] == '')
+
+        # List a zfs file system
+        command_output = self.files.list_unix_file_systems(file_system_name=self.test2_zfs_file_system)
+        self.assertTrue(len(command_output['items']) > 0)
+
+        # Unmount file system
+        command_output = self.files.unmount_file_system(self.test2_zfs_file_system)
+        self.assertTrue(command_output['response'] == '')
+
+        # Delete file system
+        command_output = self.files.delete_zFS_file_system(self.test2_zfs_file_system)
         self.assertTrue(command_output['response'] == '')
 
     #TODO implement tests for download/upload datasets
