@@ -10,7 +10,7 @@ SPDX-License-Identifier: EPL-2.0
 Copyright Contributors to the Zowe Project.
 """
 
-import json
+import commentjson
 from jsonschema import validate
 
 
@@ -34,10 +34,10 @@ def validate_config_json(path_config_json: str, path_schema_json: str):
     schema_json = ""
 
     with open(path_config_json) as f:
-        config_json = json.load(f)
+        config_json = commentjson.load(f)
 
     with open(path_schema_json) as f:
-        schema_json = json.load(f)
+        schema_json = commentjson.load(f)
 
     result = validate(instance=config_json, schema=schema_json)
     if not result:
