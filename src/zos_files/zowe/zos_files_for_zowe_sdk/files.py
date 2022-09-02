@@ -492,16 +492,15 @@ class Files(SdkApi):
 
         Parameters
         ----------
-        before_dataset_name
+        before_dataset_name: str
             The source data set name.
 
-        after_dataset_name
+        after_dataset_name: str
             New name for the source data set.
     
         Returns
         -------
-        json
-            A JSON containing the result of the operation
+        json - A JSON containing the result of the operation
         """
         data = {
             "request": "rename",
@@ -523,22 +522,21 @@ class Files(SdkApi):
 
         Parameters
         ----------
-        dataset_name
+        dataset_name: str
             Name of the data set.
 
-        before_member_name
+        before_member_name: str
             The source member name.
         
-        after_member_name
+        after_member_name: str
             New name for the source member.
         
-        enq
+        enq: str
             Values can be SHRW or EXCLU. SHRW is the default for PDS members, EXCLU otherwise.
 
         Returns
         -------
-        json
-            A JSON containing the result of the operation
+        json - A JSON containing the result of the operation
         """
 
         data = {
@@ -550,10 +548,12 @@ class Files(SdkApi):
         }
 
         path_to_member = dataset_name.strip() + "(" + after_member_name.strip() + ")"
+
         if not enq == "":
-            if not enq == "SHRW" or not enq == "EXCLU":
+            if enq in ("SHRW", "EXCLU"):
+                data["from-dataset"]["enq"] = enq.strip()
+            else:
                 raise exceptions.InvalidValuesForEnq
-            data["from-dataset"]["enq"] = enq.strip()
 
         custom_args = self._create_custom_request_arguments()
         custom_args['json'] = data

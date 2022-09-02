@@ -102,3 +102,21 @@ class TestFilesClass(TestCase):
             Files(self.test_profile).rename_dataset_member("MY.DS.NAME", "MEMBER1", "MEMBER1N", "RANDOM")
 
         self.assertEqual(str(e_info.exception), "Invalid value. Valid options are SHRW or EXCLU.")
+
+    @mock.patch('requests.Session.send')
+    def test_rename_dataset_sends_specific_request(self, mock_send_request):
+        """Test renaming a data set sends the expected request"""
+        mock_send_request = Files(self.test_profile)
+        mock_send_request.rename_dataset = mock.Mock()
+
+        mock_send_request.rename_dataset("MY.OLD.DSN", "MY.NEW.DSN")
+        mock_send_request.rename_dataset.assert_called_with("MY.OLD.DSN", "MY.NEW.DSN")
+
+    @mock.patch('requests.Session.send')
+    def test_rename_dataset_member_sends_specific_request(self, mock_send_request):
+        """Test renaming a data set member sends the expected request"""
+        mock_send_request = Files(self.test_profile)
+        mock_send_request.rename_dataset_member = mock.Mock()
+
+        mock_send_request.rename_dataset_member("MY.DS.NAME", "MEMBER1", "MEMBER1N")
+        mock_send_request.rename_dataset_member.assert_called_with("MY.DS.NAME", "MEMBER1", "MEMBER1N")

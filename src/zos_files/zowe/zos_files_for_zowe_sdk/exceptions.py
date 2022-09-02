@@ -33,7 +33,7 @@ class MaxAllocationQuantityExceeded(Exception):
         super().__init__("Maximum allocation quantity of {} exceeded".format(zos_file_constants['MaxAllocationQuantity']))
 
 class InvalidValuesForEnq(Exception):
-    """Class to represt an invalid values passed to enq param"""
+    """Class to represent invalid values passed to enq param"""
     
     def __init__(self):
         super().__init__("Invalid value. Valid options are SHRW or EXCLU.")
