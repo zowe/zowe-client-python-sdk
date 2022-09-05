@@ -549,7 +549,7 @@ class Files(SdkApi):
 
         path_to_member = dataset_name.strip() + "(" + after_member_name.strip() + ")"
 
-        if not enq == "":
+        if enq:
             if enq in ("SHRW", "EXCLU"):
                 data["from-dataset"]["enq"] = enq.strip()
             else:

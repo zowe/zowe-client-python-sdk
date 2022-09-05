@@ -1,7 +1,21 @@
 """Unit tests for the Zowe Python SDK z/OS Files package."""
 from unittest import TestCase, mock
+import pytest
 from zowe.zos_files_for_zowe_sdk import Files, exceptions
 
+
+test_data = (
+        "MY.DS.NAME", "MEMBEROLD", "MEMBERNEW", {
+            "request": "rename",
+            "from-dataset": {
+                "dsn": "MY.DS.NAME",
+                "member": "MEMBEROLD"
+            }
+        },
+        "PUT",
+        "https://https://mock-url.com:443/zosmf/restfiles/ds/MY.DS.NAME(MEMBERNEW)",
+        200
+    )
 
 class TestFilesClass(TestCase):
     """File class unit tests."""
@@ -88,6 +102,9 @@ class TestFilesClass(TestCase):
         Files(self.test_profile).rename_dataset("MY.OLD.DSN", "MY.NEW.DSN")
         mock_send_request.assert_called_once()
 
+    # @parametrize
+    # def test_rename_dataset
+
     @mock.patch('requests.Session.send')
     def test_rename_dataset_member(self, mock_send_request):
         """Test renaming dataset member sends a request"""
@@ -103,20 +120,17 @@ class TestFilesClass(TestCase):
 
         self.assertEqual(str(e_info.exception), "Invalid value. Valid options are SHRW or EXCLU.")
 
-    @mock.patch('requests.Session.send')
-    def test_rename_dataset_sends_specific_request(self, mock_send_request):
-        """Test renaming a data set sends the expected request"""
-        mock_send_request = Files(self.test_profile)
-        mock_send_request.rename_dataset = mock.Mock()
+    # @parametrize
+    # def test_rename_dataset_member
 
-        mock_send_request.rename_dataset("MY.OLD.DSN", "MY.NEW.DSN")
-        mock_send_request.rename_dataset.assert_called_with("MY.OLD.DSN", "MY.NEW.DSN")
+    @pytest.mark.parametrize("ds_name,before_member,after_member,json_data,method,url,return_code", test_data)
+    def test_rename_dataset_member_parametrized(self, ds_name, before_member, after_member, json_data, method, url, return_code):
+        """Test renaming dataset member sends a request"""
+        files_test_profile = Files(self.test_profile)
+        files_test_profile.request_handler.perform_request = mock.Mock()
+        files_test_profile.rename_dataset_member(ds_name, before_member, after_member)
+        custom_args = files_test_profile._create_custom_request_arguments()
+        custom_args["json"] = json_data
+        custom_args["url"] = url
 
-    @mock.patch('requests.Session.send')
-    def test_rename_dataset_member_sends_specific_request(self, mock_send_request):
-        """Test renaming a data set member sends the expected request"""
-        mock_send_request = Files(self.test_profile)
-        mock_send_request.rename_dataset_member = mock.Mock()
-
-        mock_send_request.rename_dataset_member("MY.DS.NAME", "MEMBER1", "MEMBER1N")
-        mock_send_request.rename_dataset_member.assert_called_with("MY.DS.NAME", "MEMBER1", "MEMBER1N")
+        files_test_profile.request_handler.perform_request.assert_called_once_with(method, custom_args, expected_code=[return_code])
