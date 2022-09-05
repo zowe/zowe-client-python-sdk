@@ -1,8 +1,9 @@
 """Unit tests for the Zowe Python SDK z/OS Files package."""
 from unittest import TestCase, mock
+import unittest
 import pytest
 from zowe.zos_files_for_zowe_sdk import Files, exceptions
-
+from parameterized import parameterized, parameterized_class
 
 test_data = (
         "MY.DS.NAME", "MEMBEROLD", "MEMBERNEW", {
@@ -16,8 +17,6 @@ test_data = (
         "https://https://mock-url.com:443/zosmf/restfiles/ds/MY.DS.NAME(MEMBERNEW)",
         200
 )
-
-test_inf = ("test_sample", ("MY.DS.NAME", "MEMBEROLD", "MEMBERNEW"))
 
 class TestFilesClass(TestCase):
     """File class unit tests."""
@@ -126,17 +125,42 @@ class TestFilesClass(TestCase):
     # def test_rename_dataset_member
 
 
-    @pytest.mark.parametrize(
-        'ds_name', 'old_name', 'new_name',
-        ["DS.NAME", "DSN.NAME"],
-        ["OLDN", "OLDNAME"],
-        ["NEWN", "NEWNAME"]
-    )
-    def test_rename_dataset_member_parametrized(self, ds_name, old_name, new_name):
-        obj = Files(self.test_profile)
-        obj.rename_dataset_member(ds_name, old_name, new_name)
+    # @parameterized.expand([
+    #     ("DS.NAME", "ODLNAME", "NEWNAME"),
+    #     ("DSN", "OLDN", "NEWN"),
+    # ])
+    # def test_rename_dataset_member_parametrized(self, ds_name, old_name, new_name):
+    #     obj = Files(self.test_profile)
+    #     obj.rename_dataset_member(ds_name, old_name, new_name)
 
-        obj.assert_called_once_with(ds_name, old_name, new_name)
+    #     obj.assert_called_once_with(ds_name, old_name, new_name)
+
+    def test_rename_dataset_member_with_different_input(self):
+        test_values = [
+            ('DSN', "MBROLD", "MBRNEW"),
+            ('DATA.SET.NAME', 'MEMBEROLD', 'MEMBERNEW'),
+            ('DS.NAME', "MONAME", "MNNAME"),
+        ]
+
+        files_test_profile = Files(self.test_profile)
+        
+        for test in test_values:
+            files_test_profile.request_handler.perform_request = mock.Mock()
+            dataset_name, before_member_name, after_member_name = test
+
+            data = {
+                "request": "rename",
+                "from-dataset": {
+                    "dsn": dataset_name.strip(),
+                    "member": before_member_name.strip(),
+                }
+            }
+
+            files_test_profile.rename_dataset_member(dataset_name, before_member_name, after_member_name)
+            custom_args = files_test_profile._create_custom_request_arguments()
+            custom_args["json"] = data
+            custom_args["url"] = "https://https://mock-url.com:443/zosmf/restfiles/ds/{}({})".format(dataset_name, after_member_name)
+            files_test_profile.request_handler.perform_request.assert_called_once_with("PUT", custom_args, expected_code=[200])
 
     # @pytest.mark.parametrize("ds_name,before_member,after_member,json_data,method,url,return_code", test_data)
     # def test_rename_dataset_member_parametrized(self, ds_name, before_member, after_member, json_data, method, url, return_code):
