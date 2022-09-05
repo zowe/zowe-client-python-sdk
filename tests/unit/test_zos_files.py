@@ -15,7 +15,9 @@ test_data = (
         "PUT",
         "https://https://mock-url.com:443/zosmf/restfiles/ds/MY.DS.NAME(MEMBERNEW)",
         200
-    )
+)
+
+test_inf = ("test_sample", ("MY.DS.NAME", "MEMBEROLD", "MEMBERNEW"))
 
 class TestFilesClass(TestCase):
     """File class unit tests."""
@@ -123,14 +125,54 @@ class TestFilesClass(TestCase):
     # @parametrize
     # def test_rename_dataset_member
 
-    @pytest.mark.parametrize("ds_name,before_member,after_member,json_data,method,url,return_code", test_data)
-    def test_rename_dataset_member_parametrized(self, ds_name, before_member, after_member, json_data, method, url, return_code):
-        """Test renaming dataset member sends a request"""
-        files_test_profile = Files(self.test_profile)
-        files_test_profile.request_handler.perform_request = mock.Mock()
-        files_test_profile.rename_dataset_member(ds_name, before_member, after_member)
-        custom_args = files_test_profile._create_custom_request_arguments()
-        custom_args["json"] = json_data
-        custom_args["url"] = url
 
-        files_test_profile.request_handler.perform_request.assert_called_once_with(method, custom_args, expected_code=[return_code])
+    @pytest.mark.parametrize(
+        'ds_name', 'old_name', 'new_name',
+        ["DS.NAME", "DSN.NAME"],
+        ["OLDN", "OLDNAME"],
+        ["NEWN", "NEWNAME"]
+    )
+    def test_rename_dataset_member_parametrized(self, ds_name, old_name, new_name):
+        obj = Files(self.test_profile)
+        obj.rename_dataset_member(ds_name, old_name, new_name)
+
+        obj.assert_called_once_with(ds_name, old_name, new_name)
+
+    # @pytest.mark.parametrize("ds_name,before_member,after_member,json_data,method,url,return_code", test_data)
+    # def test_rename_dataset_member_parametrized(self, ds_name, before_member, after_member, json_data, method, url, return_code):
+    #     """Test renaming dataset member sends a request"""
+    #     files_test_profile = Files(self.test_profile)
+    #     files_test_profile.request_handler.perform_request = mock.Mock()
+    #     files_test_profile.rename_dataset_member(ds_name, before_member, after_member)
+    #     custom_args = files_test_profile._create_custom_request_arguments()
+    #     custom_args["json"] = json_data
+    #     custom_args["url"] = url
+
+    #     files_test_profile.request_handler.perform_request.assert_called_once_with(method, custom_args, expected_code=[return_code])
+    
+    def test_create_data_set_raises_error_without_required_arguments(self):
+        """Not providing required arguments should raise error."""
+        with self.assertRaises(KeyError):
+            obj = Files(self.test_profile).create_data_set("DSNAME123", options={
+                "alcunit": "CYL",
+                "dsorg": "PO",
+                "recfm": "FB",
+                "blksize": 6160,
+                "dirblk": 25
+            })
+
+    def test_create_default_data_set_raises_error_for_unsupported_types(self):
+        """Attempting to create a data set that is not part of the suggested list should raise error."""
+        with self.assertRaises(exceptions.UnsupportedDefaultDataSetRequested) as e_info:
+            obj = Files(self.test_profile).create_default_data_set("DSNAME123", "unsuporrted_type")
+        
+        expected = "Invalid request. The following default options are available: partitioned, sequential, classic, c, binary."
+        self.assertEqual(str(e_info.exception), expected)
+
+    @mock.patch('requests.Session.send')
+    def test_create_default_dataset_with_partitioned_type(self, mock_send_request):
+        """Test creating a partitioned data set sends a request"""
+        mock_send_request.return_value = mock.Mock(headers={"Content-Type": "application/json"}, status_code=201)
+
+        Files(self.test_profile).create_default_data_set("dataset_name", "partitioned")
+        mock_send_request.assert_called_once()

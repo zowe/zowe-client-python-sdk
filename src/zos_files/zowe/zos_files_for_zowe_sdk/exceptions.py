@@ -37,3 +37,9 @@ class InvalidValuesForEnq(Exception):
     
     def __init__(self):
         super().__init__("Invalid value. Valid options are SHRW or EXCLU.")
+
+class UnsupportedDefaultDataSetRequested(Exception):
+    """Class used to represent an invalid request of default data set."""
+
+    def __init__(self):
+        super().__init__("Invalid request. The following default options are available: {}.".format(', '.join(zos_file_constants['SupportedDefaultDataSets'])))
