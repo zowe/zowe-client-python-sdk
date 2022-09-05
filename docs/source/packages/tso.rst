@@ -17,4 +17,4 @@ Reference
 .. toctree::
    :maxdepth: 2
 
-   ../classes/tso/tso
+   ../classes/zos_tso/index
