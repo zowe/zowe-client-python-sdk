@@ -116,7 +116,7 @@ class ProfileManager:
             )
         except ProfileNotFound:
             warnings.warn(
-                f"Profile not found in config '{cfg.filename}'", ProfileNotFoundWarning
+                f"Profile not found in file '{cfg.filename}'", ProfileNotFoundWarning
             )
         except SecureProfileLoadFailed:
             warnings.warn(
@@ -126,17 +126,19 @@ class ProfileManager:
         except SecurePropsNotFoundWarning:
             if profile_name:
                 warnings.warn(
-                    f"Secure properties of profile '{profile_name}' could not found hence config not loaded",
+                    f"Secure properties of profile '{profile_name}' from file '{cfg.filename}' were not found \
+                    hence profile not loaded",
                     SecurePropsNotFoundWarning,
                 )
             else:
                 warnings.warn(
-                    f"Secure properties of profile type '{profile_type}' could not found hence config not loaded",
+                    f"Secure properties of profile type '{profile_type}' from file '{cfg.filename}' were not found \
+                    hence profile not loaded",
                     SecurePropsNotFoundWarning,
                 )
         except Exception as exc:
             warnings.warn(
-                f"Could not load {config_type} Config '{cfg.filename}' with exception '{exc}'",
+                f"Could not load {config_type} '{cfg.filename}' with exception '{exc}'",
                 ConfigNotFoundWarning,
             )
         finally:
