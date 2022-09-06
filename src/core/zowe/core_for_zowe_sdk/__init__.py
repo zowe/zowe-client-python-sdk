@@ -11,3 +11,4 @@ from .sdk_api import SdkApi
 from .session_constants import *
 from .session import Session
 from .zosmf_profile import ZosmfProfile
+from .config_file import ConfigFile

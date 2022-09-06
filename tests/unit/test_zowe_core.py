@@ -16,12 +16,14 @@ import commentjson
 from pyfakefs.fake_filesystem_unittest import TestCase
 from zowe.core_for_zowe_sdk import (
     ApiConnection,
+    ConfigFile,
     ProfileManager,
     RequestHandler,
     SdkApi,
     ZosmfProfile,
     exceptions,
     session_constants,
+    custom_warnings,
 )
 
 FIXTURES_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fixtures")
@@ -80,19 +82,12 @@ class TestSdkApiClass(TestCase):
             "protocol": "https",
             "rejectUnauthorized": True
         }
-        self.basic_props = {
-            **common_props,
-            "user": "Username",
-            "password": "Password"
-        }
-        self.bearer_props = {
-            **common_props,
-            "tokenValue": "BearerToken"
-        }
+        self.basic_props = {**common_props, "user": "Username", "password": "Password"}
+        self.bearer_props = {**common_props, "tokenValue": "BearerToken"}
         self.token_props = {
             **common_props,
             "tokenType": "MyToken",
-            "tokenValue": "TokenValue"
+            "tokenValue": "TokenValue",
         }
         self.default_url = "https://default-api.com/"
 
@@ -105,22 +100,28 @@ class TestSdkApiClass(TestCase):
         """Created object should handle basic authentication."""
         sdk_api = SdkApi(self.basic_props, self.default_url)
         self.assertEqual(sdk_api.session.type, session_constants.AUTH_TYPE_BASIC)
-        self.assertEqual(sdk_api.request_arguments["auth"],
-            (self.basic_props["user"], self.basic_props["password"]))
+        self.assertEqual(
+            sdk_api.request_arguments["auth"],
+            (self.basic_props["user"], self.basic_props["password"]),
+        )
 
     def test_should_handle_bearer_auth(self):
         """Created object should handle bearer authentication."""
         sdk_api = SdkApi(self.bearer_props, self.default_url)
         self.assertEqual(sdk_api.session.type, session_constants.AUTH_TYPE_BEARER)
-        self.assertEqual(sdk_api.default_headers["Authorization"],
-            "Bearer " + self.bearer_props["tokenValue"])
+        self.assertEqual(
+            sdk_api.default_headers["Authorization"],
+            "Bearer " + self.bearer_props["tokenValue"],
+        )
 
     def test_should_handle_token_auth(self):
         """Created object should handle token authentication."""
         sdk_api = SdkApi(self.token_props, self.default_url)
         self.assertEqual(sdk_api.session.type, session_constants.AUTH_TYPE_TOKEN)
-        self.assertEqual(sdk_api.default_headers["Cookie"],
-            self.token_props["tokenType"] + "=" + self.token_props["tokenValue"])
+        self.assertEqual(
+            sdk_api.default_headers["Cookie"],
+            self.token_props["tokenType"] + "=" + self.token_props["tokenValue"],
+        )
 
 
 class TestRequestHandlerClass(unittest.TestCase):
@@ -263,18 +264,18 @@ class TestZosmfProfileManager(TestCase):
             shutil.copy(self.original_file_path, cwd_up_file_path)
 
             # Test
-            prof_manager = ProfileManager(appname=self.custom_appname)
-            props: dict = prof_manager.load("non_existent_profile")
+            config_file = ConfigFile(name=self.custom_appname, type="team_config")
+            props: dict = config_file.get_profile(profile_name="non_existent_profile")
 
     @patch("keyring.get_password", side_effect=keyring_get_password_exception)
-    def test_secure_props_loading_exception(self, get_pass_func):
+    def test_secure_props_loading_warning(self, get_pass_func):
         """
-        Test correct exceptions are being thrown when secure properties
+        Test correct warnings are being thrown when secure properties
         are not found in keyring.
 
         Only the config folder will be set
         """
-        with self.assertRaises(exceptions.SecureProfileLoadFailed):
+        with self.assertWarns(custom_warnings.SecurePropsNotFoundWarning):
             # Setup
             custom_file_path = os.path.join(self.custom_dir, "zowe.config.json")
             shutil.copy(self.original_file_path, custom_file_path)
@@ -285,14 +286,14 @@ class TestZosmfProfileManager(TestCase):
             props: dict = prof_manager.load("base")
 
     @patch("keyring.get_password", side_effect=keyring_get_password)
-    def test_secure_values_loading_exception(self, get_pass_func):
+    def test_profile_not_found_warning(self, get_pass_func):
         """
-        Test correct exceptions are being thrown when secure properties
-        are not found in keyring.
+        Test correct warnings are being thrown when profile is not found
+        in config file.
 
         Only the config folder will be set
         """
-        with self.assertRaises(exceptions.SecureValuesNotFound):
+        with self.assertWarns(custom_warnings.ProfileNotFoundWarning):
             # Setup
             custom_file_path = os.path.join(self.custom_dir, "zowe.config.json")
             shutil.copy(self.original_file_path, custom_file_path)
@@ -300,12 +301,12 @@ class TestZosmfProfileManager(TestCase):
             # Test
             prof_manager = ProfileManager()
             prof_manager.config_dir = self.custom_dir
-            props: dict = prof_manager.load("ssh")
+            props: dict = prof_manager.load("non_existent_profile")
 
 
 class TestValidateConfigJsonClass(unittest.TestCase):
     """Testing the validate_config_json function"""
-    
+
     def test_validate_config_json_valid(self):
         """Test validate_config_json with valid config.json matching schema.json"""
         path_to_config = FIXTURES_PATH + "/zowe.config.json"
