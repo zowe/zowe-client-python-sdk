@@ -20,7 +20,7 @@ from zowe.core_for_zowe_sdk import (
     ZosmfProfile,
     exceptions,
     session_constants,
-    custom_warnings
+    custom_warnings,
 )
 
 FIXTURES_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fixtures")
@@ -76,21 +76,14 @@ class TestSdkApiClass(TestCase):
         common_props = {
             "host": "https://mock-url.com",
             "port": 443,
-            "rejectUnauthorized": True
+            "rejectUnauthorized": True,
         }
-        self.basic_props = {
-            **common_props,
-            "user": "Username",
-            "password": "Password"
-        }
-        self.bearer_props = {
-            **common_props,
-            "tokenValue": "BearerToken"
-        }
+        self.basic_props = {**common_props, "user": "Username", "password": "Password"}
+        self.bearer_props = {**common_props, "tokenValue": "BearerToken"}
         self.token_props = {
             **common_props,
             "tokenType": "MyToken",
-            "tokenValue": "TokenValue"
+            "tokenValue": "TokenValue",
         }
         self.default_url = "https://default-api.com/"
 
@@ -103,22 +96,28 @@ class TestSdkApiClass(TestCase):
         """Created object should handle basic authentication."""
         sdk_api = SdkApi(self.basic_props, self.default_url)
         self.assertEqual(sdk_api.session.type, session_constants.AUTH_TYPE_BASIC)
-        self.assertEqual(sdk_api.request_arguments["auth"],
-            (self.basic_props["user"], self.basic_props["password"]))
+        self.assertEqual(
+            sdk_api.request_arguments["auth"],
+            (self.basic_props["user"], self.basic_props["password"]),
+        )
 
     def test_should_handle_bearer_auth(self):
         """Created object should handle bearer authentication."""
         sdk_api = SdkApi(self.bearer_props, self.default_url)
         self.assertEqual(sdk_api.session.type, session_constants.AUTH_TYPE_BEARER)
-        self.assertEqual(sdk_api.default_headers["Authorization"],
-            "Bearer " + self.bearer_props["tokenValue"])
+        self.assertEqual(
+            sdk_api.default_headers["Authorization"],
+            "Bearer " + self.bearer_props["tokenValue"],
+        )
 
     def test_should_handle_token_auth(self):
         """Created object should handle token authentication."""
         sdk_api = SdkApi(self.token_props, self.default_url)
         self.assertEqual(sdk_api.session.type, session_constants.AUTH_TYPE_TOKEN)
-        self.assertEqual(sdk_api.default_headers["Cookie"],
-            self.token_props["tokenType"] + "=" + self.token_props["tokenValue"])
+        self.assertEqual(
+            sdk_api.default_headers["Cookie"],
+            self.token_props["tokenType"] + "=" + self.token_props["tokenValue"],
+        )
 
 
 class TestRequestHandlerClass(unittest.TestCase):
@@ -267,7 +266,7 @@ class TestZosmfProfileManager(TestCase):
     @patch("keyring.get_password", side_effect=keyring_get_password_exception)
     def test_secure_props_loading_warning(self, get_pass_func):
         """
-        Test correct exceptions are being thrown when secure properties
+        Test correct warnings are being thrown when secure properties
         are not found in keyring.
 
         Only the config folder will be set
@@ -285,8 +284,8 @@ class TestZosmfProfileManager(TestCase):
     @patch("keyring.get_password", side_effect=keyring_get_password)
     def test_profile_not_found_warning(self, get_pass_func):
         """
-        Test correct exceptions are being thrown when secure properties
-        are not found in keyring.
+        Test correct warnings are being thrown when profile is not found
+        in config file.
 
         Only the config folder will be set
         """
@@ -298,4 +297,4 @@ class TestZosmfProfileManager(TestCase):
             # Test
             prof_manager = ProfileManager()
             prof_manager.config_dir = self.custom_dir
-            props: dict = prof_manager.load("ssh_non")
+            props: dict = prof_manager.load("non_existent_profile")

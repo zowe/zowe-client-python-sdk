@@ -12,11 +12,15 @@ Copyright Contributors to the Zowe Project.
 
 import os.path
 import warnings
-from typing import Union
+from typing import Tuple, Union
 
 
 from .config_file import ConfigFile
-from .custom_warnings import ConfigNotFoundWarning, SecurePropsNotFoundWarning
+from .custom_warnings import (
+    ConfigNotFoundWarning,
+    ProfileNotFoundWarning,
+    SecurePropsNotFoundWarning,
+)
 from .exceptions import ProfileNotFound, SecureProfileLoadFailed, SecureValuesNotFound
 from .profile_constants import GLOBAL_CONFIG_NAME, TEAM_CONFIG, USER_CONFIG
 
@@ -94,6 +98,50 @@ class ProfileManager:
         """Get the full Zowe z/OSMF Team Project Config filepath"""
         return self.project_config.filepath
 
+    @staticmethod
+    def get_profile(
+        cfg: ConfigFile,
+        profile_name: Union[str, None],
+        profile_type: Union[str, None],
+        config_type: str,
+    ) -> Tuple[dict, str]:
+        """Get just the profile from the config file (overriden with base props in the config file)"""
+
+        cfg_profile: dict = {}
+        cfg_profile_name: str = ""
+
+        try:
+            cfg_profile, cfg_profile_name = cfg.get_profile(
+                profile_name=profile_name, profile_type=profile_type
+            )
+        except ProfileNotFound:
+            warnings.warn(
+                f"Profile not found in config '{cfg.filename}'", ProfileNotFoundWarning
+            )
+        except SecureProfileLoadFailed:
+            warnings.warn(
+                f"Config '{cfg.filename}' has no saved secure properties",
+                SecurePropsNotFoundWarning,
+            )
+        except SecurePropsNotFoundWarning:
+            if profile_name:
+                warnings.warn(
+                    f"Secure properties of profile '{profile_name}' could not found hence config not loaded",
+                    SecurePropsNotFoundWarning,
+                )
+            else:
+                warnings.warn(
+                    f"Secure properties of profile type '{profile_type}' could not found hence config not loaded",
+                    SecurePropsNotFoundWarning,
+                )
+        except Exception as exc:
+            warnings.warn(
+                f"Could not load {config_type} Config '{cfg.filename}' with exception '{exc}'",
+                ConfigNotFoundWarning,
+            )
+        finally:
+            return cfg_profile, cfg_profile_name
+
     def load(
         self,
         profile_name: Union[str, None] = None,
@@ -112,88 +160,55 @@ class ProfileManager:
         global_profile_name: Union[str, None] = None
 
         # get Project Profile
-        try:
-            project_profile, project_profile_name = self.project_config.get_profile(
-                profile_name=profile_name, profile_type=profile_type
-            )
-        except Exception as exc:
-            warnings.warn(
-                f"Could not load Project Config {self.project_config.name} with exception {exc}",
-                ConfigNotFoundWarning,
-            )
+        project_profile, project_profile_name = self.get_profile(
+            self.project_config,
+            profile_name=profile_name,
+            profile_type=profile_type,
+            config_type="Project Config",
+        )
 
         # get Project User Profile
-        try:
-            (
-                project_user_profile,
-                project_user_profile_name,
-            ) = self.project_user_config.get_profile(
-                profile_name=profile_name, profile_type=profile_type
-            )
-        except Exception:
-            warnings.warn(
-                f"Could not load Project Config {self.project_config.name}",
-                ConfigNotFoundWarning,
-            )
-        else:
-            project_profile.update(project_user_profile)
+        project_user_profile, project_user_profile_name = self.get_profile(
+            self.project_user_config,
+            profile_name=profile_name,
+            profile_type=profile_type,
+            config_type="Project User Config",
+        )
+        project_profile.update(project_user_profile)
 
         # get Global Base Profile
-        try:
-            self.global_config.init_from_file()
-            (
-                global_base_profile,
-                global_base_profile_name,
-            ) = self.global_config.get_profile(profile_type="base")
-        except Exception:
-            warnings.warn(
-                f"Could not load Global Config {self.global_config.name}",
-                ConfigNotFoundWarning,
-            )
+        global_base_profile, global_base_profile_name = self.get_profile(
+            self.global_config,
+            profile_name=None,
+            profile_type="base",
+            config_type="Global Config",
+        )
 
         # get Global Base User Profile
-        try:
-            self.global_user_config.init_from_file()
-            (
-                global_base_user_profile,
-                global_base_user_profile_name,
-            ) = self.global_user_config.get_profile(profile_type="base")
-        except Exception:
-            warnings.warn(
-                f"Could not load Global User Config {self.global_user_config.name}",
-                ConfigNotFoundWarning,
-            )
-        else:
-            global_base_profile.update(global_base_user_profile)
+        global_base_user_profile, global_base_user_profile_name = self.get_profile(
+            self.global_user_config,
+            profile_name=None,
+            profile_type="base",
+            config_type="Global User Config",
+        )
+        global_base_profile.update(global_base_user_profile)
 
         # get Global Profile
-        try:
-            self.global_config.init_from_file()
-            global_profile, global_profile_name = self.global_config.get_profile(
-                profile_name=profile_name, profile_type=profile_type
-            )
-        except Exception:
-            warnings.warn(
-                f"Could not load Global Config {self.global_config.name}",
-                ConfigNotFoundWarning,
-            )
+        global_profile, global_profile_name = self.get_profile(
+            self.global_config,
+            profile_name=None,
+            profile_type="base",
+            config_type="Global Config",
+        )
 
         # get Global User Profile
-        try:
-            self.global_user_config.init_from_file()
-            (
-                global_user_profile,
-                global_user_profile_name,
-            ) = self.global_user_config.get_profile(
-                profile_name=profile_name, profile_type=profile_type
-            )
-        except Exception:
-            warnings.warn(
-                f"Could not load Global User Config {self.global_user_config.name}",
-                ConfigNotFoundWarning,
-            )
-        else:
-            global_profile.update(global_user_profile)
+        global_user_profile, global_user_profile_name = self.get_profile(
+            self.global_user_config,
+            profile_name=None,
+            profile_type="base",
+            config_type="Global User Config",
+        )
+        global_profile.update(global_user_profile)
 
         # now update service profile
         service_profile.update(global_base_profile)
