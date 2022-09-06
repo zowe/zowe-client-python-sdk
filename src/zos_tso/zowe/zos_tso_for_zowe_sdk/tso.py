@@ -10,7 +10,7 @@ SPDX-License-Identifier: EPL-2.0
 Copyright Contributors to the Zowe Project.
 """
 
-from zowe.core_for_zowe_sdk import SdkApi
+from zowe.core_for_zowe_sdk import SdkApi, constants
 
 
 class Tso(SdkApi):
@@ -37,7 +37,7 @@ class Tso(SdkApi):
             The connection object
         """
         super().__init__(connection, "/zosmf/tsoApp/tso")
-        self.session_not_found = self.constants["TsoSessionNotFound"]
+        self.session_not_found = constants["TsoSessionNotFound"]
 
     def issue_command(self, command):
         """Issues a TSO command.
@@ -95,7 +95,7 @@ class Tso(SdkApi):
         str
             The 'servletKey' key for the created session (if successful)
         """
-        custom_args = self.__create_custom_request_arguments()
+        custom_args = self._create_custom_request_arguments()
         custom_args["params"] = {
             "proc": proc,
             "chset": chset,
@@ -123,11 +123,9 @@ class Tso(SdkApi):
         list
             A non-normalized list from TSO containing the result from the command
         """
-        custom_args = self.__create_custom_request_arguments()
+        custom_args = self._create_custom_request_arguments()
         custom_args["url"] = "{}/{}".format(self.request_endpoint, str(session_key))
-        custom_args["data"] = '{"TSO RESPONSE":{"VERSION":"0100","DATA":"%s"}}' % (
-            str(message)
-        )
+        custom_args["json"] = {"TSO RESPONSE":{"VERSION":"0100","DATA":str(message)}}
         response_json = self.request_handler.perform_request("PUT", custom_args)
         return response_json["tsoData"]
 
@@ -145,7 +143,7 @@ class Tso(SdkApi):
             A string informing if the ping was successful or not.
             Where the options are: 'Ping successful' or 'Ping failed'
         """
-        custom_args = self.__create_custom_request_arguments()
+        custom_args = self._create_custom_request_arguments()
         custom_args["url"] = "{}/{}/{}".format(
             self.request_endpoint, "ping", str(session_key)
         )
@@ -170,7 +168,7 @@ class Tso(SdkApi):
         str
             A string informing if the session was terminated successfully or not
         """
-        custom_args = self.__create_custom_request_arguments()
+        custom_args = self._create_custom_request_arguments()
         custom_args["url"] = "{}/{}".format(self.request_endpoint, session_key)
         response_json = self.request_handler.perform_request("DELETE", custom_args)
         message_id_list = self.parse_message_ids(response_json)

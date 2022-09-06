@@ -18,4 +18,4 @@ Reference
 .. toctree::
    :maxdepth: 2
 
-   ../classes/core/core
+   ../classes/core/index

@@ -1,12 +1,7 @@
 """Unit tests for the Zowe Python SDK z/OS Console package."""
 
-# Including necessary paths
-import sys
-import os
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
 import unittest
-from src.zos_console.zowe.zos_console_for_zowe_sdk import Console
+from zowe.zos_console_for_zowe_sdk import Console
 
 
 class TestConsoleClass(unittest.TestCase):
@@ -14,11 +9,14 @@ class TestConsoleClass(unittest.TestCase):
 
     def setUp(self):
         """Setup fixtures for Console class."""
-        self.connection_dict = {"host_url": "https://mock-url.com",
+        self.session_details = {"host": "https://mock-url.com",
                                 "user": "Username",
-                                "password": "Password"}
+                                "password": "Password",
+                                "port": 443,
+                                "rejectUnauthorized": True
+                                }
 
     def test_object_should_be_instance_of_class(self):
         """Created object should be instance of Console class."""
-        console = Console(self.connection_dict)
+        console = Console(self.session_details)
         self.assertIsInstance(console, Console)

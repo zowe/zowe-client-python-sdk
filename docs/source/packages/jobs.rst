@@ -17,4 +17,4 @@ Reference
 .. toctree::
    :maxdepth: 2
 
-   ../classes/jobs/jobs
+   ../classes/zos_jobs/index

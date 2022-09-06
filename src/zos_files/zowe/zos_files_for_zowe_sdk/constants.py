@@ -10,10 +10,13 @@ SPDX-License-Identifier: EPL-2.0
 Copyright Contributors to the Zowe Project.
 """
 
-constants = {
-    "SecureValuePrefix": "managed by ",
-    "TsoSessionNotFound": "IZUG1126E",
-    "ZoweCredentialKey": "Zowe-Plugin",
-    "ZoweServiceName": "Zowe",
-    "ZoweAccountName": "secure_config_props",
+zos_file_constants = {
+    "MaxAllocationQuantity": 16777215,
+    "SupportedDefaultDataSets": (
+        "partitioned",
+        "sequential",
+        "classic",
+        "c",
+        "binary"
+    ),
 }
