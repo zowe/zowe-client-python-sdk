@@ -20,6 +20,7 @@ from zowe.core_for_zowe_sdk import (
     ZosmfProfile,
     exceptions,
     session_constants,
+    custom_warnings
 )
 
 FIXTURES_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fixtures")
@@ -264,14 +265,14 @@ class TestZosmfProfileManager(TestCase):
             props: dict = config_file.get_profile(profile_name="non_existent_profile")
 
     @patch("keyring.get_password", side_effect=keyring_get_password_exception)
-    def test_secure_props_loading_exception(self, get_pass_func):
+    def test_secure_props_loading_warning(self, get_pass_func):
         """
         Test correct exceptions are being thrown when secure properties
         are not found in keyring.
 
         Only the config folder will be set
         """
-        with self.assertRaises(exceptions.SecureProfileLoadFailed):
+        with self.assertWarns(custom_warnings.SecurePropsNotFoundWarning):
             # Setup
             custom_file_path = os.path.join(self.custom_dir, "zowe.config.json")
             shutil.copy(self.original_file_path, custom_file_path)
@@ -282,14 +283,14 @@ class TestZosmfProfileManager(TestCase):
             props: dict = prof_manager.load("base")
 
     @patch("keyring.get_password", side_effect=keyring_get_password)
-    def test_secure_values_loading_exception(self, get_pass_func):
+    def test_profile_not_found_warning(self, get_pass_func):
         """
         Test correct exceptions are being thrown when secure properties
         are not found in keyring.
 
         Only the config folder will be set
         """
-        with self.assertRaises(exceptions.SecureValuesNotFound):
+        with self.assertWarns(custom_warnings.ProfileNotFoundWarning):
             # Setup
             custom_file_path = os.path.join(self.custom_dir, "zowe.config.json")
             shutil.copy(self.original_file_path, custom_file_path)
@@ -297,4 +298,4 @@ class TestZosmfProfileManager(TestCase):
             # Test
             prof_manager = ProfileManager()
             prof_manager.config_dir = self.custom_dir
-            props: dict = prof_manager.load("ssh")
+            props: dict = prof_manager.load("ssh_non")
