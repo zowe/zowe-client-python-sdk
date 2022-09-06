@@ -10,6 +10,7 @@ SPDX-License-Identifier: EPL-2.0
 Copyright Contributors to the Zowe Project.
 """
 
+from multiprocessing.sharedctypes import Value
 from zowe.core_for_zowe_sdk import SdkApi
 from zowe.core_for_zowe_sdk.exceptions import FileNotFound
 from zowe.zos_files_for_zowe_sdk import exceptions, constants
@@ -637,7 +638,7 @@ class Files(SdkApi):
             if enq in ("SHRW", "EXCLU"):
                 data["from-dataset"]["enq"] = enq.strip()
             else:
-                raise exceptions.InvalidValuesForEnq
+                raise ValueError("Invalid value for enq.")
 
         custom_args = self._create_custom_request_arguments()
         custom_args['json'] = data
