@@ -569,3 +569,79 @@ class Files(SdkApi):
         custom_args["url"] = "{}mfs".format(self.request_endpoint)
         response_json = self.request_handler.perform_request("GET", custom_args, expected_code=[200])
         return response_json
+
+    def rename_dataset(self, before_dataset_name: str, after_dataset_name: str):
+        """
+        Renames the data set.
+
+        Parameters
+        ----------
+        before_dataset_name: str
+            The source data set name.
+
+        after_dataset_name: str
+            New name for the source data set.
+    
+        Returns
+        -------
+        json - A JSON containing the result of the operation
+        """
+        data = {
+            "request": "rename",
+            "from-dataset": {
+                "dsn": before_dataset_name.strip()
+            }
+        }
+
+        custom_args = self._create_custom_request_arguments()
+        custom_args["json"] = data
+        custom_args["url"] = "{}ds/{}".format(self.request_endpoint, after_dataset_name.strip())
+
+        response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[200])
+        return response_json
+
+    def rename_dataset_member(self, dataset_name: str, before_member_name: str, after_member_name: str, enq=""):
+        """
+        Renames the data set member.
+
+        Parameters
+        ----------
+        dataset_name: str
+            Name of the data set.
+
+        before_member_name: str
+            The source member name.
+        
+        after_member_name: str
+            New name for the source member.
+        
+        enq: str
+            Values can be SHRW or EXCLU. SHRW is the default for PDS members, EXCLU otherwise.
+
+        Returns
+        -------
+        json - A JSON containing the result of the operation
+        """
+
+        data = {
+            "request": "rename",
+            "from-dataset": {
+                "dsn": dataset_name.strip(),
+                "member": before_member_name.strip(),
+            }
+        }
+
+        path_to_member = dataset_name.strip() + "(" + after_member_name.strip() + ")"
+
+        if enq:
+            if enq in ("SHRW", "EXCLU"):
+                data["from-dataset"]["enq"] = enq.strip()
+            else:
+                raise ValueError("Invalid value for enq.")
+
+        custom_args = self._create_custom_request_arguments()
+        custom_args['json'] = data
+        custom_args["url"] = "{}ds/{}".format(self.request_endpoint, path_to_member)
+
+        response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[200])
+        return response_json
