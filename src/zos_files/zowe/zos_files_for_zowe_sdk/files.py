@@ -167,7 +167,7 @@ class Files(SdkApi):
         """
 
         if options.get("like") is None:
-            if options.get("primary") is None and options.get("lrecl") is None:
+            if options.get("primary") is None or options.get("lrecl") is None:
                 raise KeyError
 
             for opt in ("volser", "unit", "dsorg", "alcunit", 
