@@ -41,16 +41,22 @@ class Console(SdkApi):
         custom_args = self._create_custom_request_arguments()
         request_body = {"cmd": command}
         custom_args["json"] = request_body
+        custom_args = self.__create_custom_request_arguments()
+        request_body = '{"cmd": "%s"}' % (command)
+        custom_args["data"] = request_body
+        custom_args["url"] = self.request_endpoint.replace("defcn", console or "defcn")
         response_json = self.request_handler.perform_request("PUT", custom_args)
         return response_json
 
-    def get_response(self, sol_msgs, Ckey_number):
-        """Get a command response on z/OS Console.
+    def get_response(self, response_key, console=None):
+        """Collect outstanding synchronous z/OS Console response messages.
 
         Parameters
         ----------
-        Ckey_number
+        response_key
             The command response key from the Issue Command request.
+        console
+            The console that should be used to get the command response.
 
         Returns
         -------
@@ -58,7 +64,7 @@ class Console(SdkApi):
             A JSON containing the response to the command
         """
         custom_args = self._create_custom_request_arguments()
-        request_url = "{}/{}".format(sol_msgs, Ckey_number)
-        custom_args["url"] = "{}{}".format(self.request_endpoint, request_url)
+        request_url = "{}/solmsgs/{}".format(console or "defcn", response_key)
+        custom_args["url"] = self.request_endpoint.replace("defcn", request_url)
         response_json = self.request_handler.perform_request("GET", custom_args)
         return response_json
