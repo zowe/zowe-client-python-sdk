@@ -3,7 +3,7 @@ z/OS Console Package
 
 Contains APIs to interact with the z/OS console (using z/OSMF console REST endpoints).
 
-API Examples
+Examples
 ------------
 
 <strong>Submit a command to the z/OS console</strong>  
