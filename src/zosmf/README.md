@@ -3,7 +3,7 @@ z/OS Management Facility Package
 
 Contains APIs to interact with the z/OS Management Facility (using z/OSMF REST endpoints).
 
-API Examples
+Examples
 ------------
 
 <strong>Check z/OSMF status</strong>  
