@@ -3,7 +3,7 @@ z/OS Jobs Package
 
 Contains APIs to interact with jobs on z/OS (using z/OSMF jobs REST endpoints).
 
-API Examples
+Examples
 ------------
 
 <strong>Cancel a job</strong>  
