@@ -3,7 +3,7 @@ z/OS Files Package
 
 Contains APIs to interact with files and data sets on z/OS (using z/OSMF files REST endpoints).
 
-API Examples
+Examples
 ------------
 
 <strong>Create a dataset</strong>  
