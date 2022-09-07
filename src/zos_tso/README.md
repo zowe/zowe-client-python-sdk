@@ -3,7 +3,7 @@ z/OS TSO Package
 
 Contains APIs to interact with TSO on z/OS (using z/OSMF TSO REST endpoints).
 
-API Examples
+Examples
 ------------
 
 <strong>Issue the TSO command "status" to display information about jobs for your user ID</strong>  
