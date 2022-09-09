@@ -45,3 +45,16 @@ class Zosmf(SdkApi):
             "GET", self.request_arguments
         )
         return response_json
+
+    def list_systems(self):
+        """Return a JSON response from the GET request to z/OSMF info endpoint.
+        Returns
+        -------
+        json
+            Return a list of the systems that are defined to a z/OSMF instance
+        """
+
+        custom_args = self._create_custom_request_arguments()
+        custom_args["url"] = "{}/systems".format(self.request_endpoint)
+        response_json = self.request_handler.perform_request("GET", custom_args, expected_code = [200])
+        return response_json

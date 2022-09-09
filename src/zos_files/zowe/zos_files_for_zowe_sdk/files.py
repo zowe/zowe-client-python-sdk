@@ -15,6 +15,8 @@ from zowe.core_for_zowe_sdk.exceptions import FileNotFound
 from zowe.zos_files_for_zowe_sdk import exceptions, constants
 import os
 import shutil
+import json
+from zowe.zos_files_for_zowe_sdk.constants import zos_file_constants
 
 _ZOWE_FILES_DEFAULT_ENCODING='utf-8'
 
@@ -163,58 +165,137 @@ class Files(SdkApi):
         json
         """
 
-        for opt in ("volser", "unit", "dsorg", "alcunit", 
-            "primary", "secondary", "dirblk", "avgblk", "recfm", 
-            "blksize", "lrecl", "storclass", "mgntclass", "dataclass", 
-            "dsntype", "like"):
+        if options.get("like") is None:
+            if options.get("primary") is None or options.get("lrecl") is None:
+                raise ValueError("If 'like' is not specified, you must specify 'primary' or 'lrecl'.")
 
-            if opt == "dsorg":
-                if options.get(opt) is not None and options[opt] not in ("PO", "PS"):
-                    raise KeyError
+            for opt in ("volser", "unit", "dsorg", "alcunit", 
+                "primary", "secondary", "dirblk", "avgblk", "recfm", 
+                "blksize", "lrecl", "storclass", "mgntclass", "dataclass", 
+                "dsntype", "like"):
 
-            if opt == "alcunit":
-                if options.get(opt) is None:
-                    options[opt] = "TRK"
-                else:
-                    if options[opt] not in ("CYL", "TRK"):
+                if opt == "dsorg":
+                    if options.get(opt) is not None and options[opt] not in ("PO", "PS"):
                         raise KeyError
 
-            if opt == "primary":
-                if options.get(opt) is not None:
-                    if options["primary"] > 16777215:
-                        raise ValueError
-
-            if opt == "secondary":
-                if options.get("primary") is not None:
+                if opt == "alcunit":
                     if options.get(opt) is None:
-                        options["secondary"] = int(options["primary"] / 10)
-                    if options["secondary"] > 16777215:
-                        raise ValueError
+                        options[opt] = "TRK"
+                    else:
+                        if options[opt] not in ("CYL", "TRK"):
+                            raise KeyError
 
-            if opt == "dirblk":
-                if options.get(opt) is not None:
-                    if options.get("dsorg") == "PS":
-                        if options["dirblk"] != 0:
-                            raise ValueError
-                    elif options.get("dsorg") == "PO":
-                        if options["dirblk"] == 0:
+                if opt == "primary":
+                    if options.get(opt) is not None:
+                        if options["primary"] > 16777215:
                             raise ValueError
 
-            if opt == "recfm":
-                if options.get(opt) is None:
-                    options[opt] = "F"
-                else:
-                    if options[opt] not in ("F", "FB", "V", "VB", "U"):
-                        raise KeyError
+                if opt == "secondary":
+                    if options.get("primary") is not None:
+                        if options.get(opt) is None:
+                            options["secondary"] = int(options["primary"] / 10)
+                        if options["secondary"] > 16777215:
+                            raise ValueError
 
-            if opt == "blksize":
-                if options.get(opt) is None and options.get("lrecl") is not None:
-                    options[opt] = options["lrecl"]
+                if opt == "dirblk":
+                    if options.get(opt) is not None:
+                        if options.get("dsorg") == "PS":
+                            if options["dirblk"] != 0:
+                                raise ValueError
+                        elif options.get("dsorg") == "PO":
+                            if options["dirblk"] == 0:
+                                raise ValueError
+
+                if opt == "recfm":
+                    if options.get(opt) is None:
+                        options[opt] = "F"
+                    else:
+                        if options[opt] not in ("F", "FB", "V", "VB", "U"):
+                            raise KeyError
+
+                if opt == "blksize":
+                    if options.get(opt) is None and options.get("lrecl") is not None:
+                        options[opt] = options["lrecl"]
 
         custom_args = self._create_custom_request_arguments()
         custom_args["url"] = "{}ds/{}".format(self.request_endpoint, dataset_name)
         custom_args["json"] = options
         response_json = self.request_handler.perform_request("POST", custom_args, expected_code = [201])
+        return response_json
+
+    def create_default_data_set(self, dataset_name: str, default_type: str):
+        """
+        Create a dataset with default options set.
+        Default options depend on the requested type.
+
+        Parameters
+        ----------
+            dataset_name: str
+            default_type: str
+                "partitioned", "sequential", "classic", "c" or "binary"
+
+        Returns
+        -------
+        json - A JSON containing the result of the operation
+        """
+
+        if default_type not in ("partitioned", "sequential", "classic", "c", "binary"):
+            raise ValueError("Invalid type for default data set.")
+
+        custom_args = self._create_custom_request_arguments()
+
+        if default_type == "partitioned":
+            custom_args["json"] = {
+                "alcunit": "CYL",
+                "dsorg": "PO",
+                "primary": 1,
+                "dirblk": 5,
+                "recfm": "FB",
+                "blksize": 6160,
+                "lrecl": 80
+            }
+        elif default_type == "sequential":
+            custom_args["json"] = {
+                "alcunit": "CYL",
+                "dsorg": "PS",
+                "primary": 1,
+                "recfm": "FB",
+                "blksize": 6160,
+                "lrecl": 80
+            }
+        elif default_type == "classic":
+            custom_args["json"] = {
+                "alcunit": "CYL",
+                "dsorg": "PO",
+                "primary": 1,
+                "recfm": "FB",
+                "blksize": 6160,
+                "lrecl": 80,
+                "dirblk": 25
+            }
+        elif default_type == "c":
+            custom_args["json"] = {
+                "dsorg": "PO",
+                "alcunit": "CYL",
+                "primary": 1,
+                "recfm": "VB",
+                "blksize": 32760,
+                "lrecl": 260,
+                "dirblk": 25
+            }
+        elif default_type == "binary":
+            custom_args["json"] = {
+                "dsorg": "PO",
+                "alcunit": "CYL",
+                "primary": 10,
+                "recfm": "U",
+                "blksize": 27998,
+                "lrecl": 27998,
+                "dirblk": 25
+            }
+
+        custom_args["url"] = "{}ds/{}".format(self.request_endpoint, dataset_name)
+        response_json = self.request_handler.perform_request("POST", custom_args, expected_code=[201])
         return response_json
 
     def create_uss(self, file_path, type, mode = None):
@@ -484,4 +565,109 @@ class Files(SdkApi):
         custom_args["params"] = {"path":file_path_name, "fsname": file_system_name}
         custom_args["url"] = "{}mfs".format(self.request_endpoint)
         response_json = self.request_handler.perform_request("GET", custom_args, expected_code=[200])
+        return response_json
+
+    def migrate_data_set(self, dataset_name: str, wait=False):
+        """
+        Migrates the data set.
+
+        Parameters
+        ----------
+        dataset_name: str
+            Name of the data set
+        
+        wait: bool
+            If true, the function waits for completion of the request, otherwise the request is queued.
+
+        Returns
+        -------
+        json - A JSON containing the result of the operation
+        """
+
+        data = {
+            "request": "hmigrate",
+            "wait": json.dumps(wait)
+        }
+
+        custom_args = self._create_custom_request_arguments()
+        custom_args["json"] = data
+        custom_args["url"] = "{}ds/{}".format(self.request_endpoint, dataset_name)
+
+        response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[200])
+        return response_json
+
+    def rename_dataset(self, before_dataset_name: str, after_dataset_name: str):
+        """
+        Renames the data set.
+
+        Parameters
+        ----------
+        before_dataset_name: str
+            The source data set name.
+
+        after_dataset_name: str
+            New name for the source data set.
+    
+        Returns
+        -------
+        json - A JSON containing the result of the operation
+        """
+        data = {
+            "request": "rename",
+            "from-dataset": {
+                "dsn": before_dataset_name.strip()
+            }
+        }
+
+        custom_args = self._create_custom_request_arguments()
+        custom_args["json"] = data
+        custom_args["url"] = "{}ds/{}".format(self.request_endpoint, after_dataset_name.strip())
+
+        response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[200])
+        return response_json
+
+    def rename_dataset_member(self, dataset_name: str, before_member_name: str, after_member_name: str, enq=""):
+        """
+        Renames the data set member.
+
+        Parameters
+        ----------
+        dataset_name: str
+            Name of the data set.
+
+        before_member_name: str
+            The source member name.
+        
+        after_member_name: str
+            New name for the source member.
+        
+        enq: str
+            Values can be SHRW or EXCLU. SHRW is the default for PDS members, EXCLU otherwise.
+
+        Returns
+        -------
+        json - A JSON containing the result of the operation
+        """
+
+        data = {
+            "request": "rename",
+            "from-dataset": {
+                "dsn": dataset_name.strip(),
+                "member": before_member_name.strip(),
+            }
+        }
+
+        path_to_member = dataset_name.strip() + "(" + after_member_name.strip() + ")"
+
+        if enq:
+            if enq in ("SHRW", "EXCLU"):
+                data["from-dataset"]["enq"] = enq.strip()
+            else:
+                raise ValueError("Invalid value for enq.")
+
+        custom_args = self._create_custom_request_arguments()
+        custom_args['json'] = data
+        custom_args["url"] = "{}ds/{}".format(self.request_endpoint, path_to_member)
+
+        response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[200])
         return response_json

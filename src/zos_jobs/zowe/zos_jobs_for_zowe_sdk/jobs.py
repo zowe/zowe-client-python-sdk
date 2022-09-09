@@ -97,6 +97,9 @@ class Jobs(SdkApi):
         response_json
             A JSON containing the result of the request execution
         """
+        if modify_version not in ("1.0", "2.0"):
+            raise ValueError('Accepted values: "1.0" or "2.0".')
+
         custom_args = self._create_custom_request_arguments()
         job_url = "{}/{}".format(jobname, jobid)
         request_url = "{}{}".format(self.request_endpoint, job_url)
