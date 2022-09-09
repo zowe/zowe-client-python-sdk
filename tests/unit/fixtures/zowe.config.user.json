@@ -1,0 +1,31 @@
+{
+    "$schema": "./zowe.schema.json",
+    "profiles": {
+        "zosmf": {
+            "type": "zosmf",
+            "properties": {
+                "port": 10000 // overridden property
+            },
+            "secure": []
+        },
+        "base": {
+            "type": "base",
+            "properties": {
+                "host": "zowe.test.user.cloud", // overriden property
+                "rejectUnauthorized": false // this is by default
+            },
+            "secure": [
+                "user",
+                "password"
+            ] // credentials are generally obtained from keyring
+        }
+    },
+    "defaults": {
+        "zosmf": "zosmf",
+        "tso": "tso",
+        "ssh": "ssh",
+        "zftp": "zftp",
+        "base": "base"
+    },
+    "autoStore": true
+}
