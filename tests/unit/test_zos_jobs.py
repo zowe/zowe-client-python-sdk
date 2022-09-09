@@ -54,4 +54,4 @@ class TestJobsClass(TestCase):
             else:
                 with self.assertRaises(ValueError) as e_info:
                     jobs_test_object.delete_job(*test_case[0])
-                self.assertEqual(str(e_info.exception), 'Accepted values: "1.0" or "2.0".')
+                self.assertEqual(str(e_info.exception), 'Accepted values for modify_version: "1.0" or "2.0"')
