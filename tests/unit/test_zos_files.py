@@ -82,6 +82,44 @@ class TestFilesClass(TestCase):
         mock_send_request.assert_called_once()
 
     @mock.patch('requests.Session.send')
+    def test_delete_migrated_data_set(self, mock_send_request):
+        """Test deleting a migrated data set sends a request"""
+        mock_send_request.return_value = mock.Mock(headers={"Content-Type": "application/json"}, status_code=200)
+
+        Files(self.test_profile).delete_migrated_data_set("dataset_name")
+        mock_send_request.assert_called_once()
+
+    def test_delete_migrated_data_set_parameterized(self):
+        """Test deleting a migrated data set with different values"""
+
+        test_values = [
+            ("MY.OLD.DSN", False, False),
+            ("MY.OLD.DSN", False, True),
+            ("MY.OLD.DSN", True, True),
+            ("MY.NEW.DSN", True, True),
+            ("MY.NEW.DSN", False, True),
+            ("MY.NEW.DSN", False, False),
+        ]
+
+        files_test_profile = Files(self.test_profile)
+
+        for test_case in test_values:
+            files_test_profile.request_handler.perform_request = mock.Mock()
+
+            data = {
+                "request": "hdelete",
+                "purge": json.dumps(test_case[1]),
+                "wait": json.dumps(test_case[2]),
+
+            }
+
+            files_test_profile.delete_migrated_data_set(test_case[0], test_case[1], test_case[2])
+            custom_args = files_test_profile._create_custom_request_arguments()
+            custom_args["json"] = data
+            custom_args["url"] = "https://https://mock-url.com:443/zosmf/restfiles/ds/{}".format(test_case[0])
+            files_test_profile.request_handler.perform_request.assert_called_once_with("PUT", custom_args, expected_code=[200])
+
+    @mock.patch('requests.Session.send')
     def test_migrate_data_set(self, mock_send_request):
         """Test migrating a data set sends a request"""
         mock_send_request.return_value = mock.Mock(headers={"Content-Type": "application/json"}, status_code=200)
@@ -133,7 +171,7 @@ class TestFilesClass(TestCase):
         ]
 
         files_test_profile = Files(self.test_profile)
-        
+
         for test_case in test_values:
             files_test_profile.request_handler.perform_request = mock.Mock()
 
@@ -163,7 +201,6 @@ class TestFilesClass(TestCase):
         """Test renaming a dataset member raises error when assigning invalid values to enq parameter"""
         with self.assertRaises(ValueError) as e_info:
             Files(self.test_profile).rename_dataset_member("MY.DS.NAME", "MEMBER1", "MEMBER1N", "RANDOM")
-
         self.assertEqual(str(e_info.exception), "Invalid value for enq.")
 
     def test_rename_dataset_member_parametrized(self):
@@ -195,8 +232,10 @@ class TestFilesClass(TestCase):
                 files_test_profile.rename_dataset_member(*test_case[0])
                 custom_args = files_test_profile._create_custom_request_arguments()
                 custom_args["json"] = data
-                custom_args["url"] = "https://https://mock-url.com:443/zosmf/restfiles/ds/{}({})".format(test_case[0][0], test_case[0][2])
-                files_test_profile.request_handler.perform_request.assert_called_once_with("PUT", custom_args, expected_code=[200])
+                custom_args["url"] = "https://https://mock-url.com:443/zosmf/restfiles/ds/{}({})".format(
+                    test_case[0][0], test_case[0][2])
+                files_test_profile.request_handler.perform_request.assert_called_once_with("PUT", custom_args,
+                                                                                           expected_code=[200])
             else:
                 with self.assertRaises(ValueError) as e_info:
                     files_test_profile.rename_dataset_member(*test_case[0])
@@ -272,13 +311,13 @@ class TestFilesClass(TestCase):
         """Test create dataset with different values"""
         test_values = [
             (("DSN", {
-                    "alcunit": "CYL",
-                    "dsorg": "PO",
-                    "primary": 1,
-                    "dirblk": 5,
-                    "recfm": "FB",
-                    "blksize": 6160,
-                    "lrecl": 80
+                "alcunit": "CYL",
+                "dsorg": "PO",
+                "primary": 1,
+                "dirblk": 5,
+                "recfm": "FB",
+                "blksize": 6160,
+                "lrecl": 80
             }), True),
             (("DSN", {
                 "alcunit": "CYL",
@@ -328,7 +367,6 @@ class TestFilesClass(TestCase):
             else:
                 with self.assertRaises(ValueError) as e_info:
                     files_test_profile.create_data_set(*test_case[0])
-
                 self.assertEqual(str(e_info.exception), "If 'like' is not specified, you must specify 'primary' or 'lrecl'.")
 
     @mock.patch('requests.Session.send')
@@ -411,5 +449,4 @@ class TestFilesClass(TestCase):
             else:
                 with self.assertRaises(ValueError) as e_info:
                     files_test_profile.create_default_data_set(*test_case[0])
-
                 self.assertEqual(str(e_info.exception), "Invalid type for default data set.")

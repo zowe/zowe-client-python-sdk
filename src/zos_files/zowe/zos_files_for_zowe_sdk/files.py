@@ -567,6 +567,39 @@ class Files(SdkApi):
         response_json = self.request_handler.perform_request("GET", custom_args, expected_code=[200])
         return response_json
 
+    def delete_migrated_data_set(self, dataset_name: str, purge=False, wait=False):
+        """
+        Deletes migrated data set.
+
+        Parameters
+        ----------
+        dataset_name: str
+            Name of the data set
+        
+        purge: bool
+            If true, the function uses the PURGE=YES on ARCHDEL request, otherwise it uses the PURGE=NO.
+        
+        wait: bool
+            If true, the function waits for completion of the request, otherwise the request is queued.
+
+        Returns
+        -------
+        json - A JSON containing the result of the operation
+        """
+
+        data = {
+            "request": "hdelete",
+            "purge": json.dumps(purge),
+            "wait": json.dumps(wait), 
+        }
+
+        custom_args = self._create_custom_request_arguments()
+        custom_args["json"] = data
+        custom_args["url"] = "{}ds/{}".format(self.request_endpoint, dataset_name)
+
+        response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[200])
+        return response_json
+
     def migrate_data_set(self, dataset_name: str, wait=False):
         """
         Migrates the data set.
@@ -575,7 +608,7 @@ class Files(SdkApi):
         ----------
         dataset_name: str
             Name of the data set
-        
+
         wait: bool
             If true, the function waits for completion of the request, otherwise the request is queued.
 
@@ -607,11 +640,12 @@ class Files(SdkApi):
 
         after_dataset_name: str
             New name for the source data set.
-    
+
         Returns
         -------
         json - A JSON containing the result of the operation
         """
+        
         data = {
             "request": "rename",
             "from-dataset": {
@@ -637,10 +671,10 @@ class Files(SdkApi):
 
         before_member_name: str
             The source member name.
-        
+
         after_member_name: str
             New name for the source member.
-        
+
         enq: str
             Values can be SHRW or EXCLU. SHRW is the default for PDS members, EXCLU otherwise.
 
