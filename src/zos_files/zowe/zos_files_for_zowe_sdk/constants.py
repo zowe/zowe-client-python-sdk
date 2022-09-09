@@ -12,11 +12,4 @@ Copyright Contributors to the Zowe Project.
 
 zos_file_constants = {
     "MaxAllocationQuantity": 16777215,
-    "SupportedDefaultDataSets": (
-        "partitioned",
-        "sequential",
-        "classic",
-        "c",
-        "binary"
-    ),
 }

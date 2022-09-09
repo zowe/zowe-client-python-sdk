@@ -31,10 +31,3 @@ class MaxAllocationQuantityExceeded(Exception):
 
     def __init__(self):
         super().__init__("Maximum allocation quantity of {} exceeded".format(zos_file_constants['MaxAllocationQuantity']))
-
-
-class UnsupportedDefaultDataSetRequested(Exception):
-    """Class used to represent an invalid request of default data set."""
-
-    def __init__(self):
-        super().__init__("Invalid request. The following default options are available: {}.".format(', '.join(zos_file_constants['SupportedDefaultDataSets'])))
