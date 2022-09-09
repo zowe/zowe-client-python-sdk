@@ -167,7 +167,9 @@ class TestZosmfProfileManager(TestCase):
         # setup pyfakefs
         self.setUpPyfakefs()
         self.original_file_path = os.path.join(FIXTURES_PATH, "zowe.config.json")
+        self.original_user_file_path = os.path.join(FIXTURES_PATH, "zowe.config.user.json")
         self.fs.add_real_file(self.original_file_path)
+        self.fs.add_real_file(self.original_user_file_path)
 
         self.custom_dir = os.path.dirname(FIXTURES_PATH)
         self.custom_appname = "zowe_abcd"
@@ -243,6 +245,32 @@ class TestZosmfProfileManager(TestCase):
             "user": "user",
             "password": "password",
             "port": 10443,
+        }
+        self.assertEqual(props, expected_props)
+
+    @patch("keyring.get_password", side_effect=keyring_get_password)
+    def test_profile_loading_with_user_overriden_properties(self, get_pass_func):
+        """
+        Test overriding of properties from user config,
+        also load by profile_name correctly populating fields from base profile
+        and secure credentials
+        """
+
+        cwd_up_dir_path = os.path.dirname(CWD)
+        cwd_up_file_path = os.path.join(cwd_up_dir_path, "zowe.config.json")
+        os.chdir(CWD)
+        shutil.copy(self.original_file_path, cwd_up_file_path)
+        shutil.copy(self.original_user_file_path, cwd_up_dir_path)
+
+        # Test
+        prof_manager = ProfileManager()
+        props: dict = prof_manager.load(profile_type="zosmf")
+        expected_props = {
+            "host": "zowe.test.user.cloud",
+            "rejectUnauthorized": False,
+            "user": "user",
+            "password": "password",
+            "port": 10000,
         }
         self.assertEqual(props, expected_props)
 
