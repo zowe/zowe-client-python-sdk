@@ -87,6 +87,7 @@ class TestFilesClass(TestCase):
         mock_send_request.return_value = mock.Mock(headers={"Content-Type": "application/json"}, status_code=200)
 
         Files(self.test_profile).migrate_data_set("dataset_name")
+        mock_send_request.assert_called_once()
 
     def test_migrate_data_set_parameterized(self):
         """Test migrating a data set with different values"""
@@ -124,7 +125,7 @@ class TestFilesClass(TestCase):
         mock_send_request.assert_called_once()
 
     def test_rename_dataset_parametrized(self):
-        "Test renaming a dataset with different values."
+        """Test renaming a dataset with different values"""
         test_values = [
             (('DSN.OLD', "DSN.NEW"), True),
             (('DS.NAME.CURRENT', "DS.NAME.NEW"), True),
@@ -159,14 +160,14 @@ class TestFilesClass(TestCase):
         mock_send_request.assert_called_once()
 
     def test_rename_dataset_member_raises_exception(self):
-        """Test renaming a dataset member raises error when assigning invalid values to enq parameter."""
+        """Test renaming a dataset member raises error when assigning invalid values to enq parameter"""
         with self.assertRaises(ValueError) as e_info:
             Files(self.test_profile).rename_dataset_member("MY.DS.NAME", "MEMBER1", "MEMBER1N", "RANDOM")
 
         self.assertEqual(str(e_info.exception), "Invalid value for enq.")
 
     def test_rename_dataset_member_parametrized(self):
-        "Test renaming a dataset member with different values."
+        """Test renaming a dataset member with different values"""
         test_values = [
             (('DSN', "MBROLD", "MBRNEW", "EXCLU"), True),
             (('DSN', "MBROLD", "MBRNEW", "SHRW"), True),
@@ -202,8 +203,8 @@ class TestFilesClass(TestCase):
                 self.assertEqual(str(e_info.exception), "Invalid value for enq.")
 
     def test_create_data_set_raises_error_without_required_arguments(self):
-        """Not providing required arguments should raise error."""
-        with self.assertRaises(KeyError):
+        """Test not providing required arguments raises an error"""
+        with self.assertRaises(ValueError) as e_info:
             obj = Files(self.test_profile).create_data_set("DSNAME123", options={
                 "alcunit": "CYL",
                 "dsorg": "PO",
@@ -211,19 +212,204 @@ class TestFilesClass(TestCase):
                 "blksize": 6160,
                 "dirblk": 25
             })
+        self.assertEqual(str(e_info.exception), "If 'like' is not specified, you must specify 'primary' or 'lrecl'.")
 
-    def test_create_default_data_set_raises_error_for_unsupported_types(self):
-        """Attempting to create a data set that is not part of the suggested list should raise error."""
-        with self.assertRaises(exceptions.UnsupportedDefaultDataSetRequested) as e_info:
-            obj = Files(self.test_profile).create_default_data_set("DSNAME123", "unsuporrted_type")
-        
-        expected = "Invalid request. The following default options are available: partitioned, sequential, classic, c, binary."
-        self.assertEqual(str(e_info.exception), expected)
+    def test_create_data_set_raises_error_with_invalid_arguments_parameterized(self):
+        """Test not providing valid arguments raises an error"""
+        test_values = [
+            {
+                "alcunit": "invalid",
+                "dsorg": "PO",
+                "primary": 1,
+                "dirblk": 5,
+                "recfm": "FB",
+                "blksize": 6160,
+                "lrecl": 80
+            },
+            {
+                "dsorg": "PO",
+                "alcunit": "CYL",
+                "primary": 1,
+                "recfm": "invalid",
+                "blksize": 32760,
+                "lrecl": 260,
+                "dirblk": 25
+            },
+            {
+                "alcunit": "CYL",
+                "dsorg": "invalid",
+                "primary": 1,
+                "dirblk": 5,
+                "recfm": "FB",
+                "blksize": 6160,
+                "lrecl": 80
+            },
+            {
+                "dsorg": "PO",
+                "alcunit": "CYL",
+                "primary": 10,
+                "recfm": "U",
+                "blksize": 27998,
+                "lrecl": 27998,
+                "dirblk": 0
+            },
+            {
+                "alcunit": "CYL",
+                "dsorg": "PO",
+                "primary": 99777215,
+                "dirblk": 5,
+                "recfm": "FB",
+                "blksize": 6160,
+                "lrecl": 80
+            }
+        ]
+
+        for test_case in test_values:
+            with self.assertRaises((KeyError, ValueError)):
+                obj = Files(self.test_profile).create_data_set("MY.OLD.DSN", options=test_case)
+
+    def test_create_dataset_parameterized(self):
+        """Test create dataset with different values"""
+        test_values = [
+            (("DSN", {
+                    "alcunit": "CYL",
+                    "dsorg": "PO",
+                    "primary": 1,
+                    "dirblk": 5,
+                    "recfm": "FB",
+                    "blksize": 6160,
+                    "lrecl": 80
+            }), True),
+            (("DSN", {
+                "alcunit": "CYL",
+                "dsorg": "PO",
+                "primary": 1,
+                "recfm": "FB",
+                "blksize": 6160,
+                "lrecl": 80,
+                "dirblk": 25
+            }), True),
+            (("DSN", {
+                "dsorg": "PO",
+                "alcunit": "CYL",
+                "primary": 1,
+                "recfm": "VB",
+                "blksize": 32760,
+                "lrecl": 260,
+                "dirblk": 25
+            }), True),
+            (("DSN", {
+                "alcunit": "CYL",
+                "dsorg": "PS",
+                "primary": 1,
+                "recfm": "FB",
+                "blksize": 6160,
+                "lrecl": 80
+            }), True),
+            (("DSN", {
+                "alcunit": "CYL",
+                "dsorg": "PS",
+                "recfm": "FB",
+                "blksize": 6160,
+            }), False),
+        ]
+
+        files_test_profile = Files(self.test_profile)
+
+        for test_case in test_values:
+            files_test_profile.request_handler.perform_request = mock.Mock()
+
+            if test_case[1]:
+                files_test_profile.create_data_set(*test_case[0])
+                custom_args = files_test_profile._create_custom_request_arguments()
+                custom_args["json"] = test_case[0][1]
+                custom_args["url"] = "https://https://mock-url.com:443/zosmf/restfiles/ds/{}".format(test_case[0][0])
+                files_test_profile.request_handler.perform_request.assert_called_once_with("POST", custom_args, expected_code=[201])
+            else:
+                with self.assertRaises(ValueError) as e_info:
+                    files_test_profile.create_data_set(*test_case[0])
+
+                self.assertEqual(str(e_info.exception), "If 'like' is not specified, you must specify 'primary' or 'lrecl'.")
 
     @mock.patch('requests.Session.send')
-    def test_create_default_dataset_with_partitioned_type(self, mock_send_request):
-        """Test creating a partitioned data set sends a request"""
+    def test_create_default_dataset(self, mock_send_request):
+        """Test creating a default data set sends a request"""
         mock_send_request.return_value = mock.Mock(headers={"Content-Type": "application/json"}, status_code=201)
 
         Files(self.test_profile).create_default_data_set("dataset_name", "partitioned")
         mock_send_request.assert_called_once()
+
+    def test_create_default_dataset_parameterized(self):
+        """Test create default dataset with different values"""
+        test_values = [
+            (("DSN", "partitioned"), True),
+            (("DSN", "sequential"), True),
+            (("DSN", "classic"), True),
+            (("DSN", "c"), True),
+            (("DSN", "binary"), True),
+            (("DSN", "invalid"), False),
+        ]
+
+        files_test_profile = Files(self.test_profile)
+
+        for test_case in test_values:
+            files_test_profile.request_handler.perform_request = mock.Mock()
+
+            options = {
+                "partitioned": {
+                    "alcunit": "CYL",
+                    "dsorg": "PO",
+                    "primary": 1,
+                    "dirblk": 5,
+                    "recfm": "FB",
+                    "blksize": 6160,
+                    "lrecl": 80
+                },
+                "sequential": {
+                    "alcunit": "CYL",
+                    "dsorg": "PS",
+                    "primary": 1,
+                    "recfm": "FB",
+                    "blksize": 6160,
+                    "lrecl": 80
+                },
+                "classic": {
+                    "alcunit": "CYL",
+                    "dsorg": "PO",
+                    "primary": 1,
+                    "recfm": "FB",
+                    "blksize": 6160,
+                    "lrecl": 80,
+                    "dirblk": 25
+                },
+                "c": {
+                    "dsorg": "PO",
+                    "alcunit": "CYL",
+                    "primary": 1,
+                    "recfm": "VB",
+                    "blksize": 32760,
+                    "lrecl": 260,
+                    "dirblk": 25
+                },
+                "binary": {
+                    "dsorg": "PO",
+                    "alcunit": "CYL",
+                    "primary": 10,
+                    "recfm": "U",
+                    "blksize": 27998,
+                    "lrecl": 27998,
+                    "dirblk": 25
+                }
+            }
+
+            if test_case[1]:
+                files_test_profile.create_default_data_set(*test_case[0])
+                custom_args = files_test_profile._create_custom_request_arguments()
+                custom_args["json"] = options.get(test_case[0][1])
+                custom_args["url"] = "https://https://mock-url.com:443/zosmf/restfiles/ds/{}".format(test_case[0][0])
+                files_test_profile.request_handler.perform_request.assert_called_once_with("POST", custom_args, expected_code=[201])
+            else:
+                with self.assertRaises(ValueError) as e_info:
+                    files_test_profile.create_default_data_set(*test_case[0])
+
+                self.assertEqual(str(e_info.exception), "Invalid type for default data set.")
