@@ -1,6 +1,7 @@
 """Unit tests for the Zowe Python SDK z/OS Files package."""
 from unittest import TestCase, mock
 from zowe.zos_files_for_zowe_sdk import Files, exceptions
+import json
 
 
 class TestFilesClass(TestCase):
@@ -79,6 +80,41 @@ class TestFilesClass(TestCase):
 
         Files(self.test_profile).list_unix_file_systems("file_system_name")
         mock_send_request.assert_called_once()
+
+    @mock.patch('requests.Session.send')
+    def test_migrate_data_set(self, mock_send_request):
+        """Test migrating a data set sends a request"""
+        mock_send_request.return_value = mock.Mock(headers={"Content-Type": "application/json"}, status_code=200)
+
+        Files(self.test_profile).migrate_data_set("dataset_name")
+        mock_send_request.assert_called_once()
+
+    def test_migrate_data_set_parameterized(self):
+        """Test migrating a data set with different values"""
+
+        test_values = [
+            ("MY.OLD.DSN", False),
+            ("MY.OLD.DSN", True),
+            ("MY.NEW.DSN", True),
+            ("MY.NEW.DSN", False),
+        ]
+
+        files_test_profile = Files(self.test_profile)
+
+        for test_case in test_values:
+            files_test_profile.request_handler.perform_request = mock.Mock()
+
+            data = {
+                "request": "hmigrate",
+                "wait": json.dumps(test_case[1]),
+            }
+
+            files_test_profile.migrate_data_set(test_case[0], test_case[1])
+
+            custom_args = files_test_profile._create_custom_request_arguments()
+            custom_args["json"] = data
+            custom_args["url"] = "https://https://mock-url.com:443/zosmf/restfiles/ds/{}".format(test_case[0])
+            files_test_profile.request_handler.perform_request.assert_called_once_with("PUT", custom_args, expected_code=[200])
 
     @mock.patch('requests.Session.send')
     def test_rename_dataset(self, mock_send_request):
