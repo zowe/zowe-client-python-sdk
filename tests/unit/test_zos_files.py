@@ -94,10 +94,10 @@ class TestFilesClass(TestCase):
 
         test_values = [
             ("MY.OLD.DSN", False, False),
-            ("MY.OLD.DSN", True, False),
+            ("MY.OLD.DSN", False, True),
             ("MY.OLD.DSN", True, True),
             ("MY.NEW.DSN", True, True),
-            ("MY.NEW.DSN", True, False),
+            ("MY.NEW.DSN", False, True),
             ("MY.NEW.DSN", False, False),
         ]
 
@@ -108,8 +108,9 @@ class TestFilesClass(TestCase):
 
             data = {
                 "request": "hdelete",
-                "wait": json.dumps(test_case[1]),
-                "purge": json.dumps(test_case[2]),
+                "purge": json.dumps(test_case[1]),
+                "wait": json.dumps(test_case[2]),
+
             }
 
             files_test_profile.delete_migrated_data_set(test_case[0], test_case[1], test_case[2])

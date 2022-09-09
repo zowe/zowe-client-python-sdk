@@ -567,7 +567,7 @@ class Files(SdkApi):
         response_json = self.request_handler.perform_request("GET", custom_args, expected_code=[200])
         return response_json
 
-    def delete_migrated_data_set(self, dataset_name: str, wait=False, purge=False):
+    def delete_migrated_data_set(self, dataset_name: str, purge=False, wait=False):
         """
         Deletes migrated data set.
 
@@ -575,12 +575,12 @@ class Files(SdkApi):
         ----------
         dataset_name: str
             Name of the data set
-
-        wait: bool
-            If true, the function waits for completion of the request, otherwise the request is queued.
-
+        
         purge: bool
             If true, the function uses the PURGE=YES on ARCHDEL request, otherwise it uses the PURGE=NO.
+        
+        wait: bool
+            If true, the function waits for completion of the request, otherwise the request is queued.
 
         Returns
         -------
@@ -589,8 +589,8 @@ class Files(SdkApi):
 
         data = {
             "request": "hdelete",
-            "wait": json.dumps(wait),
             "purge": json.dumps(purge),
+            "wait": json.dumps(wait), 
         }
 
         custom_args = self._create_custom_request_arguments()
