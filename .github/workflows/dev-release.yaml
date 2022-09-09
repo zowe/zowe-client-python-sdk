@@ -1,19 +1,21 @@
 name: Zowe SDK Release
 
 on:
-  push:
+  pull_request_target:
+    types:
+      - closed
     branches:
       - next
-    paths:
-      - 'src/**'
 
 jobs:
   release:
+    if: ${{ github.event.pull_request.merged == true && contains(github.event.pull_request.labels.*.name, 'release-dev') }}
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v2
       with:
+        ref: next
         token: ${{ secrets.ZOWE_ROBOT_TOKEN }}
 
     - name: Set up Python 3.7
