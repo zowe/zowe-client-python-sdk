@@ -56,7 +56,7 @@ class Jobs(SdkApi):
         response_json = self.request_handler.perform_request("GET", custom_args)
         return response_json
 
-    def cancel_job(self, jobname, jobid):
+    def cancel_job(self, jobname: str, jobid: str, modify_version="2.0"):
         """Cancels the a job
 
         Parameters
@@ -65,19 +65,27 @@ class Jobs(SdkApi):
             The name of the job
         jobid: str
             The job id on JES
+        modify_version: str
+            Default ("2.0") specifies that the request is to be processed synchronously. For asynchronous processing - change the value to "1.0"
 
         Returns
         -------
         response_json
             A JSON containing the result of the request execution
         """
+        if modify_version not in ("1.0", "2.0"):
+            raise ValueError('Accepted values for modify_version: "1.0" or "2.0"')
 
         custom_args = self._create_custom_request_arguments()
         job_url = "{}/{}".format(jobname, jobid)
         request_url = "{}{}".format(self.request_endpoint, job_url)
         custom_args["url"] = request_url
-        custom_args["json"] = {"request": "cancel"}
-        response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[202])
+        custom_args["json"] = {
+            "request": "cancel",
+            "version": modify_version
+        }
+
+        response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[202, 200])
         return response_json
 
     def delete_job(self, jobname, jobid, modify_version="2.0"):
