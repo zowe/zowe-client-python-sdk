@@ -9,12 +9,13 @@ class TestJobsClass(TestCase):
 
     def setUp(self):
         """Setup fixtures for Jobs class."""
-        self.test_profile = {"host": "https://mock-url.com",
-                                "user": "Username",
-                                "password": "Password",
-                                "port": 443,
-                                "rejectUnauthorized": True
-                                }
+        self.test_profile = {
+            "host": "https://mock-url.com",
+            "user": "Username",
+            "password": "Password",
+            "port": 443,
+            "rejectUnauthorized": True
+        }
 
     def test_object_should_be_instance_of_class(self):
         """Created object should be instance of Jobs class."""
