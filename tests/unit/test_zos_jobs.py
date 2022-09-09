@@ -9,12 +9,13 @@ class TestJobsClass(TestCase):
 
     def setUp(self):
         """Setup fixtures for Jobs class."""
-        self.test_profile = {"host": "https://mock-url.com",
-                                "user": "Username",
-                                "password": "Password",
-                                "port": 443,
-                                "rejectUnauthorized": True
-                                }
+        self.test_profile = {
+            "host": "https://mock-url.com",
+            "user": "Username",
+            "password": "Password",
+            "port": 443,
+            "rejectUnauthorized": True
+        }
 
     def test_object_should_be_instance_of_class(self):
         """Created object should be instance of Jobs class."""
@@ -56,4 +57,4 @@ class TestJobsClass(TestCase):
             else:
                 with self.assertRaises(ValueError) as e_info:
                     jobs_test_object.cancel_job(*test_case[0])
-                self.assertEqual(str(e_info.exception), 'Accepted values: "1.0" or "2.0".')
+                self.assertEqual(str(e_info.exception), 'Accepted values for modify_version: "1.0" or "2.0"')

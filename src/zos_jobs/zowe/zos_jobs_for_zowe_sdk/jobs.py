@@ -74,7 +74,7 @@ class Jobs(SdkApi):
             A JSON containing the result of the request execution
         """
         if modify_version not in ("1.0", "2.0"):
-            raise ValueError('Accepted values: "1.0" or "2.0".')
+            raise ValueError('Accepted values for modify_version: "1.0" or "2.0"')
 
         custom_args = self._create_custom_request_arguments()
         job_url = "{}/{}".format(jobname, jobid)
@@ -82,11 +82,8 @@ class Jobs(SdkApi):
         custom_args["url"] = request_url
         custom_args["json"] = {
             "request": "cancel",
-            "version": "2.0"
+            "version": modify_version
         }
-
-        if modify_version == "1.0":
-            custom_args["json"]["version"] = "1.0"
 
         response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[202, 200])
         return response_json
