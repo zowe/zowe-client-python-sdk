@@ -56,7 +56,7 @@ class Jobs(SdkApi):
         response_json = self.request_handler.perform_request("GET", custom_args)
         return response_json
 
-    def cancel_job(self, jobname, jobid, modify_version="2.0"):
+    def cancel_job(self, jobname: str, jobid: str, modify_version="2.0"):
         """Cancels the a job
 
         Parameters
@@ -73,6 +73,8 @@ class Jobs(SdkApi):
         response_json
             A JSON containing the result of the request execution
         """
+        if modify_version not in ("1.0", "2.0"):
+            raise ValueError('Accepted values: "1.0" or "2.0".')
 
         custom_args = self._create_custom_request_arguments()
         job_url = "{}/{}".format(jobname, jobid)
