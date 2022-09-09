@@ -167,7 +167,7 @@ class Files(SdkApi):
 
         if options.get("like") is None:
             if options.get("primary") is None or options.get("lrecl") is None:
-                raise KeyError
+                raise ValueError("If 'like' is not specified, you must specify 'primary' or 'lrecl'.")
 
             for opt in ("volser", "unit", "dsorg", "alcunit", 
                 "primary", "secondary", "dirblk", "avgblk", "recfm", 
@@ -223,29 +223,29 @@ class Files(SdkApi):
         response_json = self.request_handler.perform_request("POST", custom_args, expected_code = [201])
         return response_json
 
-    def create_default_data_set(self, dataset_name, default_type):
+    def create_default_data_set(self, dataset_name: str, default_type: str):
         """
         Create a dataset with default options set.
         Default options depend on the requested type.
 
         Parameters
         ----------
-            dataset_name
-            default_type: "partitioned" or "sequential" or "classic" or "c" or "binary"
+            dataset_name: str
+            default_type: str
+                "partitioned", "sequential", "classic", "c" or "binary"
 
         Returns
         -------
-        json
-            A JSON containing the result of the operation
+        json - A JSON containing the result of the operation
         """
 
-        if default_type not in zos_file_constants["SupportedDefaultDataSets"]:
-            raise exceptions.UnsupportedDefaultDataSetRequested
+        if default_type not in ("partitioned", "sequential", "classic", "c", "binary"):
+            raise ValueError("Invalid type for default data set.")
 
-        options = {}
+        custom_args = self._create_custom_request_arguments()
 
         if default_type == "partitioned":
-            options = {
+            custom_args["json"] = {
                 "alcunit": "CYL",
                 "dsorg": "PO",
                 "primary": 1,
@@ -253,18 +253,18 @@ class Files(SdkApi):
                 "recfm": "FB",
                 "blksize": 6160,
                 "lrecl": 80
-            },
+            }
         elif default_type == "sequential":
-            options = {
+            custom_args["json"] = {
                 "alcunit": "CYL",
                 "dsorg": "PS",
                 "primary": 1,
                 "recfm": "FB",
                 "blksize": 6160,
                 "lrecl": 80
-            },
+            }
         elif default_type == "classic":
-            options = {
+            custom_args["json"] = {
                 "alcunit": "CYL",
                 "dsorg": "PO",
                 "primary": 1,
@@ -274,7 +274,7 @@ class Files(SdkApi):
                 "dirblk": 25
             }
         elif default_type == "c":
-            options = {
+            custom_args["json"] = {
                 "dsorg": "PO",
                 "alcunit": "CYL",
                 "primary": 1,
@@ -284,7 +284,7 @@ class Files(SdkApi):
                 "dirblk": 25
             }
         elif default_type == "binary":
-            options = {
+            custom_args["json"] = {
                 "dsorg": "PO",
                 "alcunit": "CYL",
                 "primary": 10,
@@ -294,12 +294,9 @@ class Files(SdkApi):
                 "dirblk": 25
             }
 
-        custom_args = self._create_custom_request_arguments()
         custom_args["url"] = "{}ds/{}".format(self.request_endpoint, dataset_name)
-        custom_args["json"] = options
         response_json = self.request_handler.perform_request("POST", custom_args, expected_code=[201])
         return response_json
-
 
     def create_uss(self, file_path, type, mode = None):
         """
