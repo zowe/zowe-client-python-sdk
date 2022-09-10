@@ -99,6 +99,10 @@ class ConfigFile:
             raise FileNotFoundError(f"given path {dirname} is not valid")
 
     def init_from_file(self) -> None:
+        """
+        Initializes the class variable after
+        setting filepath (or if not set, autodiscover the file)
+        """
         if self.filepath is None:
             self.autodiscover_config_dir()
 
@@ -108,7 +112,10 @@ class ConfigFile:
         self.profiles = profile_jsonc["profiles"]
         self.defaults = profile_jsonc["defaults"]
 
-        self.load_secure_props()
+        # loading secure props is done in load_profile_properties
+        # since we want to try loading secure properties only when
+        # we know that the profile has saved properties
+        # self.load_secure_props()
 
     def get_profile(
         self,
@@ -218,16 +225,22 @@ class ConfigFile:
 
         secure_fields: list = self.profiles[profile_name].get("secure", [])
 
-        # load properties with key as profile.{profile_name}.properties.{*}
-        for (key, value) in self.secure_props.items():
-            if re.match("profiles\\." + profile_name + "\\.properties\\.[a-z]+", key):
-                property_name = key.split(".")[3]
-                if property_name in secure_fields:
-                    props[property_name] = value
-                    secure_fields.remove(property_name)
+        # load secure props only if there are secure fields
+        if secure_fields:
+            self.load_secure_props()
 
-        if len(secure_fields) > 0:
-            raise SecureValuesNotFound(secure_fields)
+            # load properties with key as profile.{profile_name}.properties.{*}
+            for (key, value) in self.secure_props.items():
+                if re.match(
+                    "profiles\\." + profile_name + "\\.properties\\.[a-z]+", key
+                ):
+                    property_name = key.split(".")[3]
+                    if property_name in secure_fields:
+                        props[property_name] = value
+                        secure_fields.remove(property_name)
+
+            if len(secure_fields) > 0:
+                raise SecureValuesNotFound(secure_fields)
 
         return props
 
@@ -239,6 +252,7 @@ class ConfigFile:
         """
         if not HAS_KEYRING:
             self.secure_props = {}
+            return
 
         try:
             service_name = constants["ZoweServiceName"]

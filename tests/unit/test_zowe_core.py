@@ -167,7 +167,9 @@ class TestZosmfProfileManager(TestCase):
         # setup pyfakefs
         self.setUpPyfakefs()
         self.original_file_path = os.path.join(FIXTURES_PATH, "zowe.config.json")
-        self.original_user_file_path = os.path.join(FIXTURES_PATH, "zowe.config.user.json")
+        self.original_user_file_path = os.path.join(
+            FIXTURES_PATH, "zowe.config.user.json"
+        )
         self.fs.add_real_file(self.original_file_path)
         self.fs.add_real_file(self.original_user_file_path)
 
