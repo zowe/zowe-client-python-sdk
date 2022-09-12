@@ -37,6 +37,4 @@ def validate_config_json(path_config_json: str, path_schema_json: str):
     with open(path_schema_json) as file:
         schema_json = commentjson.load(file)
 
-    result = validate(instance=config_json, schema=schema_json)
-    if result:
-        return result
+    return validate(instance=config_json, schema=schema_json)
