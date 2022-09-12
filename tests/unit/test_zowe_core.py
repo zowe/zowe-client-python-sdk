@@ -9,6 +9,10 @@ import sys
 import unittest
 from unittest import mock
 from unittest.mock import patch
+import commentjson
+from jsonschema import validate
+from zowe.core_for_zowe_sdk.validators import validate_config_json
+
 
 from pyfakefs.fake_filesystem_unittest import TestCase
 from zowe.core_for_zowe_sdk import (
@@ -34,6 +38,88 @@ def keyring_get_password(serviceName: str, username: str):
 
 def keyring_get_password_exception():
     raise Exception
+
+matching_config_json = {
+    "$schema": "./zowe.schema.json",
+    "defaults": {
+        "zosmf": "zosmf",
+        "tso": "tso",
+        "ssh": "ssh",
+        "base": "base"
+    },
+}
+
+matching_schema_json = {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$version": "1.0",
+    "type": "object",
+    "description": "Zowe configuration",
+    "properties": {
+        "defaults": {
+            "type": "object",
+            "description": "Mapping of profile types to default profile names",
+            "properties": {
+                "zosmf": {
+                    "description": "Default zosmf profile",
+                    "type": "string"
+                },
+                "tso": {
+                    "description": "Default tso profile",
+                    "type": "string"
+                },
+                "ssh": {
+                    "description": "Default ssh profile",
+                    "type": "string"
+                },
+                "base": {
+                    "description": "Default base profile",
+                    "type": "string"
+                }
+            }
+        },
+    }
+}
+
+not_matching_config_json = {
+    "$schema": "./zowe.schema.json",
+    "defaults": {
+        "zosmf": "zosmf",
+        "tso": "tso",
+        "ssh": "ssh",
+        "base": "base"
+    },
+}
+
+not_matching_schema_json = {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$version": "1.0",
+    "type": "object",
+    "description": "Zowe configuration",
+    "properties": {
+        "defaults": {
+            "type": "object",
+            "description": "Mapping of profile types to default profile names",
+            "properties": {
+                "zosmf": {
+                    "description": "Default zosmf profile",
+                    "type": "boolean"
+                },
+                "tso": {
+                    "description": "Default tso profile",
+                    "type": "string"
+                },
+                "ssh": {
+                    "description": "Default ssh profile",
+                    "type": "string"
+                },
+                "base": {
+                    "description": "Default base profile",
+                    "type": "string"
+                }
+            }
+        },
+    }
+}
 
 
 class TestApiConnectionClass(unittest.TestCase):
@@ -297,3 +383,47 @@ class TestZosmfProfileManager(TestCase):
             prof_manager = ProfileManager()
             prof_manager.config_dir = self.custom_dir
             props: dict = prof_manager.load("ssh")
+
+
+class TestValidateConfigJsonClass(unittest.TestCase):
+    """Testing the validate_config_json function"""
+
+    def test_validate_config_json_parameterized(self):
+        """Test validate_config_json with different values"""
+        test_values = [
+            ((matching_config_json, matching_schema_json), True),
+            ((not_matching_config_json, not_matching_schema_json), False),
+        ]
+
+        current_dir = os.getcwd()
+
+        for test_case in test_values:
+            if test_case[1]:
+                with open("config.json", "w") as file:
+                    commentjson.dump(matching_config_json, file)
+
+                with open("schema.json", "w") as file:
+                    commentjson.dump(matching_schema_json, file)
+
+                expected = validate(test_case[0][0], test_case[0][1])
+                result = validate_config_json(current_dir + "/config.json", current_dir + "/schema.json")
+
+                self.assertEqual(result, expected)
+
+            else:
+                with open("config.json", "w") as file:
+                    commentjson.dump(not_matching_config_json, file)
+
+                with open("schema.json", "w") as file:
+                    commentjson.dump(not_matching_schema_json, file)
+
+                with self.assertRaises(Exception) as expected_info:
+                    validate(test_case[0][0], test_case[0][1])
+
+                with self.assertRaises(Exception) as actual_info:
+                    validate_config_json(current_dir + "/config.json", current_dir + "/schema.json")
+
+                self.assertEqual(str(actual_info.exception), str(expected_info.exception))
+
+            os.remove(current_dir + "/config.json")
+            os.remove(current_dir + "/schema.json")
