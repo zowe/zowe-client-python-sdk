@@ -15,21 +15,24 @@ import os.path
 import re
 import sys
 import warnings
-
 from dataclasses import dataclass
 from typing import Tuple, Union
 
 import commentjson
 
+from .constants import constants
 from .custom_warnings import (
     ProfileNotFoundWarning,
     ProfileParsingWarning,
     SecurePropsNotFoundWarning,
 )
-
-from .constants import constants
-from .exceptions import ProfileNotFound, SecureValuesNotFound, SecureProfileLoadFailed
-from .profile_constants import GLOBAL_CONFIG_NAME, TEAM_CONFIG, USER_CONFIG
+from .exceptions import ProfileNotFound, SecureProfileLoadFailed, SecureValuesNotFound
+from .profile_constants import (
+    BASE_PROFILE,
+    GLOBAL_CONFIG_NAME,
+    TEAM_CONFIG,
+    USER_CONFIG,
+)
 
 HAS_KEYRING = True
 try:
@@ -138,7 +141,9 @@ class ConfigFile:
         props: dict = self.load_profile_properties(profile_name=profile_name)
 
         try:
-            base_profile = self.get_profilename_from_profiletype(profile_type="base")
+            base_profile = self.get_profilename_from_profiletype(
+                profile_type=BASE_PROFILE
+            )
         except ProfileNotFound:
             if self.type == TEAM_CONFIG:
                 warnings.warn(

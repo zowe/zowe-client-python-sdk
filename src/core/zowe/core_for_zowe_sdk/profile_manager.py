@@ -14,15 +14,19 @@ import os.path
 import warnings
 from typing import Tuple, Union
 
-
 from .config_file import ConfigFile
 from .custom_warnings import (
     ConfigNotFoundWarning,
     ProfileNotFoundWarning,
     SecurePropsNotFoundWarning,
 )
-from .exceptions import ProfileNotFound, SecureProfileLoadFailed, SecureValuesNotFound
-from .profile_constants import GLOBAL_CONFIG_NAME, TEAM_CONFIG, USER_CONFIG
+from .exceptions import ProfileNotFound, SecureProfileLoadFailed
+from .profile_constants import (
+    BASE_PROFILE,
+    GLOBAL_CONFIG_NAME,
+    TEAM_CONFIG,
+    USER_CONFIG,
+)
 
 HAS_KEYRING = True
 
@@ -116,29 +120,41 @@ class ProfileManager:
             )
         except ProfileNotFound:
             warnings.warn(
-                f"Profile not found in file '{cfg.filename}'", ProfileNotFoundWarning
+                f"Profile not found in file '{cfg.filename}', trying to return base profile instead.",
+                ProfileNotFoundWarning,
             )
+            try:
+                cfg_profile, cfg_profile_name = cfg.get_profile(
+                    profile_name=BASE_PROFILE, profile_type=BASE_PROFILE
+                )
+            except Exception as exc:
+                warnings.warn(
+                    f"Base Profile not found in file '{cfg.filename}' because {type(exc).__name__}'{exc}', "
+                    f"returning empty profile.",
+                    ProfileNotFoundWarning,
+                )
         except SecureProfileLoadFailed:
             warnings.warn(
-                f"Config '{cfg.filename}' has no saved secure properties",
+                f"Config '{cfg.filename}' has no saved secure properties.",
                 SecurePropsNotFoundWarning,
             )
         except SecurePropsNotFoundWarning:
             if profile_name:
                 warnings.warn(
-                    f"Secure properties of profile '{profile_name}' from file '{cfg.filename}' were not found \
-                    hence profile not loaded",
+                    f"Secure properties of profile '{profile_name}' from file '{cfg.filename}' were not found "
+                    f"hence profile not loaded.",
                     SecurePropsNotFoundWarning,
                 )
             else:
                 warnings.warn(
-                    f"Secure properties of profile type '{profile_type}' from file '{cfg.filename}' were not found \
-                    hence profile not loaded",
+                    f"Secure properties of profile type '{profile_type}' from file '{cfg.filename}' were not found "
+                    f"hence profile not loaded.",
                     SecurePropsNotFoundWarning,
                 )
         except Exception as exc:
             warnings.warn(
-                f"Could not load {config_type} '{cfg.filename}' at '{cfg.filepath}' with {type(exc).__name__}'{exc}'",
+                f"Could not load {config_type} '{cfg.filename}' at '{cfg.filepath}'"
+                f"because {type(exc).__name__}'{exc}'.",
                 ConfigNotFoundWarning,
             )
         finally:
