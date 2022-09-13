@@ -9,7 +9,7 @@ import sys
 import unittest
 from unittest import mock
 from unittest.mock import patch
-from jsonschema import validate
+from jsonschema import validate, ValidationError
 from zowe.core_for_zowe_sdk.validators import validate_config_json
 
 
@@ -326,10 +326,10 @@ class TestValidateConfigJsonClass(unittest.TestCase):
         invalid_config_json = json.load(open(path_to_invalid_config))
         invalid_schema_json = json.load(open(path_to_invalid_schema))
 
-        with self.assertRaises(Exception) as expected_info:
+        with self.assertRaises(ValidationError) as expected_info:
             validate(invalid_config_json, invalid_schema_json)
 
-        with self.assertRaises(Exception) as actual_info:
+        with self.assertRaises(ValidationError) as actual_info:
             validate_config_json(path_to_invalid_config, path_to_invalid_schema)
 
         self.assertEqual(str(actual_info.exception), str(expected_info.exception))
