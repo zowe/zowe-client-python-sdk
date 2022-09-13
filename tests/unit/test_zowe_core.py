@@ -11,7 +11,7 @@ from unittest import mock
 from unittest.mock import patch
 from jsonschema import validate, ValidationError
 from zowe.core_for_zowe_sdk.validators import validate_config_json
-
+import commentjson
 
 from pyfakefs.fake_filesystem_unittest import TestCase
 from zowe.core_for_zowe_sdk import (
@@ -310,8 +310,8 @@ class TestValidateConfigJsonClass(unittest.TestCase):
         path_to_config = FIXTURES_PATH + "/zowe.config.json"
         path_to_schema = FIXTURES_PATH + "/zowe.schema.json"
 
-        config_json = json.load(open(path_to_config))
-        schema_json = json.load(open(path_to_schema))
+        config_json = commentjson.load(open(path_to_config))
+        schema_json = commentjson.load(open(path_to_schema))
 
         expected = validate(config_json, schema_json)
         result = validate_config_json(path_to_config, path_to_schema)
@@ -323,8 +323,8 @@ class TestValidateConfigJsonClass(unittest.TestCase):
         path_to_invalid_config = FIXTURES_PATH + "/invalid.zowe.config.json"
         path_to_invalid_schema = FIXTURES_PATH + "/invalid.zowe.schema.json"
 
-        invalid_config_json = json.load(open(path_to_invalid_config))
-        invalid_schema_json = json.load(open(path_to_invalid_schema))
+        invalid_config_json = commentjson.load(open(path_to_invalid_config))
+        invalid_schema_json = commentjson.load(open(path_to_invalid_schema))
 
         with self.assertRaises(ValidationError) as expected_info:
             validate(invalid_config_json, invalid_schema_json)
