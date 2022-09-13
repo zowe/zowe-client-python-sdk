@@ -138,7 +138,7 @@ class ProfileManager:
                 )
         except Exception as exc:
             warnings.warn(
-                f"Could not load {config_type} '{cfg.filename}' at '{cfg.filepath}' with exception '{exc}'",
+                f"Could not load {config_type} '{cfg.filename}' at '{cfg.filepath}' with {type(exc).__name__}'{exc}'",
                 ConfigNotFoundWarning,
             )
         finally:

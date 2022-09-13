@@ -109,8 +109,8 @@ class ConfigFile:
         with open(self.filepath, encoding="UTF-8", mode="r") as fileobj:
             profile_jsonc = commentjson.load(fileobj)
 
-        self.profiles = profile_jsonc["profiles"]
-        self.defaults = profile_jsonc["defaults"]
+        self.profiles = profile_jsonc.get("profiles", {})
+        self.defaults = profile_jsonc.get("defaults", {})
 
         # loading secure props is done in load_profile_properties
         # since we want to try loading secure properties only when
