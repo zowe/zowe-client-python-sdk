@@ -15,7 +15,7 @@ from zowe.core_for_zowe_sdk.exceptions import FileNotFound
 from zowe.zos_files_for_zowe_sdk import exceptions, constants
 import os
 import shutil
-from zowe.zos_files_for_zowe_sdk import exceptions
+import json
 from zowe.zos_files_for_zowe_sdk.constants import zos_file_constants
 
 _ZOWE_FILES_DEFAULT_ENCODING='utf-8'
@@ -167,7 +167,7 @@ class Files(SdkApi):
 
         if options.get("like") is None:
             if options.get("primary") is None or options.get("lrecl") is None:
-                raise KeyError
+                raise ValueError("If 'like' is not specified, you must specify 'primary' or 'lrecl'.")
 
             for opt in ("volser", "unit", "dsorg", "alcunit", 
                 "primary", "secondary", "dirblk", "avgblk", "recfm", 
@@ -223,29 +223,29 @@ class Files(SdkApi):
         response_json = self.request_handler.perform_request("POST", custom_args, expected_code = [201])
         return response_json
 
-    def create_default_data_set(self, dataset_name, default_type):
+    def create_default_data_set(self, dataset_name: str, default_type: str):
         """
         Create a dataset with default options set.
         Default options depend on the requested type.
 
         Parameters
         ----------
-            dataset_name
-            default_type: "partitioned" or "sequential" or "classic" or "c" or "binary"
+            dataset_name: str
+            default_type: str
+                "partitioned", "sequential", "classic", "c" or "binary"
 
         Returns
         -------
-        json
-            A JSON containing the result of the operation
+        json - A JSON containing the result of the operation
         """
 
-        if default_type not in zos_file_constants["SupportedDefaultDataSets"]:
-            raise exceptions.UnsupportedDefaultDataSetRequested
+        if default_type not in ("partitioned", "sequential", "classic", "c", "binary"):
+            raise ValueError("Invalid type for default data set.")
 
-        options = {}
+        custom_args = self._create_custom_request_arguments()
 
         if default_type == "partitioned":
-            options = {
+            custom_args["json"] = {
                 "alcunit": "CYL",
                 "dsorg": "PO",
                 "primary": 1,
@@ -253,18 +253,18 @@ class Files(SdkApi):
                 "recfm": "FB",
                 "blksize": 6160,
                 "lrecl": 80
-            },
+            }
         elif default_type == "sequential":
-            options = {
+            custom_args["json"] = {
                 "alcunit": "CYL",
                 "dsorg": "PS",
                 "primary": 1,
                 "recfm": "FB",
                 "blksize": 6160,
                 "lrecl": 80
-            },
+            }
         elif default_type == "classic":
-            options = {
+            custom_args["json"] = {
                 "alcunit": "CYL",
                 "dsorg": "PO",
                 "primary": 1,
@@ -274,7 +274,7 @@ class Files(SdkApi):
                 "dirblk": 25
             }
         elif default_type == "c":
-            options = {
+            custom_args["json"] = {
                 "dsorg": "PO",
                 "alcunit": "CYL",
                 "primary": 1,
@@ -284,7 +284,7 @@ class Files(SdkApi):
                 "dirblk": 25
             }
         elif default_type == "binary":
-            options = {
+            custom_args["json"] = {
                 "dsorg": "PO",
                 "alcunit": "CYL",
                 "primary": 10,
@@ -294,12 +294,9 @@ class Files(SdkApi):
                 "dirblk": 25
             }
 
-        custom_args = self._create_custom_request_arguments()
         custom_args["url"] = "{}ds/{}".format(self.request_endpoint, dataset_name)
-        custom_args["json"] = options
         response_json = self.request_handler.perform_request("POST", custom_args, expected_code=[201])
         return response_json
-
 
     def create_uss(self, file_path, type, mode = None):
         """
@@ -568,4 +565,143 @@ class Files(SdkApi):
         custom_args["params"] = {"path":file_path_name, "fsname": file_system_name}
         custom_args["url"] = "{}mfs".format(self.request_endpoint)
         response_json = self.request_handler.perform_request("GET", custom_args, expected_code=[200])
+        return response_json
+
+    def delete_migrated_data_set(self, dataset_name: str, purge=False, wait=False):
+        """
+        Deletes migrated data set.
+
+        Parameters
+        ----------
+        dataset_name: str
+            Name of the data set
+        
+        purge: bool
+            If true, the function uses the PURGE=YES on ARCHDEL request, otherwise it uses the PURGE=NO.
+        
+        wait: bool
+            If true, the function waits for completion of the request, otherwise the request is queued.
+
+        Returns
+        -------
+        json - A JSON containing the result of the operation
+        """
+
+        data = {
+            "request": "hdelete",
+            "purge": json.dumps(purge),
+            "wait": json.dumps(wait), 
+        }
+
+        custom_args = self._create_custom_request_arguments()
+        custom_args["json"] = data
+        custom_args["url"] = "{}ds/{}".format(self.request_endpoint, dataset_name)
+
+        response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[200])
+        return response_json
+
+    def migrate_data_set(self, dataset_name: str, wait=False):
+        """
+        Migrates the data set.
+
+        Parameters
+        ----------
+        dataset_name: str
+            Name of the data set
+
+        wait: bool
+            If true, the function waits for completion of the request, otherwise the request is queued.
+
+        Returns
+        -------
+        json - A JSON containing the result of the operation
+        """
+
+        data = {
+            "request": "hmigrate",
+            "wait": json.dumps(wait)
+        }
+
+        custom_args = self._create_custom_request_arguments()
+        custom_args["json"] = data
+        custom_args["url"] = "{}ds/{}".format(self.request_endpoint, dataset_name)
+
+        response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[200])
+        return response_json
+
+    def rename_dataset(self, before_dataset_name: str, after_dataset_name: str):
+        """
+        Renames the data set.
+
+        Parameters
+        ----------
+        before_dataset_name: str
+            The source data set name.
+
+        after_dataset_name: str
+            New name for the source data set.
+
+        Returns
+        -------
+        json - A JSON containing the result of the operation
+        """
+        
+        data = {
+            "request": "rename",
+            "from-dataset": {
+                "dsn": before_dataset_name.strip()
+            }
+        }
+
+        custom_args = self._create_custom_request_arguments()
+        custom_args["json"] = data
+        custom_args["url"] = "{}ds/{}".format(self.request_endpoint, after_dataset_name.strip())
+
+        response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[200])
+        return response_json
+
+    def rename_dataset_member(self, dataset_name: str, before_member_name: str, after_member_name: str, enq=""):
+        """
+        Renames the data set member.
+
+        Parameters
+        ----------
+        dataset_name: str
+            Name of the data set.
+
+        before_member_name: str
+            The source member name.
+
+        after_member_name: str
+            New name for the source member.
+
+        enq: str
+            Values can be SHRW or EXCLU. SHRW is the default for PDS members, EXCLU otherwise.
+
+        Returns
+        -------
+        json - A JSON containing the result of the operation
+        """
+
+        data = {
+            "request": "rename",
+            "from-dataset": {
+                "dsn": dataset_name.strip(),
+                "member": before_member_name.strip(),
+            }
+        }
+
+        path_to_member = dataset_name.strip() + "(" + after_member_name.strip() + ")"
+
+        if enq:
+            if enq in ("SHRW", "EXCLU"):
+                data["from-dataset"]["enq"] = enq.strip()
+            else:
+                raise ValueError("Invalid value for enq.")
+
+        custom_args = self._create_custom_request_arguments()
+        custom_args['json'] = data
+        custom_args["url"] = "{}ds/{}".format(self.request_endpoint, path_to_member)
+
+        response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[200])
         return response_json
