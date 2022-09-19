@@ -10,7 +10,7 @@ class TestZosmfClass(unittest.TestCase):
 
     def setUp(self):
         """Setup fixtures for Zosmf class."""
-        self.connection_dict = {"host": "https://mock-url.com",
+        self.connection_dict = {"host": "mock-url.com",
                                 "user": "Username",
                                 "password": "Password",
                                 "port": 443,

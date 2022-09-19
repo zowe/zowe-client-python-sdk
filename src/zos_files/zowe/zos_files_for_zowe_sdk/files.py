@@ -16,7 +16,6 @@ from zowe.core_for_zowe_sdk.exceptions import FileNotFound
 from zowe.zos_files_for_zowe_sdk import exceptions, constants
 import os
 import shutil
-import json
 from zowe.zos_files_for_zowe_sdk.constants import zos_file_constants
 
 _ZOWE_FILES_DEFAULT_ENCODING='utf-8'
@@ -587,7 +586,7 @@ class Files(SdkApi):
 
         data = {
             "request": "hrecall",
-            "wait": json.dumps(wait)
+            "wait": wait
         }
 
         custom_args = self._create_custom_request_arguments()
@@ -619,8 +618,8 @@ class Files(SdkApi):
 
         data = {
             "request": "hdelete",
-            "purge": json.dumps(purge),
-            "wait": json.dumps(wait), 
+            "purge": purge,
+            "wait": wait,
         }
 
         custom_args = self._create_custom_request_arguments()
@@ -649,7 +648,7 @@ class Files(SdkApi):
 
         data = {
             "request": "hmigrate",
-            "wait": json.dumps(wait)
+            "wait": wait
         }
 
         custom_args = self._create_custom_request_arguments()
