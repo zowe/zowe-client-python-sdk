@@ -1,7 +1,6 @@
 """Unit tests for the Zowe Python SDK z/OS Files package."""
 from unittest import TestCase, mock
 from zowe.zos_files_for_zowe_sdk import Files, exceptions
-import json
 
 
 class TestFilesClass(TestCase):
@@ -9,7 +8,7 @@ class TestFilesClass(TestCase):
 
     def setUp(self):
         """Setup fixtures for File class."""
-        self.test_profile = {"host": "https://mock-url.com",
+        self.test_profile = {"host": "mock-url.com",
                                 "user": "Username",
                                 "password": "Password",
                                 "port": 443,
@@ -106,13 +105,13 @@ class TestFilesClass(TestCase):
 
             data = {
                 "request": "hrecall",
-                "wait": json.dumps(test_case[1])
+                "wait": test_case[1]
             }
 
             files_test_profile.recall_migrated_dataset(test_case[0], test_case[1])
             custom_args = files_test_profile._create_custom_request_arguments()
             custom_args["json"] = data
-            custom_args["url"] = "https://https://mock-url.com:443/zosmf/restfiles/ds/{}".format(test_case[0])
+            custom_args["url"] = "https://mock-url.com:443/zosmf/restfiles/ds/{}".format(test_case[0])
             files_test_profile.request_handler.perform_request.assert_called_once_with("PUT", custom_args, expected_code=[200])
 
     @mock.patch('requests.Session.send')
@@ -142,15 +141,15 @@ class TestFilesClass(TestCase):
 
             data = {
                 "request": "hdelete",
-                "purge": json.dumps(test_case[1]),
-                "wait": json.dumps(test_case[2]),
+                "purge": test_case[1],
+                "wait": test_case[2],
 
             }
 
             files_test_profile.delete_migrated_data_set(test_case[0], test_case[1], test_case[2])
             custom_args = files_test_profile._create_custom_request_arguments()
             custom_args["json"] = data
-            custom_args["url"] = "https://https://mock-url.com:443/zosmf/restfiles/ds/{}".format(test_case[0])
+            custom_args["url"] = "https://mock-url.com:443/zosmf/restfiles/ds/{}".format(test_case[0])
             files_test_profile.request_handler.perform_request.assert_called_once_with("PUT", custom_args, expected_code=[200])
 
     @mock.patch('requests.Session.send')
@@ -178,14 +177,14 @@ class TestFilesClass(TestCase):
 
             data = {
                 "request": "hmigrate",
-                "wait": json.dumps(test_case[1]),
+                "wait": test_case[1],
             }
 
             files_test_profile.migrate_data_set(test_case[0], test_case[1])
 
             custom_args = files_test_profile._create_custom_request_arguments()
             custom_args["json"] = data
-            custom_args["url"] = "https://https://mock-url.com:443/zosmf/restfiles/ds/{}".format(test_case[0])
+            custom_args["url"] = "https://mock-url.com:443/zosmf/restfiles/ds/{}".format(test_case[0])
             files_test_profile.request_handler.perform_request.assert_called_once_with("PUT", custom_args, expected_code=[200])
 
     @mock.patch('requests.Session.send')
@@ -220,7 +219,7 @@ class TestFilesClass(TestCase):
 
             custom_args = files_test_profile._create_custom_request_arguments()
             custom_args["json"] = data
-            custom_args["url"] = "https://https://mock-url.com:443/zosmf/restfiles/ds/{}".format(test_case[0][1])
+            custom_args["url"] = "https://mock-url.com:443/zosmf/restfiles/ds/{}".format(test_case[0][1])
             files_test_profile.request_handler.perform_request.assert_called_once_with("PUT", custom_args, expected_code=[200])
 
     @mock.patch('requests.Session.send')
@@ -266,7 +265,7 @@ class TestFilesClass(TestCase):
                 files_test_profile.rename_dataset_member(*test_case[0])
                 custom_args = files_test_profile._create_custom_request_arguments()
                 custom_args["json"] = data
-                custom_args["url"] = "https://https://mock-url.com:443/zosmf/restfiles/ds/{}({})".format(
+                custom_args["url"] = "https://mock-url.com:443/zosmf/restfiles/ds/{}({})".format(
                     test_case[0][0], test_case[0][2])
                 files_test_profile.request_handler.perform_request.assert_called_once_with("PUT", custom_args,
                                                                                            expected_code=[200])
@@ -396,7 +395,7 @@ class TestFilesClass(TestCase):
                 files_test_profile.create_data_set(*test_case[0])
                 custom_args = files_test_profile._create_custom_request_arguments()
                 custom_args["json"] = test_case[0][1]
-                custom_args["url"] = "https://https://mock-url.com:443/zosmf/restfiles/ds/{}".format(test_case[0][0])
+                custom_args["url"] = "https://mock-url.com:443/zosmf/restfiles/ds/{}".format(test_case[0][0])
                 files_test_profile.request_handler.perform_request.assert_called_once_with("POST", custom_args, expected_code=[201])
             else:
                 with self.assertRaises(ValueError) as e_info:
@@ -478,7 +477,7 @@ class TestFilesClass(TestCase):
                 files_test_profile.create_default_data_set(*test_case[0])
                 custom_args = files_test_profile._create_custom_request_arguments()
                 custom_args["json"] = options.get(test_case[0][1])
-                custom_args["url"] = "https://https://mock-url.com:443/zosmf/restfiles/ds/{}".format(test_case[0][0])
+                custom_args["url"] = "https://mock-url.com:443/zosmf/restfiles/ds/{}".format(test_case[0][0])
                 files_test_profile.request_handler.perform_request.assert_called_once_with("POST", custom_args, expected_code=[201])
             else:
                 with self.assertRaises(ValueError) as e_info:
