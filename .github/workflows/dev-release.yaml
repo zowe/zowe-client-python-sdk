@@ -48,7 +48,7 @@ jobs:
     - name: Create zip bundle
       working-directory: dist
       run: |
-        pip download -f . zowe-${{ steps.update-version.outputs.version }}-py3-none-any.whl
+        pip download -f . --no-binary=pyyaml zowe-${{ steps.update-version.outputs.version }}-py3-none-any.whl
         zip zowe-python-sdk-${{ steps.update-version.outputs.version }}.zip *.whl
 
     - name: Commit version update
