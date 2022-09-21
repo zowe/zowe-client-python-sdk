@@ -54,6 +54,7 @@ jobs:
     - name: Commit version update
       uses: stefanzweifel/git-auto-commit-action@v4
       with:
+        branch: next
         commit_message: 'Bump version to ${{ steps.update-version.outputs.version }} [ci skip]'
         commit_options: '--signoff'
         commit_user_name: ${{ secrets.ZOWE_ROBOT_USER }}
