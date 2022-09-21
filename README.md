@@ -40,7 +40,7 @@ For more information on the available sub-packages click [HERE](https://zowe-cli
 **Note**: You can also install prerelease versions of the Zowe SDK from GitHub. Download the ZIP file from the [latest release](https://github.com/zowe/zowe-client-python-sdk/releases/latest), extract it, and run the following command:
 
 ```
-pip install --no-index --no-deps <path where zip is extracted>/*.whl
+pip install --no-deps <path where zip is extracted>/*
 ```
 
 ## Requirements
