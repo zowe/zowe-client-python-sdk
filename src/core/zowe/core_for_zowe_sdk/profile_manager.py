@@ -198,7 +198,7 @@ class ProfileManager:
         global_base_profile, global_base_profile_name = self.get_profile(
             self.global_config,
             profile_name=None,
-            profile_type="base",
+            profile_type=BASE_PROFILE,
             config_type="Global Config",
         )
 
@@ -206,7 +206,7 @@ class ProfileManager:
         global_base_user_profile, global_base_user_profile_name = self.get_profile(
             self.global_user_config,
             profile_name=None,
-            profile_type="base",
+            profile_type=BASE_PROFILE,
             config_type="Global User Config",
         )
         global_base_profile.update(global_base_user_profile)
