@@ -9,6 +9,9 @@ import sys
 import unittest
 from unittest import mock
 from unittest.mock import patch
+from jsonschema import validate, ValidationError
+from zowe.core_for_zowe_sdk.validators import validate_config_json
+import commentjson
 
 from pyfakefs.fake_filesystem_unittest import TestCase
 from zowe.core_for_zowe_sdk import (
@@ -72,8 +75,9 @@ class TestSdkApiClass(TestCase):
     def setUp(self):
         """Setup fixtures for SdkApi class."""
         common_props = {
-            "host": "https://mock-url.com",
+            "host": "mock-url.com",
             "port": 443,
+            "protocol": "https",
             "rejectUnauthorized": True
         }
         self.basic_props = {
@@ -297,3 +301,36 @@ class TestZosmfProfileManager(TestCase):
             prof_manager = ProfileManager()
             prof_manager.config_dir = self.custom_dir
             props: dict = prof_manager.load("ssh")
+
+
+class TestValidateConfigJsonClass(unittest.TestCase):
+    """Testing the validate_config_json function"""
+    
+    def test_validate_config_json_valid(self):
+        """Test validate_config_json with valid config.json matching schema.json"""
+        path_to_config = FIXTURES_PATH + "/zowe.config.json"
+        path_to_schema = FIXTURES_PATH + "/zowe.schema.json"
+
+        config_json = commentjson.load(open(path_to_config))
+        schema_json = commentjson.load(open(path_to_schema))
+
+        expected = validate(config_json, schema_json)
+        result = validate_config_json(path_to_config, path_to_schema)
+
+        self.assertEqual(result, expected)
+
+    def test_validate_config_json_invalid(self):
+        """Test validate_config_json with invalid config.json that does not match schema.json"""
+        path_to_invalid_config = FIXTURES_PATH + "/invalid.zowe.config.json"
+        path_to_invalid_schema = FIXTURES_PATH + "/invalid.zowe.schema.json"
+
+        invalid_config_json = commentjson.load(open(path_to_invalid_config))
+        invalid_schema_json = commentjson.load(open(path_to_invalid_schema))
+
+        with self.assertRaises(ValidationError) as expected_info:
+            validate(invalid_config_json, invalid_schema_json)
+
+        with self.assertRaises(ValidationError) as actual_info:
+            validate_config_json(path_to_invalid_config, path_to_invalid_schema)
+
+        self.assertEqual(str(actual_info.exception), str(expected_info.exception))

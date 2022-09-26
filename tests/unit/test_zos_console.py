@@ -9,7 +9,7 @@ class TestConsoleClass(unittest.TestCase):
 
     def setUp(self):
         """Setup fixtures for Console class."""
-        self.session_details = {"host": "https://mock-url.com",
+        self.session_details = {"host": "mock-url.com",
                                 "user": "Username",
                                 "password": "Password",
                                 "port": 443,

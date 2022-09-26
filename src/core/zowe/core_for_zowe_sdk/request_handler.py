@@ -143,7 +143,7 @@ class RequestHandler:
         A bytes object if the response content type is application/octet-stream,
         a normalized JSON for the request response otherwise
         """  
-        if self.response.headers['Content-Type'] == 'application/octet-stream':
+        if self.response.headers.get('Content-Type') == 'application/octet-stream':
             return self.response.content
         else:
             try:
