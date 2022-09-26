@@ -214,16 +214,16 @@ class ProfileManager:
         # get Global Profile
         global_profile, global_profile_name = self.get_profile(
             self.global_config,
-            profile_name=None,
-            profile_type="base",
+            profile_name=profile_name,
+            profile_type=profile_type,
             config_type="Global Config",
         )
 
         # get Global User Profile
         global_user_profile, global_user_profile_name = self.get_profile(
             self.global_user_config,
-            profile_name=None,
-            profile_type="base",
+            profile_name=profile_name,
+            profile_type=profile_type,
             config_type="Global User Config",
         )
         global_profile.update(global_user_profile)
