@@ -10,12 +10,12 @@ SPDX-License-Identifier: EPL-2.0
 Copyright Contributors to the Zowe Project.
 """
 
+
 from zowe.core_for_zowe_sdk import SdkApi
 from zowe.core_for_zowe_sdk.exceptions import FileNotFound
 from zowe.zos_files_for_zowe_sdk import exceptions, constants
 import os
 import shutil
-import json
 from zowe.zos_files_for_zowe_sdk.constants import zos_file_constants
 
 _ZOWE_FILES_DEFAULT_ENCODING='utf-8'
@@ -567,6 +567,35 @@ class Files(SdkApi):
         response_json = self.request_handler.perform_request("GET", custom_args, expected_code=[200])
         return response_json
 
+    def recall_migrated_dataset(self, dataset_name: str, wait=False):
+        """
+        Recalls a migrated data set.
+
+        Parameters
+        ----------
+        dataset_name: str
+            Name of the data set
+
+        wait: bool
+            If true, the function waits for completion of the request, otherwise the request is queued
+
+        Returns
+        -------
+        json - A JSON containing the result of the operation
+        """
+
+        data = {
+            "request": "hrecall",
+            "wait": wait
+        }
+
+        custom_args = self._create_custom_request_arguments()
+        custom_args["json"] = data
+        custom_args["url"] = "{}ds/{}".format(self.request_endpoint, dataset_name)
+
+        response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[200])
+        return response_json
+
     def delete_migrated_data_set(self, dataset_name: str, purge=False, wait=False):
         """
         Deletes migrated data set.
@@ -589,8 +618,8 @@ class Files(SdkApi):
 
         data = {
             "request": "hdelete",
-            "purge": json.dumps(purge),
-            "wait": json.dumps(wait), 
+            "purge": purge,
+            "wait": wait,
         }
 
         custom_args = self._create_custom_request_arguments()
@@ -619,7 +648,7 @@ class Files(SdkApi):
 
         data = {
             "request": "hmigrate",
-            "wait": json.dumps(wait)
+            "wait": wait
         }
 
         custom_args = self._create_custom_request_arguments()

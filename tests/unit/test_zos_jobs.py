@@ -10,7 +10,7 @@ class TestJobsClass(TestCase):
     def setUp(self):
         """Setup fixtures for Jobs class."""
         self.test_profile = {
-            "host": "https://mock-url.com",
+            "host": "mock-url.com",
             "user": "Username",
             "password": "Password",
             "port": 443,
@@ -52,7 +52,7 @@ class TestJobsClass(TestCase):
                     "request": "cancel",
                     "version": test_case[0][2],
                 }
-                custom_args["url"] = "https://https://mock-url.com:443/zosmf/restjobs/jobs/{}/{}".format(test_case[0][0], test_case[0][1])
+                custom_args["url"] = "https://mock-url.com:443/zosmf/restjobs/jobs/{}/{}".format(test_case[0][0], test_case[0][1])
                 jobs_test_object.request_handler.perform_request.assert_called_once_with("PUT", custom_args, expected_code=[202, 200])
             else:
                 with self.assertRaises(ValueError) as e_info:

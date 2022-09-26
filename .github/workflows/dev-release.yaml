@@ -45,9 +45,16 @@ jobs:
     - name: Build dist wheels
       run: bash build.sh
 
+    - name: Create zip bundle
+      working-directory: dist
+      run: |
+        pip download -f . --no-binary=pyyaml zowe-${{ steps.update-version.outputs.version }}-py3-none-any.whl
+        zip zowe-python-sdk-${{ steps.update-version.outputs.version }}.zip PyYAML*.tar.gz *.whl
+
     - name: Commit version update
       uses: stefanzweifel/git-auto-commit-action@v4
       with:
+        branch: next
         commit_message: 'Bump version to ${{ steps.update-version.outputs.version }} [ci skip]'
         commit_options: '--signoff'
         commit_user_name: ${{ secrets.ZOWE_ROBOT_USER }}
@@ -58,5 +65,5 @@ jobs:
     - name: Create GitHub release
       uses: softprops/action-gh-release@v1
       with:
-        files: 'dist/*.whl'
+        files: 'dist/zowe-python-sdk-${{ steps.update-version.outputs.version }}.zip'
         tag_name: v${{ steps.update-version.outputs.version }}

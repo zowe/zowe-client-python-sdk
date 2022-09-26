@@ -75,8 +75,9 @@ class TestSdkApiClass(TestCase):
     def setUp(self):
         """Setup fixtures for SdkApi class."""
         common_props = {
-            "host": "https://mock-url.com",
+            "host": "mock-url.com",
             "port": 443,
+            "protocol": "https",
             "rejectUnauthorized": True
         }
         self.basic_props = {
