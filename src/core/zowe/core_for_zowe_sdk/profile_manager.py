@@ -12,7 +12,7 @@ Copyright Contributors to the Zowe Project.
 
 import os.path
 import warnings
-from typing import Tuple, Union
+from typing import Optional, Tuple
 
 from .config_file import ConfigFile
 from .custom_warnings import (
@@ -70,7 +70,7 @@ class ProfileManager:
         return self._appname
 
     @property
-    def config_dir(self) -> Union[str, None]:
+    def config_dir(self) -> Optional[str]:
         """Returns the folder path to where the Zowe z/OSMF Team Project Config files are located."""
         return self.project_config.location
 
@@ -83,7 +83,7 @@ class ProfileManager:
         self.project_user_config.location = dirname
 
     @property
-    def user_config_dir(self) -> Union[str, None]:
+    def user_config_dir(self) -> Optional[str]:
         """Returns the folder path to where the Zowe z/OSMF User Project Config files are located."""
         return self.project_user_config.location
 
@@ -98,15 +98,15 @@ class ProfileManager:
         return self.project_config.filename
 
     @property
-    def config_filepath(self) -> Union[str, None]:
+    def config_filepath(self) -> Optional[str]:
         """Get the full Zowe z/OSMF Team Project Config filepath"""
         return self.project_config.filepath
 
     @staticmethod
     def get_profile(
         cfg: ConfigFile,
-        profile_name: Union[str, None],
-        profile_type: Union[str, None],
+        profile_name: Optional[str],
+        profile_type: Optional[str],
         config_type: str,
     ) -> Tuple[dict, str]:
         """Get just the profile from the config file (overriden with base props in the config file)"""
@@ -162,8 +162,8 @@ class ProfileManager:
 
     def load(
         self,
-        profile_name: Union[str, None] = None,
-        profile_type: Union[str, None] = None,
+        profile_name: Optional[str] = None,
+        profile_type: Optional[str] = None,
     ) -> dict:
         if profile_name is None and profile_type is None:
             raise ProfileNotFound(
@@ -174,8 +174,8 @@ class ProfileManager:
         project_profile: dict = {}
         global_profile: dict = {}
         global_base_profile: dict = {}
-        project_profile_name: Union[str, None] = None
-        global_profile_name: Union[str, None] = None
+        project_profile_name: Optional[str] = None
+        global_profile_name: Optional[str] = None
 
         # get Project Profile
         project_profile, project_profile_name = self.get_profile(

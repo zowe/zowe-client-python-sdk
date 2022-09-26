@@ -16,7 +16,7 @@ import re
 import sys
 import warnings
 from dataclasses import dataclass
-from typing import Tuple, Union
+from typing import Tuple, Optional
 
 import commentjson
 
@@ -68,10 +68,10 @@ class ConfigFile:
 
     type: str
     name: str
-    _location: Union[str, None] = None
-    profiles: Union[dict, None] = None
-    defaults: Union[dict, None] = None
-    secure_props: Union[dict, None] = None
+    _location: Optional[str] = None
+    profiles: Optional[dict] = None
+    defaults: Optional[dict] = None
+    secure_props: Optional[dict] = None
 
     @property
     def filename(self) -> str:
@@ -84,14 +84,14 @@ class ConfigFile:
         return self.name
 
     @property
-    def filepath(self) -> Union[str, None]:
+    def filepath(self) -> Optional[str]:
         if not self.location:
             return None
 
         return os.path.join(self.location, self.filename)
 
     @property
-    def location(self) -> Union[str, None]:
+    def location(self) -> Optional[str]:
         return self._location
 
     @location.setter
@@ -122,8 +122,8 @@ class ConfigFile:
 
     def get_profile(
         self,
-        profile_name: Union[str, None] = None,
-        profile_type: Union[str, None] = None,
+        profile_name: Optional[str] = None,
+        profile_type: Optional[str] = None,
     ) -> Tuple[dict, str]:
         if self.profiles is None:
             self.init_from_file()

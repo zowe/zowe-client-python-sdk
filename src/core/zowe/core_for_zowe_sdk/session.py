@@ -11,7 +11,7 @@ Copyright Contributors to the Zowe Project.
 """
 
 from dataclasses import dataclass
-from typing import Union
+from typing import Optional
 
 from . import session_constants
 
@@ -25,13 +25,13 @@ class ISession:
     host: str
     port: int = session_constants.DEFAULT_HTTPS_PORT
     rejectUnauthorized: bool = True
-    user: Union[str, None] = None
-    password: Union[str, None] = None
+    user: Optional[str] = None
+    password: Optional[str] = None
     protocol: str = session_constants.HTTPS_PROTOCOL
-    basePath: Union[str, None] = None
-    type: Union[str, None] = None
-    tokenType: Union[str, None] = None
-    tokenValue: Union[str, None] = None
+    basePath: Optional[str] = None
+    type: Optional[str] = None
+    tokenType: Optional[str] = None
+    tokenValue: Optional[str] = None
 
 
 class Session:
