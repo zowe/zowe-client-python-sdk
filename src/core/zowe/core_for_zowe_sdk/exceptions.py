@@ -11,6 +11,9 @@ Copyright Contributors to the Zowe Project.
 """
 
 
+from typing import Optional
+
+
 class InvalidRequestMethod(Exception):
     """Class used to represent an invalid request method exception."""
 
@@ -108,7 +111,7 @@ class SecureProfileLoadFailed(Exception):
 class ProfileNotFound(Exception):
     """Class used to represent a profile load failure exception."""
 
-    def __init__(self, profile_name, error_msg):
+    def __init__(self, profile_name: Optional[str], error_msg):
         """
         Parameters
         ----------
@@ -117,6 +120,9 @@ class ProfileNotFound(Exception):
         error_msg
             The error message received while trying to load the profile
         """
+        if not profile_name:
+            profile_name = "None"
+
         super().__init__(
             "Failed to load profile {}: {}".format(profile_name, error_msg)
         )

@@ -40,6 +40,12 @@ CURRENT_DIR = os.getcwd()
 
 
 class ProfileManager:
+    """
+    Profile Manager contains the logic to merge the different properties of profiles
+    (from the Project Config and the Project User Config as well as the Global Config and Global User Config).
+    This class handles all the exceptions raised in the Config File to provide a smooth user experience.
+    """
+
     def __init__(self, appname: str = "zowe"):
         self._appname = appname
 
@@ -165,9 +171,36 @@ class ProfileManager:
         profile_name: Optional[str] = None,
         profile_type: Optional[str] = None,
     ) -> dict:
+        """Load z/OSMF connection details from a z/OSMF profile.
+        Returns
+        -------
+        dictionary
+
+            z/OSMF connection object
+        We will be loading properties from a bottom up fashion,
+        the bottom being the base/default profile properties
+        and the up being the explicitly mentioned Profile.
+
+        Profile loading order :
+        1. Global Profile
+            1.1 Global Profile from Global Config (populated with base profile)
+            1.2 Global User Profile from Global User Config (populated with base profile)
+        2. Global Base Profile
+            1.1 Global Base Profile form Global Config
+            1.1 Global Base User Profile from Global User Config
+
+        3. Project Profile
+            3.1 Project Profile from Project Config
+            3.2 Project User Profile from Project User Config
+
+        4.If Global Profile and Project Profile have same profile_name,
+            we do not load defaults from Global Proifle, instead,
+            we user the Global Base Profile
+        """
         if profile_name is None and profile_type is None:
             raise ProfileNotFound(
-                "Could not find profile as both profile_name and profile_type is not set."
+                profile_name=profile_name,
+                error_msg="Could not find profile as both profile_name and profile_type is not set.",
             )
 
         service_profile: dict = {}

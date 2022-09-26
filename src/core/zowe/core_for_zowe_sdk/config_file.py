@@ -125,12 +125,16 @@ class ConfigFile:
         profile_name: Optional[str] = None,
         profile_type: Optional[str] = None,
     ) -> Tuple[dict, str]:
+        """
+        Load given profile with values populated from base profile
+        """
         if self.profiles is None:
             self.init_from_file()
 
         if profile_name is None and profile_type is None:
             raise ProfileNotFound(
-                "Could not find profile as both profile_name and profile_type is not set."
+                profile_name=profile_name,
+                error_msg="Could not find profile as both profile_name and profile_type is not set.",
             )
 
         if profile_name is None:
@@ -194,7 +198,7 @@ class ConfigFile:
             profilename = self.defaults[profile_type]
         except KeyError:
             warnings.warn(
-                "Given profile type has no default profilename",
+                f"Given profile type '{profile_type}' has no default profilename",
                 ProfileParsingWarning,
             )
         else:
@@ -208,14 +212,14 @@ class ConfigFile:
                     return key
             except KeyError:
                 warnings.warn(
-                    f"Profile {key} has no type attribute",
+                    f"Profile '{key}' has no type attribute",
                     ProfileParsingWarning,
                 )
 
         # if no profile with matching type found, we raise an exception
         raise ProfileNotFound(
             profile_name=profile_type,
-            error_msg=f"No profile with matching profile_type {profile_type} found",
+            error_msg=f"No profile with matching profile_type '{profile_type}' found",
         )
 
     def load_profile_properties(self, profile_name: str) -> dict:
@@ -226,7 +230,7 @@ class ConfigFile:
         try:
             props = self.profiles[profile_name]["properties"]
         except Exception as exc:
-            raise ProfileNotFound("Profile {profile_name} not found", error_msg=exc)
+            raise ProfileNotFound("Profile {profile_name} not found", error_msg=exc) from exc
 
         secure_fields: list = self.profiles[profile_name].get("secure", [])
 
@@ -293,7 +297,7 @@ class ConfigFile:
                 raise SecureProfileLoadFailed(
                     constants["ZoweServiceName"],
                     error_msg="No credentials found for loaded config file as well as for global config",
-                )
+                ) from exc
             else:
                 warnings.warn(
                     f"Credentials not found for given config, using global credentials {GLOBAL_CONFIG_PATH}",
