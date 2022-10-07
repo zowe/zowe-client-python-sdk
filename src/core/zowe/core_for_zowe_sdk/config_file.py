@@ -15,8 +15,8 @@ import os.path
 import re
 import sys
 import warnings
-from dataclasses import dataclass
-from typing import Tuple, Optional
+from dataclasses import dataclass, field
+from typing import List, Optional, NamedTuple
 
 import commentjson
 
@@ -47,6 +47,13 @@ GLOBAL_CONFIG_PATH = os.path.join(
 )
 CURRENT_DIR = os.getcwd()
 
+# Profile datatype is used by ConfigFile to return Profile Data along with
+# metadata such as profile_name and secure_props_not_found
+class Profile(NamedTuple):
+    data: dict = {}
+    name: str = ""
+    secure_props_not_found: list = []
+
 
 @dataclass
 class ConfigFile:
@@ -72,6 +79,7 @@ class ConfigFile:
     profiles: Optional[dict] = None
     defaults: Optional[dict] = None
     secure_props: Optional[dict] = None
+    _secure_props_not_found: list = field(default_factory=list)
 
     @property
     def filename(self) -> str:
@@ -124,9 +132,11 @@ class ConfigFile:
         self,
         profile_name: Optional[str] = None,
         profile_type: Optional[str] = None,
-    ) -> Tuple[dict, str]:
+    ) -> Profile:
         """
         Load given profile with values populated from base profile
+
+        Returns a namedtuple called Profile
         """
         if self.profiles is None:
             self.init_from_file()
@@ -158,7 +168,7 @@ class ConfigFile:
             base_props = self.load_profile_properties(profile_name=base_profile)
             props.update(base_props)
 
-        return props, profile_name
+        return Profile(props, profile_name, self._secure_props_not_found)
 
     def autodiscover_config_dir(self):
         """
@@ -230,7 +240,9 @@ class ConfigFile:
         try:
             props = self.profiles[profile_name]["properties"]
         except Exception as exc:
-            raise ProfileNotFound("Profile {profile_name} not found", error_msg=exc) from exc
+            raise ProfileNotFound(
+                "Profile {profile_name} not found", error_msg=exc
+            ) from exc
 
         secure_fields: list = self.profiles[profile_name].get("secure", [])
 
@@ -249,7 +261,7 @@ class ConfigFile:
                         secure_fields.remove(property_name)
 
             if len(secure_fields) > 0:
-                raise SecureValuesNotFound(secure_fields)
+                self._secure_props_not_found.extend(secure_fields)
 
         return props
 
@@ -294,10 +306,13 @@ class ConfigFile:
             try:
                 self.secure_props = secure_config_json[GLOBAL_CONFIG_PATH]
             except KeyError as exc:
-                raise SecureProfileLoadFailed(
-                    constants["ZoweServiceName"],
-                    error_msg="No credentials found for loaded config file as well as for global config",
-                ) from exc
+                error_msg = str(exc)
+                warnings.warn(
+                    f"No credentials found for loaded config file '{self.filepath}'"
+                    f" as well as for global config '{GLOBAL_CONFIG_PATH}'"
+                    f" with error '{error_msg}'",
+                    SecurePropsNotFoundWarning,
+                )
             else:
                 warnings.warn(
                     f"Credentials not found for given config, using global credentials {GLOBAL_CONFIG_PATH}",
