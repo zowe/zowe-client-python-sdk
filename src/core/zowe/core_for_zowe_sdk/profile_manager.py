@@ -124,19 +124,9 @@ class ProfileManager:
             )
         except ProfileNotFound:
             warnings.warn(
-                f"Profile not found in file '{cfg.filename}', trying to return base profile instead.",
+                f"Profile not found in file '{cfg.filename}', returning empty profile instead.",
                 ProfileNotFoundWarning,
             )
-            try:
-                cfg_profile = cfg.get_profile(
-                    profile_name=BASE_PROFILE, profile_type=BASE_PROFILE
-                )
-            except Exception as exc:
-                warnings.warn(
-                    f"Base Profile not found in file '{cfg.filename}' because {type(exc).__name__}'{exc}', "
-                    f"returning empty profile.",
-                    ProfileNotFoundWarning,
-                )
         except SecureProfileLoadFailed:
             warnings.warn(
                 f"Config '{cfg.filename}' has no saved secure properties.",
@@ -169,31 +159,22 @@ class ProfileManager:
         profile_name: Optional[str] = None,
         profile_type: Optional[str] = None,
     ) -> dict:
-        """Load z/OSMF connection details from a z/OSMF profile.
+        """Load connection details from a team config profile.
         Returns
         -------
         dictionary
 
-            z/OSMF connection object
-        We will be loading properties from a bottom up fashion,
-        the bottom being the base/default profile properties
-        and the up being the explicitly mentioned Profile.
+            Object containing connection details
 
-        Profile loading order :
-        1. Global Profile
-            1.1 Global Profile from Global Config (populated with base profile)
-            1.2 Global User Profile from Global User Config (populated with base profile)
-        2. Global Base Profile
-            1.1 Global Base Profile form Global Config
-            1.1 Global Base User Profile from Global User Config
+        We will load properties from config files in the following order, from
+        highest to lowest priority:
+        1. Project User Config (./zowe.config.user.json)
+        2. Project Config (./zowe.config.json)
+        3. Global User Config (~/zowe.config.user.json)
+        4. Global Config (~/zowe.config.json)
 
-        3. Project Profile
-            3.1 Project Profile from Project Config
-            3.2 Project User Profile from Project User Config
-
-        4.If Global Profile and Project Profile have same profile_name,
-            we do not load defaults from Global Proifle, instead,
-            we user the Global Base Profile
+        If `profile_type` is not base, then we will load properties from both
+        `profile_type` and base profiles and merge them together.
         """
         if profile_name is None and profile_type is None:
             raise ProfileNotFound(
@@ -201,65 +182,23 @@ class ProfileManager:
                 error_msg="Could not find profile as both profile_name and profile_type is not set.",
             )
 
-        service_profile: dict = {}
+        config_layers = {
+            "Project User Config": self.project_user_config,
+            "Project Config": self.project_config,
+            "Global User Config": self.global_user_config,
+            "Global Config": self.global_config
+        }
+        profile_props: dict = {}
 
-        # get Project Profile
-        project_profile = self.get_profile(
-            self.project_config,
-            profile_name=profile_name,
-            profile_type=profile_type,
-            config_type="Project Config",
-        )
+        for i, (config_type, cfg) in enumerate(config_layers.items()):
+            profile_loaded = self.get_profile(cfg, profile_name, profile_type, config_type)
+            if profile_loaded.name and not profile_name:
+                profile_name = profile_loaded.name  # Define profile name that will be merged from other layers
+            profile_props = { **profile_loaded.data, **profile_props }
+            if i == 1 and profile_props:
+                break  # Skip loading from global config if profile was found in project config
 
-        # get Project User Profile
-        project_user_profile = self.get_profile(
-            self.project_user_config,
-            profile_name=profile_name,
-            profile_type=profile_type,
-            config_type="Project User Config",
-        )
-        project_profile.data.update(project_user_profile.data)
+        if profile_type != "base":
+            profile_props = { **self.load(profile_type="base"), **profile_props }
 
-        # get Global Base Profile
-        global_base_profile = self.get_profile(
-            self.global_config,
-            profile_name=None,
-            profile_type=BASE_PROFILE,
-            config_type="Global Config",
-        )
-
-        # get Global Base User Profile
-        global_base_user_profile = self.get_profile(
-            self.global_user_config,
-            profile_name=None,
-            profile_type=BASE_PROFILE,
-            config_type="Global User Config",
-        )
-        global_base_profile.data.update(global_base_user_profile.data)
-
-        # get Global Profile
-        global_profile = self.get_profile(
-            self.global_config,
-            profile_name=profile_name,
-            profile_type=profile_type,
-            config_type="Global Config",
-        )
-
-        # get Global User Profile
-        global_user_profile = self.get_profile(
-            self.global_user_config,
-            profile_name=profile_name,
-            profile_type=profile_type,
-            config_type="Global User Config",
-        )
-        global_profile.data.update(global_user_profile.data)
-
-        # now update service profile
-        service_profile.update(global_base_profile.data)
-
-        if global_profile.name != project_profile.name:
-            service_profile.update(global_profile.data)
-
-        service_profile.update(project_profile.data)
-
-        return service_profile
+        return profile_props

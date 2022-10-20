@@ -154,20 +154,6 @@ class ConfigFile:
 
         props: dict = self.load_profile_properties(profile_name=profile_name)
 
-        try:
-            base_profile = self.get_profilename_from_profiletype(
-                profile_type=BASE_PROFILE
-            )
-        except ProfileNotFound:
-            if self.type == TEAM_CONFIG:
-                warnings.warn(
-                    f"Base profile not found in {self.filepath}",
-                    ProfileNotFoundWarning,
-                )
-        else:
-            base_props = self.load_profile_properties(profile_name=base_profile)
-            props.update(base_props)
-
         return Profile(props, profile_name, self._secure_props_not_found)
 
     def autodiscover_config_dir(self):
