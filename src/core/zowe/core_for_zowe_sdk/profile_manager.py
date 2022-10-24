@@ -46,8 +46,9 @@ class ProfileManager:
     This class handles all the exceptions raised in the Config File to provide a smooth user experience.
     """
 
-    def __init__(self, appname: str = "zowe"):
+    def __init__(self, appname: str = "zowe", show_warnings: bool = True):
         self._appname = appname
+        self._show_warnings = show_warnings
 
         self.project_config = ConfigFile(type=TEAM_CONFIG, name=appname)
         self.project_user_config = ConfigFile(type=USER_CONFIG, name=appname)
@@ -182,23 +183,32 @@ class ProfileManager:
                 error_msg="Could not find profile as both profile_name and profile_type is not set.",
             )
 
+        if not self._show_warnings:
+            warnings.simplefilter("ignore")
+
         config_layers = {
             "Project User Config": self.project_user_config,
             "Project Config": self.project_config,
             "Global User Config": self.global_user_config,
-            "Global Config": self.global_config
+            "Global Config": self.global_config,
         }
         profile_props: dict = {}
 
         for i, (config_type, cfg) in enumerate(config_layers.items()):
-            profile_loaded = self.get_profile(cfg, profile_name, profile_type, config_type)
+            profile_loaded = self.get_profile(
+                cfg, profile_name, profile_type, config_type
+            )
             if profile_loaded.name and not profile_name:
-                profile_name = profile_loaded.name  # Define profile name that will be merged from other layers
-            profile_props = { **profile_loaded.data, **profile_props }
+                profile_name = (
+                    profile_loaded.name
+                )  # Define profile name that will be merged from other layers
+            profile_props = {**profile_loaded.data, **profile_props}
             if i == 1 and profile_props:
                 break  # Skip loading from global config if profile was found in project config
 
         if profile_type != "base":
-            profile_props = { **self.load(profile_type="base"), **profile_props }
+            profile_props = {**self.load(profile_type="base"), **profile_props}
+
+        warnings.resetwarnings()
 
         return profile_props
