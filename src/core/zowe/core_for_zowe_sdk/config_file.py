@@ -156,10 +156,13 @@ class ConfigFile:
 
         return Profile(props, profile_name, self._secure_props_not_found)
 
-    def autodiscover_config_dir(self):
+    def autodiscover_config_dir(self) -> None:
         """
         Autodiscover Zowe z/OSMF Team Config files by going up the path from
         current working directory
+        Returns
+        -------
+        None
 
         Return path if it finds the config directory,
         Else, it returns None
@@ -184,6 +187,11 @@ class ConfigFile:
 
     def get_profilename_from_profiletype(self, profile_type: str) -> str:
         """
+        Returns profilename from given profiletype as defined in the team config profile
+        Returns
+        -------
+        str
+
         Return exact profilename of the profile to load from the mentioned type
 
         First tries to look into the defaults, if not found,
@@ -220,6 +228,13 @@ class ConfigFile:
 
     def load_profile_properties(self, profile_name: str) -> dict:
         """
+        Load profile properties including secure properties
+        Returns
+        -------
+        dictionary
+
+            Object containing profile properties
+
         Load exact profile properties (without prepopulated fields from base profile)
         from the profile dict and populate fields from the secure credentials storage
         """
@@ -253,7 +268,10 @@ class ConfigFile:
 
     def load_secure_props(self) -> None:
         """
-        load secure_props stored for the given config
+        load secure_props stored for the given config file
+        Returns
+        -------
+        None
 
         if keyring is not initialized, set empty value
         """
