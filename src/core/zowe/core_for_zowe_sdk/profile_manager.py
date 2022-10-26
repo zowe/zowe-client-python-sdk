@@ -222,9 +222,13 @@ class ProfileManager:
         if profile_type != BASE_PROFILE:
             profile_props = {**self.load(profile_type=BASE_PROFILE), **profile_props}
 
+        missing_props = []
         for item in missing_secure_props:
             if item not in profile_props.keys():
-                raise SecureValuesNotFound(values=[item])
+                missing_props.extend(item)
+
+        if len(missing_props) > 0:
+            raise SecureValuesNotFound(values=missing_props)
 
         warnings.resetwarnings()
 
