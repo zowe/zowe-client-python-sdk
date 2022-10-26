@@ -16,19 +16,17 @@ import re
 import sys
 import warnings
 from dataclasses import dataclass, field
-from typing import List, Optional, NamedTuple
+from typing import Optional, NamedTuple
 
 import commentjson
 
 from .constants import constants
 from .custom_warnings import (
-    ProfileNotFoundWarning,
     ProfileParsingWarning,
     SecurePropsNotFoundWarning,
 )
-from .exceptions import ProfileNotFound, SecureProfileLoadFailed, SecureValuesNotFound
+from .exceptions import ProfileNotFound, SecureProfileLoadFailed
 from .profile_constants import (
-    BASE_PROFILE,
     GLOBAL_CONFIG_NAME,
     TEAM_CONFIG,
     USER_CONFIG,
@@ -52,7 +50,7 @@ CURRENT_DIR = os.getcwd()
 class Profile(NamedTuple):
     data: dict = {}
     name: str = ""
-    secure_props_not_found: list = []
+    missing_secure_props: list = []
 
 
 @dataclass
@@ -79,7 +77,7 @@ class ConfigFile:
     profiles: Optional[dict] = None
     defaults: Optional[dict] = None
     secure_props: Optional[dict] = None
-    _secure_props_not_found: list = field(default_factory=list)
+    _missing_secure_props: list = field(default_factory=list)
 
     @property
     def filename(self) -> str:
@@ -134,9 +132,11 @@ class ConfigFile:
         profile_type: Optional[str] = None,
     ) -> Profile:
         """
-        Load given profile with values populated from base profile
-
-        Returns a namedtuple called Profile
+        Load given profile including secure properties and excluding values from base profile
+        Returns
+        -------
+        Profile
+            Returns a namedtuple called Profile
         """
         if self.profiles is None:
             self.init_from_file()
@@ -154,7 +154,7 @@ class ConfigFile:
 
         props: dict = self.load_profile_properties(profile_name=profile_name)
 
-        return Profile(props, profile_name, self._secure_props_not_found)
+        return Profile(props, profile_name, self._missing_secure_props)
 
     def autodiscover_config_dir(self) -> None:
         """
@@ -164,8 +164,8 @@ class ConfigFile:
         -------
         None
 
-        Return path if it finds the config directory,
-        Else, it returns None
+        Sets path if it finds the config directory,
+        Else, it raises an Exception
         """
 
         current_dir = CURRENT_DIR
@@ -192,8 +192,7 @@ class ConfigFile:
         -------
         str
 
-        Return exact profilename of the profile to load from the mentioned type
-
+        Return the exact profilename of the profile to load from the mentioned type.
         First tries to look into the defaults, if not found,
         then it tries to iterate through the profiles
         """
@@ -228,7 +227,7 @@ class ConfigFile:
 
     def load_profile_properties(self, profile_name: str) -> dict:
         """
-        Load profile properties including secure properties
+        Load profile properties given profile_name including secure properties
         Returns
         -------
         dictionary
@@ -262,7 +261,7 @@ class ConfigFile:
                         secure_fields.remove(property_name)
 
             if len(secure_fields) > 0:
-                self._secure_props_not_found.extend(secure_fields)
+                self._missing_secure_props.extend(secure_fields)
 
         return props
 

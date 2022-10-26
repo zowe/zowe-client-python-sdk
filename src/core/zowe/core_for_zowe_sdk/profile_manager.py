@@ -20,7 +20,7 @@ from .custom_warnings import (
     ProfileNotFoundWarning,
     SecurePropsNotFoundWarning,
 )
-from .exceptions import ProfileNotFound, SecureProfileLoadFailed
+from .exceptions import ProfileNotFound, SecureProfileLoadFailed, SecureValuesNotFound
 from .profile_constants import (
     BASE_PROFILE,
     GLOBAL_CONFIG_NAME,
@@ -116,7 +116,15 @@ class ProfileManager:
         profile_type: Optional[str],
         config_type: str,
     ) -> Profile:
-        """Get just the profile from the config file (overriden with base props in the config file)"""
+        """
+        Get just the profile from the config file (overriden with base props in the config file)
+
+        Returns
+        -------
+        Profile
+
+            NamedTuple (data, name, secure_props_not_found)
+        """
 
         cfg_profile = Profile()
         try:
@@ -125,7 +133,7 @@ class ProfileManager:
             )
         except ProfileNotFound:
             warnings.warn(
-                f"Profile not found in file '{cfg.filename}', returning empty profile instead.",
+                f"Profile '{profile_name}' not found in file '{cfg.filename}', returning empty profile instead.",
                 ProfileNotFoundWarning,
             )
         except SecureProfileLoadFailed:
@@ -194,6 +202,8 @@ class ProfileManager:
         }
         profile_props: dict = {}
 
+        missing_secure_props = []  # track which secure props were not loaded
+
         for i, (config_type, cfg) in enumerate(config_layers.items()):
             profile_loaded = self.get_profile(
                 cfg, profile_name, profile_type, config_type
@@ -203,11 +213,18 @@ class ProfileManager:
                     profile_loaded.name
                 )  # Define profile name that will be merged from other layers
             profile_props = {**profile_loaded.data, **profile_props}
+
+            missing_secure_props.extend(profile_loaded.missing_secure_props)
+
             if i == 1 and profile_props:
                 break  # Skip loading from global config if profile was found in project config
 
-        if profile_type != "base":
-            profile_props = {**self.load(profile_type="base"), **profile_props}
+        if profile_type != BASE_PROFILE:
+            profile_props = {**self.load(profile_type=BASE_PROFILE), **profile_props}
+
+        for item in missing_secure_props:
+            if item not in profile_props.keys():
+                raise SecureValuesNotFound(values=[item])
 
         warnings.resetwarnings()
 
