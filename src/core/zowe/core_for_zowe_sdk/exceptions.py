@@ -128,15 +128,14 @@ class ProfileNotFound(Exception):
 class SecureValuesNotFound(Exception):
     """Class used to represent a profile load failure exception."""
 
-    def __init__(self, values: list):
+    def __init__(self, values: set):
         """
         Parameters
         ----------
         values
             The list of secure values not found
         """
-        list_to_str = ", ".join(map(str, values))
-        super().__init__("Failed to load secure values: {}".format(list_to_str))
+        super().__init__("Failed to load secure values: {}".format(str(values)))
 
 
 class UnsupportedAuthType(Exception):
