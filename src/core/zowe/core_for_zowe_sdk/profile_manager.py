@@ -132,10 +132,16 @@ class ProfileManager:
                 profile_name=profile_name, profile_type=profile_type
             )
         except ProfileNotFound:
-            warnings.warn(
-                f"Profile '{profile_name}' not found in file '{cfg.filename}', returning empty profile instead.",
-                ProfileNotFoundWarning,
-            )
+            if profile_name:
+                warnings.warn(
+                    f"Profile '{profile_name}' not found in file '{cfg.filename}', returning empty profile instead.",
+                    ProfileNotFoundWarning,
+                )
+            else:
+                warnings.warn(
+                    f"Profile of type '{profile_type}' not found in file '{cfg.filename}', returning empty profile instead.",
+                    ProfileNotFoundWarning,
+                )
         except SecureProfileLoadFailed:
             warnings.warn(
                 f"Config '{cfg.filename}' has no saved secure properties.",

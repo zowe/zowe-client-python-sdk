@@ -241,7 +241,7 @@ class ConfigFile:
             props = self.profiles[profile_name]["properties"]
         except Exception as exc:
             raise ProfileNotFound(
-                "Profile {profile_name} not found", error_msg=exc
+                f"Profile {profile_name} not found", error_msg=exc
             ) from exc
 
         secure_fields: list = self.profiles[profile_name].get("secure", [])
@@ -301,23 +301,13 @@ class ConfigFile:
 
         secure_config_json = commentjson.loads(base64.b64decode(secure_config).decode())
 
-        # first look for credentials stored for currently loaded config
-        # then look for default credential stored for user_directory/.zowe/zowe.config.json
+        # look for credentials stored for currently loaded config
         try:
-            self.secure_props = secure_config_json[self.location]
-        except KeyError:
-            try:
-                self.secure_props = secure_config_json[GLOBAL_CONFIG_PATH]
-            except KeyError as exc:
-                error_msg = str(exc)
-                warnings.warn(
-                    f"No credentials found for loaded config file '{self.filepath}'"
-                    f" as well as for global config '{GLOBAL_CONFIG_PATH}'"
-                    f" with error '{error_msg}'",
-                    SecurePropsNotFoundWarning,
-                )
-            else:
-                warnings.warn(
-                    f"Credentials not found for given config, using global credentials {GLOBAL_CONFIG_PATH}",
-                    SecurePropsNotFoundWarning,
-                )
+            self.secure_props = secure_config_json.get(self.filepath, {})
+        except KeyError as exc:
+            error_msg = str(exc)
+            warnings.warn(
+                f"No credentials found for loaded config file '{self.filepath}'"
+                f" with error '{error_msg}'",
+                SecurePropsNotFoundWarning,
+            )
