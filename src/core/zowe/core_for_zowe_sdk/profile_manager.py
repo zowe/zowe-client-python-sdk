@@ -139,7 +139,8 @@ class ProfileManager:
                 )
             else:
                 warnings.warn(
-                    f"Profile of type '{profile_type}' not found in file '{cfg.filename}', returning empty profile instead.",
+                    f"Profile of type '{profile_type}' not found in file '{cfg.filename}', returning empty profile"
+                    f" instead.",
                     ProfileNotFoundWarning,
                 )
         except SecureProfileLoadFailed:
@@ -173,6 +174,7 @@ class ProfileManager:
         self,
         profile_name: Optional[str] = None,
         profile_type: Optional[str] = None,
+        check_missing_props: bool = True,
     ) -> dict:
         """Load connection details from a team config profile.
         Returns
@@ -226,15 +228,20 @@ class ProfileManager:
                 break  # Skip loading from global config if profile was found in project config
 
         if profile_type != BASE_PROFILE:
-            profile_props = {**self.load(profile_type=BASE_PROFILE), **profile_props}
+            profile_props = {
+                **self.load(profile_type=BASE_PROFILE, check_missing_props=False),
+                **profile_props,
+            }
 
-        missing_props = set()
-        for item in missing_secure_props:
-            if item not in profile_props.keys():
-                missing_props.add(item)
+        if check_missing_props:
+            missing_props = set()
+            for item in missing_secure_props:
+                print(item, profile_props.keys())
+                if item not in profile_props.keys():
+                    missing_props.add(item)
 
-        if len(missing_props) > 0:
-            raise SecureValuesNotFound(values=missing_props)
+            if len(missing_props) > 0:
+                raise SecureValuesNotFound(values=missing_props)
 
         warnings.resetwarnings()
 

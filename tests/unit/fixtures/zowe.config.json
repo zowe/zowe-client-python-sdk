@@ -6,7 +6,7 @@
             "properties": {
                 "port": 10443
             },
-            "secure": []
+            "secure": ["user", "password"]
         },
         "tso": {
             "type": "tso",

@@ -176,24 +176,18 @@ class TestZosmfProfileManager(TestCase):
         self.custom_dir = os.path.dirname(FIXTURES_PATH)
         self.custom_appname = "zowe_abcd"
         self.custom_filename = f"{self.custom_appname}.config.json"
-        custom_file_path = os.path.join(self.custom_dir, self.custom_filename)
 
         # setup keyring
         home = os.path.expanduser("~")
-        global_config_path = os.path.join(home, ".zowe", "zowe.config.json")
+        self.global_config_path = os.path.join(home, ".zowe", "zowe.config.json")
 
+    def setUpCreds(self, file_path, secure_props):
         global CRED_DICT
+        # we are not storing global config properties since they are not
+        # accessible within pyfakefs
+        # todo : add a test that check loading from gloabl config path
         CRED_DICT = {
-            custom_file_path: {
-                "profiles.zosmf.properties.user": "user",
-                "profiles.zosmf.properties.password": "password",
-                "profiles.base.properties.user": "user",
-                "profiles.base.properties.password": "password",
-            },
-            global_config_path: {
-                "profiles.base.properties.user": "user",
-                "profiles.base.properties.password": "password",
-            },
+            file_path: secure_props,
         }
 
         global SECURE_CONFIG_PROPS
@@ -215,9 +209,17 @@ class TestZosmfProfileManager(TestCase):
         os.chdir(CWD)
         shutil.copy(self.original_file_path, cwd_up_file_path)
 
+        self.setUpCreds(cwd_up_file_path, {
+            "profiles.base.properties.user": "user",
+            "profiles.base.properties.password": "password",
+        })
+
         # Test
         prof_manager = ProfileManager()
         props: dict = prof_manager.load(profile_type="base")
+
+        assert(prof_manager.config_filepath == cwd_up_file_path)
+
         expected_props = {
             "host": "zowe.test.cloud",
             "rejectUnauthorized": False,
@@ -230,12 +232,17 @@ class TestZosmfProfileManager(TestCase):
     def test_custom_file_and_custom_profile_loading(self, get_pass_func):
         """
         Test loading of correct file given a filename and directory,
-        also load by profile_name correctly populating fields from base profile
-        and secure credentials
+        also load by profile_name correctly populating fields from custom
+        profile and secure credentials
         """
         # Setup - copy profile to fake filesystem created by pyfakefs
         custom_file_path = os.path.join(self.custom_dir, self.custom_filename)
         shutil.copy(self.original_file_path, custom_file_path)
+
+        self.setUpCreds(custom_file_path, {
+            "profiles.zosmf.properties.user": "user",
+            "profiles.zosmf.properties.password": "password",
+        })
 
         # Test
         prof_manager = ProfileManager(appname=self.custom_appname)
@@ -263,6 +270,11 @@ class TestZosmfProfileManager(TestCase):
         os.chdir(CWD)
         shutil.copy(self.original_file_path, cwd_up_file_path)
         shutil.copy(self.original_user_file_path, cwd_up_dir_path)
+
+        self.setUpCreds(cwd_up_file_path, {
+            "profiles.zosmf.properties.user": "user",
+            "profiles.zosmf.properties.password": "password",
+        })
 
         # Test
         prof_manager = ProfileManager()
