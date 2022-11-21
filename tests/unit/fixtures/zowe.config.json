@@ -6,7 +6,7 @@
             "properties": {
                 "port": 10443
             },
-            "secure": []
+            "secure": ["user", "password"]
         },
         "tso": {
             "type": "tso",
@@ -15,7 +15,7 @@
                 "codePage": "1047",
                 "logonProcedure": "IZUFPROC"
             },
-            "secure": []
+            "secure": [] // no credentials
         },
         "ssh": {
             "type": "ssh",
@@ -36,12 +36,12 @@
             "type": "base",
             "properties": {
                 "host": "zowe.test.cloud",
-                "rejectUnauthorized": false
+                "rejectUnauthorized": false // this is by default
             },
             "secure": [
                 "user",
                 "password"
-            ]
+            ] // credentials are generally obtained from keyring
         }
     },
     "defaults": {
