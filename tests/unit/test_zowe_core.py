@@ -217,8 +217,7 @@ class TestZosmfProfileManager(TestCase):
         # Test
         prof_manager = ProfileManager()
         props: dict = prof_manager.load(profile_type="base")
-
-        assert(prof_manager.config_filepath == cwd_up_file_path)
+        self.assertEqual(prof_manager.config_filepath, cwd_up_file_path)
 
         expected_props = {
             "host": "zowe.test.cloud",
@@ -248,6 +247,8 @@ class TestZosmfProfileManager(TestCase):
         prof_manager = ProfileManager(appname=self.custom_appname)
         prof_manager.config_dir = self.custom_dir
         props: dict = prof_manager.load(profile_name="zosmf")
+        self.assertEqual(prof_manager.config_filepath, custom_file_path)
+
         expected_props = {
             "host": "zowe.test.cloud",
             "rejectUnauthorized": False,
@@ -279,6 +280,8 @@ class TestZosmfProfileManager(TestCase):
         # Test
         prof_manager = ProfileManager()
         props: dict = prof_manager.load(profile_type="zosmf")
+        self.assertEqual(prof_manager.config_filepath, cwd_up_file_path)
+
         expected_props = {
             "host": "zowe.test.user.cloud",
             "rejectUnauthorized": False,
