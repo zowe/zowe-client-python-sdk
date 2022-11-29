@@ -17,4 +17,8 @@ class TestConsoleIntegration(unittest.TestCase):
         command_output = self.console.issue_command("D T")
         self.assertTrue(command_output['cmd-response'].strip().startswith("IEE136I"))
 
-
+    def test_get_response_should_return_messages(self):
+        """Test that response message can be received from the console"""
+        command_output = self.console.issue_command("D T")
+        response = self.console.get_response(command_output["cmd-response-key"])
+        self.assertTrue("cmd-response" in response)
