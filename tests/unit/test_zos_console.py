@@ -27,5 +27,5 @@ class TestConsoleClass(unittest.TestCase):
        """Getting z/OS Console response messages on sending a response key"""
        mock_send_request.return_value = mock.Mock(headers={"Content-type": "application/json"}, status_codes=200)
 
-       Console(self.session_details).get_response(self)
+       Console(self.session_details).get_response("console-key")
        mock_send_request.assert_called_once()
