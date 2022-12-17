@@ -9,7 +9,7 @@ class TestTsoClass(unittest.TestCase):
 
     def setUp(self):
         """Setup fixtures for Tso class."""
-        self.connection_dict = {"host": "https://mock-url.com",
+        self.connection_dict = {"host": "mock-url.com",
                                 "user": "Username",
                                 "password": "Password",
                                 "port": 443,

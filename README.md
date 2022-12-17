@@ -37,10 +37,10 @@ pip install zowe.<subpackage>_for_zowe_sdk
 
 For more information on the available sub-packages click [HERE](https://zowe-client-python-sdk.readthedocs.io/en/next/packages/packages.html)
 
-**Note**: You can also install prerelease versions of the Zowe SDK from GitHub with the following command where "&lt;tagName&gt;" is the latest GitHub release tag:
+**Note**: You can also install prerelease versions of the Zowe SDK from GitHub. Download the ZIP file from the [latest release](https://github.com/zowe/zowe-client-python-sdk/releases/latest), extract it, and run the following command:
 
 ```
-pip install -f https://github.com/zowe/zowe-client-python-sdk/releases/tag/<tagName> zowe>=1.0.0.dev0
+pip install --no-deps <path where zip is extracted>/*
 ```
 
 ## Requirements
