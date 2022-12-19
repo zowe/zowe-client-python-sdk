@@ -25,6 +25,6 @@ class TestConsoleClass(unittest.TestCase):
     @mock.patch('requests.Session.send')
     def test_get_response_should_return_messages(self, mock_send_request):
         """Getting z/OS Console response messages on sending a response key"""
-        mock_send_request.return_value = mock.Mock(headers={"Content-type": "application/json"}, status_codes=200)
+        mock_send_request.return_value = mock.Mock(headers={"Content-type": "application/json"}, status_code=200)
         Console(self.session_details).get_response("console-key")
         mock_send_request.assert_called_once()
