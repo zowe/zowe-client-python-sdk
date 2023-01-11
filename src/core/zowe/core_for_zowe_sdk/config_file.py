@@ -240,10 +240,8 @@ class ConfigFile:
         try:
             props = self.profiles
             lst = profile_name.split(".")
-            curr = {}
             for i in range(len(lst)-1):
-                curr = props[lst[i]]
-                props = curr["profiles"]
+                props = props[lst[i]]["profiles"]
             props = props[lst[len(lst)-1]]["properties"]
         except Exception as exc:
             raise ProfileNotFound(
