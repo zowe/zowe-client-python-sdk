@@ -16,6 +16,6 @@ setup(
         "Programming Language :: Python :: 3.7",
         "License :: OSI Approved :: Eclipse Public License 2.0 (EPL-2.0)",
     ],
-    install_requires=["requests", "urllib3", "pyyaml", "jsoncparser"],
+    install_requires=["requests", "urllib3", "pyyaml", "commentjson"],
     packages=find_namespace_packages(include=["zowe.*"]),
 )
