@@ -172,6 +172,7 @@ class TestZosmfProfileManager(TestCase):
         )
         self.fs.add_real_file(self.original_file_path)
         self.fs.add_real_file(self.original_user_file_path)
+        self.fs.add_real_file("./fixtures/nested.zowe.config.json")
 
         self.custom_dir = os.path.dirname(FIXTURES_PATH)
         self.custom_appname = "zowe_abcd"
@@ -259,13 +260,14 @@ class TestZosmfProfileManager(TestCase):
         self.assertEqual(props, expected_props)
 
     @patch("keyring.get_password", side_effect=keyring_get_password)
-    def test_custom_file_and_custom_profile_loading(self, get_pass_func):
+    def test_custom_file_and_custom_profile_loading_with_nested_profile(self, get_pass_func):
         """
         Test loading of correct file given a filename and directory,
         also load by profile_name correctly populating fields from custom
         profile and secure credentials
         """
         # Setup - copy profile to fake filesystem created by pyfakefs
+        self.original_file_path = f"./fixtures/nested.zowe.config.json"
         custom_file_path = os.path.join(self.custom_dir, self.custom_filename)
         shutil.copy(self.original_file_path, custom_file_path)
 
@@ -281,11 +283,8 @@ class TestZosmfProfileManager(TestCase):
         self.assertEqual(prof_manager.config_filepath, custom_file_path)
 
         expected_props = {
-            "host": "zowe.test.cloud",
-            "rejectUnauthorized": False,
-            "user": "user",
-            "password": "password",
-            "port": 10443,
+            "host": "example.com",
+            "rejectUnauthorized": True,
         }
         self.assertEqual(props, expected_props)
 
@@ -310,7 +309,7 @@ class TestZosmfProfileManager(TestCase):
 
         # Test
         prof_manager = ProfileManager()
-        props: dict = prof_manager.load(profile_type="lpar1.zosmf")
+        props: dict = prof_manager.load(profile_type="zosmf")
         self.assertEqual(prof_manager.config_filepath, cwd_up_file_path)
 
         expected_props = {
