@@ -172,7 +172,7 @@ class TestZosmfProfileManager(TestCase):
         )
         self.fs.add_real_file(self.original_file_path)
         self.fs.add_real_file(self.original_user_file_path)
-        self.fs.add_real_file("./fixtures/nested.zowe.config.json")
+        self.fs.add_real_file(os.path.join(FIXTURES_PATH, "nested.zowe.config.json"))
 
         self.custom_dir = os.path.dirname(FIXTURES_PATH)
         self.custom_appname = "zowe_abcd"
