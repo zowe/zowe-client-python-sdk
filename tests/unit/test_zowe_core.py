@@ -170,9 +170,12 @@ class TestZosmfProfileManager(TestCase):
         self.original_user_file_path = os.path.join(
             FIXTURES_PATH, "zowe.config.user.json"
         )
+        self.original_nested_file_path = os.path.join(
+            FIXTURES_PATH, "nested.zowe.config.json"
+        )
         self.fs.add_real_file(self.original_file_path)
         self.fs.add_real_file(self.original_user_file_path)
-        self.fs.add_real_file(os.path.join(FIXTURES_PATH, "nested.zowe.config.json"))
+        self.fs.add_real_file(self.original_nested_file_path)
 
         self.custom_dir = os.path.dirname(FIXTURES_PATH)
         self.custom_appname = "zowe_abcd"
@@ -267,9 +270,8 @@ class TestZosmfProfileManager(TestCase):
         profile and secure credentials
         """
         # Setup - copy profile to fake filesystem created by pyfakefs
-        self.original_file_path = f"./fixtures/nested.zowe.config.json"
         custom_file_path = os.path.join(self.custom_dir, self.custom_filename)
-        shutil.copy(self.original_file_path, custom_file_path)
+        shutil.copy(self.original_nested_file_path, custom_file_path)
 
         self.setUpCreds(custom_file_path, {
             "profiles.zosmf.properties.user": "user",
