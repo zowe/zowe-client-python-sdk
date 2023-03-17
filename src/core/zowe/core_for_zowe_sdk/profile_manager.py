@@ -248,18 +248,10 @@ class ProfileManager:
             if key not in dict and key not in ('user', 'password'):
                 dict[key] = value
 
-        return dict
-
-        if profile_type != BASE_PROFILE:
-            profile_props = {
-                **self.load(profile_type=BASE_PROFILE, check_missing_props=False),
-                **profile_props,
-            }
 
         if check_missing_props:
             missing_props = set()
             for item in missing_secure_props:
-                print(item, profile_props.keys())
                 if item not in profile_props.keys():
                     missing_props.add(item)
 
@@ -268,4 +260,4 @@ class ProfileManager:
 
         warnings.resetwarnings()
 
-        return profile_props
+        return dict
