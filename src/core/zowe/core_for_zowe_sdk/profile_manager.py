@@ -244,11 +244,11 @@ class ProfileManager:
                     final_cfg, BASE_PROFILE, None, final_config_type
             )
 
-        dict.update(profile_loaded.data)
+        for key, value in profile_loaded.data.items():
+            if key not in dict and key not in ('user', 'password'):
+                dict[key] = value
 
-        new_d = {key: value for key, value in dict.items() if key not in ('user', 'password')}
-
-        return new_d
+        return dict
 
         if profile_type != BASE_PROFILE:
             profile_props = {
