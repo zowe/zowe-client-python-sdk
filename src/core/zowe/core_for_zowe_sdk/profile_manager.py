@@ -212,42 +212,28 @@ class ProfileManager:
 
         missing_secure_props = []  # track which secure props were not loaded
 
-        dict = {}
-
-        final_cfg = None
-        final_config_type = None
-
         for i, (config_type, cfg) in enumerate(config_layers.items()):
-            if profile_name is None:
-                continue
-            lst = profile_name.split(".")
-            for x in lst:
-                profile_loaded = self.get_profile(
-                    cfg, x, profile_type, config_type
-                )
-                if profile_loaded.name and not profile_name:
-                    profile_name = (
-                        profile_loaded.name
-                    )  # Define profile name that will be merged from other layers
-                profile_props = {**profile_loaded.data, **profile_props}
+            profile_loaded = self.get_profile(
+                cfg, profile_name, profile_type, config_type
+            )
+            # TODO Why don't user and password show up here for Project User Config?
+            # Probably need to update load_profile_properties method in config_file.py
+            if profile_loaded.name and not profile_name:
+                profile_name = (
+                    profile_loaded.name
+                )  # Define profile name that will be merged from other layers
+            profile_props = {**profile_loaded.data, **profile_props}
 
-                missing_secure_props.extend(profile_loaded.missing_secure_props)
+            missing_secure_props.extend(profile_loaded.missing_secure_props)
 
-                if profile_props and i > 0:
-                    dict.update(profile_loaded.data)
-                    if final_cfg is None:
-                        final_cfg = cfg
-                        final_config_type = config_type
+            if i == 1 and profile_props:
+                break  # Skip loading from global config if profile was found in project config
 
         if profile_type != BASE_PROFILE:
-            profile_loaded = self.get_profile(
-                    final_cfg, BASE_PROFILE, None, final_config_type
-            )
-
-        for key, value in profile_loaded.data.items():
-            if key not in dict and key not in ('user', 'password'):
-                dict[key] = value
-
+            profile_props = {
+                **self.load(profile_type=BASE_PROFILE, check_missing_props=False),
+                **profile_props,
+            }
 
         if check_missing_props:
             missing_props = set()
@@ -260,4 +246,4 @@ class ProfileManager:
 
         warnings.resetwarnings()
 
-        return dict
+        return profile_props

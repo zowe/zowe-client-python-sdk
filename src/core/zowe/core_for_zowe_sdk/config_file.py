@@ -225,6 +225,24 @@ class ConfigFile:
             error_msg=f"No profile with matching profile_type '{profile_type}' found",
         )
 
+    def find_profile(self, path: str, profiles: dict):
+        """
+        Find a profile at a specified location from within a set of nested profiles
+        Returns
+        -------
+        dictionary
+
+            The profile object that was found, or None if not found
+        """
+        segments = path.split(".")
+        for k, v in profiles.items():
+            if len(segments) == 1 and segments[0] == k:
+                return v
+            elif segments[0] == k and v.get("profiles"):
+                segments.pop(0)
+                return self.find_profile(".".join(segments), v["profiles"])
+        return None
+
     def load_profile_properties(self, profile_name: str) -> dict:
         """
         Load profile properties given profile_name including secure properties
@@ -238,17 +256,24 @@ class ConfigFile:
         from the profile dict and populate fields from the secure credentials storage
         """
         try:
-            props = self.profiles
+            props = {}
             lst = profile_name.split(".")
-            for i in range(len(lst)-1):
-                props = props[lst[i]]["profiles"]
-            props = props[lst[len(lst)-1]]["properties"]
+            while len(lst) > 0:
+                props = {
+                    **self.find_profile(".".join(lst), self.profiles)["properties"],
+                    **props
+                }
+                lst.pop()
         except Exception as exc:
             raise ProfileNotFound(
                 f"Profile {profile_name} not found", error_msg=exc
             ) from exc
 
-        secure_fields: list = self.profiles[profile_name].get("secure", [])
+        secure_fields: list = []
+        lst = profile_name.split(".")
+        while len(lst) > 0:
+            secure_fields.extend(self.find_profile(".".join(lst), self.profiles).get("secure", []))
+            lst.pop()
 
         # load secure props only if there are secure fields
         if secure_fields:
