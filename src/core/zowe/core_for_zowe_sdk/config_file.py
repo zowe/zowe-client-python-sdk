@@ -306,8 +306,8 @@ class ConfigFile:
                         props[property_name] = value
                         secure_fields.remove(property_name)
 
-            # if len(secure_fields) > 0:
-            #     self._missing_secure_props.extend(secure_fields)
+            if len(secure_fields) > 0:
+                self._missing_secure_props.extend(secure_fields)
 
         return props
 
