@@ -285,8 +285,9 @@ class TestZosmfProfileManager(TestCase):
         self.assertEqual(prof_manager.config_filepath, custom_file_path)
 
         expected_props = {
-            "host": "example.com",
+            "host": "example1.com",
             "rejectUnauthorized": True,
+            "port": 443
         }
         self.assertEqual(props, expected_props)
 

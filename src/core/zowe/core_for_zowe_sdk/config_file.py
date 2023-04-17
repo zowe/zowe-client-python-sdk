@@ -224,6 +224,23 @@ class ConfigFile:
             profile_name=profile_type,
             error_msg=f"No profile with matching profile_type '{profile_type}' found",
         )
+        
+    def find_profile(self, path: str, profiles: dict):
+        """
+        Find a profile at a specified location from within a set of nested profiles
+        Returns
+        -------
+        dictionary
+            The profile object that was found, or None if not found
+        """
+        segments = path.split(".")
+        for k, v in profiles.items():
+            if len(segments) == 1 and segments[0] == k:
+                return v
+            elif segments[0] == k and v.get("profiles"):
+                segments.pop(0)
+                return self.find_profile(".".join(segments), v["profiles"])
+        return None
 
     def find_profile(self, path: str, profiles: dict):
         """
@@ -289,8 +306,8 @@ class ConfigFile:
                         props[property_name] = value
                         secure_fields.remove(property_name)
 
-            if len(secure_fields) > 0:
-                self._missing_secure_props.extend(secure_fields)
+            # if len(secure_fields) > 0:
+            #     self._missing_secure_props.extend(secure_fields)
 
         return props
 
