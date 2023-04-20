@@ -22,6 +22,7 @@ import commentjson
 
 from .constants import constants
 from .custom_warnings import (
+    ProfileNotFoundWarning,
     ProfileParsingWarning,
     SecurePropsNotFoundWarning,
 )
@@ -272,19 +273,23 @@ class ConfigFile:
         Load exact profile properties (without prepopulated fields from base profile)
         from the profile dict and populate fields from the secure credentials storage
         """
-        try:
-            props = {}
-            lst = profile_name.split(".")
-            while len(lst) > 0:
-                props = {
-                    **self.find_profile(".".join(lst), self.profiles)["properties"],
-                    **props
-                }
-                lst.pop()
-        except Exception as exc:
-            raise ProfileNotFound(
-                f"Profile {profile_name} not found", error_msg=exc
-            ) from exc
+
+        props = {}
+        lst = profile_name.split(".")
+        secure_fields: list = []
+
+        while len(lst) > 0:
+            profile_name = ".".join(lst)
+            profile = self.find_profile(profile_name, self.profiles)
+            if profile is not None:
+                props = { **profile.get("properties", {}), **props }
+                secure_fields.extend(profile.get("secure", []))
+            else:
+                warnings.warn(
+                        f"Profile {profile_name} not found",
+                        ProfileNotFoundWarning
+                        )
+            lst.pop()
 
         secure_fields: list = []
         lst = profile_name.split(".")
@@ -306,8 +311,8 @@ class ConfigFile:
                         props[property_name] = value
                         secure_fields.remove(property_name)
 
-            if len(secure_fields) > 0:
-                self._missing_secure_props.extend(secure_fields)
+            # if len(secure_fields) > 0:
+            #     self._missing_secure_props.extend(secure_fields)
 
         return props
 
