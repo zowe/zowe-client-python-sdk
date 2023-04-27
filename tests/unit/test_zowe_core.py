@@ -332,7 +332,7 @@ class TestZosmfProfileManager(TestCase):
 
         Only the filename will be set
         """
-        with self.assertRaises(exceptions.ProfileNotFound):
+        with self.assertWarns(custom_warnings.ProfileNotFoundWarning):
             # Setup
             cwd_up_dir_path = os.path.dirname(CWD)
             cwd_up_file_path = os.path.join(

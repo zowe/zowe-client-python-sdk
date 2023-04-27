@@ -291,11 +291,6 @@ class ConfigFile:
                         )
             lst.pop()
 
-        secure_fields: list = []
-        lst = profile_name.split(".")
-        while len(lst) > 0:
-            secure_fields.extend(self.find_profile(".".join(lst), self.profiles).get("secure", []))
-            lst.pop()
 
         # load secure props only if there are secure fields
         if secure_fields:
