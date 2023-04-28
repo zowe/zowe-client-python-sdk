@@ -232,23 +232,6 @@ class ConfigFile:
         Returns
         -------
         dictionary
-            The profile object that was found, or None if not found
-        """
-        segments = path.split(".")
-        for k, v in profiles.items():
-            if len(segments) == 1 and segments[0] == k:
-                return v
-            elif segments[0] == k and v.get("profiles"):
-                segments.pop(0)
-                return self.find_profile(".".join(segments), v["profiles"])
-        return None
-
-    def find_profile(self, path: str, profiles: dict):
-        """
-        Find a profile at a specified location from within a set of nested profiles
-        Returns
-        -------
-        dictionary
 
             The profile object that was found, or None if not found
         """
