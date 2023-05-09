@@ -24,7 +24,7 @@ Details about the behavior:
 **Describe your environment**
 
 <!--
-- Node.js and NPM versions installed (run `node --version`, `npm --version`):
+- Python and PIP versions installed (run python --version, pip --version):
 - Environment variables in use:
 - Operating system and version:
 - Shell/terminal (bash, cmd, powershell, etc...):
