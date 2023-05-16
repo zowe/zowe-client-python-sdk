@@ -187,6 +187,32 @@ result = my_zosmf.get_info()
 ```
 The result will be a JSON object containing z/OSMF information
 
+## Local project setup (Windows)
+Enlisted below are the project setup instructions.
+`Note` - Usage of `python3.10` or older is recommended.
+
+
+1. Install a virtual environment package
+
+```shell
+python -m pip install virtualenv
+```
+
+2. Create a virtual environment
+```shell
+python -m venv env
+```
+
+3. Activate virtual environment
+```shell
+.\env\Scripts\activate
+```
+
+4. Install dependencies
+
+```shell
+pip instal -r requirements.txt
+```
 
 # Acknowledgments
 
