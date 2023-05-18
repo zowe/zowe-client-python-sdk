@@ -206,14 +206,44 @@ After this , you can clone the repository
 ```
 git clone https://github.com/zowe/zowe-client-python-sdk.git
 
-pyenv local <version> ## you can get thsi by running pyenv versions
+```
+
+You can create a remote <origin> for it
+    
+```
+git remote add <originname> https://github.com/zowe/zowe-client-python-sdk.git
+
+```
+
+Checkout for the next branch
+    
+```
+git fetch <origin-name> && git checkout next
+    
+```
+
+This is for using the python 3.10 or lower versions for your local setup
+
+```
+pyenv local <version> ## you can get this by running pyenv versions
 
 ## This will create a python-version file , this version will only be used locally for this project
 
+```
+
+Create a virtual environment
+
+```
+
 python -m venv <envname>
 
-source <envname>/bin/activate
+source <envname>/bin/activate ##activating it
 
+```
+
+Moving to the project and installing the dependencies
+
+```
 cd <project>
 
 pip install -r requirements.txt
