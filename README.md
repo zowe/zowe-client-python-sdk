@@ -187,6 +187,29 @@ result = my_zosmf.get_info()
 ```
 The result will be a JSON object containing z/OSMF information
 
+## Local setup for macOs
+
+Make sure that the current python version is `3.10` or older
+
+If it is in an older version , you can downgrade to a lower versions by following the below steps:
+
+```bash
+brew install pyenv
+echo 'PATH=$(pyenv root)/shims:$PATH' >> ~/.zshrc
+pyenv install 3.10 ## Example for python 3.10 version
+```
+
+After this , you can clone the repository
+
+```
+git clone https://github.com/zowe/zowe-client-python-sdk.git
+pyenv local <version> ## you can get thsi by running pyenv versions
+## This will create a python-version file , this version will only be used locally for this project
+python -m venv <envname>
+source <envname>/bin/activate
+cd <project>
+pip install -r requirements.txt
+```
 
 # Acknowledgments
 
