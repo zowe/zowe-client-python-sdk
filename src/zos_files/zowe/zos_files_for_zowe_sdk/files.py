@@ -106,7 +106,7 @@ class Files(SdkApi):
     def upload_file_to_dsn(self, input_file, dataset_name):
         """Upload contents of a given file and uploads it to a dataset."""
         if os.path.isfile(input_file):
-            in_file = open(input_file, 'r')
+            in_file = open(input_file, 'r', newline='')
             file_contents = in_file.read()
             file_contents = "\n".join(file_contents.splitlines())
             response_json = self.write_to_dsn(dataset_name, file_contents)
