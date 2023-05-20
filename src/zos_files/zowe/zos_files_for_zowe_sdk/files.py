@@ -108,6 +108,7 @@ class Files(SdkApi):
         if os.path.isfile(input_file):
             in_file = open(input_file, 'r')
             file_contents = in_file.read()
+            file_contents = "\n".join(file_contents.splitlines())
             response_json = self.write_to_dsn(dataset_name, file_contents)
         else:
             raise FileNotFound(input_file)
