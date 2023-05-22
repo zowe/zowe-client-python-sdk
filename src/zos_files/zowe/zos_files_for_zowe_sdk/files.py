@@ -97,17 +97,18 @@ class Files(SdkApi):
 
     def download_dsn(self, dataset_name, output_file):
         """Retrieve the contents of a dataset and saves it to a given file."""
-        response_json = self.get_dsn_content(dataset_name)
-        dataset_content = response_json['response']
-        out_file = open(output_file, 'w')
-        out_file.write(dataset_content)
-        out_file.close()
+        with open(output_file, 'w') as out_file:
+            response_json = self.get_dsn_content(dataset_name)
+            dataset_content = response_json['response']
+            out_file.write(dataset_content)
+
+
 
     def upload_file_to_dsn(self, input_file, dataset_name):
         """Upload contents of a given file and uploads it to a dataset."""
         if os.path.isfile(input_file):
-            in_file = open(input_file, 'r')
-            file_contents = in_file.read()
-            response_json = self.write_to_dsn(dataset_name, file_contents)
+            with open(input_file, 'r') as in_file:
+                file_contents = in_file.read()
+                response_json = self.write_to_dsn(dataset_name, file_contents)
         else:
             raise FileNotFound(input_file)
