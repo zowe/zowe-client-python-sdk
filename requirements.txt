@@ -1,4 +1,4 @@
-certifi==2020.12.5
+certifi==2022.12.7
 chardet==4.0.0
 colorama==0.4.4
 coverage==5.4
@@ -10,7 +10,7 @@ jsoncparser
 jsonschema==4.14.0
 commentjson==0.9.0
 keyring
-lxml==4.7.1
+lxml==4.9.1
 mccabe==0.6.1
 nose2==0.10.0
 pycodestyle==2.6.0
@@ -20,12 +20,12 @@ pyflakes==2.2.0
 pylama==7.7.1
 python-decouple==3.4
 PyYAML==5.4.1
-requests==2.25.1
+requests==2.31.0
 six==1.15.0
 snowballstemmer==2.1.0
 typing-extensions==3.7.4.3
 Unidecode==1.2.0
-urllib3==1.26.3
+urllib3==1.26.5
 wheel
 zipp==3.4.0
 -e ./src/core
