@@ -25,7 +25,7 @@ six==1.15.0
 snowballstemmer==2.1.0
 typing-extensions==3.7.4.3
 Unidecode==1.2.0
-urllib3==1.26.3
+urllib3==1.26.5
 wheel
 zipp==3.4.0
 -e ./src/core
