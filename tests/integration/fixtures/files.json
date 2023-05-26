@@ -1,0 +1,7 @@
+{
+    "TEST_HLQ": "ZOWE",
+    "TEST_PDS": "ZOWE.TESTS.JCL",
+    "TEST_MEMBER": "IEFBR14T",
+    "TEST1_ZFS": "TEST1.ZFS",
+    "TEST2_ZFS": "TEST2.ZFS"
+}

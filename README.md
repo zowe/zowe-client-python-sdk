@@ -1,6 +1,6 @@
 # Zowe Python Client SDK
 
-![](https://img.shields.io/badge/license-EPL--2.0-blue) ![](https://img.shields.io/badge/dynamic/json?color=informational&label=version&query=info.version&url=https%3A%2F%2Fpypi.org%2Fpypi%2Fzowe%2Fjson) [![Documentation Status](https://readthedocs.org/projects/zowe-client-python-sdk/badge/?version=latest)](https://zowe-client-python-sdk.readthedocs.io/en/latest/index.html)
+![](https://img.shields.io/badge/license-EPL--2.0-blue) [![Latest Release](https://img.shields.io/github/v/release/zowe/zowe-client-python-sdk)](https://github.com/zowe/zowe-client-python-sdk/releases/latest) [![Documentation Status](https://readthedocs.org/projects/zowe-client-python-sdk/badge/?version=next)](https://zowe-client-python-sdk.readthedocs.io/en/next/index.html)
 
 The Zowe Client Python SDK, is a set of Python packages designed to allow programmatic 
 interactions with z/OS REST API interfaces with minimum effort.
@@ -31,12 +31,17 @@ pip install zowe
 
 To install only a subpackage using pip:
 
-
 ```
 pip install zowe.<subpackage>_for_zowe_sdk
 ```
 
-For more information on the available sub-packages click [HERE](https://zowe-client-python-sdk.readthedocs.io/en/latest/packages/packages.html)
+For more information on the available sub-packages click [HERE](https://zowe-client-python-sdk.readthedocs.io/en/next/packages/packages.html)
+
+**Note**: You can also install prerelease versions of the Zowe SDK from GitHub. Download the ZIP file from the [latest release](https://github.com/zowe/zowe-client-python-sdk/releases/latest), extract it, and run the following command:
+
+```
+pip install --no-deps <path where zip is extracted>/*
+```
 
 ## Requirements
 
@@ -59,25 +64,24 @@ Create a dictionary to handle communication with the plug-in:
 
 ```python
     from zowe.zos_console_for_zowe_sdk import Console
-    connection = {
-        "host_url": "<host address>",
+    profile = {
+        "host": "example.com",
+        "port": 443,
         "user": "<user>",
-        "password": "<password>",
+        "password": "<password>"
     }
 
-    my_console = Console(connection)
+    my_console = Console(profile)
 ```
 
 Alternatively, you can use an existing Zowe CLI profile instead:
 
 ```python
+    from zowe.zos_core_for_zowe_sdk import ProfileManager
     from zowe.zos_console_for_zowe_sdk import Console
 
-    connection = {
-        "plugin_profile": "<profile name>>"
-    }
-
-    my_console = Console(connection)
+    profile = ProfileManager().load(profile_type="zosmf")
+    my_console = Console(profile)
 ```
 
 **Important**: If your z/OSMF profile uses a credentials manager, this approach may not work depending on your operating system. Support for loading secure profiles has only been tested on Windows and Ubuntu so far.

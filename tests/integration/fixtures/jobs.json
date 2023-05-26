@@ -1,0 +1,9 @@
+{
+    "TEST_JCL_OWNER": "ZOWE",
+    "TEST_JCL_MEMBER": "ZOWE.TESTS.JCL(IEFBR14T)",
+    "TEST_JCL_CODE": [
+        "//IEFBR14T JOB (AUTOMATION),CLASS=A,MSGCLASS=0,",
+        "//             MSGLEVEL=(1,1),REGION=0M,NOTIFY=&SYSUID",
+        "//STEP1    EXEC PGM=IEFBR14"
+    ]
+}
