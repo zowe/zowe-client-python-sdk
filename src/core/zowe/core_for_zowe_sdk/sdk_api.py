@@ -21,7 +21,7 @@ class SdkApi:
     Abstract class used to represent the base SDK API.
     """
 
-    def __init__(self, profile, default_url):  
+    def __init__(self, profile, default_url, timeout=30):  
         self.profile = profile
         session = Session(profile)
         self.session: ISession = session.load()
@@ -40,7 +40,7 @@ class SdkApi:
         }
         self.session_arguments = {
             "verify": self.session.rejectUnauthorized,
-            "timeout": 30,
+            "timeout": timeout,
         }
         self.request_handler = RequestHandler(self.session_arguments)
 
