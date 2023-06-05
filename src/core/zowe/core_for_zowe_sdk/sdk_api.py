@@ -9,51 +9,51 @@ SPDX-License-Identifier: EPL-2.0
 
 Copyright Contributors to the Zowe Project.
 """
+
+from .exceptions import UnsupportedAuthType
 from .request_handler import RequestHandler
-from .constants import constants
-from .connection import ApiConnection
-from .zosmf_profile import ZosmfProfile
+from .session import Session, ISession
+from . import session_constants
 
 
 class SdkApi:
     """
     Abstract class used to represent the base SDK API.
-
-    Attributes
-    ----------
-    connection: dict
-        A dictionary containing the connection arguments
-    default_url: str
-        The default endpoint for the API
     """
 
-    def __init__(self, connection, default_url):
-        if "plugin_profile" in connection:
-            self.connection = ZosmfProfile(connection['plugin_profile']).load()
-        else:
-            self.connection = ApiConnection(**connection)
+    def __init__(self, profile, default_url):  
+        self.profile = profile
+        session = Session(profile)
+        self.session: ISession = session.load()
 
-        self.constants = constants
         self.default_service_url = default_url
         self.default_headers = {
-            "Content-type": "application/json",
-            "X-CSRF-ZOSMF-HEADER": ""
+            "Content-Type": "application/json",
+            "X-CSRF-ZOSMF-HEADER": "",
         }
-        self.request_endpoint = "https://{base_url}{service}".format(
-            base_url=self.connection.host_url, service=self.default_service_url
-        )
+
+        self.request_endpoint = session.host_url + self.default_service_url
+
         self.request_arguments = {
             "url": self.request_endpoint,
-            "auth": (self.connection.user, self.connection.password),
-            "headers": self.default_headers
+            "headers": self.default_headers,
         }
         self.session_arguments = {
-            "verify": self.connection.ssl_verification,
-            "timeout": 30
+            "verify": self.session.rejectUnauthorized,
+            "timeout": 30,
         }
         self.request_handler = RequestHandler(self.session_arguments)
 
-    def create_custom_request_arguments(self):
+        if self.session.type == session_constants.AUTH_TYPE_BASIC:
+            self.request_arguments["auth"] = (self.session.user, self.session.password)
+        elif self.session.type == session_constants.AUTH_TYPE_BEARER:
+            self.default_headers["Authorization"] = f"Bearer {self.session.tokenValue}"
+        elif self.session.type == session_constants.AUTH_TYPE_TOKEN:
+            self.default_headers["Cookie"] = f"{self.session.tokenType}={self.session.tokenValue}"
+        else:
+            raise UnsupportedAuthType(self.session.type)
+
+    def _create_custom_request_arguments(self):
         """Create a copy of the default request arguments dictionary.
 
         This method is required because the way that Python handles
