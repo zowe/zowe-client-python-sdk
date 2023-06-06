@@ -118,7 +118,7 @@ class Jobs(SdkApi):
         return response_json
 
     def change_jobs_class(self, jobname: str, jobid: str, modify_version="2.0"):
-        """Changes the a job class
+        """Changes the job class
 
         Parameters
         ----------
