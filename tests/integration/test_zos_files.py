@@ -15,7 +15,7 @@ class TestFilesIntegration(unittest.TestCase):
 
     def setUp(self):
         """Setup fixtures for Files class."""
-        test_profile = ProfileManager(show_warnings=False).load(profile_type="zosmf")
+        test_profile = ProfileManager().load(profile_type="zosmf")
         self.user_name = test_profile["user"]
         with open(FILES_FIXTURES_PATH, 'r') as fixtures_json:
             self.files_fixtures = json.load(fixtures_json)
