@@ -88,6 +88,29 @@ class TestFilesClass(TestCase):
         Files(self.test_profile).recall_migrated_dataset("dataset_name")
         mock_send_request.assert_called_once()
     
+    @mock.patch('requests.Session.send')
+    def test_copy_uss_file(self, mock_send_request):
+        """Test copying a uss file sends a request"""
+        
+        mock_send_request.return_value = mock.Mock(headers={"Content-Type": "application/json"}, status_code=200)
+
+        Files(self.test_profile).copy_uss_file("from_filname",replace=True)
+        
+        
+        mock_send_request.assert_called_once()
+    
+    @mock.patch('requests.Session.send')
+    def test_copy_dataset_or_member(self, mock_send_request):
+        """Test copying a data set or member sends a request"""
+        
+        mock_send_request.return_value = mock.Mock(headers={"Content-Type": "application/json"}, status_code=200)
+
+        Files(self.test_profile).copy_dataset_or_member(from_dataset_name="MY.OLD.DSN",from_member_name="MYMEM1"
+                                                        ,to_dataset_name="MY.NEW.DSN",to_member_name="MYMEM2",replace=True)
+        
+        
+        mock_send_request.assert_called_once()
+            
     def test_recall_migrated_dataset_parameterized(self):
         """Testing recall migrated_dataset with different values"""
 

@@ -139,6 +139,42 @@ class Files(SdkApi):
         custom_args["headers"]["X-IBM-Attributes"] = attributes
         response_json = self.request_handler.perform_request("GET", custom_args)
         return response_json['items']  # type: ignore
+    
+    def copy_uss_file(self,from_filname,type="text",replace=False):
+        """
+        Copy a USS file to another USS file.
+            Parameters
+            ----------
+            from_filname: str
+                Name of the file to copy from
+            type: str
+                Type of the file to copy from
+            enq: str
+                Enqueue type for the file to copy from
+            replace: bool
+                If true, the function uses the REPLACE=YES on ARCHDEF request, otherwise it uses the REPLACE=NO.
+            Returns 
+            -------
+            json
+                A JSON containing the result of the operation
+        """
+        
+        data={
+            "request":"copy",
+           "from-file":{
+               "filename":from_filname.strip(),
+                "type":type.strip()
+           },
+           "replace":replace
+        }
+        
+            
+        custom_args = self._create_custom_request_arguments()
+        custom_args['json'] = data
+        custom_args["url"] = "{}ds/{}".format(self.request_endpoint, from_filname)
+        response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[200])
+        return response_json
+    
     def copy_dataset_or_member(self,from_dataset_name,to_dataset_name,from_member_name="",volser="",alias="",
                                to_member_name="",enq="",replace=False):
         """
@@ -778,7 +814,7 @@ class Files(SdkApi):
 
         if enq:
             if enq in ("SHRW", "EXCLU"):
-                data["from-dataset"]["enq"] = enq.strip()
+                data["enq"] = enq.strip()
             else:
                 raise ValueError("Invalid value for enq.")
 
