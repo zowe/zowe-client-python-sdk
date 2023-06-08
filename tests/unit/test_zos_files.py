@@ -89,12 +89,12 @@ class TestFilesClass(TestCase):
         mock_send_request.assert_called_once()
     
     @mock.patch('requests.Session.send')
-    def test_copy_uss_file(self, mock_send_request):
-        """Test copying a uss file sends a request"""
+    def test_copy_uss_to_dataset(self, mock_send_request):
+        """Test copy_uss_to_dataset sends a request"""
         
         mock_send_request.return_value = mock.Mock(headers={"Content-Type": "application/json"}, status_code=200)
 
-        Files(self.test_profile).copy_uss_file("from_filname",replace=True)
+        Files(self.test_profile).copy_uss_to_dataset("from_filname","to_dataset_name","to_member_name",replace=True)
         
         
         mock_send_request.assert_called_once()
@@ -283,7 +283,7 @@ class TestFilesClass(TestCase):
             }
 
             if len(test_case[0]) > 3:
-                data["from-dataset"]["enq"] = test_case[0][3].strip()
+                data["enq"] = test_case[0][3].strip()
             if test_case[1]:
                 files_test_profile.rename_dataset_member(*test_case[0])
                 custom_args = files_test_profile._create_custom_request_arguments()

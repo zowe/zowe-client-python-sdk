@@ -140,13 +140,17 @@ class Files(SdkApi):
         response_json = self.request_handler.perform_request("GET", custom_args)
         return response_json['items']  # type: ignore
     
-    def copy_uss_file(self,from_filname,type="text",replace=False):
+    def copy_uss_to_dataset(self,from_filname,to_dataset_name,to_member_name="",type="text",replace=False):
         """
-        Copy a USS file to another USS file.
+        Copy a USS file to dataset 
             Parameters
             ----------
             from_filname: str
                 Name of the file to copy from
+            to_dataset_name: str
+                Name of the dataset to copy to
+            to_member_name: str
+                Name of the member to copy to  
             type: str
                 Type of the file to copy from
             enq: str
@@ -168,10 +172,10 @@ class Files(SdkApi):
            "replace":replace
         }
         
-            
+        path_to_member = f"{to_dataset_name.strip()}({to_member_name.strip()})" if to_member_name else to_dataset_name.strip()    
         custom_args = self._create_custom_request_arguments()
         custom_args['json'] = data
-        custom_args["url"] = "{}ds/{}".format(self.request_endpoint, from_filname)
+        custom_args["url"] = "{}ds/{}".format(self.request_endpoint, path_to_member)
         response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[200])
         return response_json
     
@@ -213,7 +217,7 @@ class Files(SdkApi):
         }
         
        
-        path_to_member = f"{to_dataset_name}({to_member_name})" if to_member_name else to_dataset_name
+        path_to_member = f"{to_dataset_name.strip()}({to_member_name.strip()})" if to_member_name else to_dataset_name.strip()
         if enq:
             if enq in ("SHR","SHRW","EXCLU"):
                 data["enq"] = enq.strip()

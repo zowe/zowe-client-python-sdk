@@ -15,7 +15,7 @@ class TestFilesIntegration(unittest.TestCase):
 
     def setUp(self):
         """Setup fixtures for Files class."""
-        test_profile = ProfileManager().load(profile_type="zosmf")
+        test_profile = ProfileManager(show_warnings=False).load(profile_type="zosmf")
         self.user_name = test_profile["user"]
         with open(FILES_FIXTURES_PATH, 'r') as fixtures_json:
             self.files_fixtures = json.load(fixtures_json)
@@ -58,11 +58,10 @@ class TestFilesIntegration(unittest.TestCase):
         self.assertTrue(command_output['response'] == '')
     
     
-    # def test_copy_uss_file_should_be_possible(self):
-    #     """Executing copy_uss_file should be possible."""
-        
-    #     command_output = self.files.copy_uss_file("from_filname",replace=True)
-    #     self.assertTrue(command_output['response']=="")
+    def test_copy_uss_to_dataset_should_be_possible(self):
+        """Executing copy_uss_to_dataset should be possible."""
+        command_output = self.files.copy_uss_to_dataset(self.files_fixtures["TEST_USS"],"ZOWE.TESTS.JCL(TEST2)",replace=True)
+        self.assertTrue(command_output['response']=="")
 
     def test_copy_dataset_or_member_should_be_possible(self):
         """Executing copy_dataset_or_member should be possible."""
