@@ -74,7 +74,7 @@ class Files(SdkApi):
         custom_args["url"] = "{}fs{}".format(self.request_endpoint,filepath_name)
         response_json = self.request_handler.perform_request("GET", custom_args)
         return response_json
-
+            
     def delete_uss(self, filepath_name, recursive=False):
         """
         Delete a file or directory
@@ -139,7 +139,61 @@ class Files(SdkApi):
         custom_args["headers"]["X-IBM-Attributes"] = attributes
         response_json = self.request_handler.perform_request("GET", custom_args)
         return response_json['items']  # type: ignore
-
+    def copy_dataset_or_member(self,from_dataset_name,to_dataset_name,from_member_name="",volser="",alias="",
+                               to_member_name="",enq="",replace=False):
+        """
+         Copy a dataset or member to another dataset or member.
+            Parameters
+            ----------
+            from_dataset_name: str
+                Name of the dataset to copy from
+            to_dataset_name: str
+                Name of the dataset to copy to
+            from_member_name: str
+                Name of the member to copy from
+            volser: str
+                Volume serial number of the dataset to copy from
+            alias: str  
+                Alias of the dataset to copy from
+            to_member_name: str
+                Name of the member to copy to
+            enq: str
+                Enqueue type for the dataset to copy from
+            replace: bool
+                If true, the function uses the REPLACE=YES on ARCHDEF request, otherwise it uses the REPLACE=NO.
+            Returns 
+            -------
+            json
+                A JSON containing the result of the operation
+        """
+        
+        data={
+            "request":"copy",
+           "from-dataset":{
+               "dsn":from_dataset_name.strip(),
+                "member":from_member_name.strip()     
+           },
+           "replace":replace
+        }
+        
+       
+        path_to_member = f"{to_dataset_name}({to_member_name})" if to_member_name else to_dataset_name
+        if enq:
+            if enq in ("SHR","SHRW","EXCLU"):
+                data["enq"] = enq.strip()
+            else:
+                raise ValueError("Invalid value for enq.")
+        if volser:
+             data["from-dataset"]["volser"]=volser.strip()
+        if alias:
+            data["from-dataset"]["alias"]=alias.strip()
+            
+        custom_args = self._create_custom_request_arguments()
+        custom_args['json'] = data
+        custom_args["url"] = "{}ds/{}".format(self.request_endpoint, path_to_member)
+        response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[200])
+        return response_json
+    
     def get_dsn_content(self, dataset_name):
         """Retrieve the contents of a given dataset.
 
