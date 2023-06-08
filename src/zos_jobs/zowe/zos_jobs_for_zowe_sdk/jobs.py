@@ -117,7 +117,7 @@ class Jobs(SdkApi):
         response_json = self.request_handler.perform_request("DELETE", custom_args, expected_code=[202, 200])
         return response_json
 
-    def change_jobs_class(self, jobname: str, jobid: str, modify_version="2.0"):
+    def change_jobs_class(self, jobname: str, jobid: str, class_name: str, modify_version="2.0"):
         """Changes the job class
 
         Parameters
@@ -141,7 +141,10 @@ class Jobs(SdkApi):
         joburl = "{}/{}".format(jobname, jobid)
         request_url = "{}{}".format(self.request_endpoint, joburl)
         custom_args["url"] = request_url
-        custom_args["headers"]["X-IBM-Job-Modify-Version"] = modify_version
+        custom_args["json"] = {
+            "class": class_name,
+            "version": modify_version
+        }
 
         response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[202, 200])
         return response_json
