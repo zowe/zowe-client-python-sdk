@@ -105,7 +105,7 @@ class TestFilesClass(TestCase):
         test_case = ("MY.OLD.DSN", "MY.NEW.DSN", "MYMEM1", None, None, "MYMEM2", "RANDOM", True)
         with self.assertRaises(ValueError) as e_info:
             Files(self.test_profile).copy_dataset_or_member(*test_case)
-            self.assertEqual(str(e_info.exception), "Invalid value for enq.")
+        self.assertEqual(str(e_info.exception), "Invalid value for enq.")
             
     @mock.patch('requests.Session.send')
     def test_copy_dataset_or_member(self, mock_send_request):
