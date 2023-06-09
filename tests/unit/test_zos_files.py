@@ -94,7 +94,7 @@ class TestFilesClass(TestCase):
         
         mock_send_request.return_value = mock.Mock(headers={"Content-Type": "application/json"}, status_code=200)
 
-        Files(self.test_profile).copy_uss_to_dataset("from_filname","to_dataset_name","to_member_name",replace=True)
+        Files(self.test_profile).copy_uss_to_dataset("from_filename","to_dataset_name","to_member_name",replace=True)
         
         
         mock_send_request.assert_called_once()
