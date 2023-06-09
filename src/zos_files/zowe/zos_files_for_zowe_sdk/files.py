@@ -19,7 +19,12 @@ import shutil
 from zowe.zos_files_for_zowe_sdk.constants import zos_file_constants
 
 _ZOWE_FILES_DEFAULT_ENCODING='utf-8'
-
+from enum import Enum
+class FileType(Enum):
+    BINARY = "binary"
+    EXECUTABLE = "executable"
+    TEXT = "text"
+    
 class Files(SdkApi):
     """
     Class used to represent the base z/OSMF Files API.
@@ -140,44 +145,46 @@ class Files(SdkApi):
         response_json = self.request_handler.perform_request("GET", custom_args)
         return response_json['items']  # type: ignore
     
-    def copy_uss_to_dataset(self,from_filename,to_dataset_name,to_member_name=None,type="binary" | "executable" | "text",replace=False):
+    def copy_uss_to_dataset(self, from_filename, to_dataset_name, to_member_name=None, type=FileType.TEXT, replace=False):
         """
-        Copy a USS file to dataset 
-            Parameters
-            ----------
-            from_filename: str
-                Name of the file to copy from
-            to_dataset_name: str
-                Name of the dataset to copy to
-            to_member_name: str
-                Name of the member to copy to  
-            type: str
-                Type of the file to copy from
-            replace: bool
-                If true, members in the target data set are replaced.
-            Returns 
-            -------
-            json
-                A JSON containing the result of the operation
+        Copy a USS file to dataset.
+
+        Parameters
+        ----------
+        from_filename: str
+            Name of the file to copy from.
+        to_dataset_name: str
+            Name of the dataset to copy to.
+        to_member_name: str
+            Name of the member to copy to.
+        type: FileType, optional
+            Type of the file to copy from. Default is FileType.TEXT.
+        replace: bool, optional
+            If true, members in the target dataset are replaced.
+
+        Returns
+        -------
+        json
+            A JSON containing the result of the operation.
         """
         
         data={
             "request":"copy",
            "from-file":{
                "filename":from_filename.strip(),
-                "type":type.strip()
+                "type":type.value
            },
            "replace":replace
         }
         
-        path_to_member = f"{to_dataset_name.strip()}({to_member_name.strip()})" if to_member_name else to_dataset_name.strip()    
+        path_to_member = f"{to_dataset_name}({to_member_name})" if to_member_name else to_dataset_name
         custom_args = self._create_custom_request_arguments()
         custom_args['json'] = data
         custom_args["url"] = "{}ds/{}".format(self.request_endpoint, path_to_member)
         response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[200])
         return response_json
     
-    def copy_dataset_or_member(self,from_dataset_name,to_dataset_name,from_member_name="",volser=None,alias=None,
+    def copy_dataset_or_member(self,from_dataset_name,to_dataset_name,from_member_name=None,volser=None,alias=None,
                                to_member_name=None,enq=None,replace=False):
         """
          Copy a dataset or member to another dataset or member.
@@ -215,7 +222,7 @@ class Files(SdkApi):
         }
         
        
-        path_to_member = f"{to_dataset_name.strip()}({to_member_name})" if to_member_name else to_dataset_name.strip()
+        path_to_member = f"{to_dataset_name}({to_member_name})" if to_member_name else to_dataset_name
         if enq:
             if enq in ("SHR","SHRW","EXCLU"):
                 data["enq"] = enq
