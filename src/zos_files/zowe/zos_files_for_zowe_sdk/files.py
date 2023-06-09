@@ -140,7 +140,7 @@ class Files(SdkApi):
         response_json = self.request_handler.perform_request("GET", custom_args)
         return response_json['items']  # type: ignore
     
-    def copy_uss_to_dataset(self,from_filename,to_dataset_name,to_member_name=None,type="text",replace=False):
+    def copy_uss_to_dataset(self,from_filename,to_dataset_name,to_member_name=None,type="binary" | "executable" | "text",replace=False):
         """
         Copy a USS file to dataset 
             Parameters
