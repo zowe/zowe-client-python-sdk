@@ -140,7 +140,7 @@ class Files(SdkApi):
         response_json = self.request_handler.perform_request("GET", custom_args)
         return response_json['items']  # type: ignore
     
-    def copy_uss_to_dataset(self,from_filename,to_dataset_name,to_member_name="",type="text",replace=False):
+    def copy_uss_to_dataset(self,from_filename,to_dataset_name,to_member_name=None,type="text",replace=False):
         """
         Copy a USS file to dataset 
             Parameters
@@ -153,10 +153,8 @@ class Files(SdkApi):
                 Name of the member to copy to  
             type: str
                 Type of the file to copy from
-            enq: str
-                Enqueue type for the file to copy from
             replace: bool
-                If true, the function uses the REPLACE=YES on ARCHDEF request, otherwise it uses the REPLACE=NO.
+                If true, members in the target data set are replaced.
             Returns 
             -------
             json
@@ -179,8 +177,8 @@ class Files(SdkApi):
         response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[200])
         return response_json
     
-    def copy_dataset_or_member(self,from_dataset_name,to_dataset_name,from_member_name="",volser="",alias="",
-                               to_member_name="",enq="",replace=False):
+    def copy_dataset_or_member(self,from_dataset_name,to_dataset_name,from_member_name="",volser=None,alias=None,
+                               to_member_name=None,enq=None,replace=False):
         """
          Copy a dataset or member to another dataset or member.
             Parameters
@@ -200,7 +198,7 @@ class Files(SdkApi):
             enq: str
                 Enqueue type for the dataset to copy from
             replace: bool
-                If true, the function uses the REPLACE=YES on ARCHDEF request, otherwise it uses the REPLACE=NO.
+                If true, members in the target data set are replaced.
             Returns 
             -------
             json
@@ -211,22 +209,22 @@ class Files(SdkApi):
             "request":"copy",
            "from-dataset":{
                "dsn":from_dataset_name.strip(),
-                "member":from_member_name.strip()     
+                "member":from_member_name
            },
            "replace":replace
         }
         
        
-        path_to_member = f"{to_dataset_name.strip()}({to_member_name.strip()})" if to_member_name else to_dataset_name.strip()
+        path_to_member = f"{to_dataset_name.strip()}({to_member_name})" if to_member_name else to_dataset_name.strip()
         if enq:
             if enq in ("SHR","SHRW","EXCLU"):
-                data["enq"] = enq.strip()
+                data["enq"] = enq
             else:
                 raise ValueError("Invalid value for enq.")
         if volser:
-             data["from-dataset"]["volser"]=volser.strip()
+             data["from-dataset"]["volser"]=volser
         if alias:
-            data["from-dataset"]["alias"]=alias.strip()
+            data["from-dataset"]["alias"]=alias
             
         custom_args = self._create_custom_request_arguments()
         custom_args['json'] = data
