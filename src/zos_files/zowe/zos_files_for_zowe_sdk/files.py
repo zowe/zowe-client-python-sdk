@@ -17,14 +17,9 @@ from zowe.zos_files_for_zowe_sdk import exceptions, constants
 import os
 import shutil
 from zowe.zos_files_for_zowe_sdk.constants import zos_file_constants
-
+from zowe.zos_files_for_zowe_sdk.constants import FileType
 _ZOWE_FILES_DEFAULT_ENCODING='utf-8'
-from enum import Enum
-class FileType(Enum):
-    BINARY = "binary"
-    EXECUTABLE = "executable"
-    TEXT = "text"
-    
+
 class Files(SdkApi):
     """
     Class used to represent the base z/OSMF Files API.
