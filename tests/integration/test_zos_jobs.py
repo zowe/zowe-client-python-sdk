@@ -33,6 +33,22 @@ class TestJobsIntegration(unittest.TestCase):
         command_output = self.jobs.list_jobs(owner=self.jobs_fixtures_json['TEST_JCL_OWNER'])
         self.assertIsInstance(command_output, list)
 
+    def test_hold_job_should_execute_properly(self):
+        """Execute the hold_job should execute successfully."""
+        execution_output = self.jobs.submit_from_mainframe(self.jobs_fixtures_json['TEST_JCL_MEMBER'])
+        jobname = execution_output['jobname']
+        jobid = execution_output['jobid']
+        command_output = self.jobs.hold_job(jobname, jobid)
+        self.assertIsNotNone(command_output['jobid'])
+
+    def test_release_job_should_execute_properly(self):
+        """Execute the release_job should execute successfully."""
+        execution_output = self.jobs.submit_from_mainframe(self.jobs_fixtures_json['TEST_JCL_MEMBER'])
+        jobname = execution_output['jobname']
+        jobid = execution_output['jobid']
+        command_output = self.jobs.release_job(jobname, jobid)
+        self.assertIsNotNone(command_output['jobid'])
+
     def test_submit_from_mainframe_should_execute_properly(self):
         """Executing the submit_from_mainframe method should execute successfully."""
         command_output = self.jobs.submit_from_mainframe(self.jobs_fixtures_json['TEST_JCL_MEMBER'])
