@@ -42,7 +42,7 @@ class TestJobsIntegration(unittest.TestCase):
         self.assertIsNotNone(command_output['jobid'])
     
     def test_hold_job_should_raise_error(self):
-        """Execute the hold_job should error for modified version."""
+        """Execute the hold_job should raise error for modified version."""
         execution_output = self.jobs.submit_from_mainframe(self.jobs_fixtures_json['TEST_JCL_MEMBER'])
         jobname = execution_output['jobname']
         jobid = execution_output['jobid']
@@ -58,7 +58,7 @@ class TestJobsIntegration(unittest.TestCase):
         self.assertIsNotNone(command_output['jobid'])
     
     def test_release_job_should_raise_error(self):
-        """Execute the release_job should error for modified version."""
+        """Execute the release_job should raise error for modified version."""
         execution_output = self.jobs.submit_from_mainframe(self.jobs_fixtures_json['TEST_JCL_MEMBER'])
         jobname = execution_output['jobname']
         jobid = execution_output['jobid']
