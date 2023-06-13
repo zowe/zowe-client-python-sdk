@@ -113,6 +113,7 @@ class Files(SdkApi):
         Returns
         -------
             list of dict
+            
             A JSON with a list of dataset names (and attributes if specified) matching the given pattern.
         """
         custom_args = self._create_custom_request_arguments()
