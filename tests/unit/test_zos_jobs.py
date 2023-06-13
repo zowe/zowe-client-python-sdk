@@ -45,7 +45,6 @@ class TestJobsClass(TestCase):
 
         with self.assertRaises(ValueError):
             Jobs(self.test_profile).change_jobs_class("TESTJOB2","JOB00084","A",modify_version="3.0")
-            mock_send_request.assert_called_once()
 
     def test_cancel_job_modify_version_parameterized(self):
         """Test cancelling a job with different values sends the expected request"""
