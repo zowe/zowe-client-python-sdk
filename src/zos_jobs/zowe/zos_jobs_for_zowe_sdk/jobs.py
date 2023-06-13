@@ -116,6 +116,22 @@ class Jobs(SdkApi):
 
         response_json = self.request_handler.perform_request("DELETE", custom_args, expected_code=[202, 200])
         return response_json
+
+    def _issue_job_request(self, req: dict, jobname: str, jobid: str, modify_version):
+
+        if req["request"] in ["hold", "release"]:
+            custom_args = self._create_custom_request_arguments()
+            job_url = "{}/{}".format(jobname, jobid)
+            request_url = "{}{}".format(self.request_endpoint, job_url)
+            custom_args["url"] = request_url
+            custom_args["json"] = {
+                "request": req["request"],
+                "version": modify_version
+            }
+            custom_args["headers"]["X-IBM-Job-Modify-Version"] = modify_version
+            
+            response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[202, 200])
+            return response_json
     
     def hold_job(self, jobname: str, jobid: str, modify_version="2.0"):
         """Hold the given job on JES
@@ -137,17 +153,7 @@ class Jobs(SdkApi):
         if modify_version not in ("1.0", "2.0"):
             raise ValueError('Accepted values for modify_version: "1.0" or "2.0"')
         
-        custom_args = self._create_custom_request_arguments()
-        job_url = "{}/{}".format(jobname, jobid)
-        request_url = "{}{}".format(self.request_endpoint, job_url)
-        custom_args["url"] = request_url
-        custom_args["json"] = {
-            "request": "hold",
-            "version": modify_version
-        }
-        custom_args["headers"]["X-IBM-Job-Modify-Version"] = modify_version
-        
-        response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[202, 200])
+        response_json = self._issue_job_request({"request": "hold"}, jobname, jobid, modify_version)
         return response_json
 
     def release_job(self, jobname: str, jobid: str, modify_version="2.0"):
@@ -169,18 +175,8 @@ class Jobs(SdkApi):
         """
         if modify_version not in ("1.0", "2.0"):
             raise ValueError('Accepted values for modify_version: "1.0" or "2.0"')
-
-        custom_args = self._create_custom_request_arguments()
-        job_url = "{}/{}".format(jobname, jobid)
-        request_url = "{}{}".format(self.request_endpoint, job_url)
-        custom_args["url"] = request_url
-        custom_args["json"] = {
-            "request": "release",
-            "version": modify_version
-        }
-        custom_args["headers"]["X-IBM-Job-Modify-Version"] = modify_version
-
-        response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[202, 200])
+        
+        response_json = self._issue_job_request({"request": "release"}, jobname, jobid, modify_version)
         return response_json
 
     def list_jobs(self, owner=None,  prefix="*", max_jobs=1000, user_correlator=None):
