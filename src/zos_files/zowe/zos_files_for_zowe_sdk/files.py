@@ -119,16 +119,12 @@ class Files(SdkApi):
         custom_args = self._create_custom_request_arguments()
         custom_args["params"] = {"dslevel": name_pattern}
         custom_args["url"] = "{}ds".format(self.request_endpoint)
-        response_json = self.request_handler.perform_request("GET", custom_args)
+        
         
         if return_attributes:
-            dataset_list = response_json
-            for dataset in dataset_list['items']:
-                dataset_name = dataset["dsname"]
-                attribute_response = self.get_dsn_content(dataset_name)
-                dataset["attributes"] = attribute_response  
-            return dataset_list
-        
+            custom_args["headers"]["X-IBM-Attributes"] = "base"  
+           
+        response_json = self.request_handler.perform_request("GET", custom_args)
         return response_json
 
 

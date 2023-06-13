@@ -77,8 +77,13 @@ class TestFilesClass(TestCase):
         """Test creating a zfs sends a request"""
         mock_send_request.return_value = mock.Mock(headers={"Content-Type": "application/json"}, status_code=200)
 
-        Files(self.test_profile).list_dsn("file_system_name")
-        mock_send_request.assert_called_once()
+        test_values = [
+            ('MY.DSN',False),
+            ('MY.DSN',True)
+        ]
+        for test_case in test_values:
+            Files(self.test_profile).list_dsn(*test_case)
+            mock_send_request.assert_called()
        
         
 
