@@ -39,7 +39,8 @@ class TestJobsIntegration(unittest.TestCase):
         jobname = execution_output['jobname']
         jobid = execution_output['jobid']
         command_output = self.jobs.change_jobs_class(jobname, jobid, "A")
-        self.assertIsNotNone(command_output['jobid'])
+        expected_class = self.jobs.get_job_status(jobname, jobid)
+        self.assertEqual(expected_class['class'], "A")
 
     def test_submit_from_mainframe_should_execute_properly(self):
         """Executing the submit_from_mainframe method should execute successfully."""
