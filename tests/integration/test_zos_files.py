@@ -29,7 +29,7 @@ class TestFilesIntegration(unittest.TestCase):
 
     def test_list_dsn_should_return_a_list_of_datasets(self):
         """Executing list_dsn method should return a list of found datasets."""
-        command_output = self.files.list_dsn(self.files_fixtures["TEST_HLQ"])
+        command_output = self.files.list_dsn(self.files_fixtures["TEST_HLQ"],True)
         self.assertIsInstance(command_output['items'], list)
 
     def test_list_members_should_return_a_list_of_members(self):

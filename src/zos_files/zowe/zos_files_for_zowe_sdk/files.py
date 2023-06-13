@@ -100,16 +100,25 @@ class Files(SdkApi):
         return response_json
 
 
-    def list_dsn(self, name_pattern):
+    def list_dsn(self, name_pattern, return_attributes=False):
         """Retrieve a list of datasets based on a given pattern.
+
+        Parameters
+        ----------
+        name_pattern : str
+            The pattern to match dataset names.
+        return_attributes : bool, optional
+            Whether to return dataset attributes along with the names. Defaults to False.
 
         Returns
         -------
         json
-            A JSON with a list of dataset names matching the given pattern
+            A JSON with a list of dataset names (and attributes if specified) matching the given pattern.
         """
         custom_args = self._create_custom_request_arguments()
         custom_args["params"] = {"dslevel": name_pattern}
+        if return_attributes:
+            custom_args["params"]["attributes"] = True
         custom_args["url"] = "{}ds".format(self.request_endpoint)
         response_json = self.request_handler.perform_request("GET", custom_args)
         return response_json
