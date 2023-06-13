@@ -113,8 +113,7 @@ class Files(SdkApi):
         Returns
         -------
         dict or list of dict
-            A dictionary or list of dictionaries containing dataset names and attributes
-            if return_attributes is True. Otherwise, a dictionary with the list of dataset names.
+            A JSON with a list of dataset names (and attributes if specified) matching the given pattern.
         """
         custom_args = self._create_custom_request_arguments()
         custom_args["params"] = {"dslevel": name_pattern}
