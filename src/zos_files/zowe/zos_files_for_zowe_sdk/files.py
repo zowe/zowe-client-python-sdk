@@ -16,8 +16,8 @@ from zowe.core_for_zowe_sdk.exceptions import FileNotFound
 from zowe.zos_files_for_zowe_sdk import exceptions, constants
 import os
 import shutil
-from zowe.zos_files_for_zowe_sdk.constants import zos_file_constants
-from zowe.zos_files_for_zowe_sdk.constants import FileType
+from zowe.zos_files_for_zowe_sdk.constants import zos_file_constants, FileType
+
 _ZOWE_FILES_DEFAULT_ENCODING='utf-8'
 
 class Files(SdkApi):
@@ -179,54 +179,57 @@ class Files(SdkApi):
         response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[200])
         return response_json
     
-    def copy_dataset_or_member(self,from_dataset_name,to_dataset_name,from_member_name=None,volser=None,alias=None,
-                               to_member_name=None,enq=None,replace=False):
+    def copy_dataset_or_member(self,from_dataset_name,to_dataset_name, **copy_ds_args):
         """
-         Copy a dataset or member to another dataset or member.
-            Parameters
-            ----------
-            from_dataset_name: str
-                Name of the dataset to copy from
-            to_dataset_name: str
-                Name of the dataset to copy to
-            from_member_name: str
-                Name of the member to copy from
-            volser: str
-                Volume serial number of the dataset to copy from
-            alias: str  
-                Alias of the dataset to copy from
-            to_member_name: str
-                Name of the member to copy to
-            enq: str
-                Enqueue type for the dataset to copy from
-            replace: bool
-                If true, members in the target data set are replaced.
-            Returns 
-            -------
-            json
-                A JSON containing the result of the operation
+        Copy a dataset or member to another dataset or member.
+
+        Parameters
+        ----------
+        from_dataset_name : str
+            Name of the dataset to copy from.
+        to_dataset_name : str
+            Name of the dataset to copy to.
+        **copy_ds_args : dict
+            Additional arguments for the copy operation. The available arguments are:
+            - from_member_name : str
+                Name of the member to copy from.
+            - volser : str
+                Volume serial number of the dataset to copy from.
+            - alias : bool
+                Alias of the dataset to copy fro.
+            - to_member_name : str
+                Name of the member to copy to.
+            - enq : str
+                Enqueue type for the dataset to copy from.
+            - replace : bool
+                If True, members in the target dataset are replaced.
+
+        Returns 
+        -------
+        json
+            A JSON containing the result of the operation.
         """
         
         data={
             "request":"copy",
            "from-dataset":{
                "dsn":from_dataset_name.strip(),
-                "member":from_member_name
+                "member":copy_ds_args['from_member_name']
            },
-           "replace":replace
+           "replace":copy_ds_args['replace']
         }
         
        
-        path_to_member = f"{to_dataset_name}({to_member_name})" if to_member_name else to_dataset_name
-        if enq:
-            if enq in ("SHR","SHRW","EXCLU"):
-                data["enq"] = enq
+        path_to_member = f"{to_dataset_name}({copy_ds_args['to_member_name']})" if copy_ds_args['to_member_name'] else to_dataset_name
+        if 'enq' in copy_ds_args:
+            if copy_ds_args['enq'] in ("SHR","SHRW","EXCLU"):
+                data["enq"] = copy_ds_args['enq']
             else:
                 raise ValueError("Invalid value for enq.")
-        if volser:
-             data["from-dataset"]["volser"]=volser
-        if alias:
-            data["from-dataset"]["alias"]=alias
+        if 'volser' in copy_ds_args:
+             data["from-dataset"]["volser"]=copy_ds_args['volser']
+        if 'alias' in copy_ds_args:
+            data["from-dataset"]["alias"]=copy_ds_args['alias']
             
         custom_args = self._create_custom_request_arguments()
         custom_args['json'] = data

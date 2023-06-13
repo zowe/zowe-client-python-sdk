@@ -102,9 +102,16 @@ class TestFilesClass(TestCase):
     def test_copy_dataset_or_member_raises_exception(self):
         """Test copying a data set or member raises error when assigning invalid values to enq parameter"""
 
-        test_case = ("MY.OLD.DSN", "MY.NEW.DSN", "MYMEM1", None, None, "MYMEM2", "RANDOM", True)
+        test_case = {
+        "from_dataset_name": "MY.OLD.DSN",
+        "to_dataset_name": "MY.NEW.DSN",
+        "from_member_name": "MYMEM1",
+        "to_member_name": "MYMEM2",
+        "enq": "RANDOM",
+        "replace": True
+        }
         with self.assertRaises(ValueError) as e_info:
-            Files(self.test_profile).copy_dataset_or_member(*test_case)
+            Files(self.test_profile).copy_dataset_or_member(**test_case)
         self.assertEqual(str(e_info.exception), "Invalid value for enq.")
             
     @mock.patch('requests.Session.send')
@@ -113,11 +120,29 @@ class TestFilesClass(TestCase):
         
         mock_send_request.return_value = mock.Mock(headers={"Content-Type": "application/json"}, status_code=200)
         test_values = [
-            ("MY.OLD.DSN", "MY.NEW.DSN", "MYMEM1", None, None, "MYMEM2", None, True),
-            ("MY.OLD.DSN", "MY.NEW.DSN","MYMEM1", "primary",None, "MYMEM2", "SHRW", True)
+           {
+        "from_dataset_name": "MY.OLD.DSN",
+        "to_dataset_name": "MY.NEW.DSN",
+        "from_member_name": "MYMEM1",
+        "to_member_name": "MYMEM2",
+        "volser":'ABC',
+        'alias':False,
+        "enq": "SHRW",
+        "replace": False
+        },
+           {
+        "from_dataset_name": "MY.OLD.DSN",
+        "to_dataset_name": "MY.NEW.DSN",
+        "from_member_name": "MYMEM1",
+        "to_member_name": "MYMEM2",
+        "volser":'ABC',
+        'alias':False,
+        "enq": "SHRW",
+        "replace": True
+        }
         ]
         for test_case in test_values:
-            Files(self.test_profile).copy_dataset_or_member(*test_case)
+            Files(self.test_profile).copy_dataset_or_member(**test_case)
             mock_send_request.assert_called()
             
     def test_recall_migrated_dataset_parameterized(self):
