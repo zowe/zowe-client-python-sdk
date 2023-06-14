@@ -1,14 +1,13 @@
 certifi==2022.12.7
 chardet==4.0.0
 colorama==0.4.4
+commentjson==0.9.0
 coverage==5.4
 flake8==3.8.4
-pytest==7.1.2
 idna==2.10
 importlib-metadata==3.6.0
 jsoncparser
 jsonschema==4.14.0
-commentjson==0.9.0
 keyring
 lxml==4.9.1
 mccabe==0.6.1
@@ -18,6 +17,7 @@ pydocstyle==5.1.1
 pyfakefs
 pyflakes==2.2.0
 pylama==7.7.1
+pytest==7.1.2
 python-decouple==3.4
 PyYAML==5.4.1
 requests==2.31.0
