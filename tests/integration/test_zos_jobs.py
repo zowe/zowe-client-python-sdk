@@ -38,9 +38,10 @@ class TestJobsIntegration(unittest.TestCase):
         execution_output = self.jobs.submit_from_mainframe(self.jobs_fixtures_json['TEST_JCL_MEMBER'])
         jobname = execution_output['jobname']
         jobid = execution_output['jobid']
-        command_output = self.jobs.change_jobs_class(jobname, jobid, "A")
+        classname = execution_output['class']
+        command_output = self.jobs.change_jobs_class(jobname, jobid, classname)
         expected_class = self.jobs.get_job_status(jobname, jobid)
-        self.assertEqual(expected_class['class'], "A")
+        self.assertEqual(expected_class['class'], classname)
 
     def test_submit_from_mainframe_should_execute_properly(self):
         """Executing the submit_from_mainframe method should execute successfully."""
