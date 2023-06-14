@@ -216,7 +216,7 @@ class Files(SdkApi):
                "dsn":from_dataset_name.strip(),
                 "member":copy_ds_args['from_member_name']
            },
-           "replace":copy_ds_args['replace']
+           "replace":copy_ds_args['replace'] if 'replace' in copy_ds_args else False
         }
         
        
