@@ -1,6 +1,6 @@
 # Zowe Python Client SDK
 
-![](https://img.shields.io/badge/license-EPL--2.0-blue) [![Latest Release](https://img.shields.io/github/v/release/zowe/zowe-client-python-sdk)](https://github.com/zowe/zowe-client-python-sdk/releases/latest) [![Documentation Status](https://readthedocs.org/projects/zowe-client-python-sdk/badge/?version=next)](https://zowe-client-python-sdk.readthedocs.io/en/next/index.html)
+![](https://img.shields.io/badge/license-EPL--2.0-blue) [![Latest Release](https://img.shields.io/github/v/release/zowe/zowe-client-python-sdk)](https://github.com/zowe/zowe-client-python-sdk/releases/latest) [![Documentation Status](https://readthedocs.org/projects/zowe-client-python-sdk/badge/?version=latest)](https://zowe-client-python-sdk.readthedocs.io/en/latest/index.html)
 
 The Zowe Client Python SDK, is a set of Python packages designed to allow programmatic 
 interactions with z/OS REST API interfaces with minimum effort.
@@ -35,12 +35,12 @@ To install only a subpackage using pip:
 pip install zowe.<subpackage>_for_zowe_sdk
 ```
 
-For more information on the available sub-packages click [HERE](https://zowe-client-python-sdk.readthedocs.io/en/next/packages/packages.html)
+For more information on the available sub-packages click [HERE](https://zowe-client-python-sdk.readthedocs.io/en/latest/packages/packages.html)
 
-**Note**: You can also install prerelease versions of the Zowe SDK from GitHub. Download the ZIP file from the [latest release](https://github.com/zowe/zowe-client-python-sdk/releases/latest), extract it, and run the following command:
+**Note**: If you want to stay on the bleeding edge, install the Zowe SDK from the `main` branch with the following command:
 
 ```
-pip install --no-deps <path where zip is extracted>/*
+pip install pip@git+https://github.com/zowe/zowe-client-python-sdk@main
 ```
 
 ## Requirements

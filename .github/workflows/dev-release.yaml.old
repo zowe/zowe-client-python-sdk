@@ -5,7 +5,7 @@ on:
     types:
       - closed
     branches:
-      - next
+      - main
 
 jobs:
   release:
@@ -15,7 +15,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
       with:
-        ref: next
+        ref: main
         token: ${{ secrets.ZOWE_ROBOT_TOKEN }}
 
     - name: Set up Python 3.7
@@ -54,7 +54,7 @@ jobs:
     - name: Commit version update
       uses: stefanzweifel/git-auto-commit-action@v4
       with:
-        branch: next
+        branch: main
         commit_message: 'Bump version to ${{ steps.update-version.outputs.version }} [ci skip]'
         commit_options: '--signoff'
         commit_user_name: ${{ secrets.ZOWE_ROBOT_USER }}
