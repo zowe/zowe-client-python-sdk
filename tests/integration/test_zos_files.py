@@ -32,7 +32,7 @@ class TestFilesIntegration(unittest.TestCase):
         
         scenarios = [
             {"attributes": False, "expected_attributes": ["dsname"]},
-            {"attributes": True, "expected_attributes": ["dsname", "dsorg"]}
+            {"attributes": True, "expected_attributes": ["dsname", "migr","vol"]}
         ]
         
         for scenario in scenarios:
