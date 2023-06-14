@@ -38,7 +38,7 @@ class TestJobsIntegration(unittest.TestCase):
         execution_output = self.jobs.submit_from_mainframe(self.jobs_fixtures_json['TEST_JCL_MEMBER'])
         jobname = execution_output['jobname']
         jobid = execution_output['jobid']
-        classname = execution_output['class']
+        classname = self.jobs_fixtures_json['TEST_JCL_CLASS']
         command_output = self.jobs.change_jobs_class(jobname, jobid, classname)
         expected_class = self.jobs.get_job_status(jobname, jobid)
         self.assertEqual(expected_class['class'], classname)
