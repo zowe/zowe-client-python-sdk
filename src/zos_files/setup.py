@@ -7,7 +7,7 @@ from _version import __version__
 src_dir = os.path.realpath(os.path.dirname(os.path.dirname(__file__)))
 
 def resolve_sdk_dep(sdk_name, version_spec):
-    if os.path.exists(sdk_name):
+    if os.path.exists(os.path.join(src_dir, sdk_name, "zowe")):
         # Handle building from a Git checkout
         # Based on https://github.com/lab-cosmo/equistore/blob/master/python/equistore-torch/setup.py#L212
         sdk_dir = os.path.realpath(os.path.join(src_dir, sdk_name))
