@@ -1,18 +1,17 @@
 import os.path
-import uuid
 from setuptools import setup
 from _version import __version__
 
 src_dir = os.path.realpath(os.path.dirname(__file__))
 
-def resolve_sdk_dep(sdk_name, sdk_version):
+def resolve_sdk_dep(sdk_name, version_spec):
     if os.path.exists(sdk_name):
         # Handle building from a Git checkout
         # Based on https://github.com/lab-cosmo/equistore/blob/master/python/equistore-torch/setup.py#L212
         sdk_dir = os.path.realpath(os.path.join(src_dir, sdk_name))
-        return f"zowe.{sdk_name}_for_zowe_sdk@file://{sdk_dir}?{uuid.uuid4()}"
+        return f"zowe.{sdk_name}_for_zowe_sdk@file://{sdk_dir}?{__version__}"
     else:
-        return f"zowe.{sdk_name}_for_zowe_sdk=={sdk_version}"
+        return f"zowe.{sdk_name}_for_zowe_sdk{version_spec}"
 
 setup(
     name='zowe',
@@ -26,10 +25,10 @@ setup(
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.7",
         "License :: OSI Approved :: Eclipse Public License 2.0 (EPL-2.0)"],
-    install_requires=[resolve_sdk_dep('zos_console', __version__),
-                      resolve_sdk_dep('zos_files', __version__),
-                      resolve_sdk_dep('zos_tso', __version__),
-                      resolve_sdk_dep('zos_jobs', __version__),
-                      resolve_sdk_dep('zosmf', __version__)],
+    install_requires=[resolve_sdk_dep('zos_console', '==' + __version__),
+                      resolve_sdk_dep('zos_files', '==' + __version__),
+                      resolve_sdk_dep('zos_tso', '==' + __version__),
+                      resolve_sdk_dep('zos_jobs', '==' + __version__),
+                      resolve_sdk_dep('zosmf', '==' + __version__)],
     py_modules=[]
 )
