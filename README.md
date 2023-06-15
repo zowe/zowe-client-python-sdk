@@ -40,7 +40,7 @@ For more information on the available sub-packages click [HERE](https://zowe-cli
 **Note**: If you want to stay on the bleeding edge, install the Zowe SDK from the `main` branch with the following command:
 
 ```
-pip install zowe@git+https://github.com/zowe/zowe-client-python-sdk@main
+pip install zowe@git+https://github.com/zowe/zowe-client-python-sdk@main#src
 ```
 
 ## Requirements
