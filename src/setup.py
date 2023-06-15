@@ -28,4 +28,5 @@ setup(
                       resolve_sdk_dep('zos_tso', __version__),
                       resolve_sdk_dep('zos_jobs', __version__),
                       resolve_sdk_dep('zosmf', __version__)],
+    py_modules=[]
 )
