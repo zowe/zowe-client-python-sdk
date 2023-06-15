@@ -12,7 +12,7 @@ def resolve_sdk_dep(sdk_name, sdk_version):
         # Handle building from a Git checkout
         # Based on https://github.com/lab-cosmo/equistore/blob/master/python/equistore-torch/setup.py#L212
         sdk_dir = os.path.realpath(os.path.join(src_dir, sdk_name))
-        return f"zowe.{sdk_name}_for_zowe_sdk@file://../{sdk_dir}?{uuid.uuid4()}"
+        return f"zowe.{sdk_name}_for_zowe_sdk@file://{sdk_dir}?{uuid.uuid4()}"
     else:
         return f"zowe.{sdk_name}_for_zowe_sdk~={sdk_version}"
 
