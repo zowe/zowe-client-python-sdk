@@ -28,4 +28,4 @@ Unidecode==1.2.0
 urllib3==1.26.5
 wheel
 zipp==3.4.0
--e .
+-e ./src
