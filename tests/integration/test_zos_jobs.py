@@ -32,6 +32,16 @@ class TestJobsIntegration(unittest.TestCase):
         """Executing the list_jobs method should return a list of found jobs in JES spool."""
         command_output = self.jobs.list_jobs(owner=self.jobs_fixtures_json['TEST_JCL_OWNER'])
         self.assertIsInstance(command_output, list)
+    
+    def test_change_job_class(self):
+        """Execute the change_jobs_class should execute successfully."""
+        execution_output = self.jobs.submit_from_mainframe(self.jobs_fixtures_json['TEST_JCL_MEMBER'])
+        jobname = execution_output['jobname']
+        jobid = execution_output['jobid']
+        classname = self.jobs_fixtures_json['TEST_JCL_CLASS']
+        command_output = self.jobs.change_jobs_class(jobname, jobid, classname)
+        expected_class = self.jobs.get_job_status(jobname, jobid)
+        self.assertEqual(expected_class['class'], classname)
 
     def test_submit_hold_and_release_job_should_execute_properly(self):
         """Execute the hold_job should execute successfully."""
