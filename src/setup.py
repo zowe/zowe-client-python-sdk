@@ -1,4 +1,5 @@
 import os.path
+import uuid
 from setuptools import setup
 from _version import __version__
 
@@ -9,7 +10,7 @@ def resolve_sdk_dep(sdk_name, version_spec):
         # Handle building from a Git checkout
         # Based on https://github.com/lab-cosmo/equistore/blob/master/python/equistore-torch/setup.py#L212
         sdk_dir = os.path.realpath(os.path.join(src_dir, sdk_name))
-        return f"zowe.{sdk_name}_for_zowe_sdk@file://{sdk_dir}?{__version__}"
+        return f"zowe.{sdk_name}_for_zowe_sdk@file://{sdk_dir}?{uuid.uuid4()}"
     else:
         return f"zowe.{sdk_name}_for_zowe_sdk{version_spec}"
 
