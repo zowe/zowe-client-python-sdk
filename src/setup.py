@@ -3,11 +3,14 @@ import uuid
 from setuptools import setup
 from _version import __version__
 
+src_dir = os.path.realpath(os.path.dirname(__file__))
+
 def resolve_sdk_dep(sdk_name, sdk_version):
     if os.path.exists(sdk_name):
         # Handle building from a Git checkout
         # Based on https://github.com/lab-cosmo/equistore/blob/master/python/equistore-torch/setup.py#L212
-        return f"zowe.{sdk_name}_for_zowe_sdk@file://{sdk_name}?{uuid.uuid4()}"
+        sdk_dir = os.path.realpath(os.path.join(src_dir, sdk_name))
+        return f"zowe.{sdk_name}_for_zowe_sdk@file://{sdk_dir}?{uuid.uuid4()}"
     else:
         return f"zowe.{sdk_name}_for_zowe_sdk=={sdk_version}"
 
