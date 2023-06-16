@@ -1,8 +1,3 @@
 sphinx_rtd_theme>=0.5.1
 sphinxcontrib-spelling==5.4.0
--e ./src/core
--e ./src/zos_console
--e ./src/zos_files
--e ./src/zos_jobs
--e ./src/zos_tso
--e ./src/zosmf
+-e ./src
