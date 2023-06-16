@@ -119,7 +119,7 @@ class Jobs(SdkApi):
 
     def _issue_job_request(self, req: dict, jobname: str, jobid: str, modify_version):
 
-        if req["request"] in ["hold", "release"]:
+        if "request" in req:
             custom_args = self._create_custom_request_arguments()
             job_url = "{}/{}".format(jobname, jobid)
             request_url = "{}{}".format(self.request_endpoint, job_url)
@@ -128,10 +128,20 @@ class Jobs(SdkApi):
                 "request": req["request"],
                 "version": modify_version 
             }
-            custom_args["headers"]["X-IBM-Job-Modify-Version"] = modify_version
+        elif "class" in req:
+            custom_args = self._create_custom_request_arguments()
+            job_url = "{}/{}".format(jobname, jobid)
+            request_url = "{}{}".format(self.request_endpoint, job_url)
+            custom_args["url"] = request_url
+            custom_args["json"] = {
+                "class": req["class"],
+                "version": modify_version 
+            }
+
+        custom_args["headers"]["X-IBM-Job-Modify-Version"] = modify_version
             
-            response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[202, 200])
-            return response_json
+        response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[202, 200])
+        return response_json
        
     def change_jobs_class(self, jobname: str, jobid: str, class_name: str, modify_version="2.0"):
         """Changes the job class
@@ -153,16 +163,7 @@ class Jobs(SdkApi):
         if modify_version not in ("1.0", "2.0"):
             raise ValueError('Accepted values for modify_version: "1.0" or "2.0"')
 
-        custom_args = self._create_custom_request_arguments()
-        joburl = "{}/{}".format(jobname, jobid)
-        request_url = "{}{}".format(self.request_endpoint, joburl)
-        custom_args["url"] = request_url
-        custom_args["json"] = {
-            "class": class_name,
-            "version": modify_version
-        }
-
-        response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[202, 200])
+        response_json = self._issue_job_request({"class": class_name}, jobname, jobid, modify_version)
         return response_json
 
     def hold_job(self, jobname: str, jobid: str, modify_version="2.0"):
