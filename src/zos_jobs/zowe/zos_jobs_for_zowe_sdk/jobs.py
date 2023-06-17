@@ -119,24 +119,14 @@ class Jobs(SdkApi):
 
     def _issue_job_request(self, req: dict, jobname: str, jobid: str, modify_version):
 
-        if "request" in req:
-            custom_args = self._create_custom_request_arguments()
-            job_url = "{}/{}".format(jobname, jobid)
-            request_url = "{}{}".format(self.request_endpoint, job_url)
-            custom_args["url"] = request_url
-            custom_args["json"] = {
-                "request": req["request"],
-                "version": modify_version 
-            }
-        elif "class" in req:
-            custom_args = self._create_custom_request_arguments()
-            job_url = "{}/{}".format(jobname, jobid)
-            request_url = "{}{}".format(self.request_endpoint, job_url)
-            custom_args["url"] = request_url
-            custom_args["json"] = {
-                "class": req["class"],
-                "version": modify_version 
-            }
+        custom_args = self._create_custom_request_arguments()
+        job_url = "{}/{}".format(jobname, jobid)
+        request_url = "{}{}".format(self.request_endpoint, job_url)
+        custom_args["url"] = request_url
+        custom_args["json"] = {
+            **req,
+            "version": modify_version 
+        }
 
         custom_args["headers"]["X-IBM-Job-Modify-Version"] = modify_version
             
