@@ -122,6 +122,8 @@ class TestFilesClass(TestCase):
         "to_dataset_name": "MY.NEW.DSN",
         "from_member_name": "MYMEM1",
         "to_member_name": "MYMEM2",
+        "volser":'ABC',
+        "alias":False,
         "enq": "RANDOM",
         "replace": True
         }
@@ -141,7 +143,7 @@ class TestFilesClass(TestCase):
         "from_member_name": "MYMEM1",
         "to_member_name": "MYMEM2",
         "volser":'ABC',
-        'alias':False,
+        "alias":False,
         "enq": "SHRW",
         "replace": False
         },
@@ -151,7 +153,7 @@ class TestFilesClass(TestCase):
         "from_member_name": "MYMEM1",
         "to_member_name": "MYMEM2",
         "volser":'ABC',
-        'alias':False,
+        "alias":False,
         "enq": "SHRW",
         "replace": True
         }
