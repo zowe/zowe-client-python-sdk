@@ -73,6 +73,21 @@ class TestFilesClass(TestCase):
         mock_send_request.assert_called_once()
 
     @mock.patch('requests.Session.send')
+    def test_list_dsn(self, mock_send_request):
+        """Test creating a zfs sends a request"""
+        mock_send_request.return_value = mock.Mock(headers={"Content-Type": "application/json"}, status_code=200)
+
+        test_values = [
+            ('MY.DSN',False),
+            ('MY.DSN',True)
+        ]
+        for test_case in test_values:
+            Files(self.test_profile).list_dsn(*test_case)
+            mock_send_request.assert_called()
+       
+        
+
+    @mock.patch('requests.Session.send')
     def test_list_zFS_file_system(self, mock_send_request):
         """Test unmounting a zfs sends a request"""
         mock_send_request.return_value = mock.Mock(headers={"Content-Type": "application/json"}, status_code=200)
