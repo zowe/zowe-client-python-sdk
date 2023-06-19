@@ -208,7 +208,7 @@ class Files(SdkApi):
             Name of the member to copy from
         volser: str
             Volume serial number of the dataset to copy from
-        alias: str  
+        alias: bool  
             Alias of the dataset to copy from
         to_member_name: str
             Name of the member to copy to
