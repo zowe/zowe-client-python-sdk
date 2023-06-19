@@ -240,7 +240,7 @@ class Files(SdkApi):
                 raise ValueError("Invalid value for enq.")
         if volser:
              data["from-dataset"]["volser"]=volser
-        if alias:
+        if alias is not None: #because it can be false so
             data["from-dataset"]["alias"]=alias
             
         custom_args = self._create_custom_request_arguments()
