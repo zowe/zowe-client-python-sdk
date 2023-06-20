@@ -80,6 +80,24 @@ class TestFilesIntegration(unittest.TestCase):
         command_output = self.files.write_to_dsn(self.test_member_generic, "HELLO WORLD")
         self.assertTrue(command_output['response'] == '')
     
+    
+    def test_copy_uss_to_dataset_should_be_possible(self):
+        """Executing copy_uss_to_dataset should be possible."""
+        command_output = self.files.copy_uss_to_dataset(self.files_fixtures["TEST_USS"],"ZOWE.TESTS.JCL(TEST2)",replace=True)
+        self.assertTrue(command_output['response']=="")
+
+    def test_copy_dataset_or_member_should_be_possible(self):
+        """Executing copy_dataset_or_member should be possible."""
+        test_case = {
+        "from_dataset_name": self.files_fixtures["TEST_PDS"],
+        "to_dataset_name": self.files_fixtures["TEST_PDS"],
+        "from_member_name": self.files_fixtures["TEST_MEMBER"],
+        "to_member_name": "TEST",
+        "replace": True
+        }
+        command_output = self.files.copy_dataset_or_member(**test_case)
+        self.assertTrue(command_output['response'] =="")
+
     def test_mount_unmount_zfs_file_system(self):
         """Mounting a zfs filesystem should be possible"""
         username = self.user_name.lower()
