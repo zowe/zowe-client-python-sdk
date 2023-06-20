@@ -76,7 +76,7 @@ class TestJobsClass(TestCase):
         mock_send_request.return_value = mock.Mock(headers={"Content-Type": "application/json"}, status_code=200)
 
         with self.assertRaises(ValueError):
-            Jobs(self.test_profile).change_jobs_class("TESTJOB2","JOB00084","A",modify_version="3.0")
+            Jobs(self.test_profile).change_job_class("TESTJOB2","JOB00084","A",modify_version="3.0")
 
     def test_cancel_job_modify_version_parameterized(self):
         """Test cancelling a job with different values sends the expected request"""
