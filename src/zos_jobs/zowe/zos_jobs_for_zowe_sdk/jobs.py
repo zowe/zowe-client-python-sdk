@@ -133,7 +133,7 @@ class Jobs(SdkApi):
         response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[202, 200])
         return response_json
        
-    def change_jobs_class(self, jobname: str, jobid: str, class_name: str, modify_version="2.0"):
+    def change_job_class(self, jobname: str, jobid: str, class_name: str, modify_version="2.0"):
         """Changes the job class
 
         Parameters
