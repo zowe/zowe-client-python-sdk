@@ -2,7 +2,7 @@ import sys
 from setuptools import setup, find_namespace_packages
 sys.path.append("..")
 from _version import __version__
-from setup import resolve_sdk_dep
+from ..setup import resolve_sdk_dep
 
 setup(
     name='zowe_zosmf_for_zowe_sdk',
