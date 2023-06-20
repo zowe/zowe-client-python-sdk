@@ -13,3 +13,9 @@ Copyright Contributors to the Zowe Project.
 zos_file_constants = {
     "MaxAllocationQuantity": 16777215,
 }
+from enum import Enum
+class FileType(Enum):
+    BINARY = "binary"
+    EXECUTABLE = "executable"
+    TEXT = "text"
+    

@@ -29,13 +29,45 @@ class TestJobsClass(TestCase):
 
         Jobs(self.test_profile).cancel_job("TESTJOB2","JOB00084")
         mock_send_request.assert_called_once()
+    
+    @mock.patch('requests.Session.send')
+    def test_hold_job(self, mock_send_request):
+        """Test holding a job sends a request"""
+        mock_send_request.return_value = mock.Mock(headers={"Content-Type": "application/json"}, status_code=200)
+
+        Jobs(self.test_profile).hold_job("TESTJOB2","JOB00084")
+        mock_send_request.assert_called_once()
+
+    @mock.patch('requests.Session.send')
+    def test_modified_version_hold_job(self, mock_send_request):
+        """Test holding a job sends a request"""
+        mock_send_request.return_value = mock.Mock(headers={"Content-Type": "application/json"}, status_code=200)
+
+        with self.assertRaises(ValueError):
+            Jobs(self.test_profile).hold_job("TESTJOB2","JOB00084",modify_version="3.0")
+    
+    @mock.patch('requests.Session.send')
+    def test_modified_version_release_job(self, mock_send_request):
+        """Test holding a job sends a request"""
+        mock_send_request.return_value = mock.Mock(headers={"Content-Type": "application/json"}, status_code=200)
+
+        with self.assertRaises(ValueError):
+            Jobs(self.test_profile).release_job("TESTJOB2","JOB00084",modify_version="3.0")
+    
+    @mock.patch('requests.Session.send')
+    def test_release_job(self, mock_send_request):
+        """Test releasing a job sends a request"""
+        mock_send_request.return_value = mock.Mock(headers={"Content-Type": "application/json"}, status_code=200)
+
+        Jobs(self.test_profile).release_job("TESTJOB2","JOB00084")
+        mock_send_request.assert_called_once()
 
     @mock.patch('requests.Session.send')
     def test_change_job_class(self, mock_send_request):
         """Test changing the job class sends a request"""
         mock_send_request.return_value = mock.Mock(headers={"Content-Type": "application/json"}, status_code=200)
 
-        Jobs(self.test_profile).change_jobs_class("TESTJOB2","JOB00084","A")
+        Jobs(self.test_profile).change_job_class("TESTJOB2","JOB00084","A")
         mock_send_request.assert_called_once()
 
     @mock.patch('requests.Session.send')
@@ -44,7 +76,7 @@ class TestJobsClass(TestCase):
         mock_send_request.return_value = mock.Mock(headers={"Content-Type": "application/json"}, status_code=200)
 
         with self.assertRaises(ValueError):
-            Jobs(self.test_profile).change_jobs_class("TESTJOB2","JOB00084","A",modify_version="3.0")
+            Jobs(self.test_profile).change_job_class("TESTJOB2","JOB00084","A",modify_version="3.0")
 
     def test_cancel_job_modify_version_parameterized(self):
         """Test cancelling a job with different values sends the expected request"""
