@@ -22,6 +22,7 @@ import commentjson
 
 from .constants import constants
 from .custom_warnings import (
+    ProfileNotFoundWarning,
     ProfileParsingWarning,
     SecurePropsNotFoundWarning,
 )
@@ -224,6 +225,24 @@ class ConfigFile:
             profile_name=profile_type,
             error_msg=f"No profile with matching profile_type '{profile_type}' found",
         )
+        
+    def find_profile(self, path: str, profiles: dict):
+        """
+        Find a profile at a specified location from within a set of nested profiles
+        Returns
+        -------
+        dictionary
+
+            The profile object that was found, or None if not found
+        """
+        segments = path.split(".")
+        for k, v in profiles.items():
+            if len(segments) == 1 and segments[0] == k:
+                return v
+            elif segments[0] == k and v.get("profiles"):
+                segments.pop(0)
+                return self.find_profile(".".join(segments), v["profiles"])
+        return None
 
     def load_profile_properties(self, profile_name: str) -> dict:
         """
@@ -237,14 +256,24 @@ class ConfigFile:
         Load exact profile properties (without prepopulated fields from base profile)
         from the profile dict and populate fields from the secure credentials storage
         """
-        try:
-            props = self.profiles[profile_name]["properties"]
-        except Exception as exc:
-            raise ProfileNotFound(
-                f"Profile {profile_name} not found", error_msg=exc
-            ) from exc
 
-        secure_fields: list = self.profiles[profile_name].get("secure", [])
+        props = {}
+        lst = profile_name.split(".")
+        secure_fields: list = []
+
+        while len(lst) > 0:
+            profile_name = ".".join(lst)
+            profile = self.find_profile(profile_name, self.profiles)
+            if profile is not None:
+                props = { **profile.get("properties", {}), **props }
+                secure_fields.extend(profile.get("secure", []))
+            else:
+                warnings.warn(
+                        f"Profile {profile_name} not found",
+                        ProfileNotFoundWarning
+                        )
+            lst.pop()
+
 
         # load secure props only if there are secure fields
         if secure_fields:
@@ -260,8 +289,8 @@ class ConfigFile:
                         props[property_name] = value
                         secure_fields.remove(property_name)
 
-            if len(secure_fields) > 0:
-                self._missing_secure_props.extend(secure_fields)
+            # if len(secure_fields) > 0:
+            #     self._missing_secure_props.extend(secure_fields)
 
         return props
 
