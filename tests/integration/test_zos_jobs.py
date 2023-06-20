@@ -39,7 +39,7 @@ class TestJobsIntegration(unittest.TestCase):
         jobname = execution_output['jobname']
         jobid = execution_output['jobid']
         classname = self.jobs_fixtures_json['TEST_JCL_CLASS']
-        command_output = self.jobs.change_jobs_class(jobname, jobid, classname)
+        command_output = self.jobs.change_job_class(jobname, jobid, classname)
         expected_class = self.jobs.get_job_status(jobname, jobid)
         self.assertEqual(expected_class['class'], classname)
 

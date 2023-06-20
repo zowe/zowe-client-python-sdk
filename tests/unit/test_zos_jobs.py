@@ -67,7 +67,7 @@ class TestJobsClass(TestCase):
         """Test changing the job class sends a request"""
         mock_send_request.return_value = mock.Mock(headers={"Content-Type": "application/json"}, status_code=200)
 
-        Jobs(self.test_profile).change_jobs_class("TESTJOB2","JOB00084","A")
+        Jobs(self.test_profile).change_job_class("TESTJOB2","JOB00084","A")
         mock_send_request.assert_called_once()
 
     @mock.patch('requests.Session.send')
