@@ -1,8 +1,8 @@
 import sys
 from setuptools import setup, find_namespace_packages
-sys.path.append("..")
+sys.path.insert(0, "..")
 from _version import __version__
-from src.setup import resolve_sdk_dep
+from setup import resolve_sdk_dep
 
 setup(
     name='zowe_zos_jobs_for_zowe_sdk',
