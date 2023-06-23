@@ -3,8 +3,8 @@ name: Changelog
 on:
   pull_request:
     branches:
-      - master
-      - zowe-v?-lts
+      - main
+      - v?-lts
       - next
 
 jobs:

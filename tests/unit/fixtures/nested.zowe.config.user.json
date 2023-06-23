@@ -1,0 +1,23 @@
+{
+    "$schema": "./zowe.schema.json",
+    "profiles": {
+        "my_base": {
+            "properties": {
+                "user": "admin",
+                "password": "password"
+            }
+        },
+        "lpar1": {
+            "properties": {
+                "user": "admin",
+                "password": "password1"
+            }
+        },
+        "lpar2": {
+            "properties": {
+                "user": "admin",
+                "password": "password2"
+            }
+        }
+    }
+}

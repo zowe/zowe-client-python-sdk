@@ -216,6 +216,8 @@ class ProfileManager:
             profile_loaded = self.get_profile(
                 cfg, profile_name, profile_type, config_type
             )
+            # TODO Why don't user and password show up here for Project User Config?
+            # Probably need to update load_profile_properties method in config_file.py
             if profile_loaded.name and not profile_name:
                 profile_name = (
                     profile_loaded.name
@@ -236,7 +238,6 @@ class ProfileManager:
         if check_missing_props:
             missing_props = set()
             for item in missing_secure_props:
-                print(item, profile_props.keys())
                 if item not in profile_props.keys():
                     missing_props.add(item)
 

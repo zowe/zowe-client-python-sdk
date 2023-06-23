@@ -29,9 +29,32 @@ class TestFilesIntegration(unittest.TestCase):
 
     def test_list_dsn_should_return_a_list_of_datasets(self):
         """Executing list_dsn method should return a list of found datasets."""
-        command_output = self.files.list_dsn(self.files_fixtures["TEST_HLQ"])
-        self.assertIsInstance(command_output['items'], list)
+        
+        scenarios = [
+            {"attributes": False, "expected_attributes": ["dsname"]},
+            {"attributes": True, "expected_attributes": ["dsname", "migr","vol"]}
+        ]
+        
+        for scenario in scenarios:
 
+            # Get the command output
+            command_output = self.files.list_dsn(self.files_fixtures["TEST_HLQ"], scenario["attributes"])
+            
+            # Assert that command_output['items'] is a list
+            self.assertIsInstance(command_output['items'], list)
+            
+            # Assert that command_output['items'] contains at least one item
+            self.assertGreater(len(command_output['items']), 0)
+            
+            # Assert that the first item in the list has 'dsname' defined
+            first_item = command_output['items'][0]
+            self.assertIn('dsname', first_item)
+            
+            # Assert that the first item in the list has the expected attributes defined
+            attributes = first_item.keys()
+            for expected_attr in scenario["expected_attributes"]:
+                self.assertIn(expected_attr, attributes)
+        
     def test_list_members_should_return_a_list_of_members(self):
         """Executing list_dsn_members should return a list of members."""
         command_output = self.files.list_dsn_members(self.files_fixtures["TEST_PDS"])
@@ -57,6 +80,24 @@ class TestFilesIntegration(unittest.TestCase):
         command_output = self.files.write_to_dsn(self.test_member_generic, "HELLO WORLD")
         self.assertTrue(command_output['response'] == '')
     
+    
+    def test_copy_uss_to_dataset_should_be_possible(self):
+        """Executing copy_uss_to_dataset should be possible."""
+        command_output = self.files.copy_uss_to_dataset(self.files_fixtures["TEST_USS"],"ZOWE.TESTS.JCL(TEST2)",replace=True)
+        self.assertTrue(command_output['response']=="")
+
+    def test_copy_dataset_or_member_should_be_possible(self):
+        """Executing copy_dataset_or_member should be possible."""
+        test_case = {
+        "from_dataset_name": self.files_fixtures["TEST_PDS"],
+        "to_dataset_name": self.files_fixtures["TEST_PDS"],
+        "from_member_name": self.files_fixtures["TEST_MEMBER"],
+        "to_member_name": "TEST",
+        "replace": True
+        }
+        command_output = self.files.copy_dataset_or_member(**test_case)
+        self.assertTrue(command_output['response'] =="")
+
     def test_mount_unmount_zfs_file_system(self):
         """Mounting a zfs filesystem should be possible"""
         username = self.user_name.lower()
