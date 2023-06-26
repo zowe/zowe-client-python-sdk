@@ -77,6 +77,7 @@ class ConfigFile:
     _location: Optional[str] = None
     profiles: Optional[dict] = None
     defaults: Optional[dict] = None
+    schema_property: Optional[dict] = None
     secure_props: Optional[dict] = None
     _missing_secure_props: list = field(default_factory=list)
 
@@ -120,6 +121,7 @@ class ConfigFile:
             profile_jsonc = commentjson.load(fileobj)
 
         self.profiles = profile_jsonc.get("profiles", {})
+        self.schema_property = profile_jsonc.get("$schema", None)
         self.defaults = profile_jsonc.get("defaults", {})
 
         # loading secure props is done in load_profile_properties
@@ -293,6 +295,19 @@ class ConfigFile:
             #     self._missing_secure_props.extend(secure_fields)
 
         return props
+
+    def load_schema(self) -> str:
+        """
+        Find the schema file path from the $schema_property in the config.json
+        Returns
+        -------
+        Str
+
+        file_path to the schema property
+        """
+
+        file_path = self.schema_property
+        return file_path
 
     def load_secure_props(self) -> None:
         """

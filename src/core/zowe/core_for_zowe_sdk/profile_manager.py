@@ -15,6 +15,7 @@ import warnings
 from typing import Optional
 
 from .config_file import ConfigFile, Profile
+from .validators import validate_config_json
 from .custom_warnings import (
     ConfigNotFoundWarning,
     ProfileNotFoundWarning,
@@ -169,12 +170,45 @@ class ProfileManager:
             )
         finally:
             return cfg_profile
+    
+    @staticmethod
+    def load_schema(
+        cfg: ConfigFile,
+        path_config_json: str,
+        opt_in: Optional[bool] = True,
+    ) -> str:
+        """
+        Get the $schema_property from the config and load the schema
+
+        Returns
+        -------
+        file_path to the $schema property
+        """
+
+        path_schema_json = None
+        try:
+            path_schema_json = cfg.load_schema()
+            if path_schema_json is None:    # check if the $schema property is not defined
+                warnings.warn(
+                    f"$schema property could not found"
+                )
+                
+            # validate the $schema property 
+            if path_schema_json and opt_in:
+                validate_config_json(path_config_json, path_schema_json)
+        except Exception as exc:
+            warnings.warn(
+                f"Could not validate $schema property, {exc}"
+            )
+        finally:
+            return path_schema_json
 
     def load(
         self,
         profile_name: Optional[str] = None,
         profile_type: Optional[str] = None,
         check_missing_props: bool = True,
+        opt_in: Optional[bool] = True,
     ) -> dict:
         """Load connection details from a team config profile.
         Returns
@@ -209,6 +243,7 @@ class ProfileManager:
             "Global Config": self.global_config,
         }
         profile_props: dict = {}
+        schema_path = None
 
         missing_secure_props = []  # track which secure props were not loaded
 
@@ -223,6 +258,11 @@ class ProfileManager:
                     profile_loaded.name
                 )  # Define profile name that will be merged from other layers
             profile_props = {**profile_loaded.data, **profile_props}
+
+            # Loading $schema property from project config
+            if config_type in ("Project Config"):
+                    path_config_json = cfg._location + "/zowe.config.json"
+                    schema_path = self.load_schema(cfg, path_config_json, opt_in)
 
             missing_secure_props.extend(profile_loaded.missing_secure_props)
 
