@@ -98,12 +98,9 @@ class ZosmfProfile:
         service_name = constants["ZoweCredentialKey"]
         account_name = "zosmf_{}_{}".format(self.profile_name, name)
 
+        secret_value = ""
         if sys.platform == "win32":
             service_name += "/" + account_name
-
-        secret_value = ""
-
-        if sys.platform == "win32":
             index = 1
             while True:
                 field_name = f"{account_name}-{index}"
