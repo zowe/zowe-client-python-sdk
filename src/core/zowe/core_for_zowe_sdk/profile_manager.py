@@ -12,6 +12,7 @@ Copyright Contributors to the Zowe Project.
 
 import os.path
 import warnings
+import jsonschema
 from typing import Optional
 
 from .config_file import ConfigFile, Profile
@@ -196,7 +197,7 @@ class ProfileManager:
             # validate the $schema property 
             if path_schema_json and opt_in:
                 validate_config_json(path_config_json, path_schema_json)
-        except Exception as exc:
+        except jsonschema.ValidationError as exc:
             warnings.warn(
                 f"Could not validate $schema property, {exc}"
             )
