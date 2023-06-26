@@ -94,13 +94,29 @@ class ZosmfProfile:
         )
 
     def __get_secure_value(self, name):
+        """Retrieve a secure value from the keyring."""
         service_name = constants["ZoweCredentialKey"]
         account_name = "zosmf_{}_{}".format(self.profile_name, name)
 
         if sys.platform == "win32":
             service_name += "/" + account_name
 
-        secret_value = keyring.get_password(service_name, account_name)
+        secret_value = ""
+
+        if sys.platform == "win32":
+            index = 1
+            while True:
+                field_name = f"{account_name}-{index}"
+                temp_value = keyring.get_password(service_name, field_name)
+                if temp_value is None:
+                    if index == 1:
+                        # No fields with indexes, retrieve the value without an index
+                        secret_value = keyring.get_password(service_name, account_name)
+                    break
+                secret_value += temp_value
+                index += 1
+        else:
+            secret_value = keyring.get_password(service_name, account_name)
 
         if sys.platform == "win32":
             secret_value = secret_value.encode("utf-16")
