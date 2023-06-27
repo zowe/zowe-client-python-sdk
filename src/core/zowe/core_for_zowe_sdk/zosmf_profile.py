@@ -101,17 +101,17 @@ class ZosmfProfile:
         secret_value = ""
         if sys.platform == "win32":
             service_name += "/" + account_name
-            index = 1
-            while True:
-                field_name = f"{account_name}-{index}"
-                temp_value = keyring.get_password(service_name, field_name)
-                if temp_value is None:
-                    if index == 1:
-                        # No fields with indexes, retrieve the value without an index
-                        secret_value = keyring.get_password(service_name, account_name)
-                    break
-                secret_value += temp_value
-                index += 1
+
+            secret_value = keyring.get_password(service_name, account_name)  
+            if secret_value is None:
+                index = 1
+                while True:
+                    field_name = f"{account_name}-{index}"
+                    temp_value = keyring.get_password(service_name, field_name)
+                    if temp_value is None:
+                        break
+                    secret_value += temp_value
+                    index += 1
         else:
             secret_value = keyring.get_password(service_name, account_name)
 
