@@ -69,6 +69,7 @@ class ConfigFile:
     4. Contents of the file.
     4.1 Profiles
     4.2 Defaults
+    4.3 Schema Property
     5. Secure Properties associated with the file.
     """
 

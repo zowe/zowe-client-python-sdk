@@ -199,7 +199,19 @@ class ProfileManager:
                 validate_config_json(path_config_json, path_schema_json)
         except jsonschema.ValidationError as exc:
             warnings.warn(
-                f"Could not validate $schema property, {exc}"
+                f"Instance was invalid under the provided $schema property, {exc}"
+            )
+        except jsonschema.FormatError:
+            warnings.warn(
+                f"Validating a format {path_config_json} failed for {path_schema_json}"
+            )
+        except jsonschema.UndefinedTypeCheck as exc:
+            warnings.warn(
+                f"A type checker was asked to check a type it did not have registered, {exc}"
+            )
+        except jsonschema.UnknownType:
+            warnings.warn(
+                f"Unknown type is found in {path_schema_json}"
             )
         finally:
             return path_schema_json
