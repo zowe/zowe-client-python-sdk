@@ -72,7 +72,8 @@ class ZosmfProfile:
         )
 
         with open(profile_file, "r") as fileobj:
-            profile_yaml = yaml.safe_load(fileobj)
+            yaml_content = fileobj.read()
+            profile_yaml = yaml.safe_load(yaml_content)
 
         zosmf_host = profile_yaml["host"]
         if "port" in profile_yaml:

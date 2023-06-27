@@ -12,7 +12,7 @@ from unittest.mock import patch
 from jsonschema import validate, ValidationError
 from zowe.core_for_zowe_sdk.validators import validate_config_json
 import commentjson
-
+from zowe.core_for_zowe_sdk.constants import constants
 from pyfakefs.fake_filesystem_unittest import TestCase
 from zowe.core_for_zowe_sdk import (
     ApiConnection,
@@ -157,6 +157,74 @@ class TestZosmfProfileClass(unittest.TestCase):
         """Created object should be instance of ZosmfProfile class."""
         zosmf_profile = ZosmfProfile(self.profile_name)
         self.assertIsInstance(zosmf_profile, ZosmfProfile)
+
+    @mock.patch("builtins.open", mock.mock_open(read_data="yaml_content"))
+    @mock.patch("yaml.safe_load")
+    def test_load(self, yaml_load_mock):
+        """Test the load method."""
+        zosmf_profile = ZosmfProfile(self.profile_name)
+        profile_file = os.path.join(
+            zosmf_profile.profiles_dir, f"{self.profile_name}.yaml"
+        )
+
+                # Mock the return values
+        profile_yaml = {
+            "host": "example.com",
+            "port": 443,
+            "user": "test_user",
+            "password": "test_password",
+            "rejectUnauthorized": True,
+        }
+        yaml_load_mock.return_value = profile_yaml
+         # Set secure values for user and password
+        profile_yaml["user"] = constants["SecureValuePrefix"] + "secure_user"
+        profile_yaml["password"] = constants["SecureValuePrefix"] + "secure_password"
+        # Mock the private methods
+        # zosmf_profile._ZosmfProfile__load_secure_credentials = mock.MagicMock(return_value=("secure_user", "secure_password"))
+        zosmf_profile._ZosmfProfile__get_secure_value = mock.MagicMock(side_effect=["secure_user", "secure_password"])
+        zosmf_profile._ZosmfProfile__split_and_store_secure_value = mock.MagicMock()
+
+        # Call the load method
+        result = zosmf_profile.load()
+
+        # Assertions
+        yaml_load_mock.assert_called_once_with("yaml_content")  # Ensure safe_load is called with the correct argument
+        zosmf_profile._ZosmfProfile__load_secure_credentials.assert_called_once()
+        zosmf_profile._ZosmfProfile__get_secure_value.assert_called_with("user")
+        zosmf_profile._ZosmfProfile__get_secure_value.assert_called_with("password")
+        zosmf_profile._ZosmfProfile__split_and_store_secure_value.assert_not_called()
+
+        expected_connection = ApiConnection(
+            "example.com", "secure_user", "secure_password", True
+        )
+        self.assertEqual(result, expected_connection)
+
+        # Additional test case for long credentials
+        long_user = "x" * 1000
+        long_password = "y" * 2000
+        profile_yaml["user"] = long_user
+        profile_yaml["password"] = long_password
+
+        # Reset the mocks
+        yaml_load_mock.reset_mock()
+        zosmf_profile._ZosmfProfile__get_secure_value.reset_mock()
+        zosmf_profile._ZosmfProfile__split_and_store_secure_value.reset_mock()
+
+        # Call the load method with long credentials
+        result = zosmf_profile.load()
+
+        # Assertions
+        yaml_load_mock.assert_called_once_with("yaml_content")
+        zosmf_profile._ZosmfProfile__load_secure_credentials.assert_called_once()
+        zosmf_profile._ZosmfProfile__get_secure_value.assert_called_with("user")
+        zosmf_profile._ZosmfProfile__get_secure_value.assert_called_with("password")
+        zosmf_profile._ZosmfProfile__split_and_store_secure_value.assert_called_with("user", long_user)
+        zosmf_profile._ZosmfProfile__split_and_store_secure_value.assert_called_with("password", long_password)
+
+        expected_connection = ApiConnection(
+            "example.com", "secure_user", "secure_password", True
+        )
+        self.assertEqual(result, expected_connection)
 
 
 class TestZosmfProfileManager(TestCase):
