@@ -102,8 +102,10 @@ class ZosmfProfile:
         if sys.platform == "win32":
             service_name += "/" + account_name
 
+            # Try to retrieve the secure value without an index
             secret_value = keyring.get_password(service_name, account_name)  
             if secret_value is None:
+                # Retrieve the secure value with an index
                 index = 1
                 while True:
                     field_name = f"{account_name}-{index}"
