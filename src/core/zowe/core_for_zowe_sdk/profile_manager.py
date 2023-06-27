@@ -274,8 +274,8 @@ class ProfileManager:
 
             # Loading $schema property from project config
             if config_type in ("Project Config"):
-                    path_config_json = cfg._location + "/zowe.config.json"
-                    schema_path = self.load_schema(cfg, path_config_json, opt_in)
+                path_config_json = cfg._location + "/zowe.config.json"
+                schema_path = self.load_schema(cfg, path_config_json, opt_in)
 
             missing_secure_props.extend(profile_loaded.missing_secure_props)
 
