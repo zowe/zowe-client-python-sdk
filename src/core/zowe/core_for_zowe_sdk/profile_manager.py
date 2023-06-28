@@ -213,6 +213,8 @@ class ProfileManager:
             raise Exception(
                 f"Unknown type is found in {path_schema_json}"
             )
+        finally:
+            return path_schema_json
 
     def load(
         self,
