@@ -72,8 +72,7 @@ class ZosmfProfile:
         )
 
         with open(profile_file, "r") as fileobj:
-            yaml_content = fileobj.read()
-            profile_yaml = yaml.safe_load(yaml_content)
+            profile_yaml = yaml.safe_load(fileobj)
 
         zosmf_host = profile_yaml["host"]
         if "port" in profile_yaml:
@@ -95,28 +94,13 @@ class ZosmfProfile:
         )
 
     def __get_secure_value(self, name):
-        """Retrieve a secure value from the keyring."""
         service_name = constants["ZoweCredentialKey"]
         account_name = "zosmf_{}_{}".format(self.profile_name, name)
 
-        secret_value = ""
         if sys.platform == "win32":
             service_name += "/" + account_name
 
-            # Try to retrieve the secure value without an index
-            secret_value = keyring.get_password(service_name, account_name)  
-            if secret_value is None:
-                # Retrieve the secure value with an index
-                index = 1
-                while True:
-                    field_name = f"{account_name}-{index}"
-                    temp_value = keyring.get_password(service_name, field_name)
-                    if temp_value is None:
-                        break
-                    secret_value += temp_value
-                    index += 1
-        else:
-            secret_value = keyring.get_password(service_name, account_name)
+        secret_value = keyring.get_password(service_name, account_name)
 
         if sys.platform == "win32":
             secret_value = secret_value.encode("utf-16")
@@ -135,32 +119,11 @@ class ZosmfProfile:
         try:
             zosmf_user = self.__get_secure_value("user")
             zosmf_password = self.__get_secure_value("password")
-            if sys.platform == "win32":
-                if len(zosmf_user) > constants["WIN32_CRED_MAX_STRING_LENGTH"]:
-                    # Split user value across multiple fields
-                    self.__split_and_store_secure_value("user", zosmf_user)
-                if len(zosmf_password) > constants["WIN32_CRED_MAX_STRING_LENGTH"]:
-                    # Split password value across multiple fields
-                    self.__split_and_store_secure_value("password", zosmf_password)    
         except Exception as e:
             raise SecureProfileLoadFailed(self.profile_name, e)
         else:
             return (zosmf_user, zosmf_password)
-        
-    def __split_and_store_secure_value(self, field_name, value):
-        """Split and store a secure value across multiple fields."""
-        service_name = constants["ZoweCredentialKey"]
-        account_name = f"zosmf_{self.profile_name}_{field_name}"
-        
-        # Delete any previously used fields storing this value
-        keyring.delete_password(service_name, account_name)
-        sliced_values = [value[i:i+constants["WIN32_CRED_MAX_STRING_LENGTH"]] for i in range(0, len(value), constants["WIN32_CRED_MAX_STRING_LENGTH"])]
-    
-        for index, temp_value in enumerate(sliced_values, start=1):
-            keyring.set_password(service_name, f"{account_name}-{index}", temp_value)
 
-        # Append null byte to mark the termination of the last field
-        keyring.set_password(service_name, f"{account_name}-{len(sliced_values)+1}", "\0")
 
 if HAS_KEYRING and sys.platform.startswith("linux"):
     from contextlib import closing
