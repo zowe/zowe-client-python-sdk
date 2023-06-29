@@ -312,10 +312,11 @@ class ConfigFile:
 
             if sys.platform == "win32":
                 service_name += "/" + constants["ZoweAccountName"]
-
-            secret_value = keyring.get_password(
-                service_name, constants["ZoweAccountName"]
-            )
+                secret_value = self._retrieve_password(service_name)
+            else:
+                secret_value = keyring.get_password(
+                    service_name, constants["ZoweAccountName"]
+                )
 
         except Exception as exc:
             raise SecureProfileLoadFailed(
@@ -333,6 +334,77 @@ class ConfigFile:
         # look for credentials stored for currently loaded config
         try:
             self.secure_props = secure_config_json.get(self.filepath, {})
+        except KeyError as exc:
+            error_msg = str(exc)
+            warnings.warn(
+                f"No credentials found for loaded config file '{self.filepath}'"
+                f" with error '{error_msg}'",
+                SecurePropsNotFoundWarning,
+            )
+        self.set_secure_props() 
+
+    def _retrieve_password(self, service_name: str) -> str:
+        """
+        Retrieve the password from the keyring or storage.
+        If the password exceeds the maximum length, retrieve it in parts.
+        Parameters
+        ----------
+        service_name: str
+            The service name for the password retrieval
+        Returns
+        -------
+        str
+            The retrieved password
+        """
+        password = keyring.get_password(service_name, constants["ZoweAccountName"])
+
+        if password is None:
+            # Retrieve the secure value with an index
+            index = 1
+            while True:
+                field_name = f"{constants['ZoweAccountName']}-{index}"
+                temp_value = keyring.get_password(service_name, field_name)
+                if temp_value is None:
+                    break
+                password += temp_value
+                index += 1
+
+        return password
+    
+    def set_secure_props(self) -> None:
+        """
+        Set secure_props for the given config file
+        Returns
+        -------
+        None
+        """
+        if not HAS_KEYRING:
+            return
+
+        try:
+            service_name = constants["ZoweServiceName"]
+
+            if sys.platform == "win32":
+                service_name += "/" + constants["ZoweAccountName"]
+                credential = self.secure_props.get(self.filepath, "")
+
+                if len(credential) > constants["WIN32_CRED_MAX_STRING_LENGTH"]:
+                    # Split the credential string into chunks of maximum length
+                    keyring.delete_password(service_name, constants["ZoweAccountName"])
+                    chunk_size = constants["WIN32_CRED_MAX_STRING_LENGTH"]
+                    chunks = [credential[i : i + chunk_size] for i in range(0, len(credential), chunk_size)]
+
+                    # Set the individual chunks as separate keyring entries
+                    for index, chunk in enumerate(chunks, start=1):
+                        field_name = f"{constants['ZoweAccountName']}-{index}"
+                        keyring.set_password(service_name, field_name, chunk)
+                else:
+                    # Credential length is within the maximum limit, set it as a single keyring entry
+                    keyring.set_password(service_name, constants["ZoweAccountName"], credential)
+            else:
+                credential = self.secure_props.get(self.filepath)
+                keyring.set_password(service_name, constants["ZoweAccountName"], credential)
+
         except KeyError as exc:
             error_msg = str(exc)
             warnings.warn(
