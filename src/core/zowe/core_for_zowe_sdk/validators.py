@@ -12,6 +12,8 @@ Copyright Contributors to the Zowe Project.
 
 import commentjson
 from jsonschema import validate
+import os
+import requests
 
 
 def validate_config_json(path_config_json: str, path_schema_json: str):
@@ -31,10 +33,18 @@ def validate_config_json(path_config_json: str, path_schema_json: str):
         Provides details if config.json doesn't match schema.json, otherwise it returns None.
     """
 
+    # checks if the path_schema_json point to an internet URI and download the schema using the URI
+    if path_schema_json[:8] in ("https://", "http://"):
+        response = requests.get(path_schema_json)
+        schema_data = response.content.decode("utf-8")
+        schema_json = commentjson.load(schema_data)
+    
+    # checks if the path_schema_json is a file
+    elif os.path.isfile(path_schema_json):
+        with open(path_schema_json) as file:
+            schema_json = commentjson.load(file)
+    
     with open(path_config_json) as file:
         config_json = commentjson.load(file)
-
-    with open(path_schema_json) as file:
-        schema_json = commentjson.load(file)
 
     return validate(instance=config_json, schema=schema_json)

@@ -102,6 +102,10 @@ class ConfigFile:
     @property
     def location(self) -> Optional[str]:
         return self._location
+    
+    @property
+    def schema_path(self) -> Optional[str]:
+        return self.schema_property
 
     @location.setter
     def location(self, dirname: str) -> None:
@@ -296,19 +300,6 @@ class ConfigFile:
             #     self._missing_secure_props.extend(secure_fields)
 
         return props
-
-    def load_schema(self) -> str:
-        """
-        Find the schema file path from the $schema_property in the config.json
-        Returns
-        -------
-        Str
-
-        file_path to the schema property
-        """
-
-        file_path = self.schema_property
-        return file_path
 
     def load_secure_props(self) -> None:
         """

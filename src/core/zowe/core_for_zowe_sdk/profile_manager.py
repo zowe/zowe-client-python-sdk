@@ -173,7 +173,7 @@ class ProfileManager:
             return cfg_profile
     
     @staticmethod
-    def load_schema(
+    def validate_schema(
         cfg: ConfigFile,
         path_config_json: str,
         opt_in: Optional[bool] = True,
@@ -188,7 +188,7 @@ class ProfileManager:
 
         path_schema_json = None
         try:
-            path_schema_json = cfg.load_schema()
+            path_schema_json = cfg.schema_path
             if path_schema_json is None:    # check if the $schema property is not defined
                 warnings.warn(
                     f"$schema property could not found"
@@ -272,10 +272,13 @@ class ProfileManager:
                 )  # Define profile name that will be merged from other layers
             profile_props = {**profile_loaded.data, **profile_props}
 
-            # Loading $schema property from project config
-            if config_type in ("Project Config"):
+            # Validating $schema property for all the layers
+            if config_type in ("Project Config", "Global Config"):
                 path_config_json = cfg._location + "/zowe.config.json"
-                schema_path = self.load_schema(cfg, path_config_json, opt_in)
+                self.validate_schema(cfg, path_config_json, opt_in)
+            elif config_type in ("Project User Config", "Global User Config"):
+                path_config_json = cfg._location + "/zowe.user.config.json"
+                self.validate_schema(cfg, path_config_json, opt_in)
 
             missing_secure_props.extend(profile_loaded.missing_secure_props)
 
