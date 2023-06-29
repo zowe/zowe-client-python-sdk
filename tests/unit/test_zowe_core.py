@@ -12,7 +12,6 @@ from unittest.mock import patch
 from jsonschema import validate, ValidationError
 from zowe.core_for_zowe_sdk.validators import validate_config_json
 import commentjson
-from zowe.core_for_zowe_sdk.constants import constants
 from pyfakefs.fake_filesystem_unittest import TestCase
 from zowe.core_for_zowe_sdk import (
     ApiConnection,
