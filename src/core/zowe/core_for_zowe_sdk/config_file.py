@@ -341,7 +341,7 @@ class ConfigFile:
                 f" with error '{error_msg}'",
                 SecurePropsNotFoundWarning,
             )
-        self.set_secure_props() 
+        # self.set_secure_props() 
 
     def _retrieve_password(self, service_name: str) -> str:
         """
