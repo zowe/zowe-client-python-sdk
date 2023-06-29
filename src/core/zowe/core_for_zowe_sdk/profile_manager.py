@@ -273,10 +273,10 @@ class ProfileManager:
             profile_props = {**profile_loaded.data, **profile_props}
 
             # Validating $schema property for all the layers
-            if config_type in ("Project Config", "Global Config"):
+            if cfg._location and config_type in ("Project Config", "Global Config"):
                 path_config_json = cfg._location + "/zowe.config.json"
                 self.validate_schema(cfg, path_config_json, opt_in)
-            elif config_type in ("Project User Config", "Global User Config"):
+            elif cfg._location and config_type in ("Project User Config", "Global User Config"):
                 path_config_json = cfg._location + "/zowe.user.config.json"
                 self.validate_schema(cfg, path_config_json, opt_in)
 
