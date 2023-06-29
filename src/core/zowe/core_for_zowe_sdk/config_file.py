@@ -403,7 +403,9 @@ class ConfigFile:
                     keyring.set_password(service_name, constants["ZoweAccountName"], credential)
             else:
                 credential = self.secure_props.get(self.filepath)
-                keyring.set_password(service_name, constants["ZoweAccountName"], credential)
+                keyring.set_password(
+                    service_name, constants["ZoweAccountName"], 
+                    credential)
 
         except KeyError as exc:
             error_msg = str(exc)
