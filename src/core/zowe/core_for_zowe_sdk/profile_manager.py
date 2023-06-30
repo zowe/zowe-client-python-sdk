@@ -197,24 +197,26 @@ class ProfileManager:
             # validate the $schema property 
             if path_schema_json and opt_in:
                 validate_config_json(path_config_json, path_schema_json)
-        except jsonschema.ValidationError as exc:
-            raise Exception(
+        except jsonschema.exceptions.ValidationError as exc:
+            raise jsonschema.exceptions.ValidationError(
                 f"Instance was invalid under the provided $schema property, {exc}"
             )
-        except jsonschema.FormatError:
-            raise Exception(
-                f"Validating a format {path_config_json} failed for {path_schema_json}"
+        except jsonschema.exceptions.SchemaError as exc:
+            raise jsonschema.exception.SchemaError(
+                f"The provided schema is invalid, {exc}"
             )
-        except jsonschema.UndefinedTypeCheck as exc:
-            raise Exception(
+        except jsonschema.exceptions.UndefinedTypeCheck as exc:
+            raise jsonschema.exceptions.UndefinedTypeCheck(
                 f"A type checker was asked to check a type it did not have registered, {exc}"
             )
-        except jsonschema.UnknownType:
-            raise Exception(
-                f"Unknown type is found in {path_schema_json}"
+        except jsonschema.exceptions.UnknownType as exc:
+            raise jsonschema.exceptions.UnknownType(
+                f"Unknown type is found in {path_schema_json}, exc"
             )
-        finally:
-            return path_schema_json
+        except jsonschema.exceptions.FormatError as exc:
+            raise jsonschema.exceptions.FormatError(
+                f"Validating a format {path_config_json} failed for {path_schema_json}, {exc}"
+            )
 
     def load(
         self,
@@ -277,7 +279,7 @@ class ProfileManager:
                 path_config_json = cfg._location + "/zowe.config.json"
                 self.validate_schema(cfg, path_config_json, opt_in)
             elif cfg._location and config_type in ("Project User Config", "Global User Config"):
-                path_config_json = cfg._location + "/zowe.user.config.json"
+                path_config_json = cfg._location + "/zowe.config.user.json"
                 self.validate_schema(cfg, path_config_json, opt_in)
 
             missing_secure_props.extend(profile_loaded.missing_secure_props)

@@ -43,6 +43,10 @@ def validate_config_json(path_config_json: str, path_schema_json: str):
     elif os.path.isfile(path_schema_json):
         with open(path_schema_json) as file:
             schema_json = commentjson.load(file)
+        
+    # if there is no path_schema_json it will return None
+    else: 
+        return None
     
     with open(path_config_json) as file:
         config_json = commentjson.load(file)
