@@ -387,13 +387,22 @@ class ConfigFile:
             if sys.platform == "win32":
                 service_name += "/" + constants["ZoweAccountName"]
                 credential = self.secure_props.get(self.filepath, "")
+                # Load existing credentials
+                existing_credential = keyring.get_password(service_name, constants["ZoweAccountName"])
+
+                if existing_credential:
+                    # Decode the existing credential and update secure_props
+                    existing_secure_props = commentjson.loads(base64.b64decode(existing_credential).decode())
+                    existing_secure_props.update(self.secure_props.get(self.filepath, {}))
+                    self.secure_props[self.filepath] = existing_secure_props
 
                 if len(credential) > constants["WIN32_CRED_MAX_STRING_LENGTH"]:
                     # Split the credential string into chunks of maximum length
                     keyring.delete_password(service_name, constants["ZoweAccountName"])
                     chunk_size = constants["WIN32_CRED_MAX_STRING_LENGTH"]
                     chunks = [credential[i : i + chunk_size] for i in range(0, len(credential), chunk_size)]
-
+                    # Append NUL byte to the last chunk
+                    chunks[-1] += "\0"
                     # Set the individual chunks as separate keyring entries
                     for index, chunk in enumerate(chunks, start=1):
                         field_name = f"{constants['ZoweAccountName']}-{index}"
