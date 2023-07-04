@@ -23,6 +23,7 @@ from zowe.core_for_zowe_sdk import (
     exceptions,
     session_constants,
     custom_warnings,
+    constants,
 )
 
 FIXTURES_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fixtures")
@@ -379,6 +380,31 @@ class TestZosmfProfileManager(TestCase):
             prof_manager.config_dir = self.custom_dir
             props: dict = prof_manager.load("non_existent_profile")
 
+    @patch("keyring.get_password", side_effect=["password", None, "part1","part2", None,None,None])
+    def test_retrieve_password(self, get_pass_func):
+        # Set up mock values and expected results
+        # Create a ConfigFile instance and call the method being tested
+        service_name = "ZoweServiceName"
+        config_file = ConfigFile("User Config", "test")
+        retrieved_password = config_file._retrieve_password(service_name)
+
+        # Scenario 1: Retrieve password directly
+        expected_password1 = "password"
+        self.assertEqual(retrieved_password, expected_password1)
+        get_pass_func.assert_called_with(service_name, constants["ZoweAccountName"])
+
+        # Scenario 2: Retrieve password in parts
+        retrieved_password = config_file._retrieve_password(service_name)
+        expected_password2 = "part1part2"
+        self.assertEqual(retrieved_password, expected_password2)
+        get_pass_func.assert_any_call(service_name, constants["ZoweAccountName"])
+        get_pass_func.assert_any_call(service_name, f"{constants['ZoweAccountName']}-1")
+        get_pass_func.assert_any_call(service_name, f"{constants['ZoweAccountName']}-2")
+
+        # Scenario 3: Password not found
+        retrieved_password = config_file._retrieve_password(service_name)
+        self.assertIsNone(retrieved_password)
+        get_pass_func.assert_called_with(service_name, f"{constants['ZoweAccountName']}-1")
 
 class TestValidateConfigJsonClass(unittest.TestCase):
     """Testing the validate_config_json function"""

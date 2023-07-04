@@ -343,7 +343,7 @@ class ConfigFile:
             )
         # self.set_secure_props() 
 
-    def _retrieve_password(self, service_name: str) -> str:
+    def _retrieve_password(self, service_name: str) -> Optional[str]:
         """
         Retrieve the password from the keyring or storage.
         If the password exceeds the maximum length, retrieve it in parts.
@@ -361,15 +361,16 @@ class ConfigFile:
         if password is None:
             # Retrieve the secure value with an index
             index = 1
-            while True:
-                field_name = f"{constants['ZoweAccountName']}-{index}"
-                temp_value = keyring.get_password(service_name, field_name)
-                if temp_value is None:
-                    break
-                password += temp_value
+            temp_value = keyring.get_password(service_name, f"{constants['ZoweAccountName']}-{index}")
+            while temp_value is not None:
+                if password is None:
+                    password = temp_value
+                else:
+                    password += temp_value
                 index += 1
+                temp_value = keyring.get_password(service_name, f"{constants['ZoweAccountName']}-{index}")
 
-        return password
+        return password 
     
     def set_secure_props(self) -> None:
         """
