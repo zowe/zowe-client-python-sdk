@@ -406,6 +406,28 @@ class TestZosmfProfileManager(TestCase):
         self.assertIsNone(retrieved_password)
         get_pass_func.assert_called_with(service_name, f"{constants['ZoweAccountName']}-1")
 
+    @mock.patch("keyring.get_password")
+    @mock.patch("keyring.set_password")
+    def test_set_secure_props_normal_credential(self, set_pass_func, get_pass_func):
+        # Set up mock values and expected results
+        service_name = constants["ZoweServiceName"]
+        credential = "test_credential"
+        existing_credential = '{"existing_key": "existing_value"}'
+
+        # Mock the return values and behaviors of keyring functions
+        get_pass_func.return_value = existing_credential
+        # Create a ConfigFile instance and set secure_props
+        config_file = ConfigFile("User Config", "test")
+        config_file.secure_props = {"filepath": credential}
+        config_file.set_secure_props()
+
+        # Verify the keyring function calls
+        set_pass_func.assert_called_once_with(
+            f"{service_name}/{constants['ZoweAccountName']}",
+            constants['ZoweAccountName'],
+            ""
+        )
+
 class TestValidateConfigJsonClass(unittest.TestCase):
     """Testing the validate_config_json function"""
 

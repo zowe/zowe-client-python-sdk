@@ -393,7 +393,7 @@ class ConfigFile:
 
                 if existing_credential:
                     # Decode the existing credential and update secure_props
-                    existing_secure_props = commentjson.loads(base64.b64decode(existing_credential).decode())
+                    existing_secure_props = commentjson.loads(existing_credential)
                     existing_secure_props.update(self.secure_props.get(self.filepath, {}))
                     self.secure_props[self.filepath] = existing_secure_props
 
