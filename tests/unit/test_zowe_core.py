@@ -418,7 +418,7 @@ class TestZosmfProfileManager(TestCase):
         get_pass_func.return_value = existing_credential
         # Create a ConfigFile instance and set secure_props
         config_file = ConfigFile("User Config", "test")
-        config_file.secure_props = {"filepath": credential}
+        config_file.secure_props = {}
         config_file.set_secure_props()
 
         # Verify the keyring function calls
