@@ -392,46 +392,48 @@ class ConfigFile:
         try:
             service_name = constants["ZoweServiceName"]
             credential = self.secure_props.get(self.filepath, {})
-            if sys.platform == "win32":
-                service_name += "/" + constants["ZoweAccountName"]
+            # Check if credential is a non-empty string
+            if credential:
+                # Get the username and password from the credential dictionary
+                username = credential.get("profiles.base.properties.user")
+                password = credential.get("profiles.base.properties.password")
                 
-                # Load existing credentials
-                existing_credential = keyring.get_password(service_name, constants["ZoweAccountName"])
-
-                if existing_credential:
-                    # Decode the existing credential and update secure_props
-                    existing_secure_props = commentjson.loads(existing_credential)
-                    existing_secure_props.update(self.secure_props.get(self.filepath, {}))
-                    self.secure_props[self.filepath] = existing_secure_props
-                # Check if credential is a non-empty string
-                if credential:
-                    # Get the username and password from the credential dictionary
-                    username = credential.get("profiles.base.properties.user")
-                    password = credential.get("profiles.base.properties.password")
+                # Combine the username and password as "username:password"
+                username_password = f"{username}:{password}"
+                
+                # Encode the combined string as base64
+                encoded_credential = base64.b64encode(username_password.encode()).decode()
+                print(encoded_credential)
+                if sys.platform == "win32":
+                    service_name += "/" + constants["ZoweAccountName"]
                     
-                    # Combine the username and password as "username:password"
-                    username_password = f"{username}:{password}"
+                    # Load existing credentials
+                    existing_credential = keyring.get_password(service_name, constants["ZoweAccountName"])
+                    print(existing_credential)
+                    if existing_credential:
+                        # Decode the existing credential and update secure_props
+                        existing_secure_props = commentjson.loads(existing_credential)
+                        existing_secure_props.update(self.secure_props.get(self.filepath, {}))
+                        self.secure_props[self.filepath] = existing_secure_props
                     
-                    # Encode the combined string as base64
-                    encoded_credential = base64.b64encode(username_password.encode()).decode()
-                    if len(encoded_credential) > constants["WIN32_CRED_MAX_STRING_LENGTH"]:
-                        # Split the encoded credential string into chunks of maximum length
-                        keyring.delete_password(service_name, constants["ZoweAccountName"])
-                        chunk_size = constants["WIN32_CRED_MAX_STRING_LENGTH"]
-                        chunks = [encoded_credential[i : i + chunk_size] for i in range(0, len(encoded_credential), chunk_size)]
-                        # Append NUL byte to the last chunk
-                        chunks[-1] += "\0"
-                        # Set the individual chunks as separate keyring entries
-                        for index, chunk in enumerate(chunks, start=1):
-                            field_name = f"{constants['ZoweAccountName']}-{index}"
-                            keyring.set_password(service_name, field_name, chunk)
+                        if len(encoded_credential) > constants["WIN32_CRED_MAX_STRING_LENGTH"]:
+                            # Split the encoded credential string into chunks of maximum length
+                            keyring.delete_password(service_name, constants["ZoweAccountName"])
+                            chunk_size = constants["WIN32_CRED_MAX_STRING_LENGTH"]
+                            chunks = [encoded_credential[i : i + chunk_size] for i in range(0, len(encoded_credential), chunk_size)]
+                            # Append NUL byte to the last chunk
+                            chunks[-1] += "\0"
+                            # Set the individual chunks as separate keyring entries
+                            for index, chunk in enumerate(chunks, start=1):
+                                field_name = f"{constants['ZoweAccountName']}-{index}"
+                                keyring.set_password(service_name, field_name, chunk)
+                        else:
+                            # Credential length is within the maximum limit, set it as a single keyring entry
+                                keyring.set_password(service_name, constants["ZoweAccountName"],encoded_credential)
                 else:
-                     # Credential length is within the maximum limit, set it as a single keyring entry
-                        keyring.set_password(service_name, constants["ZoweAccountName"], "")
-            else:
-                keyring.set_password(
-                    service_name, constants["ZoweAccountName"], 
-                    credential)
+                    keyring.set_password(
+                        service_name, constants["ZoweAccountName"], 
+                        encoded_credential)
 
         except KeyError as exc:
             error_msg = str(exc)

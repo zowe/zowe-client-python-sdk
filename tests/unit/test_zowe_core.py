@@ -380,7 +380,7 @@ class TestZosmfProfileManager(TestCase):
             prof_manager.config_dir = self.custom_dir
             props: dict = prof_manager.load("non_existent_profile")
 
-    @patch("keyring.get_password", side_effect=["password", None, "part1","part2", None,None,None])
+    @patch("keyring.get_password", side_effect=["password", None, "part1","part2\0", None,None,None])
     def test_retrieve_password(self, get_pass_func):
         # Set up mock values and expected results
         # Create a ConfigFile instance and call the method being tested
