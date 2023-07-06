@@ -2,3 +2,7 @@
 
 All notable changes to the Zowe Client Python SDK will be documented in this file.
 
+## Recent Changes
+
+- BugFix: Added a method to load secure values from multiple credential entries on Windows [#134](https://github.com/zowe/zowe-client-python-sdk/issues/134)
+
