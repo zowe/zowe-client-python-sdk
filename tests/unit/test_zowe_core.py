@@ -410,7 +410,7 @@ class TestZosmfProfileManager(TestCase):
     @mock.patch("keyring.set_password")
     def test_set_secure_props_normal_credential(self, set_pass_func, get_pass_func):
         # Set up mock values and expected results
-        service_name = constants["ZoweServiceName"]
+        service_name =constants["ZoweServiceName"] + "/" + constants["ZoweAccountName"]
         # Setup - copy profile to fake filesystem created by pyfakefs
         cwd_up_dir_path = os.path.dirname(CWD)
         cwd_up_file_path = os.path.join(cwd_up_dir_path, "zowe.config.json")
@@ -437,7 +437,7 @@ class TestZosmfProfileManager(TestCase):
         config_file.set_secure_props()
         # Verify the keyring function calls
         set_pass_func.assert_called_once_with(
-            f"{service_name}/{constants['ZoweAccountName']}",
+            service_name,
             constants['ZoweAccountName'],
             encoded_credential
         )
@@ -447,7 +447,7 @@ class TestZosmfProfileManager(TestCase):
     @mock.patch("keyring.delete_password")
     def test_set_secure_props_exceed_limit(self, delete_pass_func, set_pass_func, get_pass_func):
         # Set up mock values and expected results
-        service_name = constants["ZoweServiceName"]
+        service_name =constants["ZoweServiceName"] + "/" + constants["ZoweAccountName"]
         # Setup - copy profile to fake filesystem created by pyfakefs
         cwd_up_dir_path = os.path.dirname(CWD)
         cwd_up_file_path = os.path.join(cwd_up_dir_path, "zowe.config.json")
@@ -473,7 +473,7 @@ class TestZosmfProfileManager(TestCase):
 
         # Verify the keyring function calls
         delete_pass_func.assert_called_once_with(
-           f"{service_name}/{constants['ZoweAccountName']}", constants["ZoweAccountName"]
+           service_name, constants["ZoweAccountName"]
         )
 
         expected_calls = []
@@ -483,7 +483,7 @@ class TestZosmfProfileManager(TestCase):
         for index, chunk in enumerate(chunks, start=1):
             field_name = f"{constants['ZoweAccountName']}-{index}"
             expected_calls.append(mock.call(
-                f"{service_name}/{constants['ZoweAccountName']}",
+                service_name,
                 field_name,
                 chunk
             ))

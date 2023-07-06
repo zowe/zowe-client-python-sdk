@@ -403,13 +403,11 @@ class ConfigFile:
                 
                 # Encode the combined string as base64
                 encoded_credential = base64.b64encode(username_password.encode()).decode()
-                print(encoded_credential)
                 if sys.platform == "win32":
                     service_name += "/" + constants["ZoweAccountName"]
                     
                     # Load existing credentials
                     existing_credential = keyring.get_password(service_name, constants["ZoweAccountName"])
-                    print(existing_credential)
                     if existing_credential:
                         # Decode the existing credential and update secure_props
                         existing_secure_props = commentjson.loads(existing_credential)
