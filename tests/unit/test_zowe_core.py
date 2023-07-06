@@ -410,84 +410,86 @@ class TestZosmfProfileManager(TestCase):
     @mock.patch("keyring.set_password")
     def test_set_secure_props_normal_credential(self, set_pass_func, get_pass_func):
         # Set up mock values and expected results
-        service_name =constants["ZoweServiceName"] + "/" + constants["ZoweAccountName"]
-        # Setup - copy profile to fake filesystem created by pyfakefs
-        cwd_up_dir_path = os.path.dirname(CWD)
-        cwd_up_file_path = os.path.join(cwd_up_dir_path, "zowe.config.json")
-        os.chdir(CWD)
-        shutil.copy(self.original_file_path, cwd_up_file_path)
-        credential = {
-            "profiles.base.properties.user": "user",
-            "profiles.base.properties.password": "password"
-        }
-        self.setUpCreds(cwd_up_file_path,credential)
-        username = credential.get("profiles.base.properties.user")
-        password = credential.get("profiles.base.properties.password")
-        username_password = f"{username}:{password}"
-        encoded_credential = base64.b64encode(
-            username_password.encode()
-        ).decode()
+        if sys.platform == "win32":
+            service_name =constants["ZoweServiceName"] + "/" + constants["ZoweAccountName"]
+            # Setup - copy profile to fake filesystem created by pyfakefs
+            cwd_up_dir_path = os.path.dirname(CWD)
+            cwd_up_file_path = os.path.join(cwd_up_dir_path, "zowe.config.json")
+            os.chdir(CWD)
+            shutil.copy(self.original_file_path, cwd_up_file_path)
+            credential = {
+                "profiles.base.properties.user": "user",
+                "profiles.base.properties.password": "password"
+            }
+            self.setUpCreds(cwd_up_file_path,credential)
+            username = credential.get("profiles.base.properties.user")
+            password = credential.get("profiles.base.properties.password")
+            username_password = f"{username}:{password}"
+            encoded_credential = base64.b64encode(
+                username_password.encode()
+            ).decode()
 
-        existing_credential = json.dumps(credential)
+            existing_credential = json.dumps(credential)
 
-        get_pass_func.return_value = existing_credential
-    
-        config_file = ConfigFile("User Config", "zowe.config.json",cwd_up_dir_path)
-        config_file.secure_props = {cwd_up_file_path: credential}
-        config_file.set_secure_props()
-        # Verify the keyring function calls
-        set_pass_func.assert_called_once_with(
-            service_name,
-            constants['ZoweAccountName'],
-            encoded_credential
-        )
+            get_pass_func.return_value = existing_credential
+        
+            config_file = ConfigFile("User Config", "zowe.config.json",cwd_up_dir_path)
+            config_file.secure_props = {cwd_up_file_path: credential}
+            config_file.set_secure_props()
+            # Verify the keyring function calls
+            set_pass_func.assert_called_once_with(
+                service_name,
+                constants['ZoweAccountName'],
+                encoded_credential
+            )
 
     @mock.patch("keyring.get_password")
     @mock.patch("keyring.set_password")
     @mock.patch("keyring.delete_password")
     def test_set_secure_props_exceed_limit(self, delete_pass_func, set_pass_func, get_pass_func):
-        # Set up mock values and expected results
-        service_name =constants["ZoweServiceName"] + "/" + constants["ZoweAccountName"]
-        # Setup - copy profile to fake filesystem created by pyfakefs
-        cwd_up_dir_path = os.path.dirname(CWD)
-        cwd_up_file_path = os.path.join(cwd_up_dir_path, "zowe.config.json")
-        os.chdir(CWD)
-        shutil.copy(self.original_file_path, cwd_up_file_path)
-        credential = {
-            "profiles.base.properties.user": "user",
-            "profiles.base.properties.password": "a" * (constants["WIN32_CRED_MAX_STRING_LENGTH"] + 1)
-        }
-        self.setUpCreds(cwd_up_file_path, credential)
-        username = credential.get("profiles.base.properties.user")
-        password = credential.get("profiles.base.properties.password")
-        username_password = f"{username}:{password}"
-        encoded_credential = base64.b64encode(username_password.encode()).decode()
+        if sys.platform == "win32":
+            # Set up mock values and expected results
+            service_name =constants["ZoweServiceName"] + "/" + constants["ZoweAccountName"]
+            # Setup - copy profile to fake filesystem created by pyfakefs
+            cwd_up_dir_path = os.path.dirname(CWD)
+            cwd_up_file_path = os.path.join(cwd_up_dir_path, "zowe.config.json")
+            os.chdir(CWD)
+            shutil.copy(self.original_file_path, cwd_up_file_path)
+            credential = {
+                "profiles.base.properties.user": "user",
+                "profiles.base.properties.password": "a" * (constants["WIN32_CRED_MAX_STRING_LENGTH"] + 1)
+            }
+            self.setUpCreds(cwd_up_file_path, credential)
+            username = credential.get("profiles.base.properties.user")
+            password = credential.get("profiles.base.properties.password")
+            username_password = f"{username}:{password}"
+            encoded_credential = base64.b64encode(username_password.encode()).decode()
 
-        existing_credential = json.dumps(credential)
+            existing_credential = json.dumps(credential)
 
-        get_pass_func.return_value = existing_credential
+            get_pass_func.return_value = existing_credential
 
-        config_file = ConfigFile("User Config", "zowe.config.json", cwd_up_dir_path)
-        config_file.secure_props = {cwd_up_file_path: credential}
-        config_file.set_secure_props()
+            config_file = ConfigFile("User Config", "zowe.config.json", cwd_up_dir_path)
+            config_file.secure_props = {cwd_up_file_path: credential}
+            config_file.set_secure_props()
 
-        # Verify the keyring function calls
-        delete_pass_func.assert_called_once_with(
-           service_name, constants["ZoweAccountName"]
-        )
+            # Verify the keyring function calls
+            delete_pass_func.assert_called_once_with(
+            service_name, constants["ZoweAccountName"]
+            )
 
-        expected_calls = []
-        chunk_size = constants["WIN32_CRED_MAX_STRING_LENGTH"]
-        chunks = [encoded_credential[i: i + chunk_size] for i in range(0, len(encoded_credential), chunk_size)]
-        chunks[-1] += "\0"
-        for index, chunk in enumerate(chunks, start=1):
-            field_name = f"{constants['ZoweAccountName']}-{index}"
-            expected_calls.append(mock.call(
-                service_name,
-                field_name,
-                chunk
-            ))
-        set_pass_func.assert_has_calls(expected_calls)
+            expected_calls = []
+            chunk_size = constants["WIN32_CRED_MAX_STRING_LENGTH"]
+            chunks = [encoded_credential[i: i + chunk_size] for i in range(0, len(encoded_credential), chunk_size)]
+            chunks[-1] += "\0"
+            for index, chunk in enumerate(chunks, start=1):
+                field_name = f"{constants['ZoweAccountName']}-{index}"
+                expected_calls.append(mock.call(
+                    service_name,
+                    field_name,
+                    chunk
+                ))
+            set_pass_func.assert_has_calls(expected_calls)
 
 class TestValidateConfigJsonClass(unittest.TestCase):
     """Testing the validate_config_json function"""
