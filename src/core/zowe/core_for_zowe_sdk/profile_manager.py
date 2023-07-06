@@ -12,11 +12,9 @@ Copyright Contributors to the Zowe Project.
 
 import os.path
 import warnings
-import jsonschema
 from typing import Optional
 
 from .config_file import ConfigFile, Profile
-from .validators import validate_config_json
 from .custom_warnings import (
     ConfigNotFoundWarning,
     ProfileNotFoundWarning,
@@ -171,52 +169,6 @@ class ProfileManager:
             )
         finally:
             return cfg_profile
-    
-    @staticmethod
-    def validate_schema(
-        cfg: ConfigFile,
-        path_config_json: str,
-        opt_in: Optional[bool] = True,
-    ) -> str:
-        """
-        Get the $schema_property from the config and load the schema
-
-        Returns
-        -------
-        file_path to the $schema property
-        """
-
-        path_schema_json = None
-        try:
-            path_schema_json = cfg.schema_path
-            if path_schema_json is None:    # check if the $schema property is not defined
-                warnings.warn(
-                    f"$schema property could not found"
-                )
-                
-            # validate the $schema property 
-            if path_schema_json and opt_in:
-                validate_config_json(path_config_json, path_schema_json)
-        except jsonschema.exceptions.ValidationError as exc:
-            raise jsonschema.exceptions.ValidationError(
-                f"Instance was invalid under the provided $schema property, {exc}"
-            )
-        except jsonschema.exceptions.SchemaError as exc:
-            raise jsonschema.exception.SchemaError(
-                f"The provided schema is invalid, {exc}"
-            )
-        except jsonschema.exceptions.UndefinedTypeCheck as exc:
-            raise jsonschema.exceptions.UndefinedTypeCheck(
-                f"A type checker was asked to check a type it did not have registered, {exc}"
-            )
-        except jsonschema.exceptions.UnknownType as exc:
-            raise jsonschema.exceptions.UnknownType(
-                f"Unknown type is found in {path_schema_json}, exc"
-            )
-        except jsonschema.exceptions.FormatError as exc:
-            raise jsonschema.exceptions.FormatError(
-                f"Validating a format {path_config_json} failed for {path_schema_json}, {exc}"
-            )
 
     def load(
         self,
@@ -277,10 +229,10 @@ class ProfileManager:
             # Validating $schema property for all the layers
             if cfg._location and config_type in ("Project Config", "Global Config"):
                 path_config_json = cfg._location + "/zowe.config.json"
-                self.validate_schema(cfg, path_config_json, opt_in)
+                cfg.validate_schema(path_config_json, opt_in)
             elif cfg._location and config_type in ("Project User Config", "Global User Config"):
                 path_config_json = cfg._location + "/zowe.config.user.json"
-                self.validate_schema(cfg, path_config_json, opt_in)
+                cfg.validate_schema(path_config_json, opt_in)
 
             missing_secure_props.extend(profile_loaded.missing_secure_props)
 

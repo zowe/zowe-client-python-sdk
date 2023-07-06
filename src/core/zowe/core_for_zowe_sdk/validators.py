@@ -13,10 +13,11 @@ Copyright Contributors to the Zowe Project.
 import commentjson
 from jsonschema import validate
 import os
+from typing import Union
 import requests
 
 
-def validate_config_json(path_config_json: str, path_schema_json: str):
+def validate_config_json(path_config_json: Union[str, dict], path_schema_json: str):
     """
     Function validating that zowe.config.json file matches zowe.schema.json.
 
@@ -34,10 +35,8 @@ def validate_config_json(path_config_json: str, path_schema_json: str):
     """
 
     # checks if the path_schema_json point to an internet URI and download the schema using the URI
-    if path_schema_json[:8] in ("https://", "http://"):
-        response = requests.get(path_schema_json)
-        schema_data = response.content.decode("utf-8")
-        schema_json = commentjson.load(schema_data)
+    if path_schema_json.startswith("https://") or path_schema_json.startswith("http://"):
+        schema_json = requests.get(path_schema_json).json()
     
     # checks if the path_schema_json is a file
     elif os.path.isfile(path_schema_json):
@@ -47,8 +46,11 @@ def validate_config_json(path_config_json: str, path_schema_json: str):
     # if there is no path_schema_json it will return None
     else: 
         return None
-    
-    with open(path_config_json) as file:
-        config_json = commentjson.load(file)
+
+    if isinstance(path_config_json, str):
+        with open(path_config_json) as file:
+            config_json = commentjson.load(file)
+    else:
+        config_json = path_config_json
 
     return validate(instance=config_json, schema=schema_json)

@@ -14,6 +14,7 @@ import base64
 import os.path
 import re
 import sys
+import jsonschema
 import warnings
 from dataclasses import dataclass, field
 from typing import Optional, NamedTuple
@@ -21,6 +22,7 @@ from typing import Optional, NamedTuple
 import commentjson
 
 from .constants import constants
+from .validators import validate_config_json
 from .custom_warnings import (
     ProfileNotFoundWarning,
     ProfileParsingWarning,
@@ -133,6 +135,51 @@ class ConfigFile:
         # since we want to try loading secure properties only when
         # we know that the profile has saved properties
         # self.load_secure_props()
+
+    def validate_schema(
+        self,
+        path_config_json: str,
+        opt_in: Optional[bool] = True,
+    ) -> None:
+        """
+        Get the $schema_property from the config and load the schema
+
+        Returns
+        -------
+        file_path to the $schema property
+        """
+
+        path_schema_json = None
+        try:
+            path_schema_json = self.schema_path
+            if path_schema_json is None:    # check if the $schema property is not defined
+                warnings.warn(
+                    f"$schema property could not found"
+                )
+                
+            # validate the $schema property 
+            if path_schema_json and opt_in:
+                validate_config_json(path_config_json, path_schema_json)
+        except jsonschema.exceptions.ValidationError as exc:
+            raise jsonschema.exceptions.ValidationError(
+                f"Instance was invalid under the provided $schema property, {exc}"
+            )
+        except jsonschema.exceptions.SchemaError as exc:
+            raise jsonschema.exception.SchemaError(
+                f"The provided schema is invalid, {exc}"
+            )
+        except jsonschema.exceptions.UndefinedTypeCheck as exc:
+            raise jsonschema.exceptions.UndefinedTypeCheck(
+                f"A type checker was asked to check a type it did not have registered, {exc}"
+            )
+        except jsonschema.exceptions.UnknownType as exc:
+            raise jsonschema.exceptions.UnknownType(
+                f"Unknown type is found in {path_schema_json}, exc"
+            )
+        except jsonschema.exceptions.FormatError as exc:
+            raise jsonschema.exceptions.FormatError(
+                f"Validating a format {path_config_json} failed for {path_schema_json}, {exc}"
+            )
 
     def get_profile(
         self,
