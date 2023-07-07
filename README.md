@@ -10,30 +10,37 @@ that can interact with z/OS components.
 
 ![](./img/zowesdk.gif)
 
-## Installation
+<h2>Installation</h2>
+
+<p>To set up the Zowe Client Python SDK for local development and contribution, follow these steps:</p>
+
+<ol>
+  <li>Clone the repository:</li>
+  <pre><code>git clone [REPO_URL]</code></pre>
+
+  <li>Create a virtual environment:</li>
+  <ul>
+    <li>Use a virtual environment tool such as <code>conda</code> or <code>venv</code> to create a clean environment for the project.</li>
+    <li>Activate the virtual environment before proceeding to the next steps.</li>
+  </ul>
+
+  <li>Navigate to the project directory:</li>
+  <pre><code>cd zowe-client-python-sdk</code></pre>
+
+  <li>Install the SDK and its dependencies:</li>
+  <ul>
+    <li>Run the following command to install the SDK along with all the necessary dependencies:</li>
+    <pre><code>pip install -e .</code></pre>
+  </ul>
+
+  <li>Continue with development:</li>
+  <ul>
+    <li>You can now start working with the Zowe Client Python SDK in your local environment.</li>
+    <li>Import the required modules in your Python scripts and follow the SDK documentation and examples for guidance on utilizing the functionalities effectively.</li>
+  </ul>
+</ol>
 
 
-When installing the Zowe Client Python SDK you have two options.
-
-- Install all the Zowe packages
-- Install a single sub-package
-
-The choice depends on your intentions. If you chose to install all Zowe SDK packages
-this means that you will install everything under the `zowe` namespace in PyPi. 
-
-Alternatively, you can choose to install only a single subpackage for a smaller installation.
-
-To install all Zowe SDK packages using pip:
-
-```
-pip install zowe
-```
-
-To install only a subpackage using pip:
-
-```
-pip install zowe.<subpackage>_for_zowe_sdk
-```
 
 For more information on the available sub-packages click [HERE](https://zowe-client-python-sdk.readthedocs.io/en/latest/packages/packages.html)
 
