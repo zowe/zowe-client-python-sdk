@@ -12,6 +12,7 @@ Copyright Contributors to the Zowe Project.
 
 import os.path
 import warnings
+import jsonschema
 from typing import Optional
 
 from .config_file import ConfigFile, Profile
@@ -129,7 +130,27 @@ class ProfileManager:
         cfg_profile = Profile()
         try:
             cfg_profile = cfg.get_profile(
-                profile_name=profile_name, profile_type=profile_type
+                profile_name=profile_name, profile_type=profile_type, config_type=config_type
+            )
+        except jsonschema.exceptions.ValidationError as exc:
+            raise jsonschema.exceptions.ValidationError(
+                f"Instance was invalid under the provided $schema property, {exc}"
+            )
+        except jsonschema.exceptions.SchemaError as exc:
+            raise jsonschema.exception.SchemaError(
+                f"The provided schema is invalid, {exc}"
+            )
+        except jsonschema.exceptions.UndefinedTypeCheck as exc:
+            raise jsonschema.exceptions.UndefinedTypeCheck(
+                f"A type checker was asked to check a type it did not have registered, {exc}"
+            )
+        except jsonschema.exceptions.UnknownType as exc:
+            raise jsonschema.exceptions.UnknownType(
+                f"Unknown type is found in {path_schema_json}, exc"
+            )
+        except jsonschema.exceptions.FormatError as exc:
+            raise jsonschema.exceptions.FormatError(
+                f"Validating a format {path_config_json} failed for {path_schema_json}, {exc}"
             )
         except ProfileNotFound:
             if profile_name:
@@ -167,8 +188,8 @@ class ProfileManager:
                 f"because {type(exc).__name__}'{exc}'.",
                 ConfigNotFoundWarning,
             )
-        finally:
-            return cfg_profile
+        
+        return cfg_profile
 
     def load(
         self,
@@ -227,12 +248,12 @@ class ProfileManager:
             profile_props = {**profile_loaded.data, **profile_props}
 
             # Validating $schema property for all the layers
-            if cfg._location and config_type in ("Project Config", "Global Config"):
-                path_config_json = cfg._location + "/zowe.config.json"
-                cfg.validate_schema(path_config_json, opt_in)
-            elif cfg._location and config_type in ("Project User Config", "Global User Config"):
-                path_config_json = cfg._location + "/zowe.config.user.json"
-                cfg.validate_schema(path_config_json, opt_in)
+            # if cfg._location and config_type in ("Project Config", "Global Config"):
+            #     path_config_json = "./zowe.config.json"
+            #     cfg.validate_schema(path_config_json, opt_in)
+            # elif cfg._location and config_type in ("Project User Config", "Global User Config"):
+            #     path_config_json = "./zowe.config.user.json"
+            #     cfg.validate_schema(path_config_json, opt_in)
 
             missing_secure_props.extend(profile_loaded.missing_secure_props)
 
