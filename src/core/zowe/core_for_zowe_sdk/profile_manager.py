@@ -146,11 +146,11 @@ class ProfileManager:
             )
         except jsonschema.exceptions.UnknownType as exc:
             raise jsonschema.exceptions.UnknownType(
-                f"Unknown type is found in {path_schema_json}, exc"
+                f"Unknown type is found in schema_json, exc"
             )
         except jsonschema.exceptions.FormatError as exc:
             raise jsonschema.exceptions.FormatError(
-                f"Validating a format {path_config_json} failed for {path_schema_json}, {exc}"
+                f"Validating a format config_json failed for schema_json, {exc}"
             )
         except ProfileNotFound:
             if profile_name:
