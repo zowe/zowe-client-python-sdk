@@ -246,15 +246,7 @@ class ProfileManager:
                     profile_loaded.name
                 )  # Define profile name that will be merged from other layers
             profile_props = {**profile_loaded.data, **profile_props}
-
-            # Validating $schema property for all the layers
-            # if cfg._location and config_type in ("Project Config", "Global Config"):
-            #     path_config_json = "./zowe.config.json"
-            #     cfg.validate_schema(path_config_json, opt_in)
-            # elif cfg._location and config_type in ("Project User Config", "Global User Config"):
-            #     path_config_json = "./zowe.config.user.json"
-            #     cfg.validate_schema(path_config_json, opt_in)
-
+            
             missing_secure_props.extend(profile_loaded.missing_secure_props)
 
             if i == 1 and profile_props:
