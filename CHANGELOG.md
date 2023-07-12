@@ -4,6 +4,7 @@ All notable changes to the Zowe Client Python SDK will be documented in this fil
 
 ## Recent Changes
 
-Added : Run SDK build workflow in multiple environments
+Added : Run SDK build workflow in multiple environments --done
 
 [#194](https://github.com/zowe/zowe-client-python-sdk/issues/194)
+ 
