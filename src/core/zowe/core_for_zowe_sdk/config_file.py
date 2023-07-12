@@ -156,10 +156,8 @@ class ConfigFile:
 
         path_schema_json, path_config_json = None, ""
 
-        if self._location and config_type in ("Project Config", "Global Config"):
-            path_config_json = "./zowe.config.json"
-        elif self._location and config_type in ("Project User Config", "Global User Config"):
-            path_config_json = "./zowe.config.user.json"
+        if self._location:
+            path_config_json = f"./{self.filename}"
 
         path_schema_json = self.schema_path
         if path_schema_json is None:    # check if the $schema property is not defined
