@@ -13,6 +13,7 @@ Copyright Contributors to the Zowe Project.
 import base64
 import os.path
 import re
+import json
 import sys
 import warnings
 from dataclasses import dataclass, field
@@ -69,6 +70,7 @@ class ConfigFile:
     4. Contents of the file.
     4.1 Profiles
     4.2 Defaults
+    4.3 Schema Property
     5. Secure Properties associated with the file.
     """
 
@@ -78,6 +80,7 @@ class ConfigFile:
     profiles: Optional[dict] = None
     defaults: Optional[dict] = None
     secure_props: Optional[dict] = None
+    schema_property: Optional[dict] = None
     _missing_secure_props: list = field(default_factory=list)
 
     @property
@@ -100,6 +103,10 @@ class ConfigFile:
     @property
     def location(self) -> Optional[str]:
         return self._location
+
+    @property
+    def schema_path(self) -> Optional[str]:
+        self.schema_property
 
     @location.setter
     def location(self, dirname: str) -> None:
@@ -126,6 +133,34 @@ class ConfigFile:
         # since we want to try loading secure properties only when
         # we know that the profile has saved properties
         # self.load_secure_props()
+
+    def schema_list(
+        self,
+    ) -> list:
+        """
+        Loads the schema properties
+        in a sorted order according to the priority
+        
+        Returns
+        -------
+        Dictionary
+        
+            Returns the profile properties from schema (prop: value)
+        """
+
+        schema = self.schema_path
+        with open("zowe.schema.json") as f:
+            schema = json.load(f)
+        profile_props = []
+        schema = dict(schema)
+        
+        for props in schema['properties']['profiles']['patternProperties']["^\\S*$"]["allOf"]:
+            props = props["then"]
+            while "properties" in props:
+                props = props.pop("properties")
+                profile_props = list(props.keys())
+        
+        return profile_props
 
     def get_profile(
         self,
