@@ -329,7 +329,7 @@ class ConfigFile:
 
         secure_config: str
         if sys.platform == "win32":
-            secure_config = secret_value.encode("utf-16") 
+            secure_config = secret_value.encode() 
         else:
             secure_config = secret_value
 
@@ -345,39 +345,39 @@ class ConfigFile:
                 f" with error '{error_msg}'",
                 SecurePropsNotFoundWarning,
             )
-        # self.set_secure_props() 
 
-    def _retrieve_password(self, service_name: str) -> Optional[str]:
+    def _retrieve_credential(self, service_name: str) -> Optional[str]:
         """
-        Retrieve the password from the keyring or storage.
-        If the password exceeds the maximum length, retrieve it in parts.
+        Retrieve the credential from the keyring or storage.
+        If the credential exceeds the maximum length, retrieve it in parts.
         Parameters
         ----------
         service_name: str
-            The service name for the password retrieval
+            The service name for the credential retrieval
         Returns
         -------
         str
-            The retrieved password
+            The retrieved  encoded credential
         """
-        password = keyring.get_password(service_name, constants["ZoweAccountName"])
+        encoded_credential = keyring.get_password(service_name, constants["ZoweAccountName"])
 
-        if password is None:
+        if encoded_credential is None:
             # Retrieve the secure value with an index
             index = 1
-            temp_value = keyring.get_password(service_name, f"{constants['ZoweAccountName']}-{index}")
+            temp_value = keyring.get_password(f"{service_name}-{index}", f"{constants['ZoweAccountName']}-{index}")
             while temp_value is not None:
-                if password is None:
-                    password = temp_value
+                if encoded_credential is None:
+                    encoded_credential = temp_value
                 else:
-                    password += temp_value
+                    encoded_credential += temp_value
                 index += 1
-                temp_value = keyring.get_password(service_name, f"{constants['ZoweAccountName']}-{index}")
+                temp_value = keyring.get_password(f"{service_name}-{index}", f"{constants['ZoweAccountName']}-{index}")
                 
-        if password is not None and password.endswith("\0"):
-            password = password[:-1]
-
-        return password 
+        if encoded_credential is not None and encoded_credential.endswith("\0"):
+            encoded_credential = encoded_credential[:-1]
+            
+        
+        return encoded_credential 
     
     def set_secure_props(self) -> None:
         """
@@ -394,25 +394,21 @@ class ConfigFile:
             credential = self.secure_props.get(self.filepath, {})
             # Check if credential is a non-empty string
             if credential:
-                # Get the username and password from the credential dictionary
-                username = credential.get("profiles.base.properties.user")
-                password = credential.get("profiles.base.properties.password")
                 
-                # Combine the username and password as "username:password"
-                username_password = f"{username}:{password}"
-                
-                # Encode the combined string as base64
-                encoded_credential = base64.b64encode(username_password.encode()).decode()
+                # Encode the credential
+                encoded_credential = base64.b64encode(commentjson.dumps(credential).encode()).decode()
                 if sys.platform == "win32":
                     service_name += "/" + constants["ZoweAccountName"]
                     
                     # Load existing credentials
-                    existing_credential = keyring.get_password(service_name, constants["ZoweAccountName"])
+                    existing_credential = self._retrieve_credential(service_name)
                     if existing_credential:
                         # Decode the existing credential and update secure_props
-                        existing_secure_props = commentjson.loads(existing_credential)
-                        existing_secure_props.update(self.secure_props.get(self.filepath, {}))
-                        self.secure_props[self.filepath] = existing_secure_props
+                        existing_credential_bytes = base64.b64decode(existing_credential.encode())
+                        existing_secure_props = commentjson.loads(existing_credential_bytes)
+                        existing_secure_props[self.filepath] = self.secure_props[self.filepath]
+                        encoded_credential = base64.b64encode(commentjson.dumps(existing_secure_props).encode()).decode()
+
                     
                         if len(encoded_credential) > constants["WIN32_CRED_MAX_STRING_LENGTH"]:
                             # Split the encoded credential string into chunks of maximum length
@@ -424,7 +420,7 @@ class ConfigFile:
                             # Set the individual chunks as separate keyring entries
                             for index, chunk in enumerate(chunks, start=1):
                                 field_name = f"{constants['ZoweAccountName']}-{index}"
-                                keyring.set_password(service_name, field_name, chunk)
+                                keyring.set_password(f"{service_name}-{index}", field_name, chunk)
                         else:
                             # Credential length is within the maximum limit, set it as a single keyring entry
                                 keyring.set_password(service_name, constants["ZoweAccountName"],encoded_credential)

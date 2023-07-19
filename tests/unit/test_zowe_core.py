@@ -381,35 +381,35 @@ class TestZosmfProfileManager(TestCase):
             props: dict = prof_manager.load("non_existent_profile")
 
     @patch("keyring.get_password", side_effect=["password", None, "part1","part2\0", None,None,None])
-    def test_retrieve_password(self, get_pass_func):
+    def test_retrieve_credential(self, get_pass_func):
         # Set up mock values and expected results
         # Create a ConfigFile instance and call the method being tested
         service_name = "ZoweServiceName"
         config_file = ConfigFile("User Config", "test")
-        retrieved_password = config_file._retrieve_password(service_name)
+        retrieve_credential = config_file._retrieve_credential(service_name)
 
         # Scenario 1: Retrieve password directly
         expected_password1 = "password"
-        self.assertEqual(retrieved_password, expected_password1)
+        self.assertEqual(retrieve_credential, expected_password1)
         get_pass_func.assert_called_with(service_name, constants["ZoweAccountName"])
 
         # Scenario 2: Retrieve password in parts
-        retrieved_password = config_file._retrieve_password(service_name)
+        retrieve_credential = config_file._retrieve_credential(service_name)
         expected_password2 = "part1part2"
-        self.assertEqual(retrieved_password, expected_password2)
+        self.assertEqual(retrieve_credential, expected_password2)
         get_pass_func.assert_any_call(service_name, constants["ZoweAccountName"])
-        get_pass_func.assert_any_call(service_name, f"{constants['ZoweAccountName']}-1")
-        get_pass_func.assert_any_call(service_name, f"{constants['ZoweAccountName']}-2")
+        get_pass_func.assert_any_call(f"{service_name}-1", f"{constants['ZoweAccountName']}-1")
+        get_pass_func.assert_any_call(f"{service_name}-2", f"{constants['ZoweAccountName']}-2")
 
         # Scenario 3: Password not found
-        retrieved_password = config_file._retrieve_password(service_name)
-        self.assertIsNone(retrieved_password)
-        get_pass_func.assert_called_with(service_name, f"{constants['ZoweAccountName']}-1")
+        retrieve_credential = config_file._retrieve_credential(service_name)
+        self.assertIsNone(retrieve_credential)
+        get_pass_func.assert_called_with(f"{service_name}-1", f"{constants['ZoweAccountName']}-1")
 
     @mock.patch("sys.platform", "win32")
-    @mock.patch("keyring.get_password")
     @mock.patch("keyring.set_password")
-    def test_set_secure_props_normal_credential(self, set_pass_func, get_pass_func):
+    @mock.patch("zowe.core_for_zowe_sdk.ConfigFile._retrieve_credential")
+    def test_set_secure_props_normal_credential(self, retrieve_cred_func, set_pass_func):
         # Set up mock values and expected results
         
         service_name =constants["ZoweServiceName"] + "/" + constants["ZoweAccountName"]
@@ -419,25 +419,23 @@ class TestZosmfProfileManager(TestCase):
         os.chdir(CWD)
         shutil.copy(self.original_file_path, cwd_up_file_path)
         credential = {
+            cwd_up_file_path:
+            {
             "profiles.base.properties.user": "user",
             "profiles.base.properties.password": "password"
+            }
         }
         self.setUpCreds(cwd_up_file_path,credential)
-        username = credential.get("profiles.base.properties.user")
-        password = credential.get("profiles.base.properties.password")
-        username_password = f"{username}:{password}"
-        encoded_credential = base64.b64encode(
-            username_password.encode()
-        ).decode()
+        
+        encoded_credential = base64.b64encode(commentjson.dumps(credential).encode()).decode()
+        
+        retrieve_cred_func.return_value = encoded_credential
 
-        existing_credential = json.dumps(credential)
 
-        get_pass_func.return_value = existing_credential
-    
-        config_file = ConfigFile("User Config", "zowe.config.json",cwd_up_dir_path)
-        config_file.secure_props = {cwd_up_file_path: credential}
+        config_file = ConfigFile("User Config", "zowe.config.json", cwd_up_dir_path)
+        config_file.secure_props =  credential
         config_file.set_secure_props()
-        # Verify the keyring function calls
+        # Verify the keyring function call
         set_pass_func.assert_called_once_with(
             service_name,
             constants['ZoweAccountName'],
@@ -445,10 +443,10 @@ class TestZosmfProfileManager(TestCase):
         )
 
     @mock.patch("sys.platform", "win32")
-    @mock.patch("keyring.get_password")
+    @mock.patch("zowe.core_for_zowe_sdk.ConfigFile._retrieve_credential")
     @mock.patch("keyring.set_password")
     @mock.patch("keyring.delete_password")
-    def test_set_secure_props_exceed_limit(self, delete_pass_func, set_pass_func, get_pass_func):
+    def test_set_secure_props_exceed_limit(self, delete_pass_func, set_pass_func, retrieve_cred_func):
         
         # Set up mock values and expected results
         service_name =constants["ZoweServiceName"] + "/" + constants["ZoweAccountName"]
@@ -458,21 +456,18 @@ class TestZosmfProfileManager(TestCase):
         os.chdir(CWD)
         shutil.copy(self.original_file_path, cwd_up_file_path)
         credential = {
+            cwd_up_file_path:
+            {
             "profiles.base.properties.user": "user",
             "profiles.base.properties.password": "a" * (constants["WIN32_CRED_MAX_STRING_LENGTH"] + 1)
+            }
         }
         self.setUpCreds(cwd_up_file_path, credential)
-        username = credential.get("profiles.base.properties.user")
-        password = credential.get("profiles.base.properties.password")
-        username_password = f"{username}:{password}"
-        encoded_credential = base64.b64encode(username_password.encode()).decode()
-
-        existing_credential = json.dumps(credential)
-
-        get_pass_func.return_value = existing_credential
+        encoded_credential = base64.b64encode(commentjson.dumps(credential).encode()).decode()
+        retrieve_cred_func.return_value = encoded_credential
 
         config_file = ConfigFile("User Config", "zowe.config.json", cwd_up_dir_path)
-        config_file.secure_props = {cwd_up_file_path: credential}
+        config_file.secure_props =  credential
         config_file.set_secure_props()
 
         # Verify the keyring function calls
@@ -486,8 +481,9 @@ class TestZosmfProfileManager(TestCase):
         chunks[-1] += "\0"
         for index, chunk in enumerate(chunks, start=1):
             field_name = f"{constants['ZoweAccountName']}-{index}"
+            service_names = f"{service_name}-{index}"
             expected_calls.append(mock.call(
-                service_name,
+                service_names,
                 field_name,
                 chunk
             ))
