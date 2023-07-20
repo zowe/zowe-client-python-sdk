@@ -128,6 +128,7 @@ class ConfigFile:
 
         self.profiles = profile_jsonc.get("profiles", {})
         self.defaults = profile_jsonc.get("defaults", {})
+        self.schema_property = profile_jsonc.get("$schema", None)
 
         # loading secure props is done in load_profile_properties
         # since we want to try loading secure properties only when
@@ -148,8 +149,11 @@ class ConfigFile:
             Returns the profile properties from schema (prop: value)
         """
 
-        schema = self.schema_path
-        with open("zowe.schema.json") as f:
+        schema = self.schema_property
+        if schema is None:
+            return []
+
+        with open(schema) as f:
             schema = json.load(f)
         profile_props = []
         schema = dict(schema)

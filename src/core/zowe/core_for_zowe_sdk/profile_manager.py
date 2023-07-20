@@ -113,7 +113,7 @@ class ProfileManager:
     @staticmethod
     def get_env(
         cfg: ConfigFile,
-    ) -> None:
+    ) -> dict:
         """
         Maps the env variables to the profile properties
         
@@ -125,6 +125,9 @@ class ProfileManager:
         """
         
         props = cfg.schema_list()
+        if props == []:
+            return {}
+        
         env, env_var = {}, {}
         
         for var in list(os.environ.keys()):
