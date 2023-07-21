@@ -210,6 +210,7 @@ class ProfileManager:
         profile_name: Optional[str] = None,
         profile_type: Optional[str] = None,
         check_missing_props: bool = True,
+        opt_in: Optional[bool] = False,
     ) -> dict:
         """Load connection details from a team config profile.
         Returns
@@ -262,7 +263,8 @@ class ProfileManager:
 
             missing_secure_props.extend(profile_loaded.missing_secure_props)
 
-            env_var = {**self.get_env(cfg)}
+            if opt_in:
+                env_var = {**self.get_env(cfg)}
 
             if i == 1 and profile_props:
                 break  # Skip loading from global config if profile was found in project config
