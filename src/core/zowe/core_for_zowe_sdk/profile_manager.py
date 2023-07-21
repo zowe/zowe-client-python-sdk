@@ -247,3 +247,46 @@ class ProfileManager:
         warnings.resetwarnings()
 
         return profile_props
+
+    def get_highest_priority_layer(self, profile_name: str, layers: list[ConfigFile]) -> Optional[ConfigFile]:
+        """
+        Get the highest priority layer (configuration file) based on the given profile name and the list of layers.
+
+        Parameters:
+            profile_name (str): The name of the profile to look for in the layers.
+            layers (list[ConfigFile]): The list of ConfigFile objects representing different configuration files.
+
+        Returns:
+            Optional[ConfigFile]: The highest priority layer (configuration file) that contains the specified profile,
+                                or None if the profile is not found in any layer.
+        """
+        highest_priority_layer = None
+
+        for layer in layers:
+            try:
+                profile = layer.get_profile(profile_name=profile_name, profile_type=None)
+                if profile.name:
+                    highest_priority_layer = layer
+                    break
+            except ProfileNotFound:
+                pass
+
+        return highest_priority_layer
+    
+    def set_property(self, json_path, value, secure=False):
+            # Get all layers to search for the highest priority layer
+            layers = [self.project_user_config, self.project_config, self.global_user_config, self.global_config]
+            profile_name = ".".join(json_path.split(".")[:2])
+
+            # Find the highest priority layer for the given profile name
+            highest_priority_layer = self.get_highest_priority_layer(profile_name, layers)
+
+            # If the profile doesn't exist in any layer, use the project user config as the default location
+            if not highest_priority_layer:
+                highest_priority_layer = self.project_user_config
+
+            # Set the property in the highest priority layer
+            highest_priority_layer.set_property(json_path, value, highest_priority_layer, secure=secure)
+            
+            # Save the modified configuration file
+            highest_priority_layer.save()

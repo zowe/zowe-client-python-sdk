@@ -340,3 +340,60 @@ class ConfigFile:
                 f" with error '{error_msg}'",
                 SecurePropsNotFoundWarning,
             )
+
+    def __is_secure(self, json_path: str) -> bool:
+        """
+        Check whether the given JSON path corresponds to a secure property.
+
+        Parameters:
+            json_path (str): The JSON path of the property to check.
+
+        Returns:
+            bool: True if the property should be stored securely, False otherwise.
+        """
+        profile_name, property_name = json_path.split(".")[1:]
+        profile = self.find_profile(profile_name, self.profiles)
+        if profile and profile.get("secure"):
+            return property_name in profile["secure"]
+        return False
+
+    def set_property(self, json_path, value, secure=False):
+        """
+        Set a property in the profile, storing it securely if necessary.
+
+        Parameters:
+            json_path (str): The JSON path of the property to set.
+            value (str): The value to be set for the property.
+            secure (bool): If True, the property will be stored securely. Default is False.
+        """
+        if self.profiles is None:
+            self.init_from_file()
+
+        segments = json_path.split(".")
+        updated_profiles = self.profiles
+
+        while len(segments) > 1:
+            profile_name = segments[0]
+            updated_profiles[profile_name] = updated_profiles.get(profile_name, {})
+            updated_profiles = updated_profiles[profile_name]
+            segments.pop(0)
+
+        # If the property should be stored securely, add it to the secure layer
+        if secure or self.__is_secure(json_path):
+            updated_profiles["secure"] = updated_profiles.get("secure", [])
+            property_name = segments[1]
+            if property_name not in updated_profiles["secure"]:
+                updated_profiles["secure"].append(property_name)
+
+         
+        else:
+            # Store the property in plain text
+            updated_profiles["properties"] = updated_profiles.get("properties", {})
+            updated_profiles["properties"][segments[1]] = value
+
+        # Save the updated profile to the file
+        self.save()
+    def save(self) :
+        """
+        working on it
+        """   
