@@ -264,7 +264,7 @@ class ProfileManager:
 
         for layer in layers:
             try:
-                profile = layer.get_profile(profile_name=profile_name, profile_type=None)
+                profile = layer.get_profile(profile_name=profile_name)
                 if profile.name:
                     highest_priority_layer = layer
                     break
@@ -273,20 +273,30 @@ class ProfileManager:
 
         return highest_priority_layer
     
-    def set_property(self, json_path, value, secure=False):
-            # Get all layers to search for the highest priority layer
-            layers = [self.project_user_config, self.project_config, self.global_user_config, self.global_config]
-            profile_name = ".".join(json_path.split(".")[:2])
+    def set_property(self, json_path, value, secure=None):
+        """
+        Set a property in the profile, storing it securely if necessary.
 
-            # Find the highest priority layer for the given profile name
-            highest_priority_layer = self.get_highest_priority_layer(profile_name, layers)
+        Parameters:
+            json_path (str): The JSON path of the property to set.
+            value (str): The value to be set for the property.
+            secure (bool): If True, the property will be stored securely. Default is None.
+        """
+        # Get all layers to search for the highest priority layer
+        layers = [self.project_user_config, self.project_config, self.global_user_config, self.global_config]
+        profile_name = json_path.split(".")[1]
+       
 
-            # If the profile doesn't exist in any layer, use the project user config as the default location
-            if not highest_priority_layer:
-                highest_priority_layer = self.project_user_config
+        # Find the highest priority layer for the given profile name
+        highest_priority_layer = self.get_highest_priority_layer(profile_name, layers)
 
-            # Set the property in the highest priority layer
-            highest_priority_layer.set_property(json_path, value, highest_priority_layer, secure=secure)
-            
-            # Save the modified configuration file
-            highest_priority_layer.save()
+        # If the profile doesn't exist in any layer, use the project user config as the default location
+        if not highest_priority_layer:
+            highest_priority_layer = self.project_user_config
+
+        # Set the property in the highest priority layer
+        return highest_priority_layer.set_property(json_path, value, secure=secure)
+        
+        
+        # Save the modified configuration file
+        # highest_priority_layer.save()
