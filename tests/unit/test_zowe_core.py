@@ -165,7 +165,6 @@ class TestZosmfProfileManager(TestCase):
     def setUp(self):
         """Setup fixtures for ZosmfProfile class."""
         # setup pyfakefs
-        os.environ["ZOWE_OPT_USER"] = "aaditya"
         self.setUpPyfakefs()
         self.original_file_path = os.path.join(FIXTURES_PATH, "zowe.config.json")
         self.original_user_file_path = os.path.join(
@@ -394,10 +393,11 @@ class TestZosmfProfileManager(TestCase):
         profile and secure credentials
         """
         # Setup - copy profile to fake filesystem created by pyfakefs
+        os.environ["ZOWE_OPT_HOST"] = "aaditya"
         custom_file_path = os.path.join(self.custom_dir, "zowe.config.json")
         shutil.copy(self.original_nested_file_path, custom_file_path)
-        custom_file_path = os.path.join(self.custom_dir, "zowe.schema.json")
-        shutil.copy(self.original_schema_file_path, custom_file_path)
+        shutil.copy(self.original_schema_file_path, self.custom_dir)
+        os.chdir(self.custom_dir)
 
         self.setUpCreds(custom_file_path, {
             "profiles.zosmf.properties.user": "user",
@@ -410,11 +410,9 @@ class TestZosmfProfileManager(TestCase):
         props: dict = prof_manager.load(profile_name="lpar1.zosmf", opt_in=True)
 
         expected_props = {
-            "host": "example1.com",
+            "host": "aaditya",
             "rejectUnauthorized": True,
             "port": 443,
-            "user": "aaditya",
-            "password": "password"
         }
         self.assertEqual(props, expected_props)
 
