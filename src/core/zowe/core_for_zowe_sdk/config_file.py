@@ -14,6 +14,7 @@ import base64
 import os.path
 import re
 import json
+import requests
 import sys
 import warnings
 from dataclasses import dataclass, field
@@ -154,7 +155,7 @@ class ConfigFile:
             return []
 
         if schema.startswith("https://") or schema.startswith("http://"):
-            schema_json = requests.get(path_schema_json).json()
+            schema_json = requests.get(schema).json()
 
         elif os.path.isfile(schema):
             with open(schema) as f:
