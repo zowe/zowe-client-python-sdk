@@ -358,12 +358,13 @@ class ConfigFile:
             return json_path.split(".")[-1] in profile["secure"]
         return False
 
-    def set_property(self, json_path, value, secure=None):
+    def set_property(self, json_path, profile_name, value, secure=None):
         """
         Set a property in the profile, storing it securely if necessary.
 
         Parameters:
             json_path (str): The JSON path of the property to set.
+            profile_name (str): The name of the profile to set the property in.
             value (str): The value to be set for the property.
             secure (bool): If True, the property will be stored securely. Default is None.
         """
@@ -375,51 +376,49 @@ class ConfigFile:
         is_secure = secure if secure is not None else is_property_secure
         segments = json_path.split(".")[1:]
         updated_profiles = self.profiles
-        prof_name = segments[0]
+        current_profile_name = None
         secure_value=False
-        print(updated_profiles,"updated_profiles")
-        while len(segments) > 1:
-            profile_name = segments[0]
-            updated_profiles[profile_name] = updated_profiles.get(profile_name, {})
-            # If profile name is the same as the one we are looking for and it is secure, add propeties to secure array
-            if prof_name == profile_name:
-                updated_profiles[profile_name]["secure"] = updated_profiles[profile_name].get("secure", [])
-                property_name = segments[-1]
-                if is_secure:
-                    if property_name not in updated_profiles[profile_name]["secure"]:
-                        updated_profiles[profile_name]["secure"].append(property_name)
-                    # Remove the property from properties dictionary if it's secure
-                    properties = updated_profiles[profile_name].get("properties")
-                    if properties and property_name in properties:
-                        del properties[property_name]
-                    
-                    if property_name not in updated_profiles[profile_name]["secure"]:
-                        updated_profiles[profile_name]["secure"].append(property_name)
-                    print(updated_profiles,"here")
-                else:
-                    if property_name in updated_profiles[profile_name]["secure"] and is_secure is not None:
-                        updated_profiles[profile_name]["secure"].remove(property_name)   
-                        
-                    elif is_secure is None and property_name in updated_profiles[profile_name]["secure"]:
-                        secure_value=True  
-                    else:
-                        # Set the property value in the properties dictionary
-                        updated_profiles[profile_name]["properties"] = updated_profiles[profile_name].get("properties", {})
-                        updated_profiles[profile_name]["properties"][property_name] = value
-                        print(updated_profiles,"here")
-
-            updated_profiles_copy = updated_profiles.copy()               
-
+        while len(segments) > 1 and profile_name!=current_profile_name:
+            current_profile_name = segments[0]
             updated_profiles = updated_profiles[profile_name]
-            segments.pop(0) 
-                   
-         
+            segments.pop(0)              
 
-        print(updated_profiles_copy,"while")
-        if secure_value:
-            pass
+        if current_profile_name == profile_name:
+            updated_profiles["secure"] = updated_profiles.get("secure", [])
+            property_name = segments[-1]
+            if is_secure:
+                if property_name not in updated_profiles["secure"]:
+                    updated_profiles["secure"].append(property_name)
+                # Remove the property from properties dictionary if it's secure
+                properties = updated_profiles.get("properties")
+                if properties and property_name in properties:
+                    del properties[property_name]
+                
+                if property_name not in updated_profiles["secure"]:
+                    updated_profiles["secure"].append(property_name)
+                print(updated_profiles,"here")
+            else:
+                if property_name in updated_profiles["secure"] and is_secure is not None:
+                    updated_profiles["secure"].remove(property_name)   
+                    print(updated_profiles,"here")   
+                    
+                elif is_secure is None and property_name in updated_profiles["secure"]:
+                    secure_value=True  
+                else:
+                    # Set the property value in the properties dictionary
+                    updated_profiles["properties"] = updated_profiles.get("properties", {})
+                    updated_profiles["properties"][property_name] = value
+                    print(updated_profiles,"here")         
+
+        print(updated_profiles,"while")
+        if secure_value or is_secure:
+            self.load_secure_props()
+            self.secure_props[json_path] = value     
         self.save()
     def save(self) :
         """
-        working on it
-        """   
+        Save the config file to disk. and secure props to vault
+        Returns:
+            None
+        """
+        

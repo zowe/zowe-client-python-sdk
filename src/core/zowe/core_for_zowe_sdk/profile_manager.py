@@ -296,7 +296,7 @@ class ProfileManager:
             highest_priority_layer = self.project_user_config
 
         # Set the property in the highest priority layer
-        return highest_priority_layer.set_property(json_path, value, secure=secure)
+        return highest_priority_layer.set_property(json_path, profile_name, value, secure=secure)
         
         
         # Save the modified configuration file
