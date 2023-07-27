@@ -351,8 +351,10 @@ class ConfigFile:
         Returns:
             bool: True if the property should be stored securely, False otherwise.
         """
+        
         profile = self.find_profile(json_path, self.profiles)
         if profile and profile.get("secure"):
+            print(json_path.split(".")[-1] in profile["secure"],"here")
             return json_path.split(".")[-1] in profile["secure"]
         return False
 
@@ -368,29 +370,40 @@ class ConfigFile:
         if self.profiles is None:
             self.init_from_file()
 
-        segments = json_path.split(".")[1:]
-        updated_profiles = self.profiles
-
-        while len(segments) > 1:
-            profile_name = segments[0]
-            updated_profiles[profile_name] = updated_profiles.get(profile_name, {})
-            updated_profiles = updated_profiles[profile_name]
-            segments.pop(0)
-
         # checking whether the property should be stored securely or in plain text
         is_property_secure = self.__is_secure(json_path)
         is_secure = secure if secure is not None else is_property_secure
+        segments = json_path.split(".")[1:]
+        print(segments,'seg')
+        updated_profiles = self.profiles
+        prof_name = segments[0]
+        print(updated_profiles,"updated_profiles")
+        while len(segments) > 1:
+            profile_name = segments[0]
+            updated_profiles[profile_name] = updated_profiles.get(profile_name, {})
+            # If profile name is the same as the one we are looking for and it is secure, add propeties to secure array
+            if prof_name == profile_name and is_secure:
+                updated_profiles["secure"] = updated_profiles.get("secure", [])
+                property_name = segments[0]
+                if property_name not in updated_profiles["secure"]:
+                    updated_profiles["secure"].append(property_name)
+            else:
+              updated_profiles = updated_profiles[profile_name]
+              segments.pop(0)
+
+        print(updated_profiles,"while")
+        
 
         # Update the secure array or properties based on the determined secure flag
-        if is_secure:
-            updated_profiles["secure"] = updated_profiles.get("secure", [])
-            property_name = segments[0]
-            if property_name not in updated_profiles["secure"]:
-                updated_profiles["secure"].append(property_name)
-        else:
-            updated_profiles["properties"] = updated_profiles.get("properties", {})
-            updated_profiles["properties"][segments[0]] = value
-        print(updated_profiles)
+        # if is_secure:
+        #     updated_profiles["secure"] = updated_profiles.get("secure", [])
+        #     property_name = segments[0]
+        #     if property_name not in updated_profiles["secure"]:
+        #         updated_profiles["secure"].append(property_name)
+        # else:
+        #     updated_profiles["properties"] = updated_profiles.get("properties", {})
+        #     updated_profiles["properties"][segments[0]] = value
+        # print(updated_profiles,"this")
     
         # Save the updated profile to the file
         self.save()

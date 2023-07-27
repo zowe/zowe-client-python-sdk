@@ -248,30 +248,29 @@ class ProfileManager:
 
         return profile_props
 
-    def get_highest_priority_layer(self, profile_name: str, layers: list[ConfigFile]) -> Optional[ConfigFile]:
+    def get_highest_priority_layer(self, profile_name: str) -> Optional[ConfigFile]:
         """
-        Get the highest priority layer (configuration file) based on the given profile name and the list of layers.
+        Get the highest priority layer (configuration file) based on the given profile name
 
         Parameters:
             profile_name (str): The name of the profile to look for in the layers.
-            layers (list[ConfigFile]): The list of ConfigFile objects representing different configuration files.
-
+            
         Returns:
             Optional[ConfigFile]: The highest priority layer (configuration file) that contains the specified profile,
                                 or None if the profile is not found in any layer.
         """
         highest_priority_layer = None
-
+        layers = [self.project_user_config, self.project_config, self.global_user_config, self.global_config]
         for layer in layers:
             try:
                 profile = layer.get_profile(profile_name=profile_name)
-                if profile.name:
+                if profile.data:
                     highest_priority_layer = layer
                     break
-            except ProfileNotFound:
-                pass
+            except ProfileNotFoundWarning:
+                print("here")
 
-        return highest_priority_layer
+        return highest_priority_layer          
     
     def set_property(self, json_path, value, secure=None):
         """
@@ -282,13 +281,15 @@ class ProfileManager:
             value (str): The value to be set for the property.
             secure (bool): If True, the property will be stored securely. Default is None.
         """
-        # Get all layers to search for the highest priority layer
-        layers = [self.project_user_config, self.project_config, self.global_user_config, self.global_config]
-        profile_name = json_path.split(".")[1]
+        # Extract the keys from json_path
+        keys = json_path.split(".")
+        profile_name = next((keys[i + 1] for i, key in enumerate(keys) if key == "profiles"), None)
        
-
-        # Find the highest priority layer for the given profile name
-        highest_priority_layer = self.get_highest_priority_layer(profile_name, layers)
+        if not profile_name:
+            raise ValueError("Invalid json_path. Couldn't find profile_name after 'profiles' keyword.")
+        
+        # highest priority layer for the given profile name
+        highest_priority_layer = self.get_highest_priority_layer(profile_name)
 
         # If the profile doesn't exist in any layer, use the project user config as the default location
         if not highest_priority_layer:
