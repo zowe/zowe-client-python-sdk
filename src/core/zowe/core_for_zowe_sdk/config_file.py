@@ -376,7 +376,7 @@ class ConfigFile:
         segments = json_path.split(".")[1:]
         updated_profiles = self.profiles
         prof_name = segments[0]
-
+        secure_value=False
         print(updated_profiles,"updated_profiles")
         while len(segments) > 1:
             profile_name = segments[0]
@@ -399,20 +399,25 @@ class ConfigFile:
                 else:
                     if property_name in updated_profiles[profile_name]["secure"] and is_secure is not None:
                         updated_profiles[profile_name]["secure"].remove(property_name)   
+                        
+                    elif is_secure is None and property_name in updated_profiles[profile_name]["secure"]:
+                        secure_value=True  
+                    else:
                         # Set the property value in the properties dictionary
                         updated_profiles[profile_name]["properties"] = updated_profiles[profile_name].get("properties", {})
                         updated_profiles[profile_name]["properties"][property_name] = value
-                    else:
-                         secure_value=property_name   
+                        print(updated_profiles,"here")
+
+            updated_profiles_copy = updated_profiles.copy()               
 
             updated_profiles = updated_profiles[profile_name]
             segments.pop(0) 
                    
          
 
-        print(updated_profiles,"while")
-        
-
+        print(updated_profiles_copy,"while")
+        if secure_value:
+            pass
         self.save()
     def save(self) :
         """
