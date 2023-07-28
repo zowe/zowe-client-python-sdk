@@ -312,7 +312,7 @@ class ConfigFile:
 
             if sys.platform == "win32":
                 service_name += "/" + constants["ZoweAccountName"]
-                secret_value = self._retrieve_password(service_name)
+                secret_value = self._retrieve_credential(service_name)
             else:
                 secret_value = keyring.get_password(
                     service_name, constants["ZoweAccountName"]
@@ -329,12 +329,12 @@ class ConfigFile:
 
         secure_config: str
         if sys.platform == "win32":
-            secure_config = secret_value.encode() 
+            secure_config = secret_value.encode("utf-16") 
         else:
             secure_config = secret_value
 
         secure_config_json = commentjson.loads(base64.b64decode(secure_config).decode())
-
+        
         # look for credentials stored for currently loaded config
         try:
             self.secure_props = secure_config_json.get(self.filepath, {})
