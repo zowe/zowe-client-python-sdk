@@ -341,21 +341,21 @@ class ConfigFile:
                 SecurePropsNotFoundWarning,
             )
 
-    def __is_secure(self, json_path: str) -> bool:
+    def __is_secure(self, json_path: str, property_name :str) -> bool:
         """
         Check whether the given JSON path corresponds to a secure property.
 
         Parameters:
             json_path (str): The JSON path of the property to check.
+            property_name (str): The name of the property to check.
 
         Returns:
             bool: True if the property should be stored securely, False otherwise.
         """
-        
+
         profile = self.find_profile(json_path, self.profiles)
         if profile and profile.get("secure"):
-            print(json_path.split(".")[-1] in profile["secure"],"here")
-            return json_path.split(".")[-1] in profile["secure"]
+            return property_name in profile["secure"]
         return False
 
     def set_property(self, json_path, profile_name, value, secure=None):
@@ -371,49 +371,32 @@ class ConfigFile:
         if self.profiles is None:
             self.init_from_file()
 
-        # checking whether the property should be stored securely or in plain text
-        is_property_secure = self.__is_secure(json_path)
-        is_secure = secure if secure is not None else is_property_secure
+        # Checking whether the property should be stored securely or in plain text
         segments = json_path.split(".")[1:]
-        updated_profiles = self.profiles
-        current_profile_name = None
-        secure_value=False
-        while len(segments) > 1 and profile_name!=current_profile_name:
-            current_profile_name = segments[0]
-            updated_profiles = updated_profiles[profile_name]
-            segments.pop(0)              
+        property_name = segments[-1]
+        # check if the property is already secure
+        is_property_secure = self.__is_secure(profile_name,property_name)
+        is_secure = secure if secure is not None else is_property_secure
 
-        if current_profile_name == profile_name:
-            updated_profiles["secure"] = updated_profiles.get("secure", [])
-            property_name = segments[-1]
-            if is_secure:
-                if property_name not in updated_profiles["secure"]:
-                    updated_profiles["secure"].append(property_name)
-                # Remove the property from properties dictionary if it's secure
-                properties = updated_profiles.get("properties")
-                if properties and property_name in properties:
-                    del properties[property_name]
+
+        current_profile = self.find_profile(profile_name, self.profiles)         
+        
+
+        current_properties = current_profile.setdefault("properties", {})
+        current_secure = current_profile.setdefault("secure", [])
+       
+        if is_secure:
+            if not is_property_secure:
+                current_secure.append(property_name)
                 
-                if property_name not in updated_profiles["secure"]:
-                    updated_profiles["secure"].append(property_name)
-                print(updated_profiles,"here")
-            else:
-                if property_name in updated_profiles["secure"] and is_secure is not None:
-                    updated_profiles["secure"].remove(property_name)   
-                    print(updated_profiles,"here")   
-                    
-                elif is_secure is None and property_name in updated_profiles["secure"]:
-                    secure_value=True  
-                else:
-                    # Set the property value in the properties dictionary
-                    updated_profiles["properties"] = updated_profiles.get("properties", {})
-                    updated_profiles["properties"][property_name] = value
-                    print(updated_profiles,"here")         
-
-        print(updated_profiles,"while")
-        if secure_value or is_secure:
-            self.load_secure_props()
-            self.secure_props[json_path] = value     
+            current_properties.pop(property_name, None)
+           
+        else:
+            current_secure.remove(property_name)
+            current_properties[property_name] = value        
+            
+           
+            
         self.save()
     def save(self) :
         """
@@ -421,4 +404,3 @@ class ConfigFile:
         Returns:
             None
         """
-        

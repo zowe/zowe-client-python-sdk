@@ -261,14 +261,15 @@ class ProfileManager:
         """
         highest_priority_layer = None
         layers = [self.project_user_config, self.project_config, self.global_user_config, self.global_config]
+        if not self._show_warnings:
+                warnings.simplefilter("ignore")
         for layer in layers:
-            try:
-                profile = layer.get_profile(profile_name=profile_name)
-                if profile.data:
-                    highest_priority_layer = layer
-                    break
-            except ProfileNotFoundWarning:
-                print("here")
+            profile = layer.get_profile(profile_name=profile_name)
+            if profile.data:
+                highest_priority_layer = layer
+                break
+            
+        warnings.resetwarnings()    
 
         return highest_priority_layer          
     
