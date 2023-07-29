@@ -398,9 +398,11 @@ class ConfigFile:
            
             
         self.save()
-    def save(self) :
+    def save(self,secure_props=False) :
         """
         Save the config file to disk. and secure props to vault
+        parameters:
+            secure_props (bool): If True, the secure properties will be stored in the vault. Default is False.
         Returns:
             None
         """
