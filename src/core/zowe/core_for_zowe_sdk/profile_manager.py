@@ -15,6 +15,7 @@ import warnings
 from typing import Optional
 
 from .config_file import ConfigFile, Profile
+from .credential_manager import CredentialManager
 from .custom_warnings import (
     ConfigNotFoundWarning,
     ProfileNotFoundWarning,
