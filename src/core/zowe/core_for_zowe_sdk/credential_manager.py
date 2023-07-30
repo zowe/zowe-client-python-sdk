@@ -57,7 +57,7 @@ class CredentialManager:
             
             # Handle the case when secret_value is None
             if secret_value is None:
-                secret_value = ""    
+                return 
 
         except Exception as exc:
             raise SecureProfileLoadFailed(
@@ -71,7 +71,7 @@ class CredentialManager:
             secure_config_json = commentjson.loads(base64.b64decode(secure_config).decode("utf-16" if is_win32 else "utf-8"))
         except UnicodeDecodeError:
             # Fallback to UTF-8 decoding if needed
-            secure_config_json = commentjson.loads(base64.b64decode(secure_config).decode("utf-8"))
+            secure_config_json = commentjson.loads(base64.b64decode(secure_config).decode())
 
         # update the secure props
         CredentialManager._secure_props = secure_config_json
@@ -92,7 +92,6 @@ class CredentialManager:
             The retrieved  encoded credential
         """
         encoded_credential = keyring.get_password(service_name, constants["ZoweAccountName"])
-
         if encoded_credential is None and sys.platform == "win32":
             # Retrieve the secure value with an index
             index = 1
@@ -176,8 +175,9 @@ class CredentialManager:
                 # Delete the existing credential
                 CredentialManager.delete_credential(service_name , constants["ZoweAccountName"])
             else:
+                print(credential)
                 # Encode the credential
-                encoded_credential = base64.b64encode(commentjson.dumps(credential.encode("UTF-16") if is_win32 else credential.encode())).decode()   
+                encoded_credential = base64.b64encode(commentjson.dumps(credential).encode("UTF-16") if is_win32 else credential.encode()).decode()   
             # Check if the encoded credential exceeds the maximum length for win32
             if is_win32 and len(encoded_credential) > constants["WIN32_CRED_MAX_STRING_LENGTH"]:
                 # Split the encoded credential string into chunks of maximum length
@@ -195,7 +195,3 @@ class CredentialManager:
                 keyring.set_password(
                     service_name, constants["ZoweAccountName"], 
                     encoded_credential)
-
-       
-    
-        
