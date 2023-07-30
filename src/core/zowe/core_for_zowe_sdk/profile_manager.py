@@ -299,6 +299,10 @@ class ProfileManager:
         # Set the property in the highest priority layer
         return highest_priority_layer.set_property(json_path, profile_name, value, secure=secure)
         
-        
-        # Save the modified configuration file
-        # highest_priority_layer.save()
+    def save(self)->None: 
+        """
+        Save the layers (configuration files) to disk.
+        """
+        layers = [self.project_user_config, self.project_config, self.global_user_config, self.global_config]
+        for layer in layers:
+            layer.save(False)  

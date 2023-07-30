@@ -21,6 +21,7 @@ from typing import Optional, NamedTuple
 import commentjson
 
 from .constants import constants
+from .credential_manager import CredentialManager
 from .custom_warnings import (
     ProfileNotFoundWarning,
     ProfileParsingWarning,
@@ -277,10 +278,10 @@ class ConfigFile:
 
         # load secure props only if there are secure fields
         if secure_fields:
-            self.load_secure_props()
+            CredentialManager.load_secure_props()
 
             # load properties with key as profile.{profile_name}.properties.{*}
-            for (key, value) in self.secure_props.items():
+            for (key, value) in CredentialManager._secure_props.items():
                 if re.match(
                     "profiles\\." + profile_name + "\\.properties\\.[a-z]+", key
                 ):
@@ -380,7 +381,6 @@ class ConfigFile:
 
 
         current_profile = self.find_profile(profile_name, self.profiles)         
-        
 
         current_properties = current_profile.setdefault("properties", {})
         current_secure = current_profile.setdefault("secure", [])
@@ -388,16 +388,20 @@ class ConfigFile:
         if is_secure:
             if not is_property_secure:
                 current_secure.append(property_name)
-                
+
+            CredentialManager._secure_props[self.filepath] = {**CredentialManager._secure_props.get(self.filepath, {}), json_path: value}
             current_properties.pop(property_name, None)
            
         else:
-            current_secure.remove(property_name)
+            if  is_property_secure:
+                current_secure.remove(property_name)
             current_properties[property_name] = value        
             
-           
-            
-        self.save()
+        current_profile["properties"] = current_properties
+        current_profile["secure"] = current_secure
+        self.profiles[profile_name] = current_profile
+
+        self.save(is_secure)
     def save(self,secure_props=False) :
         """
         Save the config file to disk. and secure props to vault
@@ -406,3 +410,14 @@ class ConfigFile:
         Returns:
             None
         """
+        # Update the config file with any changes
+        with open(self.filepath, 'r+') as file:
+            config_data = commentjson.load(file)
+
+            # Update the profiles in the JSON data
+            config_data["profiles"] = self.profiles
+            file.seek(0)# Move the file pointer to the beginning of the file
+            commentjson.dump(config_data, file, indent=4)
+            file.truncate()# Truncate the file to the current file pointer position
+        if secure_props:
+            CredentialManager.save_secure_props()    
