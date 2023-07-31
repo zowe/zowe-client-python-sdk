@@ -15,6 +15,7 @@ import warnings
 from typing import Optional
 
 from .config_file import ConfigFile, Profile
+from .credential_manager import CredentialManager
 from .custom_warnings import (
     ConfigNotFoundWarning,
     ProfileNotFoundWarning,
@@ -53,7 +54,8 @@ class ProfileManager:
         self.project_config = ConfigFile(type=TEAM_CONFIG, name=appname)
         self.project_user_config = ConfigFile(type=USER_CONFIG, name=appname)
 
-        self.global_config = ConfigFile(type=TEAM_CONFIG, name=GLOBAL_CONFIG_NAME)
+        self.global_config = ConfigFile(
+            type=TEAM_CONFIG, name=GLOBAL_CONFIG_NAME)
         try:
             self.global_config.location = GLOBAl_CONFIG_LOCATION
         except Exception:
@@ -62,7 +64,8 @@ class ProfileManager:
                 ConfigNotFoundWarning,
             )
 
-        self.global_user_config = ConfigFile(type=USER_CONFIG, name=GLOBAL_CONFIG_NAME)
+        self.global_user_config = ConfigFile(
+            type=USER_CONFIG, name=GLOBAL_CONFIG_NAME)
         try:
             self.global_user_config.location = GLOBAl_CONFIG_LOCATION
         except Exception:
@@ -254,25 +257,26 @@ class ProfileManager:
 
         Parameters:
             profile_name (str): The name of the profile to look for in the layers.
-            
+
         Returns:
             Optional[ConfigFile]: The highest priority layer (configuration file) that contains the specified profile,
                                 or None if the profile is not found in any layer.
         """
         highest_priority_layer = None
-        layers = [self.project_user_config, self.project_config, self.global_user_config, self.global_config]
+        layers = [self.project_user_config, self.project_config,
+                  self.global_user_config, self.global_config]
         if not self._show_warnings:
-                warnings.simplefilter("ignore")
+            warnings.simplefilter("ignore")
         for layer in layers:
             profile = layer.get_profile(profile_name=profile_name)
             if profile.data:
                 highest_priority_layer = layer
                 break
-            
-        warnings.resetwarnings()    
 
-        return highest_priority_layer          
-    
+        warnings.resetwarnings()
+
+        return highest_priority_layer
+
     def set_property(self, json_path, value, secure=None):
         """
         Set a property in the profile, storing it securely if necessary.
@@ -284,11 +288,13 @@ class ProfileManager:
         """
         # Extract the keys from json_path
         keys = json_path.split(".")
-        profile_name = next((keys[i + 1] for i, key in enumerate(keys) if key == "profiles"), None)
-       
+        profile_name = next(
+            (keys[i + 1] for i, key in enumerate(keys) if key == "profiles"), None)
+
         if not profile_name:
-            raise ValueError("Invalid json_path. Couldn't find profile_name after 'profiles' keyword.")
-        
+            raise ValueError(
+                "Invalid json_path. Couldn't find profile_name after 'profiles' keyword.")
+
         # highest priority layer for the given profile name
         highest_priority_layer = self.get_highest_priority_layer(profile_name)
 
@@ -298,12 +304,29 @@ class ProfileManager:
 
         # Set the property in the highest priority layer
         return highest_priority_layer.set_property(json_path, profile_name, value, secure=secure)
-        
-    def save(self)->None: 
+
+    def set_profile(self, profile_name: str, profile_data: dict) -> None:
+        """
+        Set a profile in the highest priority layer (configuration file) based on the given profile name
+
+        Parameters:
+            profile_name (str): The name of the profile to set.
+            profile_data (dict): The data of the profile to set.
+        """
+        highest_priority_layer = self.get_highest_priority_layer(profile_name)
+        if not highest_priority_layer:
+            highest_priority_layer = self.project_user_config
+        highest_priority_layer.set_profile(profile_name, profile_data)
+    
+    def save(self) -> None:
         """
         Save the layers (configuration files) to disk.
         """
-        layers = [self.project_user_config, self.project_config, self.global_user_config, self.global_config]
+        layers = [self.project_user_config,
+                  self.project_config,
+                  self.global_user_config,
+                  self.global_config]
+        
         for layer in layers:
-            layer.save(False)  
-        # creaditnal.save_secure_props()
+            layer.save(False)
+        CredentialManager.save_secure_props()
