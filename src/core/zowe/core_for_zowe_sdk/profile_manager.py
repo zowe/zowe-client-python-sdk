@@ -13,6 +13,7 @@ Copyright Contributors to the Zowe Project.
 import os.path
 import warnings
 from typing import Optional
+from deepmerge import always_merger
 
 from .config_file import ConfigFile, Profile
 from .custom_warnings import (
@@ -212,10 +213,17 @@ class ProfileManager:
 
         missing_secure_props = []  # track which secure props were not loaded
 
+        loaded_cfg: dict = {}
+
         for i, (config_type, cfg) in enumerate(config_layers.items()):
+            loaded_cfg = always_merger.merge(loaded_cfg, cfg.profiles)
+            if loaded_cfg:
+                cfg.profiles = loaded_cfg
+                
             profile_loaded = self.get_profile(
                 cfg, profile_name, profile_type, config_type
             )
+            # How about we update by iterating each layer and at last we will get the merged layer
             # TODO Why don't user and password show up here for Project User Config?
             # Probably need to update load_profile_properties method in config_file.py
             if profile_loaded.name and not profile_name:
