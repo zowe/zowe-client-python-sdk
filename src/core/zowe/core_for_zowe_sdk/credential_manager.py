@@ -48,6 +48,7 @@ class CredentialManager:
 
         try:
             service_name = constants["ZoweServiceName"]
+            charset = "UTF-16" if is_win32 else "UTF-8"
             is_win32 = sys.platform == "win32"
 
             if is_win32:
@@ -65,10 +66,10 @@ class CredentialManager:
             ) from exc
 
         secure_config: str
-        secure_config = secret_value.encode("UTF-16" if is_win32 else "UTF-8")
+        secure_config = secret_value.encode(charset)
         try:
             # Decode the credential
-            secure_config_json = commentjson.loads(base64.b64decode(secure_config).decode("UTF-16" if is_win32 else "UTF-8"))
+            secure_config_json = commentjson.loads(base64.b64decode(secure_config).decode(charset))
         except UnicodeDecodeError:
             # Fallback to UTF-8 decoding if needed
             secure_config_json = commentjson.loads(base64.b64decode(secure_config).decode())
@@ -155,6 +156,7 @@ class CredentialManager:
         warnings.filterwarnings("ignore", message="^Retrieved an UTF-8 encoded credential")
         service_name = constants["ZoweServiceName"]
         credential =  CredentialManager._secure_props
+        charset = charset
         # Check if credential is a non-empty string
         if credential:
             is_win32 = sys.platform == "win32"
@@ -167,17 +169,17 @@ class CredentialManager:
             if existing_credential:
                     
                 # Decode the existing credential and update secure_props
-                existing_credential_bytes = base64.b64decode(existing_credential.encode("UTF-16") if is_win32 else existing_credential.encode())
+                existing_credential_bytes = base64.b64decode(existing_credential.encode(charset))
                 existing_secure_props = commentjson.loads(existing_credential_bytes)
                 existing_secure_props.update(credential)
                 # Encode the credential
-                encoded_credential = base64.b64encode(commentjson.dumps(existing_secure_props).encode("UTF-16" if is_win32 else "UTF-8")).decode()
+                encoded_credential = base64.b64encode(commentjson.dumps(existing_secure_props).encode(charset)).decode()
                 # Delete the existing credential
                 CredentialManager.delete_credential(service_name , constants["ZoweAccountName"])
             else:
                 print(credential)
                 # Encode the credential
-                encoded_credential = base64.b64encode(commentjson.dumps(credential).encode("UTF-16" if is_win32 else "UTF-8")).decode()   
+                encoded_credential = base64.b64encode(commentjson.dumps(credential).encode(charset)).decode()   
             # Check if the encoded credential exceeds the maximum length for win32
             if is_win32 and len(encoded_credential) > constants["WIN32_CRED_MAX_STRING_LENGTH"]:
                 # Split the encoded credential string into chunks of maximum length
