@@ -171,13 +171,13 @@ class CredentialManager:
                 existing_secure_props = commentjson.loads(existing_credential_bytes)
                 existing_secure_props.update(credential)
                 # Encode the credential
-                encoded_credential = base64.b64encode(commentjson.dumps(existing_secure_props).encode("UTF-16") if is_win32 else credential.encode()).decode()
+                encoded_credential = base64.b64encode(commentjson.dumps(existing_secure_props).encode("utf-16" if is_win32 else "utf-8")).decode()
                 # Delete the existing credential
                 CredentialManager.delete_credential(service_name , constants["ZoweAccountName"])
             else:
                 print(credential)
                 # Encode the credential
-                encoded_credential = base64.b64encode(commentjson.dumps(credential).encode("UTF-16") if is_win32 else credential.encode()).decode()   
+                encoded_credential = base64.b64encode(commentjson.dumps(credential).encode("utf-16" if is_win32 else "utf-8")).decode()   
             # Check if the encoded credential exceeds the maximum length for win32
             if is_win32 and len(encoded_credential) > constants["WIN32_CRED_MAX_STRING_LENGTH"]:
                 # Split the encoded credential string into chunks of maximum length
