@@ -3,6 +3,7 @@ chardet==4.0.0
 colorama==0.4.4
 commentjson==0.9.0
 coverage==5.4
+deepmerge==1.1.0
 flake8==3.8.4
 idna==2.10
 importlib-metadata==3.6.0
