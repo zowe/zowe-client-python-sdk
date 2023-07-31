@@ -306,3 +306,4 @@ class ProfileManager:
         layers = [self.project_user_config, self.project_config, self.global_user_config, self.global_config]
         for layer in layers:
             layer.save(False)  
+        # creaditnal.save_secure_props()

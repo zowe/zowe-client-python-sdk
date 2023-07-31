@@ -122,6 +122,7 @@ class ConfigFile:
 
         self.profiles = profile_jsonc.get("profiles", {})
         self.defaults = profile_jsonc.get("defaults", {})
+        self.jsonc = profile_jsonc
 
         # loading secure props is done in load_profile_properties
         # since we want to try loading secure properties only when
@@ -401,7 +402,7 @@ class ConfigFile:
         current_profile["secure"] = current_secure
         self.profiles[profile_name] = current_profile
 
-        self.save(is_secure)
+        # self.save(is_secure)
     def save(self,secure_props=False) :
         """
         Save the config file to disk. and secure props to vault
