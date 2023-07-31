@@ -25,12 +25,9 @@ except ImportError:
     HAS_KEYRING = False
 
 class CredentialManager:
-    _secure_props = {}
+    secure_props = {}
 
-    @staticmethod
-    @property
-    def secure_props():
-        return CredentialManager._secure_props
+    
 
     @staticmethod
     def load_secure_props() -> None:
@@ -43,13 +40,13 @@ class CredentialManager:
         if keyring is not initialized, set empty value
         """
         if not HAS_KEYRING:
-            CredentialManager._secure_props = {}
+            CredentialManager.secure_props = {}
             return
 
         try:
             service_name = constants["ZoweServiceName"]
-            charset = "UTF-16" if is_win32 else "UTF-8"
             is_win32 = sys.platform == "win32"
+            charset = "UTF-16" if is_win32 else "UTF-8"
 
             if is_win32:
                 service_name += "/" + constants["ZoweAccountName"]
@@ -75,7 +72,7 @@ class CredentialManager:
             secure_config_json = commentjson.loads(base64.b64decode(secure_config).decode())
 
         # update the secure props
-        CredentialManager._secure_props = secure_config_json
+        CredentialManager.secure_props = secure_config_json
         
     
     @staticmethod    
@@ -155,11 +152,11 @@ class CredentialManager:
         # Filter or suppress specific warning messages
         warnings.filterwarnings("ignore", message="^Retrieved an UTF-8 encoded credential")
         service_name = constants["ZoweServiceName"]
-        credential =  CredentialManager._secure_props
-        charset = charset
+        credential =  CredentialManager.secure_props
         # Check if credential is a non-empty string
         if credential:
             is_win32 = sys.platform == "win32"
+            charset = "UTF-16" if is_win32 else "UTF-8"
             if is_win32:
                 service_name += "/" + constants["ZoweAccountName"] 
             
