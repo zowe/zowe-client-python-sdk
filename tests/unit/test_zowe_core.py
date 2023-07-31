@@ -393,8 +393,8 @@ class TestZosmfProfileManager(TestCase):
         # Setup - copy profile to fake filesystem created by pyfakefs
         custom_file_path = os.path.join(self.custom_dir, "zowe.config.json")
         shutil.copy(self.original_nested_file_path, custom_file_path)
-        custom_file_path = os.path.join(self.custom_dir, "zowe.schema.json")
-        shutil.copy(self.original_schema_file_path, custom_file_path)
+        shutil.copy(self.original_schema_file_path, self.custom_dir)
+        os.chdir(self.custom_dir)
 
         self.setUpCreds(custom_file_path, {
             "profiles.zosmf.properties.user": "user",
