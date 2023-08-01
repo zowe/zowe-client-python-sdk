@@ -12,16 +12,16 @@ that can interact with z/OS components.
 
 ## Installation
 
-
-When installing the Zowe Client Python SDK you have two options.
+When installing the Zowe Client Python SDK, you have two options:
 
 - Install all the Zowe packages
 - Install a single sub-package
 
-The choice depends on your intentions. If you chose to install all Zowe SDK packages
+The choice depends on your intentions. If you choose to install all Zowe SDK packages,
 this means that you will install everything under the `zowe` namespace in PyPi. 
 
 Alternatively, you can choose to install only a single subpackage for a smaller installation.
+
 
 To install all Zowe SDK packages using pip:
 
@@ -29,7 +29,7 @@ To install all Zowe SDK packages using pip:
 pip install zowe
 ```
 
-To install only a subpackage using pip:
+Or, to install a subpackage using pip:
 
 ```
 pip install zowe.<subpackage>_for_zowe_sdk
@@ -54,6 +54,50 @@ pyyaml
 urllib3
 ```
 
+### Developer setup
+
+Clone the repository using `git`:
+```
+git clone https://github.com/zowe/zowe-client-python-sdk.git
+```
+
+We recommend that developers create a virtual environment to install all the required dependencies for this project.  
+**Note:** Use of `venv`, the virtual environment module, requires at least version 3.3 of Python.
+
+To create a virtual environment, make a folder to store your virtual environment (referred to below as `YOUR_VENV_PATH`). Then, use the `venv` module to set it up:
+
+```
+python3 -m venv YOUR_VENV_PATH
+```
+
+Next, activate your virtual environment so that Python uses this folder to manage dependencies.
+
+Assuming that you are using Bash shell, reference the command below. Otherwise, check the table titled "Command to activate virtual environment" [here](https://docs.python.org/3/library/venv.html#how-venvs-work) to find the command that works for your shell.
+
+```
+source YOUR_VENV_PATH/bin/activate
+```
+
+Navigate to the root of the repository and checkout the desired branch. Currently, active development is on the `main` branch.
+
+```
+cd zowe-client-python-sdk/
+git checkout main
+```
+
+Install the dependencies listed in `requirements.txt` using `pip`:
+
+```
+pip install -r requirements.txt
+```
+
+Once complete, you can now develop the Python SDK with the installed dependencies.
+
+Finally, when you are finished with your development session, deactivate your virtual environment:
+
+```
+deactivate
+```
 
 ## Quickstart
 
