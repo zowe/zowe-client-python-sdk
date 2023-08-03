@@ -404,6 +404,7 @@ class ConfigFile:
         current_profile["properties"] = current_properties
         current_profile["secure"] = current_secure
         self.profiles[profile_name] = current_profile
+        # self.save(is_secure)
 
     def set_profile(self, profile_path: str, profile_data: dict) -> None: 
         """
