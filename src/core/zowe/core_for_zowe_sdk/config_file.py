@@ -316,7 +316,7 @@ class ConfigFile:
                 service_name += "/" + constants["ZoweAccountName"]
             
             secret_value = self._retrieve_credential(service_name)
-            
+
             # Handle the case when secret_value is None
             if secret_value is None:
                 secret_value = ""    
@@ -420,7 +420,7 @@ class ConfigFile:
         
         try:
             # Filter or suppress specific warning messages
-            warnings.fildterwarnings("ignore", message="^Retrieved an UTF-8 encoded credential")
+            warnings.filterwarnings("ignore", message="^Retrieved an UTF-8 encoded credential")
             service_name = constants["ZoweServiceName"]
             credential = {self.filepath: self.secure_props}
             # Check if credential is a non-empty string
