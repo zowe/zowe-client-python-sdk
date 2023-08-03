@@ -46,7 +46,7 @@ class CredentialManager:
         try:
             service_name = constants["ZoweServiceName"]
             is_win32 = sys.platform == "win32"
-            charset = "UTF-16" if is_win32 else "UTF-8"
+            #  = "UTF-16" if is_win32 else "UTF-8"
 
             if is_win32:
                 service_name += "/" + constants["ZoweAccountName"]
@@ -63,13 +63,8 @@ class CredentialManager:
             ) from exc
 
         secure_config: str
-        secure_config = secret_value.encode(charset)
-        try:
-            # Decode the credential
-            secure_config_json = commentjson.loads(base64.b64decode(secure_config).decode(charset))
-        except UnicodeDecodeError:
-            # Fallback to UTF-8 decoding if needed
-            secure_config_json = commentjson.loads(base64.b64decode(secure_config).decode())
+        secure_config = secret_value.encode()
+        secure_config_json = commentjson.loads(base64.b64decode(secure_config).decode())
 
         # update the secure props
         CredentialManager.secure_props = secure_config_json
@@ -91,6 +86,8 @@ class CredentialManager:
         """
         encoded_credential = keyring.get_password(service_name, constants["ZoweAccountName"])
         if encoded_credential is None and sys.platform == "win32":
+            # Filter or suppress specific warning messages
+            warnings.filterwarnings("ignore", message="^Retrieved an UTF-8 encoded credential")
             # Retrieve the secure value with an index
             index = 1
             temp_value = keyring.get_password(f"{service_name}-{index}", f"{constants['ZoweAccountName']}-{index}")
@@ -105,7 +102,12 @@ class CredentialManager:
         if encoded_credential is not None and encoded_credential.endswith("\0"):
             encoded_credential = encoded_credential[:-1]
 
-        return encoded_credential 
+        try:
+            return encoded_credential.encode('utf-16le').decode()
+        except (UnicodeDecodeError, AttributeError):
+            # The credential is not encoded in UTF-16
+            return encoded_credential
+        
     
     @staticmethod
     def delete_credential(service_name: str, account_name: str) -> None:
@@ -156,7 +158,7 @@ class CredentialManager:
         # Check if credential is a non-empty string
         if credential:
             is_win32 = sys.platform == "win32"
-            charset = "UTF-16" if is_win32 else "UTF-8"
+            #  = "UTF-16" if is_win32 else "UTF-8"
             if is_win32:
                 service_name += "/" + constants["ZoweAccountName"] 
             
@@ -166,28 +168,28 @@ class CredentialManager:
             if existing_credential:
                     
                 # Decode the existing credential and update secure_props
-                existing_credential_bytes = base64.b64decode(existing_credential.encode(charset))
+                existing_credential_bytes = base64.b64decode(existing_credential).decode()
                 existing_secure_props = commentjson.loads(existing_credential_bytes)
                 existing_secure_props.update(credential)
                 # Encode the credential
-                encoded_credential = base64.b64encode(commentjson.dumps(existing_secure_props).encode(charset)).decode()
+                encoded_credential = base64.b64encode(commentjson.dumps(existing_secure_props).encode()).decode()
                 # Delete the existing credential
                 CredentialManager.delete_credential(service_name , constants["ZoweAccountName"])
             else:
-                print(credential)
+                print("here")
                 # Encode the credential
-                encoded_credential = base64.b64encode(commentjson.dumps(credential).encode(charset)).decode()   
+                encoded_credential = base64.b64encode(commentjson.dumps(credential).encode()).decode() 
+            print(encoded_credential)  
             # Check if the encoded credential exceeds the maximum length for win32
             if is_win32 and len(encoded_credential) > constants["WIN32_CRED_MAX_STRING_LENGTH"]:
                 # Split the encoded credential string into chunks of maximum length
                 chunk_size = constants["WIN32_CRED_MAX_STRING_LENGTH"]
                 chunks = [encoded_credential[i: i + chunk_size] for i in range(0, len(encoded_credential), chunk_size)]
-                # Append NUL byte to the last chunk
-                chunks[-1] += "\0"
                 # Set the individual chunks as separate keyring entries
                 for index, chunk in enumerate(chunks, start=1):
+                    password=(chunk + '\0' *(len(chunk)%2)).encode().decode('utf-16le')
                     field_name = f"{constants['ZoweAccountName']}-{index}"
-                    keyring.set_password(f"{service_name}-{index}", field_name, chunk)
+                    keyring.set_password(f"{service_name}-{index}", field_name, password)
                     
             else:
                 # Credential length is within the maximum limit or not on win32, set it as a single keyring entry
