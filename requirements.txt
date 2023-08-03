@@ -19,7 +19,7 @@ pyflakes==2.2.0
 pylama==7.7.1
 pytest==7.1.2
 python-decouple==3.4
-PyYAML==5.4.1
+PyYAML==6.0.1
 requests==2.31.0
 six==1.15.0
 snowballstemmer==2.1.0
