@@ -56,34 +56,40 @@ urllib3
 
 ### Developer setup
 
+**Prerequisite:** The minimum supported Python version is 3.7.
+
 Clone the repository using `git`:
+
 ```
 git clone https://github.com/zowe/zowe-client-python-sdk.git
 ```
 
-We recommend that developers create a virtual environment to install all the required dependencies for this project.  
-**Note:** Use of `venv`, the virtual environment module, requires at least version 3.3 of Python.
-
-To create a virtual environment, make a folder to store your virtual environment (referred to below as `YOUR_VENV_PATH`). Then, use the `venv` module to set it up:
-
-```
-python3 -m venv YOUR_VENV_PATH
-```
-
-Next, activate your virtual environment so that Python uses this folder to manage dependencies.
-
-Assuming that you are using Bash shell, reference the command below. Otherwise, check the table titled "Command to activate virtual environment" [here](https://docs.python.org/3/library/venv.html#how-venvs-work) to find the command that works for your shell.
-
-```
-source YOUR_VENV_PATH/bin/activate
-```
-
-Navigate to the root of the repository and checkout the desired branch. Currently, active development is on the `main` branch.
+Navigate to the root of the repository and checkout the desired branch. Currently, active development is on the `main` branch:
 
 ```
 cd zowe-client-python-sdk/
 git checkout main
 ```
+
+We recommend that developers make a virtual environment to install all required dependencies.  
+
+Create a virtual environment in the root of the repository folder using the `venv` module.  
+The command below assumes that `python` is a version of Python3:
+
+```
+python -m venv venv
+```
+
+_(If this isn't the case for your environment, use the appropriate command alias for Python3)_
+
+Activate your virtual environment so that Python uses it to manage dependencies.  
+Assuming that you are using Bash shell, reference the command below:
+
+```
+source venv/bin/activate
+```
+
+Otherwise, check the table titled "Command to activate virtual environment" [here](https://docs.python.org/3/library/venv.html#how-venvs-work) to find the command that works for your shell.
 
 Install the dependencies listed in `requirements.txt` using `pip`:
 
@@ -91,9 +97,8 @@ Install the dependencies listed in `requirements.txt` using `pip`:
 pip install -r requirements.txt
 ```
 
-Once complete, you can now develop the Python SDK with the installed dependencies.
-
-Finally, when you are finished with your development session, deactivate your virtual environment:
+You can now develop the Python SDK with the installed dependencies.  
+When you are finished with your development session, deactivate your virtual environment:
 
 ```
 deactivate
