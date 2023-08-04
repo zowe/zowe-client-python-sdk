@@ -407,7 +407,7 @@ class TestZosmfProfileManager(TestCase):
         # Test
         prof_manager = ProfileManager(appname="zowe")
         prof_manager.config_dir = self.custom_dir
-        props: dict = prof_manager.load(profile_name="lpar1.zosmf", opt_in=True)
+        props: dict = prof_manager.load(profile_name="lpar1.zosmf", override_with_env=True)
 
         expected_props = {
             "host": "aaditya",

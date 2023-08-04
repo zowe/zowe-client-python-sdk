@@ -157,22 +157,27 @@ class ConfigFile:
         if schema.startswith("https://") or schema.startswith("http://"):
             schema_json = requests.get(schema).json()
 
+        elif not os.path.isabs(schema):
+            schema = os.path.join(self.location, schema)
+            with open(schema) as f:
+                schema_json = json.load(f)
+        
         elif os.path.isfile(schema):
             with open(schema) as f:
                 schema_json = json.load(f)
-
         else:
             return []
 
-        profile_props = []
+        profile_props:dict = {}
         schema_json = dict(schema_json)
         
         for props in schema_json['properties']['profiles']['patternProperties']["^\\S*$"]["allOf"]:
             props = props["then"]
+            
             while "properties" in props:
                 props = props.pop("properties")
-                profile_props = list(props.keys())
-        
+                profile_props = props
+
         return profile_props
 
     def get_profile(
