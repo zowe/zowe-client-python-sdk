@@ -12,16 +12,16 @@ that can interact with z/OS components.
 
 ## Installation
 
-
-When installing the Zowe Client Python SDK you have two options.
+When installing the Zowe Client Python SDK, you have two options:
 
 - Install all the Zowe packages
 - Install a single sub-package
 
-The choice depends on your intentions. If you chose to install all Zowe SDK packages
+The choice depends on your intentions. If you choose to install all Zowe SDK packages,
 this means that you will install everything under the `zowe` namespace in PyPi. 
 
 Alternatively, you can choose to install only a single subpackage for a smaller installation.
+
 
 To install all Zowe SDK packages using pip:
 
@@ -29,19 +29,19 @@ To install all Zowe SDK packages using pip:
 pip install zowe
 ```
 
-To install only a subpackage using pip:
+Or, to install a subpackage using pip:
 
 ```
 pip install zowe.<subpackage>_for_zowe_sdk
 ```
 
 For more information on the available sub-packages click [HERE](https://zowe-client-python-sdk.readthedocs.io/en/latest/packages/packages.html)
-
-**Note**: If you want to stay on the bleeding edge, install the Zowe SDK from the `main` branch with the following command:
-
-```
-pip install zowe@git+https://github.com/zowe/zowe-client-python-sdk@main#subdirectory=src
-```
+<!-- 
+    **Note**: If you want to stay on the bleeding edge, install the Zowe SDK from the `main` branch with the following command:
+    ```
+    pip install zowe@git+https://github.com/zowe/zowe-client-python-sdk@main#subdirectory=src
+    ``` 
+-->
 
 ## Requirements
 
@@ -54,6 +54,55 @@ pyyaml
 urllib3
 ```
 
+### Developer setup
+
+**Prerequisite:** The minimum supported Python version is 3.7.
+
+Clone the repository using `git`:
+
+```
+git clone https://github.com/zowe/zowe-client-python-sdk.git
+```
+
+Navigate to the root of the repository and checkout the desired branch. Currently, active development is on the `main` branch:
+
+```
+cd zowe-client-python-sdk/
+git checkout main
+```
+
+We recommend that developers make a virtual environment to install all required dependencies.  
+
+Create a virtual environment in the root of the repository folder using the `venv` module.  
+The command below assumes that `python` is a version of Python3:
+
+```
+python -m venv venv
+```
+
+_(If this isn't the case for your environment, use the appropriate command alias for Python3)_
+
+Activate your virtual environment so that Python uses it to manage dependencies.  
+Assuming that you are using Bash shell, reference the command below:
+
+```
+source venv/bin/activate
+```
+
+Otherwise, check the table titled "Command to activate virtual environment" [here](https://docs.python.org/3/library/venv.html#how-venvs-work) to find the command that works for your shell.
+
+Install the dependencies listed in `requirements.txt` using `pip`:
+
+```
+pip install -r requirements.txt
+```
+
+You can now develop the Python SDK with the installed dependencies.  
+When you are finished with your development session, deactivate your virtual environment:
+
+```
+deactivate
+```
 
 ## Quickstart
 
