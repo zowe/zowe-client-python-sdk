@@ -36,12 +36,12 @@ pip install zowe.<subpackage>_for_zowe_sdk
 ```
 
 For more information on the available sub-packages click [HERE](https://zowe-client-python-sdk.readthedocs.io/en/latest/packages/packages.html)
-
-**Note**: If you want to stay on the bleeding edge, install the Zowe SDK from the `main` branch with the following command:
-
-```
-pip install zowe@git+https://github.com/zowe/zowe-client-python-sdk@main#subdirectory=src
-```
+<!-- 
+    **Note**: If you want to stay on the bleeding edge, install the Zowe SDK from the `main` branch with the following command:
+    ```
+    pip install zowe@git+https://github.com/zowe/zowe-client-python-sdk@main#subdirectory=src
+    ``` 
+-->
 
 ## Requirements
 
