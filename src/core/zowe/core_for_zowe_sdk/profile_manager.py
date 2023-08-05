@@ -11,6 +11,7 @@ Copyright Contributors to the Zowe Project.
 """
 
 import os.path
+import os
 import warnings
 import jsonschema
 from typing import Optional
@@ -111,6 +112,50 @@ class ProfileManager:
         return self.project_config.filepath
 
     @staticmethod
+    def get_env(
+        cfg: ConfigFile,
+    ) -> dict:
+        """
+        Maps the env variables to the profile properties
+        
+        Returns
+        -------
+        Dictionary
+
+            Containing profile properties from env variables (prop: value)
+        """
+        
+        props = cfg.schema_list()
+        if props == []:
+            return {}
+        
+        env, env_var = {}, {}
+        
+        for var in list(os.environ.keys()):
+            if var.startswith("ZOWE_OPT"):
+                env[var[len("ZOWE_OPT_"):].lower()] = os.environ.get(var)
+                
+        for k, v in env.items():
+            word = k.split("_")
+
+            if len(word) > 1:
+                k = word[0]+word[1].capitalize()
+            else:
+                k = word[0]
+
+            if k in list(props.keys()):
+                if props[k]['type'] == "number":
+                    env_var[k] = int(v)
+
+                elif props[k]['type'] == "string":
+                    env_var[k] = str(v)
+
+                elif props[k]['type'] == "boolean":
+                    env_var[k] = bool(v)
+
+        return env_var
+                                 
+    @staticmethod
     def get_profile(
         cfg: ConfigFile,
         profile_name: Optional[str],
@@ -198,6 +243,7 @@ class ProfileManager:
         profile_type: Optional[str] = None,
         check_missing_props: bool = True,
         opt_out: Optional[bool] = True,
+        override_with_env: Optional[bool] = False,
     ) -> dict:
         """Load connection details from a team config profile.
         Returns
@@ -233,6 +279,7 @@ class ProfileManager:
         }
         profile_props: dict = {}
         schema_path = None
+        env_var: dict = {}
 
         missing_secure_props = []  # track which secure props were not loaded
 
@@ -249,6 +296,9 @@ class ProfileManager:
             profile_props = {**profile_loaded.data, **profile_props}
             
             missing_secure_props.extend(profile_loaded.missing_secure_props)
+
+            if override_with_env:
+                env_var = {**self.get_env(cfg)}
 
             if i == 1 and profile_props:
                 break  # Skip loading from global config if profile was found in project config
@@ -269,5 +319,9 @@ class ProfileManager:
                 raise SecureValuesNotFound(values=missing_props)
 
         warnings.resetwarnings()
+
+        for k, v in profile_props.items():
+            if k in env_var:
+                profile_props[k] = env_var[k]
 
         return profile_props

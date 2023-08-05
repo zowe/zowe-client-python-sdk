@@ -13,6 +13,8 @@ Copyright Contributors to the Zowe Project.
 import base64
 import os.path
 import re
+import json
+import requests
 import sys
 import warnings
 from dataclasses import dataclass, field
@@ -81,6 +83,7 @@ class ConfigFile:
     defaults: Optional[dict] = None
     schema_property: Optional[dict] = None
     secure_props: Optional[dict] = None
+    schema_property: Optional[dict] = None
     _missing_secure_props: list = field(default_factory=list)
 
     @property
@@ -108,6 +111,10 @@ class ConfigFile:
     def schema_path(self) -> Optional[str]:
         return self.schema_property
 
+    @property
+    def schema_path(self) -> Optional[str]:
+        self.schema_property
+
     @location.setter
     def location(self, dirname: str) -> None:
         if os.path.isdir(dirname):
@@ -133,6 +140,7 @@ class ConfigFile:
         self.profiles = profile_jsonc.get("profiles", {})
         self.schema_property = profile_jsonc.get("$schema", None)
         self.defaults = profile_jsonc.get("defaults", {})
+        self.schema_property = profile_jsonc.get("$schema", None)
 
         if self.schema_property:
             self.validate_schema(config_type, opt_out)
@@ -169,6 +177,49 @@ class ConfigFile:
         if path_schema_json and opt_out:
             validate_config_json(path_config_json, path_schema_json)
         
+    def schema_list(
+        self,
+    ) -> list:
+        """
+        Loads the schema properties
+        in a sorted order according to the priority
+        
+        Returns
+        -------
+        Dictionary
+        
+            Returns the profile properties from schema (prop: value)
+        """
+
+        schema = self.schema_property
+        if schema is None:
+            return []
+
+        if schema.startswith("https://") or schema.startswith("http://"):
+            schema_json = requests.get(schema).json()
+
+        elif not os.path.isabs(schema):
+            schema = os.path.join(self.location, schema)
+            with open(schema) as f:
+                schema_json = json.load(f)
+        
+        elif os.path.isfile(schema):
+            with open(schema) as f:
+                schema_json = json.load(f)
+        else:
+            return []
+
+        profile_props:dict = {}
+        schema_json = dict(schema_json)
+        
+        for props in schema_json['properties']['profiles']['patternProperties']["^\\S*$"]["allOf"]:
+            props = props["then"]
+            
+            while "properties" in props:
+                props = props.pop("properties")
+                profile_props = props
+
+        return profile_props
 
     def get_profile(
         self,

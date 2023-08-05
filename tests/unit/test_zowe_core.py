@@ -184,7 +184,6 @@ class TestZosmfProfileManager(TestCase):
         self.fs.add_real_file(self.original_nested_file_path)
         self.fs.add_real_file(self.original_schema_file_path)
         self.fs.add_real_file(self.original_invalid_file_path)
-
         self.custom_dir = os.path.dirname(FIXTURES_PATH)
         self.custom_appname = "zowe_abcd"
         self.custom_filename = f"{self.custom_appname}.config.json"
@@ -431,6 +430,37 @@ class TestZosmfProfileManager(TestCase):
             prof_manager = ProfileManager(appname="zowe")
             prof_manager.config_dir = self.custom_dir
             props: dict = prof_manager.load(profile_name="zosmf")
+
+    @patch("keyring.get_password", side_effect=keyring_get_password)
+    def test_profile_loading_with_env_variables(self, get_pass_func):
+        """
+        Test loading of correct file given a filename and directory,
+        also load by profile_name correctly populating fields from custom
+        profile and secure credentials
+        """
+        # Setup - copy profile to fake filesystem created by pyfakefs
+        os.environ["ZOWE_OPT_HOST"] = "aaditya"
+        custom_file_path = os.path.join(self.custom_dir, "zowe.config.json")
+        shutil.copy(self.original_nested_file_path, custom_file_path)
+        shutil.copy(self.original_schema_file_path, self.custom_dir)
+        os.chdir(self.custom_dir)
+
+        self.setUpCreds(custom_file_path, {
+            "profiles.zosmf.properties.user": "user",
+            "profiles.zosmf.properties.password": "password",
+        })
+
+        # Test
+        prof_manager = ProfileManager(appname="zowe")
+        prof_manager.config_dir = self.custom_dir
+        props: dict = prof_manager.load(profile_name="lpar1.zosmf", override_with_env=True)
+
+        expected_props = {
+            "host": "aaditya",
+            "rejectUnauthorized": True,
+            "port": 443,
+        }
+        self.assertEqual(props, expected_props)
 
 
 class TestValidateConfigJsonClass(unittest.TestCase):
