@@ -1,4 +1,4 @@
-certifi==2022.12.7
+certifi==2023.7.22
 chardet==4.0.0
 colorama==0.4.4
 commentjson==0.9.0
@@ -6,10 +6,9 @@ coverage==5.4
 flake8==3.8.4
 idna==2.10
 importlib-metadata==3.6.0
-jsoncparser
 jsonschema==4.14.0
 keyring
-lxml==4.9.1
+lxml==4.9.3
 mccabe==0.6.1
 nose2==0.10.0
 pycodestyle==2.6.0
@@ -19,7 +18,7 @@ pyflakes==2.2.0
 pylama==7.7.1
 pytest==7.1.2
 python-decouple==3.4
-PyYAML==5.4.1
+PyYAML==6.0.1
 requests==2.31.0
 six==1.15.0
 snowballstemmer==2.1.0
@@ -28,4 +27,9 @@ Unidecode==1.2.0
 urllib3==1.26.5
 wheel
 zipp==3.4.0
--e ./src
+-e ./src/core
+-e ./src/zos_console
+-e ./src/zos_files
+-e ./src/zos_jobs
+-e ./src/zos_tso
+-e ./src/zosmf
