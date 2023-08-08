@@ -310,8 +310,8 @@ class ConfigFile:
         Load exact profile properties (without prepopulated fields from base profile)
         from the profile dict and populate fields from the secure credentials storage
         """
-        if self.profiles is None:
-            self.init_from_file()
+        # if self.profiles is None:
+        #     self.init_from_file()
         props = {}
         lst = profile_name.split(".")
         secure_fields: list = []
