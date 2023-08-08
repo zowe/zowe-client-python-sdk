@@ -427,6 +427,7 @@ class TestZosmfProfileManager(TestCase):
         ]
         delete_pass_func.assert_has_calls(expected_calls)
 
+    @patch("sys.platform", "win32")
     @patch("keyring.get_password", side_effect=["password", None, "part1", "part2\0", None])
     def test_retrieve_credential(self, get_pass_func):
         """
@@ -450,7 +451,7 @@ class TestZosmfProfileManager(TestCase):
         get_pass_func.assert_any_call(f"{service_name}-1", f"{constants['ZoweAccountName']}-1")
         get_pass_func.assert_any_call(f"{service_name}-2", f"{constants['ZoweAccountName']}-2")
 
-
+    @patch("sys.platform", "win32")
     @patch("keyring.get_password", side_effect=[None,None])
     def test_retrieve_credential_encoding_errors(self, get_pass_func):
         """
