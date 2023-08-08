@@ -45,6 +45,14 @@ class CredentialManager:
 
         try:
             service_name = constants["ZoweServiceName"]
+            service_name = constants["ZoweServiceName"]
+            is_win32 = sys.platform == "win32"
+            #  = "UTF-16" if is_win32 else "UTF-8"
+
+            if is_win32:
+                service_name += "/" + constants["ZoweAccountName"]
+            
+            service_name = constants["ZoweServiceName"]            
             is_win32 = sys.platform == "win32"
             #  = "UTF-16" if is_win32 else "UTF-8"
 
@@ -84,8 +92,11 @@ class CredentialManager:
         str
             The retrieved  encoded credential
         """
+        is_win32 = sys.platform == "win32"
+        if is_win32:
+            service_name += "/" + constants["ZoweAccountName"]
         encoded_credential = keyring.get_password(service_name, constants["ZoweAccountName"])
-        if encoded_credential is None and sys.platform == "win32":
+        if encoded_credential is None and is_win32:
             # Filter or suppress specific warning messages
             warnings.filterwarnings("ignore", message="^Retrieved an UTF-8 encoded credential")
             # Retrieve the secure value with an index
@@ -126,9 +137,9 @@ class CredentialManager:
         """
         
         try:
-            keyring.delete_password(service_name, account_name)
+            keyring.delete_password(service_name, account_name)  
         except keyring.errors.PasswordDeleteError:
-            # keyring.delete_password is not available (e.g., macOS)
+            # Handling multiple credentials stored when the operating system is Windows
             if sys.platform == "win32":
                 # Delete the secure value with an index
                 index = 1
@@ -162,7 +173,6 @@ class CredentialManager:
             if is_win32:
                 service_name += "/" + constants["ZoweAccountName"] 
             
-            
             # Load existing credentials, if any
             existing_credential = CredentialManager._retrieve_credential(service_name)
             if existing_credential:
@@ -176,15 +186,14 @@ class CredentialManager:
                 # Delete the existing credential
                 CredentialManager.delete_credential(service_name , constants["ZoweAccountName"])
             else:
-                print("here")
                 # Encode the credential
                 encoded_credential = base64.b64encode(commentjson.dumps(credential).encode()).decode() 
-            print(encoded_credential)  
             # Check if the encoded credential exceeds the maximum length for win32
             if is_win32 and len(encoded_credential) > constants["WIN32_CRED_MAX_STRING_LENGTH"]:
                 # Split the encoded credential string into chunks of maximum length
                 chunk_size = constants["WIN32_CRED_MAX_STRING_LENGTH"]
                 chunks = [encoded_credential[i: i + chunk_size] for i in range(0, len(encoded_credential), chunk_size)]
+                chunks[-1]+= '\0'
                 # Set the individual chunks as separate keyring entries
                 for index, chunk in enumerate(chunks, start=1):
                     password=(chunk + '\0' *(len(chunk)%2)).encode().decode('utf-16le')

@@ -310,7 +310,8 @@ class ConfigFile:
         Load exact profile properties (without prepopulated fields from base profile)
         from the profile dict and populate fields from the secure credentials storage
         """
-
+        if self.profiles is None:
+            self.init_from_file()
         props = {}
         lst = profile_name.split(".")
         secure_fields: list = []
@@ -331,8 +332,8 @@ class ConfigFile:
 
         # load secure props only if there are secure fields
         if secure_fields:
-            self.load_secure_props()
-
+            CredentialManager.load_secure_props()
+            self.secure_props=CredentialManager.secure_props.get(self.filepath, {})
             # load properties with key as profile.{profile_name}.properties.{*}
             for (key, value) in self.secure_props.items():
                 if re.match(
@@ -347,180 +348,3 @@ class ConfigFile:
             #     self._missing_secure_props.extend(secure_fields)
 
         return props
-
-    def load_secure_props(self) -> None:
-        """
-        load secure_props stored for the given config file
-        Returns
-        -------
-        None
-
-        if keyring is not initialized, set empty value
-        """
-        if not HAS_KEYRING:
-            self.secure_props = {}
-            return
-
-        try:
-            service_name = constants["ZoweServiceName"]
-            is_win32 = sys.platform == "win32"
-
-            if is_win32:
-                service_name += "/" + constants["ZoweAccountName"]
-            
-            secret_value = self._retrieve_credential(service_name)
-
-            # Handle the case when secret_value is None
-            if secret_value is None:
-                secret_value = ""    
-
-        except Exception as exc:
-            raise SecureProfileLoadFailed(
-                constants["ZoweServiceName"], error_msg=str(exc)
-            ) from exc
-
-        secure_config: str
-        secure_config = secret_value.encode()
-        secure_config_json = commentjson.loads(base64.b64decode(secure_config).decode())
-        # look for credentials stored for currently loaded config
-        try:
-            self.secure_props = secure_config_json.get(self.filepath, {})
-        except KeyError as exc:
-            error_msg = str(exc)
-            warnings.warn(
-                f"No credentials found for loaded config file '{self.filepath}'"
-                f" with error '{error_msg}'",
-                SecurePropsNotFoundWarning,
-            )
-
-    def _retrieve_credential(self, service_name: str) -> Optional[str]:
-        """
-        Retrieve the credential from the keyring or storage.
-        If the credential exceeds the maximum length, retrieve it in parts.
-        Parameters
-        ----------
-        service_name: str
-            The service name for the credential retrieval
-        Returns
-        -------
-        str
-            The retrieved  encoded credential
-        """
-        encoded_credential = keyring.get_password(service_name, constants["ZoweAccountName"])
-
-        if encoded_credential is None and sys.platform == "win32":
-            # Filter or suppress specific warning messages
-            warnings.filterwarnings("ignore", message="^Retrieved an UTF-8 encoded credential")
-            # Retrieve the secure value with an index
-            index = 1
-            temp_value = keyring.get_password(f"{service_name}-{index}", f"{constants['ZoweAccountName']}-{index}")
-            while temp_value is not None:
-                if encoded_credential is None:
-                    encoded_credential = temp_value
-                else:
-                    encoded_credential += temp_value
-                index += 1
-                temp_value = keyring.get_password(f"{service_name}-{index}", f"{constants['ZoweAccountName']}-{index}")
-                
-        if encoded_credential is not None and encoded_credential.endswith("\0"):
-            encoded_credential = encoded_credential[:-1]
-
-        try:
-            return encoded_credential.encode('utf-16le').decode()
-        except (UnicodeDecodeError, AttributeError):
-            # The credential is not encoded in UTF-16
-            return encoded_credential
-    
-    def delete_credential(self, service_name: str, account_name: str) -> None:
-        """
-        Delete the credential from the keyring or storage.
-        If the keyring.delete_password function is not available, iterate through and delete credentials.
-        Parameters
-        ----------
-        service_name: str
-            The service name for the credential deletion
-        account_name: str
-            The account name for the credential deletion
-        Returns
-        -------
-        None
-        """
-        
-        try:
-            keyring.delete_password(service_name, account_name)
-        except keyring.errors.PasswordDeleteError:
-            # keyring.delete_password is not available (e.g., macOS)
-            if sys.platform == "win32":
-                # Delete the secure value with an index
-                index = 1
-                while True:
-                    field_name = f"{account_name}-{index}"
-                    try:
-                        keyring.delete_password(f"{service_name}-{index}", field_name)
-                    except keyring.errors.PasswordDeleteError:
-                        break
-                    index += 1
-    
-    def set_secure_props(self) -> None:
-        """
-        Set secure_props for the given config file
-        Returns
-        -------
-        None
-        """
-        if not HAS_KEYRING:
-            return
-        
-        try:
-            # Filter or suppress specific warning messages
-            warnings.filterwarnings("ignore", message="^Retrieved an UTF-8 encoded credential")
-            service_name = constants["ZoweServiceName"]
-            credential = {self.filepath: self.secure_props}
-            # Check if credential is a non-empty string
-            if credential:
-                is_win32 = sys.platform == "win32"
-                if is_win32:
-                    service_name += "/" + constants["ZoweAccountName"] 
-                
-               
-                # Load existing credentials, if any
-                existing_credential = self._retrieve_credential(service_name)
-                if existing_credential:
-                        
-                    # Decode the existing credential and update secure_props
-                    existing_credential_bytes = base64.b64decode(existing_credential).decode()
-                    existing_secure_props = commentjson.loads(existing_credential_bytes)
-                    existing_secure_props[self.filepath].update(credential[self.filepath])
-                    # Encode the credential
-                    encoded_credential = base64.b64encode(commentjson.dumps(existing_secure_props).encode()).decode()
-                    # Delete the existing credential
-                    self.delete_credential(service_name , constants["ZoweAccountName"])
-                else:
-                    print("here")
-                    # Encode the credential
-                    encoded_credential = base64.b64encode(commentjson.dumps(credential).encode()).decode() 
-                print(encoded_credential)  
-                # Check if the encoded credential exceeds the maximum length for win32
-                if is_win32 and len(encoded_credential) > constants["WIN32_CRED_MAX_STRING_LENGTH"]:
-                    # Split the encoded credential string into chunks of maximum length
-                    chunk_size = constants["WIN32_CRED_MAX_STRING_LENGTH"]
-                    chunks = [encoded_credential[i: i + chunk_size] for i in range(0, len(encoded_credential), chunk_size)]
-                    # Set the individual chunks as separate keyring entries
-                    for index, chunk in enumerate(chunks, start=1):
-                        password=(chunk + '\0' *(len(chunk)%2)).encode().decode('utf-16le')
-                        field_name = f"{constants['ZoweAccountName']}-{index}"
-                        keyring.set_password(f"{service_name}-{index}", field_name, password)
-                        
-                else:
-                    # Credential length is within the maximum limit or not on win32, set it as a single keyring entry
-                    keyring.set_password(
-                        service_name, constants["ZoweAccountName"], 
-                        encoded_credential)
-
-        except KeyError as exc:
-            error_msg = str(exc)
-            warnings.warn(
-                f"No credentials found for loaded config file '{self.filepath}'"
-                f" with error '{error_msg}'",
-                SecurePropsNotFoundWarning,
-            )
