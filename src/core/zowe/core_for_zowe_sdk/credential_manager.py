@@ -45,22 +45,11 @@ class CredentialManager:
 
         try:
             service_name = constants["ZoweServiceName"]
-            service_name = constants["ZoweServiceName"]
             is_win32 = sys.platform == "win32"
-            #  = "UTF-16" if is_win32 else "UTF-8"
-
             if is_win32:
                 service_name += "/" + constants["ZoweAccountName"]
-            
-            service_name = constants["ZoweServiceName"]            
-            is_win32 = sys.platform == "win32"
-            #  = "UTF-16" if is_win32 else "UTF-8"
-
-            if is_win32:
-                service_name += "/" + constants["ZoweAccountName"]
-            
+                
             secret_value = CredentialManager._retrieve_credential(service_name)
-            
             # Handle the case when secret_value is None
             if secret_value is None:
                 return 
@@ -73,7 +62,6 @@ class CredentialManager:
         secure_config: str
         secure_config = secret_value.encode()
         secure_config_json = commentjson.loads(base64.b64decode(secure_config).decode())
-
         # update the secure props
         CredentialManager.secure_props = secure_config_json
         
