@@ -17,7 +17,7 @@ from typing import Union
 import requests
 
 
-def validate_config_json(path_config_json: Union[str, dict], path_schema_json: str):
+def validate_config_json(path_config_json: Union[str, dict], path_schema_json: str, cwd: str):
     """
     Function validating that zowe.config.json file matches zowe.schema.json.
 
@@ -37,12 +37,18 @@ def validate_config_json(path_config_json: Union[str, dict], path_schema_json: s
     # checks if the path_schema_json point to an internet URI and download the schema using the URI
     if path_schema_json.startswith("https://") or path_schema_json.startswith("http://"):
         schema_json = requests.get(path_schema_json).json()
-    
+
     # checks if the path_schema_json is a file
     elif os.path.isfile(path_schema_json):
         with open(path_schema_json) as file:
             schema_json = commentjson.load(file)
-        
+
+    # checks if the path_schema_json is absolute
+    elif not os.path.isabs(path_schema_json):
+        path_schema_json = os.path.join(cwd, path_schema_json)
+        with open(path_schema_json) as file:
+            schema_json = commentjson.load(file)
+
     # if there is no path_schema_json it will return None
     else: 
         return None

@@ -111,10 +111,6 @@ class ConfigFile:
     def schema_path(self) -> Optional[str]:
         return self.schema_property
 
-    @property
-    def schema_path(self) -> Optional[str]:
-        self.schema_property
-
     @location.setter
     def location(self, dirname: str) -> None:
         if os.path.isdir(dirname):
@@ -125,7 +121,7 @@ class ConfigFile:
     def init_from_file(
         self, 
         config_type: str, 
-        opt_out: Optional[bool] = True
+        validate_schema: Optional[bool] = True
     ) -> None:
         """
         Initializes the class variable after
@@ -143,7 +139,7 @@ class ConfigFile:
         self.schema_property = profile_jsonc.get("$schema", None)
 
         if self.schema_property:
-            self.validate_schema(config_type, opt_out)
+            self.validate_schema(config_type, validate_schema)
         # loading secure props is done in load_profile_properties
         # since we want to try loading secure properties only when
         # we know that the profile has saved properties
@@ -152,7 +148,7 @@ class ConfigFile:
     def validate_schema(
         self,
         config_type: str,
-        opt_out: Optional[bool] = True,
+        validate_schema: Optional[bool] = True,
     ) -> None:
         """
         Get the $schema_property from the config and load the schema
@@ -174,8 +170,8 @@ class ConfigFile:
             )
                 
         # validate the $schema property 
-        if path_schema_json and opt_out:
-            validate_config_json(path_config_json, path_schema_json)
+        if path_schema_json and validate_schema:
+            validate_config_json(path_config_json, path_schema_json, cwd = self.location)
         
     def schema_list(
         self,
@@ -226,7 +222,7 @@ class ConfigFile:
         profile_name: Optional[str] = None,
         profile_type: Optional[str] = None,
         config_type: Optional[str] = None,
-        opt_out: Optional[bool] = True,
+        validate_schema: Optional[bool] = True,
     ) -> Profile:
         """
         Load given profile including secure properties and excluding values from base profile
@@ -236,7 +232,7 @@ class ConfigFile:
             Returns a namedtuple called Profile
         """
         if self.profiles is None:
-            self.init_from_file(config_type, opt_out)
+            self.init_from_file(config_type, validate_schema)
 
         if profile_name is None and profile_type is None:
             raise ProfileNotFound(

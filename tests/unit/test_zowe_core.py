@@ -179,11 +179,15 @@ class TestZosmfProfileManager(TestCase):
         self.original_schema_file_path = os.path.join(
             FIXTURES_PATH, "zowe.schema.json"
         )
+        self.original_invalid_schema_file_path = os.path.join(
+            FIXTURES_PATH, "invalid.zowe.schema.json"
+        )
         self.fs.add_real_file(self.original_file_path)
         self.fs.add_real_file(self.original_user_file_path)
         self.fs.add_real_file(self.original_nested_file_path)
         self.fs.add_real_file(self.original_schema_file_path)
         self.fs.add_real_file(self.original_invalid_file_path)
+        self.fs.add_real_file(self.original_invalid_schema_file_path)
         self.custom_dir = os.path.dirname(FIXTURES_PATH)
         self.custom_appname = "zowe_abcd"
         self.custom_filename = f"{self.custom_appname}.config.json"
@@ -419,6 +423,8 @@ class TestZosmfProfileManager(TestCase):
             custom_file_path = os.path.join(self.custom_dir, "invalid.zowe.config.json")
             shutil.copy(self.original_invalid_file_path, custom_file_path)
             shutil.copy(self.original_schema_file_path, self.custom_dir)
+            shutil.copy(self.original_user_file_path, self.custom_dir)
+            shutil.copy(self.original_file_path, self.custom_dir)
             os.chdir(self.custom_dir)
 
             self.setUpCreds(custom_file_path, {

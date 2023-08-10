@@ -161,7 +161,7 @@ class ProfileManager:
         profile_name: Optional[str],
         profile_type: Optional[str],
         config_type: str,
-        opt_out: Optional[bool] = True,
+        validate_schema: Optional[bool] = True,
     ) -> Profile:
         """
         Get just the profile from the config file (overriden with base props in the config file)
@@ -176,14 +176,14 @@ class ProfileManager:
         cfg_profile = Profile()
         try:
             cfg_profile = cfg.get_profile(
-                profile_name=profile_name, profile_type=profile_type, config_type=config_type, opt_out=opt_out
+                profile_name=profile_name, profile_type=profile_type, config_type=config_type, validate_schema=validate_schema
             )
         except jsonschema.exceptions.ValidationError as exc:
             raise jsonschema.exceptions.ValidationError(
                 f"Instance was invalid under the provided $schema property, {exc}"
             )
         except jsonschema.exceptions.SchemaError as exc:
-            raise jsonschema.exception.SchemaError(
+            raise jsonschema.exceptions.SchemaError(
                 f"The provided schema is invalid, {exc}"
             )
         except jsonschema.exceptions.UndefinedTypeCheck as exc:
@@ -242,7 +242,7 @@ class ProfileManager:
         profile_name: Optional[str] = None,
         profile_type: Optional[str] = None,
         check_missing_props: bool = True,
-        opt_out: Optional[bool] = True,
+        validate_schema: Optional[bool] = True,
         override_with_env: Optional[bool] = False,
     ) -> dict:
         """Load connection details from a team config profile.
@@ -285,7 +285,7 @@ class ProfileManager:
 
         for i, (config_type, cfg) in enumerate(config_layers.items()):
             profile_loaded = self.get_profile(
-                cfg, profile_name, profile_type, config_type, opt_out
+                cfg, profile_name, profile_type, config_type, validate_schema
             )
             # TODO Why don't user and password show up here for Project User Config?
             # Probably need to update load_profile_properties method in config_file.py
