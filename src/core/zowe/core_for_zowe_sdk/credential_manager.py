@@ -45,10 +45,6 @@ class CredentialManager:
 
         try:
             service_name = constants["ZoweServiceName"]
-            is_win32 = sys.platform == "win32"
-            if is_win32:
-                service_name += "/" + constants["ZoweAccountName"]
-                
             secret_value = CredentialManager._retrieve_credential(service_name)
             # Handle the case when secret_value is None
             if secret_value is None:

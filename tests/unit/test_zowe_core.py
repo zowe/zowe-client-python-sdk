@@ -374,7 +374,7 @@ class TestZosmfProfileManager(TestCase):
         """
         Test loading secure_props from keyring or storage.
         """
-        service_name = constants["ZoweServiceName"] + "/" + constants["ZoweAccountName"]
+        service_name = constants["ZoweServiceName"]
         # Setup - copy profile to fake filesystem created by pyfakefs
         cwd_up_dir_path = os.path.dirname(CWD)
         cwd_up_file_path = os.path.join(cwd_up_dir_path, "zowe.config.json")
