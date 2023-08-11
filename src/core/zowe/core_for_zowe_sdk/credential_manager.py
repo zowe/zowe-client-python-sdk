@@ -94,14 +94,18 @@ class CredentialManager:
                 index += 1
                 temp_value = keyring.get_password(f"{service_name}-{index}", f"{constants['ZoweAccountName']}-{index}")
                 
-        if encoded_credential is not None and encoded_credential.endswith("\0"):
-            encoded_credential = encoded_credential[:-1]
+        if is_win32:
+            try:
+                encoded_credential = encoded_credential.encode('utf-16le').decode()
+            except (UnicodeDecodeError, AttributeError):
+                # The credential is not encoded in UTF-16
+                pass
 
-        try:
-            return encoded_credential.encode('utf-16le' if is_win32 else "utf-8").decode()
-        except (UnicodeDecodeError, AttributeError):
-            # The credential is not encoded in UTF-16
-            return encoded_credential
+            if encoded_credential is not None and encoded_credential.endswith("\0"):
+                encoded_credential = encoded_credential[:-1]
+        else:
+             encoded_credential = encoded_credential.decode()
+        return encoded_credential        
         
     
     @staticmethod
@@ -158,7 +162,7 @@ class CredentialManager:
                 service_name += "/" + constants["ZoweAccountName"] 
             
             # Load existing credentials, if any
-            existing_credential = CredentialManager._retrieve_credential(service_name)
+            existing_credential = CredentialManager._retrieve_credential(constants["ZoweServiceName"])
             if existing_credential:
                     
                 # Decode the existing credential and update secure_props

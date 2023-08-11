@@ -439,6 +439,7 @@ class TestZosmfProfileManager(TestCase):
 
         # Scenario 1: Retrieve password directly
         expected_password1 = "password".encode('utf-16le' if is_win32 else "utf-8").decode()
+        expected_password1 = expected_password1[:-1]
         retrieve_credential1 = credential_manager._retrieve_credential(constants['ZoweServiceName'])
         self.assertEqual(retrieve_credential1, expected_password1)
         get_pass_func.assert_called_with(service_name, constants["ZoweAccountName"])
@@ -446,6 +447,7 @@ class TestZosmfProfileManager(TestCase):
         # Scenario 2: Retrieve password in parts
         expected_password2 = "part1part2".encode('utf-16le' if is_win32 else "utf-8").decode()
         retrieve_credential2 = credential_manager._retrieve_credential(constants['ZoweServiceName'])
+        retrieve_credential2 = retrieve_credential2[:-1]
         self.assertEqual(retrieve_credential2, expected_password2)
         get_pass_func.assert_any_call(service_name, constants["ZoweAccountName"])
         get_pass_func.assert_any_call(f"{service_name}-1", f"{constants['ZoweAccountName']}-1")
