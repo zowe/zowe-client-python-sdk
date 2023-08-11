@@ -98,7 +98,7 @@ class CredentialManager:
             encoded_credential = encoded_credential[:-1]
 
         try:
-            return encoded_credential.encode('utf-16le').decode()
+            return encoded_credential.encode('utf-16le' if is_win32 else "utf-8").decode()
         except (UnicodeDecodeError, AttributeError):
             # The credential is not encoded in UTF-16
             return encoded_credential
