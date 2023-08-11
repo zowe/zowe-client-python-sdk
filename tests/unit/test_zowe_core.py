@@ -422,9 +422,7 @@ class TestZosmfProfileManager(TestCase):
         with self.assertRaises(ValidationError):
             custom_file_path = os.path.join(self.custom_dir, "invalid.zowe.config.json")
             shutil.copy(self.original_invalid_file_path, custom_file_path)
-            shutil.copy(self.original_schema_file_path, self.custom_dir)
-            shutil.copy(self.original_user_file_path, self.custom_dir)
-            shutil.copy(self.original_file_path, self.custom_dir)
+            shutil.copy(self.original_invalid_schema_file_path, self.custom_dir)
             os.chdir(self.custom_dir)
 
             self.setUpCreds(custom_file_path, {
@@ -433,7 +431,7 @@ class TestZosmfProfileManager(TestCase):
             })
 
             # Test
-            prof_manager = ProfileManager(appname="zowe")
+            prof_manager = ProfileManager(appname="invalid.zowe")
             prof_manager.config_dir = self.custom_dir
             props: dict = prof_manager.load(profile_name="zosmf")
 
