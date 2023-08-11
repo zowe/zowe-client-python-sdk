@@ -13,6 +13,8 @@ Copyright Contributors to the Zowe Project.
 import base64
 import os.path
 import re
+import json
+import requests
 import sys
 import warnings
 from dataclasses import dataclass, field
@@ -72,6 +74,7 @@ class ConfigFile:
     4. Contents of the file.
     4.1 Profiles
     4.2 Defaults
+    4.3 Schema Property
     5. Secure Properties associated with the file.
     """
 
@@ -81,6 +84,7 @@ class ConfigFile:
     profiles: Optional[dict] = None
     defaults: Optional[dict] = None
     secure_props: Optional[dict] = None
+    schema_property: Optional[dict] = None
     _missing_secure_props: list = field(default_factory=list)
 
     @property
@@ -104,6 +108,10 @@ class ConfigFile:
     def location(self) -> Optional[str]:
         return self._location
 
+    @property
+    def schema_path(self) -> Optional[str]:
+        self.schema_property
+
     @location.setter
     def location(self, dirname: str) -> None:
         if os.path.isdir(dirname):
@@ -125,11 +133,56 @@ class ConfigFile:
         self.profiles = profile_jsonc.get("profiles", {})
         self.defaults = profile_jsonc.get("defaults", {})
         self.jsonc = profile_jsonc
+        self.schema_property = profile_jsonc.get("$schema", None)
 
         # loading secure props is done in load_profile_properties
         # since we want to try loading secure properties only when
         # we know that the profile has saved properties
         # self.load_secure_props()
+
+    def schema_list(
+        self,
+    ) -> list:
+        """
+        Loads the schema properties
+        in a sorted order according to the priority
+        
+        Returns
+        -------
+        Dictionary
+        
+            Returns the profile properties from schema (prop: value)
+        """
+
+        schema = self.schema_property
+        if schema is None:
+            return []
+
+        if schema.startswith("https://") or schema.startswith("http://"):
+            schema_json = requests.get(schema).json()
+
+        elif not os.path.isabs(schema):
+            schema = os.path.join(self.location, schema)
+            with open(schema) as f:
+                schema_json = json.load(f)
+        
+        elif os.path.isfile(schema):
+            with open(schema) as f:
+                schema_json = json.load(f)
+        else:
+            return []
+
+        profile_props:dict = {}
+        schema_json = dict(schema_json)
+        
+        for props in schema_json['properties']['profiles']['patternProperties']["^\\S*$"]["allOf"]:
+            props = props["then"]
+            
+            while "properties" in props:
+                props = props.pop("properties")
+                profile_props = props
+
+        return profile_props
 
     def get_profile(
         self,
@@ -260,7 +313,8 @@ class ConfigFile:
         Load exact profile properties (without prepopulated fields from base profile)
         from the profile dict and populate fields from the secure credentials storage
         """
-
+        # if self.profiles is None:
+        #     self.init_from_file()
         props = {}
         lst = profile_name.split(".")
         secure_fields: list = []
@@ -281,7 +335,7 @@ class ConfigFile:
         # load secure props only if there are secure fields
         if secure_fields:
             CredentialManager.load_secure_props()
-
+            self.secure_props=CredentialManager.secure_props.get(self.filepath, {})
             # load properties with key as profile.{profile_name}.properties.{*}
             for (key, value) in CredentialManager.secure_props.items():
                 if re.match(
@@ -297,54 +351,6 @@ class ConfigFile:
             #     self._missing_secure_props.extend(secure_fields)
 
         return props
-
-    def load_secure_props(self) -> None:
-        """
-        load secure_props stored for the given config file
-        Returns
-        -------
-        None
-
-        if keyring is not initialized, set empty value
-        """
-        if not HAS_KEYRING:
-            self.secure_props = {}
-            return
-
-        try:
-            service_name = constants["ZoweServiceName"]
-
-            if sys.platform == "win32":
-                service_name += "/" + constants["ZoweAccountName"]
-
-            secret_value = keyring.get_password(
-                service_name, constants["ZoweAccountName"]
-            )
-
-        except Exception as exc:
-            raise SecureProfileLoadFailed(
-                constants["ZoweServiceName"], error_msg=str(exc)
-            ) from exc
-
-        secure_config: str
-        if sys.platform == "win32":
-            secure_config = secret_value.encode("utf-16")
-        else:
-            secure_config = secret_value
-
-        secure_config_json = commentjson.loads(
-            base64.b64decode(secure_config).decode())
-
-        # look for credentials stored for currently loaded config
-        try:
-            self.secure_props = secure_config_json.get(self.filepath, {})
-        except KeyError as exc:
-            error_msg = str(exc)
-            warnings.warn(
-                f"No credentials found for loaded config file '{self.filepath}'"
-                f" with error '{error_msg}'",
-                SecurePropsNotFoundWarning,
-            )
 
     def __is_secure(self, json_path: str, property_name: str) -> bool:
         """
