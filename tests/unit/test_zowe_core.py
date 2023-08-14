@@ -9,7 +9,7 @@ import keyring
 import sys
 import unittest
 from unittest import mock
-from unittest.mock import patch
+from unittest.mock import patch , call
 from jsonschema import validate, ValidationError
 from zowe.core_for_zowe_sdk.validators import validate_config_json
 import commentjson
@@ -612,3 +612,61 @@ class TestValidateConfigJsonClass(unittest.TestCase):
             validate_config_json(path_to_invalid_config, path_to_invalid_schema)
 
         self.assertEqual(str(actual_info.exception), str(expected_info.exception))
+    
+    @mock.patch("warnings.simplefilter")
+    @mock.patch("warnings.resetwarnings")
+    def test_get_highest_priority_layer(self, mock_resetwarnings, mock_simplefilter):
+        """
+        Test that get_highest_priority_layer returns the highest priority layer with a valid profile data dictionary.       
+        """
+        # Set up mock profiles in the layers
+        project_user_config =  mock.MagicMock(spec=ConfigFile)
+        profile_manager = ProfileManager()
+        project_user_config.get_profile.return_value.data = {"profile_name": "zosmf"}
+        profile_manager.project_user_config = project_user_config
+        profile_manager._show_warnings = False
+        result = profile_manager.get_highest_priority_layer("zosmf")
+        self.assertEqual(result, project_user_config)
+        mock_simplefilter.assert_called_with("ignore")
+        mock_resetwarnings.assert_called()
+
+    @patch("zowe.core_for_zowe_sdk.ProfileManager.get_highest_priority_layer")
+    def test_profile_manager_set_property(self,get_highest_priority_layer):
+        """
+        Test that set_property calls the set_property method of the highest priority layer.
+        """
+        json_path = "profiles.zosmf.properties.user"
+        value = "samadpls"
+        secure = True
+        profile_manager = ProfileManager()
+        
+        # Mock the return value of get_highest_priority_layer
+        highest_priority_layer = mock.MagicMock(spec=ConfigFile)
+        get_highest_priority_layer.return_value = highest_priority_layer
+        profile_manager.set_property(json_path, value, secure)
+        # Mock the return value of set_property in highest_priority_layer
+        highest_priority_layer.set_property.return_value = None        
+        highest_priority_layer.set_property.assert_called_with(json_path, "zosmf", value,  secure=secure)
+
+    @patch("zowe.core_for_zowe_sdk.ProfileManager.get_highest_priority_layer")
+    def test_set_property_invalid_json_path(self, get_highest_priority_layer):
+        """
+        Test that set_property raises a ValueError when the json_path is invalid.
+        """
+        json_path = "invalid.json.path"
+        value = "samadpls"
+        profile_manager = ProfileManager()
+        with self.assertRaises(ValueError):
+            profile_manager.set_property(json_path, value)
+        
+    @patch("zowe.core_for_zowe_sdk.ConfigFile.save")
+    @patch("zowe.core_for_zowe_sdk.CredentialManager.save_secure_props")
+    def test_profile_manager_save(self, mock_save_secure_props, mock_save):
+        """
+        Test that save calls the save method of all layers.
+        """
+        profile_manager = ProfileManager()
+        profile_manager.save()
+        expected_calls = [call(False) for _ in range(4)]
+        mock_save.assert_has_calls(expected_calls)
+        mock_save_secure_props.assert_called_once() 

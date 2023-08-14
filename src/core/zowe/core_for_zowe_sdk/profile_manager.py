@@ -331,7 +331,7 @@ class ProfileManager:
 
         return highest_priority_layer
 
-    def set_property(self, json_path, value, secure=None):
+    def set_property(self, json_path, value, secure=None) -> None:
         """
         Set a property in the profile, storing it securely if necessary.
 
@@ -345,7 +345,7 @@ class ProfileManager:
         profile_name = next(
             (keys[i + 1] for i, key in enumerate(keys) if key == "profiles"), None)
 
-        if not profile_name:
+        if profile_name is None:
             raise ValueError(
                 "Invalid json_path. Couldn't find profile_name after 'profiles' keyword.")
 
@@ -357,7 +357,7 @@ class ProfileManager:
             highest_priority_layer = self.project_user_config
 
         # Set the property in the highest priority layer
-        return highest_priority_layer.set_property(json_path, profile_name, value, secure=secure)
+        highest_priority_layer.set_property(json_path, profile_name, value, secure=secure)
 
     def set_profile(self, profile_name: str, profile_data: dict) -> None:
         """

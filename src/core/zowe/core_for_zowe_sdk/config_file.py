@@ -369,7 +369,7 @@ class ConfigFile:
             return property_name in profile["secure"]
         return False
 
-    def set_property(self, json_path, profile_name, value, secure=None):
+    def set_property(self, json_path, profile_name, value, secure=None) -> None:
         """
         Set a property in the profile, storing it securely if necessary.
 
@@ -467,7 +467,7 @@ class ConfigFile:
         # Update the config file with any changes
         if self.profiles is None:
             self.init_from_file()
-        else:    
+        elif any(self.profiles.values()):
             with open(self.filepath, 'w') as file:
                 # Update the profiles in the JSON data
                 self.jsonc["profiles"] = self.profiles
