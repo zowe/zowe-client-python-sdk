@@ -209,7 +209,6 @@ class ConfigFile:
             profile_name = self.get_profilename_from_profiletype(
                 profile_type=profile_type
             )
-
         props: dict = self.load_profile_properties(profile_name=profile_name)
 
         return Profile(props, profile_name, self._missing_secure_props)
@@ -313,8 +312,6 @@ class ConfigFile:
         Load exact profile properties (without prepopulated fields from base profile)
         from the profile dict and populate fields from the secure credentials storage
         """
-        # if self.profiles is None:
-        #     self.init_from_file()
         props = {}
         lst = profile_name.split(".")
         secure_fields: list = []
@@ -339,8 +336,7 @@ class ConfigFile:
             # load properties with key as profile.{profile_name}.properties.{*}
             for (key, value) in CredentialManager.secure_props.items():
                 if re.match(
-                    "profiles\\." + profile_name +
-                        "\\.properties\\.[a-z]+", key
+                    "profiles\\." + profile_name + "\\.properties\\.[a-z]+", key
                 ):
                     property_name = key.split(".")[3]
                     if property_name in secure_fields:
@@ -365,17 +361,17 @@ class ConfigFile:
         """
 
         profile = self.find_profile(json_path, self.profiles)
+        print(profile,'profile',json_path,self.profiles)
         if profile and profile.get("secure"):
             return property_name in profile["secure"]
         return False
 
-    def set_property(self, json_path, profile_name, value, secure=None) -> None:
+    def set_property(self, json_path, value, secure=None) -> None:
         """
         Set a property in the profile, storing it securely if necessary.
 
         Parameters:
             json_path (str): The JSON path of the property to set.
-            profile_name (str): The name of the profile to set the property in.
             value (str): The value to be set for the property.
             secure (bool): If True, the property will be stored securely. Default is None.
         """
@@ -383,13 +379,13 @@ class ConfigFile:
             self.init_from_file()
 
         # Checking whether the property should be stored securely or in plain text
-        segments = json_path.split(".")[1:]
-        property_name = segments[-1]
+        property_name = json_path.split(".")[1:][-1]
+        profile_name = self.get_profile_name_from_path(json_path)
         # check if the property is already secure
         is_property_secure = self.__is_secure(profile_name, property_name)
         is_secure = secure if secure is not None else is_property_secure
 
-        current_profile = self.find_profile(profile_name, self.profiles)
+        current_profile = self.find_profile(json_path, self.profiles)
 
         current_properties = current_profile.setdefault("properties", {})
         current_secure = current_profile.setdefault("secure", [])
@@ -476,3 +472,18 @@ class ConfigFile:
                 file.truncate()  # Truncate the file to the current file pointer position
             if secure_props:
                 CredentialManager.save_secure_props()
+    
+
+    def get_profile_name_from_path(self, path: str) -> str:
+        """
+        Get the name of the profile from the given path.
+        """
+        segments = path.split(".")
+        profile_name = ".".join(segments[i] for i in range(1, len(segments), 2) if segments[i - 1] != "properties")
+        return profile_name
+    
+    def get_profile_path_from_name(self, short_path: str) -> str:
+        """
+        Get the path of the profile from the given name.
+        """
+        return re.sub(r'(^|\.)', r'\1profiles.', short_path)

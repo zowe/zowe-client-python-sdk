@@ -9,7 +9,9 @@ SPDX-License-Identifier: EPL-2.0
 
 Copyright Contributors to the Zowe Project.
 """
-import sys, warnings , base64 
+import sys
+import warnings 
+import base64 
 from typing import Optional
 import commentjson
 from zowe.core_for_zowe_sdk import constants
