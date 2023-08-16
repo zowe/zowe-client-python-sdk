@@ -316,25 +316,38 @@ class ProfileManager:
             Optional[ConfigFile]: The highest priority layer (configuration file) that contains the specified profile,
                                 or None if the profile is not found in any layer.
         """
-        highest_priority_layer = None
-        layers = [self.project_user_config, self.project_config,
-                  self.global_user_config, self.global_config]
-        
+        highest_layer = None
+        longest_match = ""
+        layers = [
+            self.project_user_config,
+            self.project_config,
+            self.global_user_config,
+            self.global_config
+        ]
+
+        original_name = layers[0].get_profile_name_from_path(json_path)
+
         if not self._show_warnings:
             warnings.simplefilter("ignore")
-        
-        profile_name = layers[0].get_profile_name_from_path(json_path)
-        candidate_layers=[]
-        for idx,layer in enumerate(layers):
-            profile = layer.get_profile(profile_name)
-            if profile is not None:
-                candidate_layers.append((idx,layer))      
-        
-        warnings.resetwarnings()
-        
-        if candidate_layers: return min(candidate_layers)[1]
-        return None 
 
+        for layer in layers:
+            layer.init_from_file()
+            parts = original_name.split(".")
+            current_name = ""
+            while parts:
+                current_name = ".".join(parts)
+                profile = layer.find_profile(current_name, layer.profiles)
+                if profile is not None and len(current_name) > len(longest_match):
+                    highest_layer = layer
+                    longest_match = current_name
+                else:
+                    parts.pop()
+            if original_name == longest_match:
+                break
+        warnings.resetwarnings()
+        return highest_layer, longest_match
+     
+       
     def set_property(self, json_path, value, secure=None) -> None:
         """
         Set a property in the profile, storing it securely if necessary.
@@ -345,14 +358,16 @@ class ProfileManager:
             secure (bool): If True, the property will be stored securely. Default is None.
         """
         # highest priority layer for the given profile name
-        highest_priority_layer = self.get_highest_priority_layer(json_path)
-
+        highest_priority_layer , profile_name = self.get_highest_priority_layer(json_path)
+        if not profile_name:
+            raise ValueError("Invalid json_path. Couldn't find profile_name after 'profiles' keyword.")
         # If the profile doesn't exist in any layer, use the project user config as the default location
         if not highest_priority_layer:
             highest_priority_layer = self.project_user_config
 
         # Set the property in the highest priority layer
-        highest_priority_layer.set_property(json_path, value, secure=secure)
+
+        highest_priority_layer.set_property(json_path, value, profile_name, secure=secure)
 
     def set_profile(self, profile_name: str, profile_data: dict) -> None:
         """
