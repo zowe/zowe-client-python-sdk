@@ -320,7 +320,7 @@ class TestZosmfProfileManager(TestCase):
         self.assertEqual(prof_manager.config_filepath, cwd_up_file_path)
 
         expected_props = {
-            "host": "zowe.test.user.cloud",
+            "host": "zowe.test.cloud",
             "rejectUnauthorized": False,
             "user": "user",
             "password": "password",

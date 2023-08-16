@@ -263,9 +263,6 @@ class ProfileManager:
         loaded_cfg: dict = {}
 
         for i, (config_type, cfg) in enumerate(config_layers.items()):
-            loaded_cfg = always_merger.merge(loaded_cfg, cfg.profiles)
-            if loaded_cfg:
-                cfg.profiles = loaded_cfg
                 
             profile_loaded = self.get_profile(
                 cfg, profile_name, profile_type, config_type
@@ -281,11 +278,20 @@ class ProfileManager:
 
             missing_secure_props.extend(profile_loaded.missing_secure_props)
 
-            if override_with_env:
-                env_var = {**self.get_env(cfg)}
 
             if i == 1 and profile_props:
                 break  # Skip loading from global config if profile was found in project config
+
+        usrProject = self.project_user_config.profiles
+        project = self.project_config.profiles
+        prjt = always_merger.merge(usrProject, project)
+
+        usrGlobal = self.global_user_config.profiles
+        glbal = self.global_config.profiles
+        glbl = always_merger.merge(usrGlobal, glbal)
+
+        if override_with_env:
+                env_var = {**self.get_env(cfg)}
 
         if profile_type != BASE_PROFILE:
             profile_props = {
