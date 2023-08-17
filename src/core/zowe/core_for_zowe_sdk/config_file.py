@@ -121,7 +121,7 @@ class ConfigFile:
     def init_from_file(
         self, 
         config_type: str, 
-        validate_schema: Optional[bool] = True
+        validate_schema: Optional[bool] = False
     ) -> None:
         """
         Initializes the class variable after
@@ -148,7 +148,7 @@ class ConfigFile:
     def validate_schema(
         self,
         config_type: str,
-        validate_schema: Optional[bool] = True,
+        validate_schema: Optional[bool] = False,
     ) -> None:
         """
         Get the $schema_property from the config and load the schema
@@ -222,7 +222,7 @@ class ConfigFile:
         profile_name: Optional[str] = None,
         profile_type: Optional[str] = None,
         config_type: Optional[str] = None,
-        validate_schema: Optional[bool] = True,
+        validate_schema: Optional[bool] = False,
     ) -> Profile:
         """
         Load given profile including secure properties and excluding values from base profile

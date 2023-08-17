@@ -182,12 +182,16 @@ class TestZosmfProfileManager(TestCase):
         self.original_invalid_schema_file_path = os.path.join(
             FIXTURES_PATH, "invalid.zowe.schema.json"
         )
+        self.original_invalidUri_schema_file_path = os.path.join(
+            FIXTURES_PATH, "invalidUri.zowe.config.json"
+        )
         self.fs.add_real_file(self.original_file_path)
         self.fs.add_real_file(self.original_user_file_path)
         self.fs.add_real_file(self.original_nested_file_path)
         self.fs.add_real_file(self.original_schema_file_path)
         self.fs.add_real_file(self.original_invalid_file_path)
         self.fs.add_real_file(self.original_invalid_schema_file_path)
+        self.fs.add_real_file(self.original_invalidUri_schema_file_path)
         self.custom_dir = os.path.dirname(FIXTURES_PATH)
         self.custom_appname = "zowe_abcd"
         self.custom_filename = f"{self.custom_appname}.config.json"
@@ -433,7 +437,28 @@ class TestZosmfProfileManager(TestCase):
             # Test
             prof_manager = ProfileManager(appname="invalid.zowe")
             prof_manager.config_dir = self.custom_dir
-            props: dict = prof_manager.load(profile_name="zosmf")
+            props: dict = prof_manager.load(profile_name="zosmf", validate_schema=True)
+
+    @patch("keyring.get_password", side_effect=keyring_get_password)
+    def test_profile_loading_with_invalid_schema_internet_URI(self, get_pass_func):
+        """
+        Test Validation, no error should be raised for valid schema
+        """
+        # Setup - copy profile to fake filesystem created by pyfakefs
+        with self.assertRaises(ValidationError):
+            custom_file_path = os.path.join(self.custom_dir, "invalidUri.zowe.config.json")
+            shutil.copy(self.original_invalidUri_schema_file_path, custom_file_path)
+            os.chdir(self.custom_dir)
+
+            self.setUpCreds(custom_file_path, {
+                "profiles.zosmf.properties.user": "user",
+                "profiles.zosmf.properties.password": "password",
+            })
+
+            # Test
+            prof_manager = ProfileManager(appname="invalidUri.zowe")
+            prof_manager.config_dir = self.custom_dir
+            props: dict = prof_manager.load(profile_name="zosmf", validate_schema=True)
 
     @patch("keyring.get_password", side_effect=keyring_get_password)
     def test_profile_loading_with_env_variables(self, get_pass_func):

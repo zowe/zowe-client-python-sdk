@@ -229,6 +229,7 @@ class ProfileManager:
                     SecurePropsNotFoundWarning,
                 )
         except Exception as exc:
+            print("hi", exc)
             warnings.warn(
                 f"Could not load {config_type} '{cfg.filename}' at '{cfg.filepath}'"
                 f"because {type(exc).__name__}'{exc}'.",
@@ -242,7 +243,7 @@ class ProfileManager:
         profile_name: Optional[str] = None,
         profile_type: Optional[str] = None,
         check_missing_props: bool = True,
-        validate_schema: Optional[bool] = True,
+        validate_schema: Optional[bool] = False,
         override_with_env: Optional[bool] = False,
     ) -> dict:
         """Load connection details from a team config profile.
