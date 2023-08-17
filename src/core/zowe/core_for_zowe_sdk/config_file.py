@@ -464,7 +464,7 @@ class ConfigFile:
         # self.save("secure" in profile_data)
         
 
-    def save(self, secure_props=False):
+    def save(self, secure_props=True):
         """
         Save the config file to disk. and secure props to vault
         parameters:
