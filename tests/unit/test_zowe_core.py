@@ -524,6 +524,7 @@ class TestZosmfProfileManager(TestCase):
         }
         self.setUpCreds(cwd_up_file_path, credential)
         base64_encoded_credential = base64.b64encode(commentjson.dumps(credential).encode()).decode()
+        base64_encoded_credential+='\0'
         encoded_credential = base64_encoded_credential.encode('utf-16le').decode()
         retrieve_cred_func.return_value = encoded_credential
 
@@ -536,7 +537,6 @@ class TestZosmfProfileManager(TestCase):
         expected_calls = []
         chunk_size = constants["WIN32_CRED_MAX_STRING_LENGTH"]
         chunks = [base64_encoded_credential[i: i + chunk_size] for i in range(0, len(base64_encoded_credential), chunk_size)]
-        chunks[-1] += "\0"
         for index, chunk in enumerate(chunks, start=1):
             field_name = f"{constants['ZoweAccountName']}-{index}"
             service_names = f"{service_name}-{index}"
