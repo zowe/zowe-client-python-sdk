@@ -13,7 +13,7 @@ Copyright Contributors to the Zowe Project.
 import os.path
 import os
 import warnings
-from typing import Optional
+from typing import Optional , Tuple
 
 from .config_file import ConfigFile, Profile
 from .credential_manager import CredentialManager
@@ -305,7 +305,7 @@ class ProfileManager:
 
         return profile_props
 
-    def get_highest_priority_layer(self, json_path: str) -> Optional[ConfigFile]:
+    def get_highest_priority_layer(self, json_path: str) -> Tuple[Optional[ConfigFile], str]:
         """
         Get the highest priority layer (configuration file) based on the given profile name
 
@@ -313,7 +313,7 @@ class ProfileManager:
             profile_name (str): The name of the profile to look for in the layers.
 
         Returns:
-            Optional[ConfigFile]: The highest priority layer (configuration file) that contains the specified profile,
+            Tuple[Optional[ConfigFile], str]: Highest priority layer and longest matching profile name
                                 or None if the profile is not found in any layer.
         """
         highest_layer = None
@@ -329,7 +329,7 @@ class ProfileManager:
 
         if not self._show_warnings:
             warnings.simplefilter("ignore")
-
+        
         for layer in layers:
             layer.init_from_file()
             parts = original_name.split(".")
@@ -367,7 +367,7 @@ class ProfileManager:
 
         # Set the property in the highest priority layer
 
-        highest_priority_layer.set_property(json_path, value, profile_name, secure=secure)
+        highest_priority_layer._set_property(json_path, value, profile_name, secure=secure)
 
     def set_profile(self, profile_name: str, profile_data: dict) -> None:
         """
@@ -377,7 +377,7 @@ class ProfileManager:
             profile_name (str): The name of the profile to set.
             profile_data (dict): The data of the profile to set.
         """
-        highest_priority_layer = self.get_highest_priority_layer(profile_name)
+        highest_priority_layer, profile_name = self.get_highest_priority_layer(profile_name)
         if not highest_priority_layer:
             highest_priority_layer = self.project_user_config
         highest_priority_layer.set_profile(profile_name, profile_data)

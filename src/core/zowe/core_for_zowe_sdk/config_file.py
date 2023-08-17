@@ -349,24 +349,13 @@ class ConfigFile:
         return props
 
     def __set_or_create_nested_profile(self, original_name, current_profile):
-        parts = original_name.split(".")
+        path = self.get_profile_path_from_name(original_name)
+        keys = path.split(".")[1:]
         nested_profiles = self.profiles
+        for key in keys:
+            nested_profiles = nested_profiles.setdefault(key, {})
+        nested_profiles.update(current_profile)
 
-        for part in parts[:-1]:
-            nested_profiles = nested_profiles.setdefault(part, {}).setdefault("profiles", {})
-
-        last_part = parts[-2]  # The parent profile of the current_profile
-        current_profile_name = parts[-1]  # The current_profile name
-        parent_profile = nested_profiles.setdefault(last_part, {})  # Get or create the parent profile
-
-        profiles_dict = parent_profile.setdefault("profiles", {})  # Get or create the profiles dictionary
-        profiles_dict[current_profile_name] = current_profile  # Add the current_profile to the profiles dictionary
-
-        # Update the profiles dictionary for the parent profile
-        parent_profile["profiles"] = profiles_dict
-        
-        self.profiles.update(nested_profiles)  # Update the class variable with the modified structure # Update the class variable with the modified structure
-        print(self.profiles)
     def __is_secure(self, json_path: str, property_name: str) -> bool:
         """
         Check whether the given JSON path corresponds to a secure property.
@@ -384,7 +373,7 @@ class ConfigFile:
             return property_name in profile["secure"]
         return False
 
-    def set_property(self, json_path, value, profile_name, secure=None) -> None:
+    def _set_property(self, json_path, value, profile_name, secure=None) -> None:
         """
         Set a property in the profile, storing it securely if necessary.
 
@@ -424,7 +413,6 @@ class ConfigFile:
 
         current_profile["properties"] = current_properties
         current_profile["secure"] = current_secure
-        print(original_name)
         if original_name != profile_name:
             self.__set_or_create_nested_profile(original_name, current_profile)
         else:
@@ -441,11 +429,12 @@ class ConfigFile:
         """
         if self.profiles is None:
             self.init_from_file()
-        profile_name=profile_path.split(".")[-1]
+        profile_name = self.get_profile_name_from_path(profile_path)
         if "secure" in profile_data:
             # Checking if the profile has a 'secure' field with values
             secure_fields = profile_data["secure"]
-            existing_secure_fields = self.profiles.get(profile_name, {}).get("secure", [])
+            current_profile     = self.find_profile(profile_name,self.profiles) #working on this logic
+            existing_secure_fields = current_profile.get(profile_name, {}).get("secure", [])
             new_secure_fields = [field for field in secure_fields if field not in existing_secure_fields]
 
             # JSON paths for new secure properties and store their values in CredentialManager.secure_props
