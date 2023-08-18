@@ -305,7 +305,7 @@ class ProfileManager:
 
         return profile_props
 
-    def get_highest_priority_layer(self, json_path: str) -> Tuple[Optional[ConfigFile], str]:
+    def get_highest_priority_layer(self, json_path: str) -> Optional[ConfigFile]:
         """
         Get the highest priority layer (configuration file) based on the given profile name
 
@@ -313,7 +313,7 @@ class ProfileManager:
             profile_name (str): The name of the profile to look for in the layers.
 
         Returns:
-            Tuple[Optional[ConfigFile], str]: Highest priority layer and longest matching profile name
+            Optional[ConfigFile]: The highest priority layer (configuration file) that contains the specified profile,
                                 or None if the profile is not found in any layer.
         """
         highest_layer = None
@@ -345,7 +345,7 @@ class ProfileManager:
             if original_name == longest_match:
                 break
         warnings.resetwarnings()
-        return highest_layer, longest_match
+        return highest_layer
      
        
     def set_property(self, json_path, value, secure=None) -> None:
@@ -357,30 +357,30 @@ class ProfileManager:
             value (str): The value to be set for the property.
             secure (bool): If True, the property will be stored securely. Default is None.
         """
+
         # highest priority layer for the given profile name
-        highest_priority_layer , profile_name = self.get_highest_priority_layer(json_path)
-        if not profile_name:
-            raise ValueError("Invalid json_path. Couldn't find profile_name after 'profiles' keyword.")
+        highest_priority_layer = self.get_highest_priority_layer(json_path)
         # If the profile doesn't exist in any layer, use the project user config as the default location
         if not highest_priority_layer:
             highest_priority_layer = self.project_user_config
 
         # Set the property in the highest priority layer
 
-        highest_priority_layer._set_property(json_path, value, profile_name, secure=secure)
+        highest_priority_layer.set_property(json_path, value, secure=secure)
 
-    def set_profile(self, profile_name: str, profile_data: dict) -> None:
+    def set_profile(self, profile_path: str, profile_data: dict) -> None:
         """
         Set a profile in the highest priority layer (configuration file) based on the given profile name
 
         Parameters:
-            profile_name (str): The name of the profile to set.
+            profile_path (str): TThe path of the profile to be set. eg: profiles.zosmf
             profile_data (dict): The data of the profile to set.
         """
-        highest_priority_layer, profile_name = self.get_highest_priority_layer(profile_name)
+        highest_priority_layer = self.get_highest_priority_layer(profile_path)
+
         if not highest_priority_layer:
             highest_priority_layer = self.project_user_config
-        highest_priority_layer.set_profile(profile_name, profile_data)
+        highest_priority_layer.set_profile(profile_path, profile_data)
     
     def save(self) -> None:
         """

@@ -348,8 +348,8 @@ class ConfigFile:
 
         return props
 
-    def __set_or_create_nested_profile(self, original_name, current_profile):
-        path = self.get_profile_path_from_name(original_name)
+    def __set_or_create_nested_profile(self, profile_name, current_profile):
+        path = self.get_profile_path_from_name(profile_name)
         keys = path.split(".")[1:]
         nested_profiles = self.profiles
         for key in keys:
@@ -373,7 +373,7 @@ class ConfigFile:
             return property_name in profile["secure"]
         return False
 
-    def _set_property(self, json_path, value, profile_name, secure=None) -> None:
+    def set_property(self, json_path, value, secure=None) -> None:
         """
         Set a property in the profile, storing it securely if necessary.
 
@@ -388,13 +388,12 @@ class ConfigFile:
 
         # Checking whether the property should be stored securely or in plain text
         property_name = json_path.split(".")[-1]
-        original_name = self.get_profile_name_from_path(json_path)
+        profile_name = self.get_profile_name_from_path(json_path)
         # check if the property is already secure
         is_property_secure = self.__is_secure(profile_name, property_name)
         is_secure = secure if secure is not None else is_property_secure
 
-        current_profile = {} if original_name != profile_name else self.find_profile(profile_name, self.profiles)
-
+        current_profile = self.find_profile(profile_name, self.profiles) or {}
         current_properties = current_profile.setdefault("properties", {})
         current_secure = current_profile.setdefault("secure", [])
 
@@ -413,18 +412,14 @@ class ConfigFile:
 
         current_profile["properties"] = current_properties
         current_profile["secure"] = current_secure
-        if original_name != profile_name:
-            self.__set_or_create_nested_profile(original_name, current_profile)
-        else:
-            self.profiles[profile_name] = current_profile
-        # self.save(is_secure)
+        self.__set_or_create_nested_profile(profile_name, current_profile)
 
     def set_profile(self, profile_path: str, profile_data: dict) -> None: 
         """
         Set a profile in the config file.
 
         Parameters:
-            profile_path (str): The path of the profile to be set.
+            profile_path (str): The path of the profile to be set. eg: profiles.zosmf
             profile_data (dict): The data to be set for the profile.
         """
         if self.profiles is None:
@@ -433,8 +428,8 @@ class ConfigFile:
         if "secure" in profile_data:
             # Checking if the profile has a 'secure' field with values
             secure_fields = profile_data["secure"]
-            current_profile     = self.find_profile(profile_name,self.profiles) #working on this logic
-            existing_secure_fields = current_profile.get(profile_name, {}).get("secure", [])
+            current_profile  = self.find_profile(profile_name,self.profiles) or {}
+            existing_secure_fields = current_profile.get("secure", [])
             new_secure_fields = [field for field in secure_fields if field not in existing_secure_fields]
 
             # JSON paths for new secure properties and store their values in CredentialManager.secure_props
@@ -453,15 +448,7 @@ class ConfigFile:
                 for field, value in profile_data.get("properties", {}).items()
                 if field not in profile_data["secure"]
             }
-        if profile_name in self.profiles:
-            # If the profile already exists, update its properties with the new data
-            existing_properties = self.profiles[profile_name].get("properties", {})
-            existing_properties.update(profile_data.get("properties", {}))
-            profile_data["properties"] = existing_properties
-
-        self.profiles[profile_name] = profile_data
-        # print(self.profiles[profile_name])
-        # self.save("secure" in profile_data)
+        self.__set_or_create_nested_profile(profile_name, profile_data)
         
 
     def save(self, secure_props=True):

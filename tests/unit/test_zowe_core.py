@@ -632,11 +632,10 @@ class TestValidateConfigJsonClass(unittest.TestCase):
         profile_manager._show_warnings = False
         project_user_config.get_profile_name_from_path.return_value = "zosmf"
         # Call the function being tested
-        result_layer, result_profile_name = profile_manager.get_highest_priority_layer("zosmf")
+        result_layer = profile_manager.get_highest_priority_layer("zosmf")
         
         # Assert the results
         self.assertEqual(result_layer, project_user_config)
-        self.assertEqual(result_profile_name, "zosmf")
         mock_simplefilter.assert_called_with("ignore")
         mock_resetwarnings.assert_called()
 
@@ -651,34 +650,19 @@ class TestValidateConfigJsonClass(unittest.TestCase):
 
         # Set up mock for the highest priority layer
         highest_priority_layer_mock = mock.MagicMock(spec=ConfigFile)
-        get_highest_priority_layer_mock.return_value = (highest_priority_layer_mock, "zosmf")
+        get_highest_priority_layer_mock.return_value = highest_priority_layer_mock
 
         profile_manager = ProfileManager()
 
         # Mock the behavior of _set_property method in highest_priority_layer
-        highest_priority_layer_mock._set_property.return_value = None
+        highest_priority_layer_mock.set_property.return_value = None
 
         # Call the method being tested
         profile_manager.set_property(json_path, value, secure)
 
         # Assert the method calls
-        highest_priority_layer_mock._set_property.assert_called_with(json_path, value, "zosmf", secure=secure)
+        highest_priority_layer_mock.set_property.assert_called_with(json_path, value, secure=secure)
 
-
-    @patch("zowe.core_for_zowe_sdk.ProfileManager.get_highest_priority_layer")
-    def test_set_property_invalid_json_path(self, get_highest_priority_layer_mock):
-        """
-        Test that set_property raises a ValueError when the json_path is invalid.
-        """
-        json_path = "invalid.json.path"
-        value = "samadpls"
-
-        highest_priority_layer_mock = mock.MagicMock(spec=ConfigFile)
-        get_highest_priority_layer_mock.return_value = (highest_priority_layer_mock, "")
-        profile_manager = ProfileManager()
-        with self.assertRaises(ValueError):
-            profile_manager.set_property(json_path, value)
-        get_highest_priority_layer_mock.assert_called_with(json_path)
 
     @patch("zowe.core_for_zowe_sdk.ConfigFile.save")
     @patch("zowe.core_for_zowe_sdk.CredentialManager.save_secure_props")
