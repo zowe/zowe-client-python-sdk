@@ -348,13 +348,16 @@ class ConfigFile:
 
         return props
 
-    def __set_or_create_nested_profile(self, profile_name, current_profile):
+    def __set_or_create_nested_profile(self, profile_name, profile_data):
+        """
+        Set or create a nested profile.
+        """
         path = self.get_profile_path_from_name(profile_name)
         keys = path.split(".")[1:]
         nested_profiles = self.profiles
         for key in keys:
             nested_profiles = nested_profiles.setdefault(key, {})
-        nested_profiles.update(current_profile)
+        nested_profiles.update(profile_data)
 
     def __is_secure(self, json_path: str, property_name: str) -> bool:
         """

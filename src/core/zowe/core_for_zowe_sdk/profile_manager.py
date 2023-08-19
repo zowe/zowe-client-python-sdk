@@ -13,7 +13,7 @@ Copyright Contributors to the Zowe Project.
 import os.path
 import os
 import warnings
-from typing import Optional , Tuple
+from typing import Optional
 
 from .config_file import ConfigFile, Profile
 from .credential_manager import CredentialManager
