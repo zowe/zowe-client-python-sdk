@@ -121,7 +121,8 @@ class ConfigFile:
     def init_from_file(
         self, 
         config_type: str, 
-        validate_schema: Optional[bool] = False
+        validate_schema: Optional[bool] = False,
+        verify: Optional[bool] = False,
     ) -> None:
         """
         Initializes the class variable after
@@ -139,7 +140,7 @@ class ConfigFile:
         self.schema_property = profile_jsonc.get("$schema", None)
 
         if self.schema_property:
-            self.validate_schema(config_type, validate_schema)
+            self.validate_schema(config_type, validate_schema, verify=verify)
         # loading secure props is done in load_profile_properties
         # since we want to try loading secure properties only when
         # we know that the profile has saved properties
@@ -149,6 +150,7 @@ class ConfigFile:
         self,
         config_type: str,
         validate_schema: Optional[bool] = False,
+        verify: Optional[bool] = False,
     ) -> None:
         """
         Get the $schema_property from the config and load the schema
@@ -171,7 +173,7 @@ class ConfigFile:
                 
         # validate the $schema property 
         if path_schema_json and validate_schema:
-            validate_config_json(path_config_json, path_schema_json, cwd = self.location)
+            validate_config_json(path_config_json, path_schema_json, cwd = self.location, verify=verify)
         
     def schema_list(
         self,
@@ -223,6 +225,7 @@ class ConfigFile:
         profile_type: Optional[str] = None,
         config_type: Optional[str] = None,
         validate_schema: Optional[bool] = False,
+        verify: Optional[bool] = False,
     ) -> Profile:
         """
         Load given profile including secure properties and excluding values from base profile
@@ -232,7 +235,7 @@ class ConfigFile:
             Returns a namedtuple called Profile
         """
         if self.profiles is None:
-            self.init_from_file(config_type, validate_schema)
+            self.init_from_file(config_type, validate_schema, verify)
 
         if profile_name is None and profile_type is None:
             raise ProfileNotFound(

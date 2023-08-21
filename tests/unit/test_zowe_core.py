@@ -9,7 +9,7 @@ import sys
 import unittest
 from unittest import mock
 from unittest.mock import patch
-from jsonschema import validate, ValidationError
+from jsonschema import validate, ValidationError, SchemaError
 from zowe.core_for_zowe_sdk.validators import validate_config_json
 import commentjson
 
@@ -182,8 +182,11 @@ class TestZosmfProfileManager(TestCase):
         self.original_invalid_schema_file_path = os.path.join(
             FIXTURES_PATH, "invalid.zowe.schema.json"
         )
-        self.original_invalidUri_schema_file_path = os.path.join(
+        self.original_invalidUri_file_path = os.path.join(
             FIXTURES_PATH, "invalidUri.zowe.config.json"
+        )
+        self.original_invalidUri_schema_file_path = os.path.join(
+            FIXTURES_PATH, "invalidUri.zowe.schema.json"
         )
         self.fs.add_real_file(self.original_file_path)
         self.fs.add_real_file(self.original_user_file_path)
@@ -191,6 +194,7 @@ class TestZosmfProfileManager(TestCase):
         self.fs.add_real_file(self.original_schema_file_path)
         self.fs.add_real_file(self.original_invalid_file_path)
         self.fs.add_real_file(self.original_invalid_schema_file_path)
+        self.fs.add_real_file(self.original_invalidUri_file_path)
         self.fs.add_real_file(self.original_invalidUri_schema_file_path)
         self.custom_dir = os.path.dirname(FIXTURES_PATH)
         self.custom_appname = "zowe_abcd"
@@ -445,9 +449,10 @@ class TestZosmfProfileManager(TestCase):
         Test Validation, no error should be raised for valid schema
         """
         # Setup - copy profile to fake filesystem created by pyfakefs
-        with self.assertRaises(ValidationError):
+        with self.assertRaises(SchemaError):
             custom_file_path = os.path.join(self.custom_dir, "invalidUri.zowe.config.json")
-            shutil.copy(self.original_invalidUri_schema_file_path, custom_file_path)
+            shutil.copy(self.original_invalidUri_file_path, custom_file_path)
+            shutil.copy(self.original_invalidUri_schema_file_path, self.custom_dir)
             os.chdir(self.custom_dir)
 
             self.setUpCreds(custom_file_path, {
@@ -458,7 +463,7 @@ class TestZosmfProfileManager(TestCase):
             # Test
             prof_manager = ProfileManager(appname="invalidUri.zowe")
             prof_manager.config_dir = self.custom_dir
-            props: dict = prof_manager.load(profile_name="zosmf", validate_schema=True)
+            props: dict = prof_manager.load(profile_name="zosmf", validate_schema=True, verify=False)
 
     @patch("keyring.get_password", side_effect=keyring_get_password)
     def test_profile_loading_with_env_variables(self, get_pass_func):
@@ -504,7 +509,7 @@ class TestValidateConfigJsonClass(unittest.TestCase):
         schema_json = commentjson.load(open(path_to_schema))
 
         expected = validate(config_json, schema_json)
-        result = validate_config_json(path_to_config, path_to_schema)
+        result = validate_config_json(path_to_config, path_to_schema, cwd = FIXTURES_PATH)
 
         self.assertEqual(result, expected)
 
@@ -520,6 +525,6 @@ class TestValidateConfigJsonClass(unittest.TestCase):
             validate(invalid_config_json, invalid_schema_json)
 
         with self.assertRaises(ValidationError) as actual_info:
-            validate_config_json(path_to_invalid_config, path_to_invalid_schema)
+            validate_config_json(path_to_invalid_config, path_to_invalid_schema, cwd = FIXTURES_PATH)
 
         self.assertEqual(str(actual_info.exception), str(expected_info.exception))
