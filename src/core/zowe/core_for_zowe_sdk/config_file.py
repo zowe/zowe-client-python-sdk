@@ -138,7 +138,7 @@ class ConfigFile:
         # loading secure props is done in load_profile_properties
         # since we want to try loading secure properties only when
         # we know that the profile has saved properties
-        # self.load_secure_props()
+        #  CredentialManager.load_secure_props()
 
     def schema_list(
         self,

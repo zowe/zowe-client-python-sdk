@@ -624,7 +624,7 @@ class TestValidateConfigJsonClass(unittest.TestCase):
         # Set up mock profiles in the layers
         project_user_config = mock.MagicMock(spec=ConfigFile)
         project_user_config.find_profile.return_value = mock.MagicMock()
-        project_user_config.find_profile.return_value.data = {"profile_name": "zosmf"}
+        project_user_config.find_profile.return_value.data = {"profiles": "zosmf"}
         
         # Set up the ProfileManager
         profile_manager = ProfileManager()
@@ -675,3 +675,106 @@ class TestValidateConfigJsonClass(unittest.TestCase):
         expected_calls = [call(False) for _ in range(4)]
         mock_save.assert_has_calls(expected_calls)
         mock_save_secure_props.assert_called_once() 
+    
+    @mock.patch("zowe.core_for_zowe_sdk.ProfileManager.get_highest_priority_layer")
+    def test_profile_manager_set_profile(self, get_highest_priority_layer_mock):
+        """
+        Test that set_profile calls the set_profile method of the highest priority layer.
+        """
+        profile_path = "profiles.zosmf"
+        profile_data = {
+            "properties": {
+                "user": "admin",
+                "password": "password1"
+            }
+        }
+
+        highest_priority_layer_mock = mock.MagicMock(spec=ConfigFile)
+        get_highest_priority_layer_mock.return_value = highest_priority_layer_mock
+        profile_manager = ProfileManager()
+
+        highest_priority_layer_mock.set_profile.return_value = None
+        profile_manager.set_profile(profile_path, profile_data)
+
+        highest_priority_layer_mock.set_profile.assert_called_with(profile_path, profile_data)
+
+    @mock.patch("zowe.core_for_zowe_sdk.ConfigFile.get_profile_path_from_name")
+    def test_set_or_create_nested_profile(self, mock_get_profile_path):
+        """
+        Test that __set_or_create_nested_profile calls the get_profile_path_from_name method and sets the profile data.
+        """
+        mock_get_profile_path.return_value = "profiles.zosmf"
+        config_file = ConfigFile( name="zowe_abcd", type="User Config", profiles={})
+        profile_data = {
+            "properties": {
+                "user": "samadpls",
+                "password": "password1"
+            } 
+        }
+        config_file._ConfigFile__set_or_create_nested_profile("zosmf", profile_data)
+        expected_profiles = {
+            "zosmf": {
+                "properties": {
+                    "user": "samadpls",
+                    "password": "password1"
+                }
+            }
+        }
+        self.assertEqual(config_file.profiles, expected_profiles)
+
+    @mock.patch("zowe.core_for_zowe_sdk.ConfigFile.find_profile")
+    def test_is_secure(self, mock_find_profile):
+        """
+        Test that __is_secure returns True if the property is secure and False otherwise.
+        """
+        config_file = ConfigFile(name="zowe_abcd", type="User Config", profiles={})
+        mock_find_profile.return_value = {
+                                        "properties": {"user":"samadpls"},
+                                        "secure": ["password"]
+                                        }
+        is_secure_secure = config_file._ConfigFile__is_secure("zosmf", "password")
+        is_secure_non_secure = config_file._ConfigFile__is_secure("zosmf", "user")
+
+        self.assertTrue(is_secure_secure)
+        self.assertFalse(is_secure_non_secure)
+
+    @mock.patch("zowe.core_for_zowe_sdk.ConfigFile.get_profile_name_from_path")
+    @mock.patch("zowe.core_for_zowe_sdk.ConfigFile.find_profile")
+    @mock.patch("zowe.core_for_zowe_sdk.ConfigFile._ConfigFile__is_secure")
+    def test_config_file_set_property(self, mock_is_secure, mock_find_profile, mock_get_profile_name):
+        """
+        Test that set_property calls the __is_secure, find_profile and get_profile_name_from_path methods.
+        """
+        config_file = ConfigFile(name="zowe_abcd", type="User Config", profiles= {})
+
+        mock_is_secure.return_value = False
+        mock_find_profile.return_value = {"properties": {"port": 1443}, "secure": []}
+        mock_get_profile_name.return_value = "zosmf"
+
+        config_file.set_property("profiles.zosmf.properties.user", "admin", secure=True)
+
+        mock_is_secure.assert_called_with("zosmf", "user")
+        mock_find_profile.assert_called_with("zosmf", config_file.profiles)
+        mock_get_profile_name.assert_called_with("profiles.zosmf.properties.user")
+        self.assertEqual(config_file.profiles, {
+            "zosmf": {
+                "properties": {"port": 1443},
+                "secure": ["user"]
+            }
+        })    
+
+    def test_get_profile_name_from_path(self):
+        """
+        Test that get_profile_name_from_path returns the profile name from the path.
+        """
+        config_file = ConfigFile(name="zowe_abcd", type="User Config")
+        profile_name = config_file.get_profile_name_from_path("profiles.lpar1.profiles.zosmf.properties.user")
+        self.assertEqual(profile_name, "lpar1.zosmf")    
+    
+    def test_get_profile_path_from_name(self):
+        """
+        Test that get_profile_path_from_name returns the profile path from the name.
+        """
+        config_file = ConfigFile(name="zowe_abcd", type="User Config")
+        profile_path_1 = config_file.get_profile_path_from_name("lpar1.zosmf")
+        self.assertEqual(profile_path_1, "profiles.lpar1.profiles.zosmf")
