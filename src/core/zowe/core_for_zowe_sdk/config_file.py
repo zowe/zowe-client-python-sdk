@@ -10,37 +10,28 @@ SPDX-License-Identifier: EPL-2.0
 Copyright Contributors to the Zowe Project.
 """
 
-import base64
 import os.path
 import re
 import json
 import requests
-import sys
 import warnings
 from dataclasses import dataclass, field
 from typing import Optional, NamedTuple
 
 import commentjson
 
-from .constants import constants
 from .credential_manager import CredentialManager
 from .custom_warnings import (
     ProfileNotFoundWarning,
     ProfileParsingWarning,
-    SecurePropsNotFoundWarning,
 )
-from .exceptions import ProfileNotFound, SecureProfileLoadFailed
+from .exceptions import ProfileNotFound
 from .profile_constants import (
     GLOBAL_CONFIG_NAME,
     TEAM_CONFIG,
     USER_CONFIG,
 )
 
-HAS_KEYRING = True
-try:
-    import keyring
-except ImportError:
-    HAS_KEYRING = False
 
 HOME = os.path.expanduser("~")
 GLOBAl_CONFIG_LOCATION = os.path.join(HOME, ".zowe")
