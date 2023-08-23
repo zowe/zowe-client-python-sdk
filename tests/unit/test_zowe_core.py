@@ -200,7 +200,7 @@ class TestZosmfProfileManager(TestCase):
         }
 
         global SECURE_CONFIG_PROPS
-        SECURE_CONFIG_PROPS = base64.b64encode((json.dumps(CRED_DICT)).encode("utf-8"))
+        SECURE_CONFIG_PROPS = base64.b64encode((json.dumps(CRED_DICT)).encode()).decode()
         if sys.platform == "win32":
             SECURE_CONFIG_PROPS = SECURE_CONFIG_PROPS.decode("utf-16")
 
