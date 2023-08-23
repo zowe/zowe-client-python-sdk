@@ -745,11 +745,14 @@ class TestZosmfProfileManager(TestCase):
         profile_path_1 = config_file.get_profile_path_from_name("lpar1.zosmf")
         self.assertEqual(profile_path_1, "profiles.lpar1.profiles.zosmf")
 
-    def test_set_profile_method(self):
+    def test_config_file_set_profile(self):
         """
         Test the set_profile method.
         """
-    
+        cwd_up_dir_path = os.path.dirname(CWD)
+        cwd_up_file_path = os.path.join(cwd_up_dir_path, "zowe.config.json")
+        os.chdir(CWD)
+        shutil.copy(self.original_file_path, cwd_up_file_path)
         initial_profiles = {
             "lpar1": {
                 "profiles": {
@@ -762,8 +765,7 @@ class TestZosmfProfileManager(TestCase):
                 }
             }
         }
-        config_file = ConfigFile("User Config", "zowe.config.json", FIXTURES_PATH , profiles=initial_profiles)
-        path_to_schema = FIXTURES_PATH + "\zowe.config.json"
+        config_file = ConfigFile("User Config", "zowe.config.json", cwd_up_dir_path , profiles=initial_profiles)
         profile_data = {
             "type": "zosmf",
             "properties": {
@@ -779,7 +781,7 @@ class TestZosmfProfileManager(TestCase):
                 config_file.set_profile("profiles.lpar1.profiles.zosmf", profile_data)
 
         expected_secure_props = {
-            path_to_schema: {
+            cwd_up_file_path: {
                 "profiles.lpar1.profiles.zosmf.properties.user": "abc",
                 "profiles.lpar1.profiles.zosmf.properties.password": "def"
             }
@@ -805,6 +807,10 @@ class TestZosmfProfileManager(TestCase):
         """
         Test saving a config file with secure properties.
         """
+        cwd_up_dir_path = os.path.dirname(CWD)
+        cwd_up_file_path = os.path.join(cwd_up_dir_path, "zowe.config.json")
+        os.chdir(CWD)
+        shutil.copy(self.original_file_path, cwd_up_file_path)
         config_data = {
             "profiles": {
                 "zosmf": {
@@ -815,15 +821,14 @@ class TestZosmfProfileManager(TestCase):
                     "secure": ["user"]
                 }
             }
-        }
-        path_to_schema = FIXTURES_PATH + "\zowe.config.json"
+        } 
         with patch("builtins.open", mock.mock_open()) as mock_file:
-            config_file = ConfigFile("User Config", "zowe.config.json", FIXTURES_PATH , profiles=config_data.copy())
+            config_file = ConfigFile("User Config", "zowe.config.json", cwd_up_dir_path , profiles=config_data.copy())
             config_file.jsonc = config_data
             config_file.save()
 
             mock_save_secure_props.assert_called_once()
-            mock_file.assert_called_once_with(path_to_schema, 'w')
+            mock_file.assert_called_once_with(cwd_up_file_path, 'w')
             mock_file.return_value.__enter__.return_value.write.asser_called()
             
 
