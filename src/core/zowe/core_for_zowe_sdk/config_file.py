@@ -334,11 +334,11 @@ class ConfigFile:
             CredentialManager.load_secure_props()
             self.secure_props=CredentialManager.secure_props.get(self.filepath, {})
             # load properties with key as profile.{profile_name}.properties.{*}
-            for (key, value) in CredentialManager.secure_props.items():
+            for (key, value) in self.secure_props.items():
                 if re.match(
                     "profiles\\." + profile_name + "\\.properties\\.[a-z]+", key
                 ):
-                    property_name = key.split(".")[3]
+                    property_name = key.split(".")[-1]
                     if property_name in secure_fields:
                         props[property_name] = value
                         secure_fields.remove(property_name)
