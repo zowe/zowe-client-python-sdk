@@ -106,8 +106,7 @@ class CredentialManager:
 
             if encoded_credential is not None and encoded_credential.endswith("\0"):
                 encoded_credential = encoded_credential[:-1]
-        else:
-             encoded_credential = encoded_credential.decode()
+        
         return encoded_credential        
         
     
