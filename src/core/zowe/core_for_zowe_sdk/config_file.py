@@ -324,7 +324,7 @@ class ConfigFile:
         # load secure props only if there are secure fields
         if secure_fields:
             CredentialManager.load_secure_props()
-            self.secure_props=CredentialManager.secure_props.get(self.filepath, {})
+            self.secure_props = CredentialManager.secure_props.get(self.filepath, {})
             # load properties with key as profile.{profile_name}.properties.{*}
             for (key, value) in self.secure_props.items():
                 if re.match(
