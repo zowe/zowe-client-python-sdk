@@ -581,40 +581,6 @@ class TestZosmfProfileManager(TestCase):
         }
         self.assertEqual(props, expected_props)
 
-
-
-class TestValidateConfigJsonClass(unittest.TestCase):
-    """Testing the validate_config_json function"""
-
-    def test_validate_config_json_valid(self):
-        """Test validate_config_json with valid config.json matching schema.json"""
-        path_to_config = FIXTURES_PATH + "/zowe.config.json"
-        path_to_schema = FIXTURES_PATH + "/zowe.schema.json"
-
-        config_json = commentjson.load(open(path_to_config))
-        schema_json = commentjson.load(open(path_to_schema))
-
-        expected = validate(config_json, schema_json)
-        result = validate_config_json(path_to_config, path_to_schema)
-
-        self.assertEqual(result, expected)
-
-    def test_validate_config_json_invalid(self):
-        """Test validate_config_json with invalid config.json that does not match schema.json"""
-        path_to_invalid_config = FIXTURES_PATH + "/invalid.zowe.config.json"
-        path_to_invalid_schema = FIXTURES_PATH + "/invalid.zowe.schema.json"
-
-        invalid_config_json = commentjson.load(open(path_to_invalid_config))
-        invalid_schema_json = commentjson.load(open(path_to_invalid_schema))
-
-        with self.assertRaises(ValidationError) as expected_info:
-            validate(invalid_config_json, invalid_schema_json)
-
-        with self.assertRaises(ValidationError) as actual_info:
-            validate_config_json(path_to_invalid_config, path_to_invalid_schema)
-
-        self.assertEqual(str(actual_info.exception), str(expected_info.exception))
-    
     @mock.patch("warnings.simplefilter")
     @mock.patch("warnings.resetwarnings")
     def test_get_highest_priority_layer(self, mock_resetwarnings, mock_simplefilter):
@@ -778,3 +744,119 @@ class TestValidateConfigJsonClass(unittest.TestCase):
         config_file = ConfigFile(name="zowe_abcd", type="User Config")
         profile_path_1 = config_file.get_profile_path_from_name("lpar1.zosmf")
         self.assertEqual(profile_path_1, "profiles.lpar1.profiles.zosmf")
+
+    def test_set_profile_method(self):
+        """
+        Test the set_profile method.
+        """
+    
+        initial_profiles = {
+            "lpar1": {
+                "profiles": {
+                    "zosmf": {
+                        "properties": {
+                            "port": 1443
+                        },
+                        "secure": []
+                    }
+                }
+            }
+        }
+        config_file = ConfigFile("User Config", "zowe.config.json", FIXTURES_PATH , profiles=initial_profiles)
+        path_to_schema = FIXTURES_PATH + "\zowe.config.json"
+        profile_data = {
+            "type": "zosmf",
+            "properties": {
+                "port": 443,
+                "user": "abc",
+                "password": "def"
+            },
+            "secure": ["user", "password"]
+        }
+
+        with patch("zowe.core_for_zowe_sdk.ConfigFile.get_profile_name_from_path", return_value="lpar1.zosmf"):
+            with patch("zowe.core_for_zowe_sdk.ConfigFile.find_profile", return_value=initial_profiles["lpar1"]["profiles"]["zosmf"]):
+                config_file.set_profile("profiles.lpar1.profiles.zosmf", profile_data)
+
+        expected_secure_props = {
+            path_to_schema: {
+                "profiles.lpar1.profiles.zosmf.properties.user": "abc",
+                "profiles.lpar1.profiles.zosmf.properties.password": "def"
+            }
+        }
+        expected_profiles = {
+            "lpar1": {
+                "profiles": {
+                    "zosmf": {
+                        'type': 'zosmf',
+                        "properties": {
+                            "port": 443,
+                        },
+                        "secure": ["user", "password"]
+                    }
+                }
+            }
+        }
+        self.assertEqual(CredentialManager.secure_props, expected_secure_props)
+        self.assertEqual(config_file.profiles, expected_profiles)
+    
+    @patch("zowe.core_for_zowe_sdk.CredentialManager.save_secure_props")
+    def test_config_file_save(self, mock_save_secure_props):
+        """
+        Test saving a config file with secure properties.
+        """
+        config_data = {
+            "profiles": {
+                "zosmf": {
+                    "properties": {
+                        "user": "admin",
+                        "port": 1443
+                    },
+                    "secure": ["user"]
+                }
+            }
+        }
+        path_to_schema = FIXTURES_PATH + "\zowe.config.json"
+        with patch("builtins.open", mock.mock_open()) as mock_file:
+            config_file = ConfigFile("User Config", "zowe.config.json", FIXTURES_PATH , profiles=config_data.copy())
+            config_file.jsonc = config_data
+            config_file.save()
+
+            mock_save_secure_props.assert_called_once()
+            mock_file.assert_called_once_with(path_to_schema, 'w')
+            mock_file.return_value.__enter__.return_value.write.asser_called()
+            
+
+class TestValidateConfigJsonClass(unittest.TestCase):
+    """Testing the validate_config_json function"""
+
+    def test_validate_config_json_valid(self):
+        """Test validate_config_json with valid config.json matching schema.json"""
+        path_to_config = FIXTURES_PATH + "/zowe.config.json"
+        path_to_schema = FIXTURES_PATH + "/zowe.schema.json"
+
+        config_json = commentjson.load(open(path_to_config))
+        schema_json = commentjson.load(open(path_to_schema))
+
+        expected = validate(config_json, schema_json)
+        result = validate_config_json(path_to_config, path_to_schema)
+
+        self.assertEqual(result, expected)
+
+    def test_validate_config_json_invalid(self):
+        """Test validate_config_json with invalid config.json that does not match schema.json"""
+        path_to_invalid_config = FIXTURES_PATH + "/invalid.zowe.config.json"
+        path_to_invalid_schema = FIXTURES_PATH + "/invalid.zowe.schema.json"
+
+        invalid_config_json = commentjson.load(open(path_to_invalid_config))
+        invalid_schema_json = commentjson.load(open(path_to_invalid_schema))
+
+        with self.assertRaises(ValidationError) as expected_info:
+            validate(invalid_config_json, invalid_schema_json)
+
+        with self.assertRaises(ValidationError) as actual_info:
+            validate_config_json(path_to_invalid_config, path_to_invalid_schema)
+
+        self.assertEqual(str(actual_info.exception), str(expected_info.exception))
+    
+    

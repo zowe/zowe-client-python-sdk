@@ -436,13 +436,11 @@ class ConfigFile:
             new_secure_fields = [field for field in secure_fields if field not in existing_secure_fields]
 
             # JSON paths for new secure properties and store their values in CredentialManager.secure_props
+            CredentialManager.secure_props[self.filepath] = {}
             for field in new_secure_fields:
-                json_path = f"{profile_path}.properties.{field}.value"
-                CredentialManager.secure_props[self.filepath] = {
-                    **CredentialManager.secure_props.get(self.filepath, {}),
-                    json_path: profile_data["properties"][field]
-                }
-
+                json_path = f"{profile_path}.properties.{field}"
+                profile_value = profile_data["properties"][field]
+                CredentialManager.secure_props[self.filepath][json_path] = profile_value
             # Updating the 'secure' field of the profile with the combined list of secure fields
             profile_data["secure"] = existing_secure_fields + new_secure_fields
             # If a field is provided in the 'secure' list and its value exists in 'profile_data', remove it
@@ -464,14 +462,14 @@ class ConfigFile:
         """
         # Update the config file with any changes
         if self.profiles is None:
-            self.init_from_file()
+            warnings.warn(
+                    "Profiles are not found.",
+                    ProfileNotFoundWarning
+                )
         elif any(self.profiles.values()):
             with open(self.filepath, 'w') as file:
-                # Update the profiles in the JSON data
                 self.jsonc["profiles"] = self.profiles
-                file.seek(0)  # Move the file pointer to the beginning of the file
                 commentjson.dump(self.jsonc, file, indent=4)
-                file.truncate()  # Truncate the file to the current file pointer position
             if secure_props:
                 CredentialManager.save_secure_props()
     
