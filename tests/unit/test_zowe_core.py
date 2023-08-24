@@ -707,12 +707,19 @@ class TestZosmfProfileManager(TestCase):
     @mock.patch("zowe.core_for_zowe_sdk.ConfigFile.get_profile_name_from_path")
     @mock.patch("zowe.core_for_zowe_sdk.ConfigFile.find_profile")
     @mock.patch("zowe.core_for_zowe_sdk.ConfigFile._ConfigFile__is_secure")
-    def test_config_file_set_property(self, mock_is_secure, mock_find_profile, mock_get_profile_name):
+    @patch("keyring.get_password", side_effect=keyring_get_password)
+    def test_config_file_set_property(self, get_pass_func, mock_is_secure, mock_find_profile, mock_get_profile_name):
         """
         Test that set_property calls the __is_secure, find_profile and get_profile_name_from_path methods.
         """
+        cwd_up_dir_path = os.path.dirname(CWD)
+        cwd_up_file_path = os.path.join(cwd_up_dir_path, "zowe.config.json")
+        os.chdir(CWD)
+        shutil.copy(self.original_file_path, cwd_up_file_path)
+        self.setUpCreds(cwd_up_file_path, {
+            "profiles.zosmf.properties.user": "admin"
+        })
         config_file = ConfigFile(name="zowe_abcd", type="User Config", profiles= {})
-
         mock_is_secure.return_value = False
         mock_find_profile.return_value = {"properties": {"port": 1443}, "secure": []}
         mock_get_profile_name.return_value = "zosmf"
@@ -745,7 +752,8 @@ class TestZosmfProfileManager(TestCase):
         profile_path_1 = config_file.get_profile_path_from_name("lpar1.zosmf")
         self.assertEqual(profile_path_1, "profiles.lpar1.profiles.zosmf")
 
-    def test_config_file_set_profile(self):
+    @patch("keyring.get_password", side_effect=keyring_get_password)
+    def test_config_file_set_profile(self,get_pass_func):
         """
         Test the set_profile method.
         """
@@ -753,17 +761,17 @@ class TestZosmfProfileManager(TestCase):
         cwd_up_file_path = os.path.join(cwd_up_dir_path, "zowe.config.json")
         os.chdir(CWD)
         shutil.copy(self.original_file_path, cwd_up_file_path)
+        self.setUpCreds(cwd_up_file_path, {
+            "profiles.zosmf.properties.user": "abc",
+            "profiles.zosmf.properties.password": "def"
+        })
         initial_profiles = {
-            "lpar1": {
-                "profiles": {
                     "zosmf": {
                         "properties": {
                             "port": 1443
                         },
                         "secure": []
-                    }
                 }
-            }
         }
         config_file = ConfigFile("User Config", "zowe.config.json", cwd_up_dir_path , profiles=initial_profiles)
         profile_data = {
@@ -776,28 +784,24 @@ class TestZosmfProfileManager(TestCase):
             "secure": ["user", "password"]
         }
 
-        with patch("zowe.core_for_zowe_sdk.ConfigFile.get_profile_name_from_path", return_value="lpar1.zosmf"):
-            with patch("zowe.core_for_zowe_sdk.ConfigFile.find_profile", return_value=initial_profiles["lpar1"]["profiles"]["zosmf"]):
-                config_file.set_profile("profiles.lpar1.profiles.zosmf", profile_data)
+        with patch("zowe.core_for_zowe_sdk.ConfigFile.get_profile_name_from_path", return_value="zosmf"):
+            with patch("zowe.core_for_zowe_sdk.ConfigFile.find_profile", return_value=initial_profiles["zosmf"]):
+                config_file.set_profile("profiles.zosmf", profile_data)
 
         expected_secure_props = {
             cwd_up_file_path: {
-                "profiles.lpar1.profiles.zosmf.properties.user": "abc",
-                "profiles.lpar1.profiles.zosmf.properties.password": "def"
+                "profiles.zosmf.properties.user": "abc",
+                "profiles.zosmf.properties.password": "def"
             }
         }
         expected_profiles = {
-            "lpar1": {
-                "profiles": {
                     "zosmf": {
                         'type': 'zosmf',
                         "properties": {
                             "port": 443,
                         },
                         "secure": ["user", "password"]
-                    }
-                }
-            }
+                }  
         }
         self.assertEqual(CredentialManager.secure_props, expected_secure_props)
         self.assertEqual(config_file.profiles, expected_profiles)

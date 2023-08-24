@@ -399,8 +399,8 @@ class ConfigFile:
         current_profile = self.find_profile(profile_name, self.profiles) or {}
         current_properties = current_profile.setdefault("properties", {})
         current_secure = current_profile.setdefault("secure", [])
-
         if is_secure:
+            CredentialManager.load_secure_props()
             if not is_property_secure:
                 current_secure.append(property_name)
 
@@ -436,6 +436,7 @@ class ConfigFile:
             new_secure_fields = [field for field in secure_fields if field not in existing_secure_fields]
 
             # JSON paths for new secure properties and store their values in CredentialManager.secure_props
+            CredentialManager.load_secure_props()
             CredentialManager.secure_props[self.filepath] = {}
             for field in new_secure_fields:
                 json_path = f"{profile_path}.properties.{field}"
