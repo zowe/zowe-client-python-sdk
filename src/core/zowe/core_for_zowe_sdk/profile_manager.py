@@ -230,7 +230,6 @@ class ProfileManager:
                     SecurePropsNotFoundWarning,
                 )
         except Exception as exc:
-            print("hi", exc)
             warnings.warn(
                 f"Could not load {config_type} '{cfg.filename}' at '{cfg.filepath}'"
                 f"because {type(exc).__name__}'{exc}'.",
@@ -244,7 +243,7 @@ class ProfileManager:
         profile_name: Optional[str] = None,
         profile_type: Optional[str] = None,
         check_missing_props: bool = True,
-        validate_schema: Optional[bool] = False,
+        validate_schema: Optional[bool] = True,
         override_with_env: Optional[bool] = False,
         verify: Optional[bool] = False,
     ) -> dict:

@@ -39,8 +39,8 @@ def validate_config_json(path_config_json: Union[str, dict], path_schema_json: s
         schema_json = requests.get(path_schema_json, verify = verify).json()
 
     # checks if the path_schema_json is a file
-    elif os.path.isfile(path_schema_json):
-        with open(path_schema_json) as file:
+    elif os.path.isfile(path_schema_json) or path_schema_json.startswith("file://"):
+        with open(path_schema_json.replace("file://", "")) as file:
             schema_json = commentjson.load(file)
 
     # checks if the path_schema_json is absolute

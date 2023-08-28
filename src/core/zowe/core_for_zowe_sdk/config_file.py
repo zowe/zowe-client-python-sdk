@@ -83,7 +83,7 @@ class ConfigFile:
     defaults: Optional[dict] = None
     schema_property: Optional[dict] = None
     secure_props: Optional[dict] = None
-    schema_property: Optional[dict] = None
+    jsonc: Optional[dict] = None
     _missing_secure_props: list = field(default_factory=list)
 
     @property
@@ -121,7 +121,7 @@ class ConfigFile:
     def init_from_file(
         self, 
         config_type: str, 
-        validate_schema: Optional[bool] = False,
+        validate_schema: Optional[bool] = True,
         verify: Optional[bool] = False,
     ) -> None:
         """
@@ -137,10 +137,10 @@ class ConfigFile:
         self.profiles = profile_jsonc.get("profiles", {})
         self.schema_property = profile_jsonc.get("$schema", None)
         self.defaults = profile_jsonc.get("defaults", {})
-        self.schema_property = profile_jsonc.get("$schema", None)
+        self.jsonc = profile_jsonc
 
-        if self.schema_property:
-            self.validate_schema(config_type, validate_schema, verify=verify)
+        if self.schema_property and validate_schema:
+            self.validate_schema(config_type, validate_schema)
         # loading secure props is done in load_profile_properties
         # since we want to try loading secure properties only when
         # we know that the profile has saved properties
@@ -149,7 +149,6 @@ class ConfigFile:
     def validate_schema(
         self,
         config_type: str,
-        validate_schema: Optional[bool] = False,
         verify: Optional[bool] = False,
     ) -> None:
         """
@@ -172,8 +171,8 @@ class ConfigFile:
             )
                 
         # validate the $schema property 
-        if path_schema_json and validate_schema:
-            validate_config_json(path_config_json, path_schema_json, cwd = self.location, verify=verify)
+        if path_schema_json:
+            validate_config_json(self.jsonc, path_schema_json, cwd = self.location, verify=verify)
         
     def schema_list(
         self,
@@ -224,7 +223,7 @@ class ConfigFile:
         profile_name: Optional[str] = None,
         profile_type: Optional[str] = None,
         config_type: Optional[str] = None,
-        validate_schema: Optional[bool] = False,
+        validate_schema: Optional[bool] = True,
         verify: Optional[bool] = False,
     ) -> Profile:
         """

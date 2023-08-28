@@ -239,7 +239,7 @@ class TestZosmfProfileManager(TestCase):
 
         # Test
         prof_manager = ProfileManager()
-        props: dict = prof_manager.load(profile_type="base")
+        props: dict = prof_manager.load(profile_type="base", validate_schema=False)
         self.assertEqual(prof_manager.config_filepath, cwd_up_file_path)
 
         expected_props = {
@@ -269,7 +269,7 @@ class TestZosmfProfileManager(TestCase):
         # Test
         prof_manager = ProfileManager(appname=self.custom_appname)
         prof_manager.config_dir = self.custom_dir
-        props: dict = prof_manager.load(profile_name="zosmf")
+        props: dict = prof_manager.load(profile_name="zosmf", validate_schema=False)
         self.assertEqual(prof_manager.config_filepath, custom_file_path)
 
         expected_props = {
@@ -300,7 +300,7 @@ class TestZosmfProfileManager(TestCase):
         # Test
         prof_manager = ProfileManager(appname=self.custom_appname)
         prof_manager.config_dir = self.custom_dir
-        props: dict = prof_manager.load(profile_name="lpar1.zosmf")
+        props: dict = prof_manager.load(profile_name="lpar1.zosmf", validate_schema=False)
         self.assertEqual(prof_manager.config_filepath, custom_file_path)
 
         expected_props = {
@@ -331,7 +331,7 @@ class TestZosmfProfileManager(TestCase):
 
         # Test
         prof_manager = ProfileManager()
-        props: dict = prof_manager.load(profile_type="zosmf")
+        props: dict = prof_manager.load(profile_type="zosmf", validate_schema=False)
         self.assertEqual(prof_manager.config_filepath, cwd_up_file_path)
 
         expected_props = {
@@ -362,7 +362,7 @@ class TestZosmfProfileManager(TestCase):
 
             # Test
             config_file = ConfigFile(name=self.custom_appname, type="team_config")
-            props: dict = config_file.get_profile(profile_name="non_existent_profile")
+            props: dict = config_file.get_profile(profile_name="non_existent_profile", validate_schema=False)
 
     @patch("keyring.get_password", side_effect=keyring_get_password_exception)
     def test_secure_props_loading_warning(self, get_pass_func):
@@ -398,7 +398,7 @@ class TestZosmfProfileManager(TestCase):
             # Test
             prof_manager = ProfileManager()
             prof_manager.config_dir = self.custom_dir
-            props: dict = prof_manager.load("non_existent_profile")
+            props: dict = prof_manager.load("non_existent_profile", validate_schema=False)
     
     @patch("keyring.get_password", side_effect=keyring_get_password)
     def test_profile_loading_with_valid_schema(self, get_pass_func):
