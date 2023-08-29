@@ -200,9 +200,7 @@ class TestZosmfProfileManager(TestCase):
         }
 
         global SECURE_CONFIG_PROPS
-        SECURE_CONFIG_PROPS = base64.b64encode((json.dumps(CRED_DICT)).encode("utf-8"))
-        if sys.platform == "win32":
-            SECURE_CONFIG_PROPS = SECURE_CONFIG_PROPS.decode("utf-16")
+        SECURE_CONFIG_PROPS = base64.b64encode((json.dumps(CRED_DICT)).encode()).decode()
 
     @patch("keyring.get_password", side_effect=keyring_get_password)
     def test_autodiscovery_and_base_profile_loading(self, get_pass_func):
@@ -524,6 +522,7 @@ class TestZosmfProfileManager(TestCase):
         }
         self.setUpCreds(cwd_up_file_path, credential)
         base64_encoded_credential = base64.b64encode(commentjson.dumps(credential).encode()).decode()
+        base64_encoded_credential+='\0'
         encoded_credential = base64_encoded_credential.encode('utf-16le').decode()
         retrieve_cred_func.return_value = encoded_credential
 
@@ -536,7 +535,6 @@ class TestZosmfProfileManager(TestCase):
         expected_calls = []
         chunk_size = constants["WIN32_CRED_MAX_STRING_LENGTH"]
         chunks = [base64_encoded_credential[i: i + chunk_size] for i in range(0, len(base64_encoded_credential), chunk_size)]
-        chunks[-1] += "\0"
         for index, chunk in enumerate(chunks, start=1):
             field_name = f"{constants['ZoweAccountName']}-{index}"
             service_names = f"{service_name}-{index}"

@@ -106,8 +106,7 @@ class CredentialManager:
 
             if encoded_credential is not None and encoded_credential.endswith("\0"):
                 encoded_credential = encoded_credential[:-1]
-        else:
-             encoded_credential = encoded_credential.decode()
+        
         return encoded_credential        
         
     
@@ -128,19 +127,22 @@ class CredentialManager:
         """
         
         try:
-            keyring.delete_password(service_name, account_name)  
+            keyring.delete_password(service_name, account_name)
         except keyring.errors.PasswordDeleteError:
-            # Handling multiple credentials stored when the operating system is Windows
-            if sys.platform == "win32":
-                # Delete the secure value with an index
-                index = 1
-                while True:
-                    field_name = f"{account_name}-{index}"
-                    try:
-                        keyring.delete_password(f"{service_name}-{index}", field_name)
-                    except keyring.errors.PasswordDeleteError:
-                        break
-                    index += 1
+            pass
+
+        # Handling multiple credentials stored when the operating system is Windows
+        if sys.platform == "win32":
+            index = 1
+            while True:
+                field_name = f"{account_name}-{index}"
+                service_name = f"{service_name}-{index}"
+                try:
+                    keyring.delete_password(service_name, field_name)
+                except keyring.errors.PasswordDeleteError:
+                    break
+                index += 1
+
     
     @staticmethod
     def save_secure_props()-> None:
