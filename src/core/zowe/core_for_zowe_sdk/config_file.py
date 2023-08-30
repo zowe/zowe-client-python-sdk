@@ -10,12 +10,10 @@ SPDX-License-Identifier: EPL-2.0
 Copyright Contributors to the Zowe Project.
 """
 
-import base64
 import os.path
 import re
 import json
 import requests
-import sys
 import warnings
 from dataclasses import dataclass, field
 from typing import Optional, NamedTuple
@@ -24,23 +22,18 @@ import commentjson
 
 from .constants import constants
 from .validators import validate_config_json
+from .credential_manager import CredentialManager
 from .custom_warnings import (
     ProfileNotFoundWarning,
     ProfileParsingWarning,
-    SecurePropsNotFoundWarning,
 )
-from .exceptions import ProfileNotFound, SecureProfileLoadFailed
+from .exceptions import ProfileNotFound
 from .profile_constants import (
     GLOBAL_CONFIG_NAME,
     TEAM_CONFIG,
     USER_CONFIG,
 )
 
-HAS_KEYRING = True
-try:
-    import keyring
-except ImportError:
-    HAS_KEYRING = False
 
 HOME = os.path.expanduser("~")
 GLOBAl_CONFIG_LOCATION = os.path.join(HOME, ".zowe")
@@ -350,7 +343,8 @@ class ConfigFile:
         Load exact profile properties (without prepopulated fields from base profile)
         from the profile dict and populate fields from the secure credentials storage
         """
-
+        # if self.profiles is None:
+        #     self.init_from_file()
         props = {}
         lst = profile_name.split(".")
         secure_fields: list = []
@@ -371,8 +365,8 @@ class ConfigFile:
 
         # load secure props only if there are secure fields
         if secure_fields:
-            self.load_secure_props()
-
+            CredentialManager.load_secure_props()
+            self.secure_props = CredentialManager.secure_props.get(self.filepath, {})
             # load properties with key as profile.{profile_name}.properties.{*}
             for (key, value) in self.secure_props.items():
                 if re.match(
@@ -387,50 +381,3 @@ class ConfigFile:
             #     self._missing_secure_props.extend(secure_fields)
 
         return props
-
-    def load_secure_props(self) -> None:
-        """
-        load secure_props stored for the given config file
-        Returns
-        -------
-        None
-
-        if keyring is not initialized, set empty value
-        """
-        if not HAS_KEYRING:
-            self.secure_props = {}
-            return
-
-        try:
-            service_name = constants["ZoweServiceName"]
-
-            if sys.platform == "win32":
-                service_name += "/" + constants["ZoweAccountName"]
-
-            secret_value = keyring.get_password(
-                service_name, constants["ZoweAccountName"]
-            )
-
-        except Exception as exc:
-            raise SecureProfileLoadFailed(
-                constants["ZoweServiceName"], error_msg=str(exc)
-            ) from exc
-
-        secure_config: str
-        if sys.platform == "win32":
-            secure_config = secret_value.encode("utf-16")
-        else:
-            secure_config = secret_value
-
-        secure_config_json = commentjson.loads(base64.b64decode(secure_config).decode())
-
-        # look for credentials stored for currently loaded config
-        try:
-            self.secure_props = secure_config_json.get(self.filepath, {})
-        except KeyError as exc:
-            error_msg = str(exc)
-            warnings.warn(
-                f"No credentials found for loaded config file '{self.filepath}'"
-                f" with error '{error_msg}'",
-                SecurePropsNotFoundWarning,
-            )
