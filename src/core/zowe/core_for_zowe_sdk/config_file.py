@@ -401,6 +401,7 @@ class ConfigFile:
 
         else:
             if is_property_secure:
+                CredentialManager.secure_props[self.filepath].pop(json_path,None)
                 current_secure.remove(property_name)
             current_properties[property_name] = value
 
@@ -454,10 +455,7 @@ class ConfigFile:
         """
         # Update the config file with any changes
         if self.profiles is None:
-            warnings.warn(
-                    "Profiles are not found.",
-                    ProfileNotFoundWarning
-                )
+            self.init_from_file()
         elif any(self.profiles.values()):
             with open(self.filepath, 'w') as file:
                 self.jsonc["profiles"] = self.profiles
