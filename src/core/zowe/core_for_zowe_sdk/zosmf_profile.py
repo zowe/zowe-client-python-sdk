@@ -101,6 +101,10 @@ class ZosmfProfile:
             service_name += "/" + account_name
 
         secret_value = keyring.get_password(service_name, account_name)
+        
+        # Handle the case when secret_value is None
+        if secret_value is None:
+            secret_value = ""
 
         if sys.platform == "win32":
             secret_value = secret_value.encode("utf-16")
