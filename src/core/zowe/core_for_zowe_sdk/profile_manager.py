@@ -162,7 +162,6 @@ class ProfileManager:
         profile_type: Optional[str],
         config_type: str,
         validate_schema: Optional[bool] = True,
-        verify: Optional[bool] = False,
     ) -> Profile:
         """
         Get just the profile from the config file (overriden with base props in the config file)
@@ -245,7 +244,6 @@ class ProfileManager:
         check_missing_props: bool = True,
         validate_schema: Optional[bool] = True,
         override_with_env: Optional[bool] = False,
-        verify: Optional[bool] = False,
     ) -> dict:
         """Load connection details from a team config profile.
         Returns
@@ -287,7 +285,7 @@ class ProfileManager:
 
         for i, (config_type, cfg) in enumerate(config_layers.items()):
             profile_loaded = self.get_profile(
-                cfg, profile_name, profile_type, config_type, validate_schema, verify
+                cfg, profile_name, profile_type, config_type, validate_schema
             )
             # TODO Why don't user and password show up here for Project User Config?
             # Probably need to update load_profile_properties method in config_file.py

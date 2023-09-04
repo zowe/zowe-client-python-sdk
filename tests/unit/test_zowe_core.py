@@ -166,6 +166,7 @@ class TestZosmfProfileManager(TestCase):
     def setUp(self):
         """Setup fixtures for ZosmfProfile class."""
         # setup pyfakefs
+        self.session_arguments = {"verify": False} 
         self.setUpPyfakefs()
         self.original_file_path = os.path.join(FIXTURES_PATH, "zowe.config.json")
         self.original_user_file_path = os.path.join(
@@ -642,7 +643,7 @@ class TestZosmfProfileManager(TestCase):
             # Test
             prof_manager = ProfileManager(appname="invalidUri.zowe")
             prof_manager.config_dir = self.custom_dir
-            props: dict = prof_manager.load(profile_name="zosmf", validate_schema=True, verify=False)
+            props: dict = prof_manager.load(profile_name="zosmf", validate_schema=True)
 
     @patch("keyring.get_password", side_effect=keyring_get_password)
     def test_profile_loading_with_env_variables(self, get_pass_func):

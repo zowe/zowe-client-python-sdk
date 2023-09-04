@@ -115,7 +115,6 @@ class ConfigFile:
         self, 
         config_type: str, 
         validate_schema: Optional[bool] = True,
-        verify: Optional[bool] = False,
     ) -> None:
         """
         Initializes the class variable after
@@ -133,16 +132,14 @@ class ConfigFile:
         self.jsonc = profile_jsonc
 
         if self.schema_property and validate_schema:
-            self.validate_schema(config_type, validate_schema)
+            self.validate_schema()
         # loading secure props is done in load_profile_properties
         # since we want to try loading secure properties only when
         # we know that the profile has saved properties
         # self.load_secure_props()
 
     def validate_schema(
-        self,
-        config_type: str,
-        verify: Optional[bool] = False,
+        self
     ) -> None:
         """
         Get the $schema_property from the config and load the schema
@@ -152,10 +149,7 @@ class ConfigFile:
         file_path to the $schema property
         """
 
-        path_schema_json, path_config_json = None, ""
-
-        if self._location:
-            path_config_json = f"./{self.filename}"
+        path_schema_json = None
 
         path_schema_json = self.schema_path
         if path_schema_json is None:    # check if the $schema property is not defined
@@ -165,7 +159,7 @@ class ConfigFile:
                 
         # validate the $schema property 
         if path_schema_json:
-            validate_config_json(self.jsonc, path_schema_json, cwd = self.location, verify=verify)
+            validate_config_json(self.jsonc, path_schema_json, cwd = self.location)
         
     def schema_list(
         self,
@@ -217,7 +211,6 @@ class ConfigFile:
         profile_type: Optional[str] = None,
         config_type: Optional[str] = None,
         validate_schema: Optional[bool] = True,
-        verify: Optional[bool] = False,
     ) -> Profile:
         """
         Load given profile including secure properties and excluding values from base profile
@@ -227,7 +220,7 @@ class ConfigFile:
             Returns a namedtuple called Profile
         """
         if self.profiles is None:
-            self.init_from_file(config_type, validate_schema, verify)
+            self.init_from_file(config_type, validate_schema)
 
         if profile_name is None and profile_type is None:
             raise ProfileNotFound(
