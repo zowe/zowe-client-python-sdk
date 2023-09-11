@@ -1,4 +1,5 @@
 """Unit tests for the Zowe Python SDK z/OS Files package."""
+import re
 from unittest import TestCase, mock
 from zowe.zos_files_for_zowe_sdk import Files, exceptions
 
@@ -74,7 +75,7 @@ class TestFilesClass(TestCase):
 
     @mock.patch('requests.Session.send')
     def test_list_dsn(self, mock_send_request):
-        """Test creating a zfs sends a request"""
+        """Test list DSN sends request"""
         mock_send_request.return_value = mock.Mock(headers={"Content-Type": "application/json"}, status_code=200)
 
         test_values = [
@@ -311,10 +312,10 @@ class TestFilesClass(TestCase):
     def test_rename_dataset_member_parametrized(self):
         """Test renaming a dataset member with different values"""
         test_values = [
-            (('DSN', "MBROLD", "MBRNEW", "EXCLU"), True),
-            (('DSN', "MBROLD", "MBRNEW", "SHRW"), True),
+            (('DSN', "MBROLD$", "MBRNEW$", "EXCLU"), True),
+            (('DSN', "MBROLD#", "MBRNE#", "SHRW"), True),
             (('DSN', "MBROLD", "MBRNEW", "INVALID"), False),
-            (('DATA.SET.NAME', 'MEMBEROLD', 'MEMBERNEW'), True),
+            (('DATA.SET.@NAME', 'MEMBEROLD', 'MEMBERNEW'), True),
             (('DS.NAME', "MONAME", "MNNAME"), True),
         ]
 
@@ -337,8 +338,11 @@ class TestFilesClass(TestCase):
                 files_test_profile.rename_dataset_member(*test_case[0])
                 custom_args = files_test_profile._create_custom_request_arguments()
                 custom_args["json"] = data
-                custom_args["url"] = "https://mock-url.com:443/zosmf/restfiles/ds/{}({})".format(
-                    test_case[0][0], test_case[0][2])
+                ds_path = "{}({})".format(test_case[0][0], test_case[0][2])
+                ds_path_adjusted = files_test_profile._encode_uri_component(ds_path)
+                self.assertNotRegex(ds_path_adjusted, r'[\$\@\#]')
+                self.assertRegex(ds_path_adjusted, r'[\(' + re.escape(test_case[0][2]) + r'\)]')
+                custom_args["url"] = "https://mock-url.com:443/zosmf/restfiles/ds/{}".format(ds_path_adjusted)
                 files_test_profile.request_handler.perform_request.assert_called_once_with("PUT", custom_args,
                                                                                            expected_code=[200])
             else:
