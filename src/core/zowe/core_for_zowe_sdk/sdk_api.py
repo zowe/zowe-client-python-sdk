@@ -10,6 +10,7 @@ SPDX-License-Identifier: EPL-2.0
 Copyright Contributors to the Zowe Project.
 """
 
+import urllib
 from .exceptions import UnsupportedAuthType
 from .request_handler import RequestHandler
 from .session import Session, ISession
@@ -60,3 +61,14 @@ class SdkApi:
         dictionary creation
         """
         return self.request_arguments.copy()
+
+    def _encode_uri_component(self, str_to_adjust):
+        """Adjust string to be correct in a URL
+
+        Returns
+        -------
+        adjusted_str
+            A string with special characters, acceptable for a URL
+        """
+
+        return urllib.parse.quote(str_to_adjust, safe="!~*'()") if str_to_adjust is not None else None
