@@ -160,7 +160,6 @@ class ProfileManager:
         cfg: ConfigFile,
         profile_name: Optional[str],
         profile_type: Optional[str],
-        config_type: str,
         validate_schema: Optional[bool] = True,
     ) -> Profile:
         """
@@ -176,7 +175,7 @@ class ProfileManager:
         cfg_profile = Profile()
         try:
             cfg_profile = cfg.get_profile(
-                profile_name=profile_name, profile_type=profile_type, config_type=config_type, validate_schema=validate_schema
+                profile_name=profile_name, profile_type=profile_type, validate_schema=validate_schema
             )
         except jsonschema.exceptions.ValidationError as exc:
             raise jsonschema.exceptions.ValidationError(
@@ -285,7 +284,7 @@ class ProfileManager:
 
         for i, (config_type, cfg) in enumerate(config_layers.items()):
             profile_loaded = self.get_profile(
-                cfg, profile_name, profile_type, config_type, validate_schema
+                cfg, profile_name, profile_type, validate_schema
             )
             # TODO Why don't user and password show up here for Project User Config?
             # Probably need to update load_profile_properties method in config_file.py

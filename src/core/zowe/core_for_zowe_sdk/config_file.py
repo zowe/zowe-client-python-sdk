@@ -113,7 +113,6 @@ class ConfigFile:
 
     def init_from_file(
         self, 
-        config_type: str, 
         validate_schema: Optional[bool] = True,
     ) -> None:
         """
@@ -209,7 +208,6 @@ class ConfigFile:
         self,
         profile_name: Optional[str] = None,
         profile_type: Optional[str] = None,
-        config_type: Optional[str] = None,
         validate_schema: Optional[bool] = True,
     ) -> Profile:
         """
@@ -220,7 +218,7 @@ class ConfigFile:
             Returns a namedtuple called Profile
         """
         if self.profiles is None:
-            self.init_from_file(config_type, validate_schema)
+            self.init_from_file(validate_schema)
 
         if profile_name is None and profile_type is None:
             raise ProfileNotFound(
