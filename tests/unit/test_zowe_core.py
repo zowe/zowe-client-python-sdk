@@ -125,6 +125,23 @@ class TestSdkApiClass(TestCase):
             self.token_props["tokenType"] + "=" + self.token_props["tokenValue"],
         )
 
+    def test_encode_uri_component(self):
+        """Test string is being adjusted to the correct URL parameter"""
+
+        sdk_api = SdkApi(self.basic_props, self.default_url)
+        
+        actual_not_empty = sdk_api._encode_uri_component('MY.STRING@.TEST#.$HERE(MBR#NAME)')
+        expected_not_empty = 'MY.STRING%40.TEST%23.%24HERE(MBR%23NAME)'
+        self.assertEqual(actual_not_empty, expected_not_empty)
+
+        actual_wildcard = sdk_api._encode_uri_component('GET.#DS.*')
+        expected_wildcard = 'GET.%23DS.*'
+        self.assertEqual(actual_wildcard, expected_wildcard)
+
+        actual_none = sdk_api._encode_uri_component(None)
+        expected_none = None
+        self.assertEqual(actual_none, expected_none)
+
 
 class TestRequestHandlerClass(unittest.TestCase):
     """RequestHandler class unit tests."""

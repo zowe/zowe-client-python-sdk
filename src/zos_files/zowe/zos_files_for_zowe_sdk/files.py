@@ -117,7 +117,7 @@ class Files(SdkApi):
             A JSON with a list of dataset names (and attributes if specified) matching the given pattern.
         """
         custom_args = self._create_custom_request_arguments()
-        custom_args["params"] = {"dslevel": name_pattern}
+        custom_args["params"] = {"dslevel": self._encode_uri_component(name_pattern)}
         custom_args["url"] = "{}ds".format(self.request_endpoint)
         
         
@@ -149,7 +149,7 @@ class Files(SdkApi):
         for k,v in additional_parms.items():
             url = "{}{}{}={}".format(url,separator,k,v)
             separator = '&'
-        custom_args['url'] = url
+        custom_args['url'] = self._encode_uri_component(url)
         custom_args["headers"]["X-IBM-Max-Items"]  = "{}".format(limit)
         custom_args["headers"]["X-IBM-Attributes"] = attributes
         response_json = self.request_handler.perform_request("GET", custom_args)
@@ -190,7 +190,7 @@ class Files(SdkApi):
         path_to_member = f"{to_dataset_name}({to_member_name})" if to_member_name else to_dataset_name
         custom_args = self._create_custom_request_arguments()
         custom_args['json'] = data
-        custom_args["url"] = "{}ds/{}".format(self.request_endpoint, path_to_member)
+        custom_args["url"] = "{}ds/{}".format(self.request_endpoint, self._encode_uri_component(path_to_member))
         response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[200])
         return response_json
     
@@ -224,11 +224,11 @@ class Files(SdkApi):
         
         data={
             "request":"copy",
-           "from-dataset":{
-               "dsn":from_dataset_name.strip(),
+            "from-dataset":{
+                "dsn":from_dataset_name.strip(),
                 "member":from_member_name
-           },
-           "replace":replace
+            },
+            "replace":replace
         }
         
        
@@ -245,7 +245,7 @@ class Files(SdkApi):
             
         custom_args = self._create_custom_request_arguments()
         custom_args['json'] = data
-        custom_args["url"] = "{}ds/{}".format(self.request_endpoint, path_to_member)
+        custom_args["url"] = "{}ds/{}".format(self.request_endpoint, self._encode_uri_component(path_to_member))
         response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[200])
         return response_json
     
@@ -258,7 +258,7 @@ class Files(SdkApi):
             A JSON with the contents of a given dataset
         """
         custom_args = self._create_custom_request_arguments()
-        custom_args["url"] = "{}ds/{}".format(self.request_endpoint, dataset_name)
+        custom_args["url"] = "{}ds/{}".format(self.request_endpoint, self._encode_uri_component(dataset_name))
         response_json = self.request_handler.perform_request("GET", custom_args)
         return response_json
 
@@ -327,7 +327,7 @@ class Files(SdkApi):
                         options[opt] = options["lrecl"]
 
         custom_args = self._create_custom_request_arguments()
-        custom_args["url"] = "{}ds/{}".format(self.request_endpoint, dataset_name)
+        custom_args["url"] = "{}ds/{}".format(self.request_endpoint, self._encode_uri_component(dataset_name))
         custom_args["json"] = options
         response_json = self.request_handler.perform_request("POST", custom_args, expected_code = [201])
         return response_json
@@ -403,7 +403,7 @@ class Files(SdkApi):
                 "dirblk": 25
             }
 
-        custom_args["url"] = "{}ds/{}".format(self.request_endpoint, dataset_name)
+        custom_args["url"] = "{}ds/{}".format(self.request_endpoint, self._encode_uri_component(dataset_name))
         response_json = self.request_handler.perform_request("POST", custom_args, expected_code=[201])
         return response_json
 
@@ -438,7 +438,7 @@ class Files(SdkApi):
             A raw socket response
         """
         custom_args = self._create_custom_request_arguments()
-        custom_args["url"] = "{}ds/{}".format(self.request_endpoint, dataset_name)
+        custom_args["url"] = "{}ds/{}".format(self.request_endpoint, self._encode_uri_component(dataset_name))
         raw_response = self.request_handler.perform_streamed_request("GET", custom_args)
         return raw_response
 
@@ -457,7 +457,7 @@ class Files(SdkApi):
             The contents of the dataset with no transformation
         """
         custom_args = self._create_custom_request_arguments()
-        custom_args["url"] = "{}ds/{}".format(self.request_endpoint, dataset_name)
+        custom_args["url"] = "{}ds/{}".format(self.request_endpoint, self._encode_uri_component(dataset_name))
         custom_args["headers"]["Accept"] = "application/octet-stream"
         if with_prefixes:
             custom_args["headers"]["X-IBM-Data-Type"] = 'record'
@@ -481,7 +481,7 @@ class Files(SdkApi):
             The raw socket response
         """
         custom_args = self._create_custom_request_arguments()
-        custom_args["url"] = "{}ds/{}".format(self.request_endpoint, dataset_name)
+        custom_args["url"] = "{}ds/{}".format(self.request_endpoint, self._encode_uri_component(dataset_name))
         custom_args["headers"]["Accept"] = "application/octet-stream"
         if with_prefixes:
             custom_args["headers"]["X-IBM-Data-Type"] = 'record'
@@ -499,7 +499,7 @@ class Files(SdkApi):
             A JSON containing the result of the operation
         """
         custom_args = self._create_custom_request_arguments()
-        custom_args["url"] = "{}ds/{}".format(self.request_endpoint, dataset_name)
+        custom_args["url"] = "{}ds/{}".format(self.request_endpoint, self._encode_uri_component(dataset_name))
         custom_args["data"] = data
         custom_args['headers']['Content-Type'] = 'text/plain; charset={}'.format(encoding)
         response_json = self.request_handler.perform_request(
@@ -573,7 +573,7 @@ class Files(SdkApi):
         url = "{}ds/{}".format(self.request_endpoint, dataset_name)
         if volume is not None:
             url = "{}ds/-{}/{}".format(self.request_endpoint, volume, dataset_name)
-        custom_args["url"] = url
+        custom_args["url"] = self._encode_uri_component(url)
         response_json = self.request_handler.perform_request(
             "DELETE", custom_args, expected_code=[200, 202, 204])
         return response_json
@@ -700,7 +700,7 @@ class Files(SdkApi):
 
         custom_args = self._create_custom_request_arguments()
         custom_args["json"] = data
-        custom_args["url"] = "{}ds/{}".format(self.request_endpoint, dataset_name)
+        custom_args["url"] = "{}ds/{}".format(self.request_endpoint, self._encode_uri_component(dataset_name))
 
         response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[200])
         return response_json
@@ -733,7 +733,7 @@ class Files(SdkApi):
 
         custom_args = self._create_custom_request_arguments()
         custom_args["json"] = data
-        custom_args["url"] = "{}ds/{}".format(self.request_endpoint, dataset_name)
+        custom_args["url"] = "{}ds/{}".format(self.request_endpoint, self._encode_uri_component(dataset_name))
 
         response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[200])
         return response_json
@@ -762,7 +762,7 @@ class Files(SdkApi):
 
         custom_args = self._create_custom_request_arguments()
         custom_args["json"] = data
-        custom_args["url"] = "{}ds/{}".format(self.request_endpoint, dataset_name)
+        custom_args["url"] = "{}ds/{}".format(self.request_endpoint, self._encode_uri_component(dataset_name))
 
         response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[200])
         return response_json
@@ -793,7 +793,7 @@ class Files(SdkApi):
 
         custom_args = self._create_custom_request_arguments()
         custom_args["json"] = data
-        custom_args["url"] = "{}ds/{}".format(self.request_endpoint, after_dataset_name.strip())
+        custom_args["url"] = "{}ds/{}".format(self.request_endpoint, self._encode_uri_component(after_dataset_name).strip())
 
         response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[200])
         return response_json
@@ -839,7 +839,7 @@ class Files(SdkApi):
 
         custom_args = self._create_custom_request_arguments()
         custom_args['json'] = data
-        custom_args["url"] = "{}ds/{}".format(self.request_endpoint, path_to_member)
+        custom_args["url"] = "{}ds/{}".format(self.request_endpoint, self._encode_uri_component(path_to_member))
 
         response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[200])
         return response_json

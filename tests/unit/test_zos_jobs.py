@@ -81,7 +81,7 @@ class TestJobsClass(TestCase):
     def test_cancel_job_modify_version_parameterized(self):
         """Test cancelling a job with different values sends the expected request"""
         test_values = [
-            (("TESTJOB", "JOB00010", "1.0"), True),
+            (("TESTJOB", "JOB$0010", "1.0"), True),
             (("TESTJOBN", "JOB00011", "2.0"), True),
             (("TESTJOB", "JOB00012", "2"), False),
             (("TESTJOBN", "JOB00113", "3.0"), False),
@@ -100,7 +100,10 @@ class TestJobsClass(TestCase):
                     "request": "cancel",
                     "version": test_case[0][2],
                 }
-                custom_args["url"] = "https://mock-url.com:443/zosmf/restjobs/jobs/{}/{}".format(test_case[0][0], test_case[0][1])
+                job_url = "{}/{}".format(test_case[0][0], test_case[0][1])
+                job_url_adjusted = jobs_test_object._encode_uri_component(job_url)
+                self.assertNotRegex(job_url_adjusted, r'\$')
+                custom_args["url"] = "https://mock-url.com:443/zosmf/restjobs/jobs/{}".format(job_url_adjusted)
                 jobs_test_object.request_handler.perform_request.assert_called_once_with("PUT", custom_args, expected_code=[202, 200])
             else:
                 with self.assertRaises(ValueError) as e_info:
