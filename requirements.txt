@@ -22,11 +22,12 @@ PyYAML==6.0.1
 requests==2.31.0
 six==1.15.0
 snowballstemmer==2.1.0
-typing-extensions==3.7.4.3
+typing-extensions==4.0.1
 Unidecode==1.2.0
 urllib3==1.26.5
 wheel
 zipp==3.4.0
+black
 -e ./src/core
 -e ./src/zos_console
 -e ./src/zos_files
