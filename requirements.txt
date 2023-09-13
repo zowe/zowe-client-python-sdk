@@ -33,3 +33,4 @@ zipp==3.4.0
 -e ./src/zos_jobs
 -e ./src/zos_tso
 -e ./src/zosmf
+black
