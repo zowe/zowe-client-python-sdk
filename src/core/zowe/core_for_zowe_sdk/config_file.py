@@ -453,9 +453,13 @@ class ConfigFile:
         Returns:
             None
         """
-        # Update the config file with any changes
+        # Updating the config file with any changes
         if self.profiles is None:
-            self.init_from_file()
+            try:
+                self.init_from_file()
+            except FileNotFoundError:
+                pass
+
         elif any(self.profiles.values()):
             with open(self.filepath, 'w') as file:
                 self.jsonc["profiles"] = self.profiles

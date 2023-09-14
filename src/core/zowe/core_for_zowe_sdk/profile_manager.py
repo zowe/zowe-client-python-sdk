@@ -326,25 +326,34 @@ class ProfileManager:
         ]
 
         original_name = layers[0].get_profile_name_from_path(json_path)
-
-        if not self._show_warnings:
-            warnings.simplefilter("ignore")
         
         for layer in layers:
-            layer.init_from_file()
+            try:
+                layer.init_from_file()
+            except FileNotFoundError:
+                continue
             parts = original_name.split(".")
             current_name = ""
+
             while parts:
                 current_name = ".".join(parts)
                 profile = layer.find_profile(current_name, layer.profiles)
+
                 if profile is not None and len(current_name) > len(longest_match):
                     highest_layer = layer
                     longest_match = current_name
+
                 else:
                     parts.pop()
             if original_name == longest_match:
                 break
-        warnings.resetwarnings()
+
+            if highest_layer is None:
+                highest_layer = layer
+
+        if highest_layer is None:
+            raise FileNotFoundError(f"Could not find a valid layer for {json_path}")
+    
         return highest_layer
      
        
@@ -360,10 +369,7 @@ class ProfileManager:
 
         # highest priority layer for the given profile name
         highest_priority_layer = self.get_highest_priority_layer(json_path)
-        # If the profile doesn't exist in any layer, use the project user config as the default location
-        if not highest_priority_layer:
-            highest_priority_layer = self.project_user_config
-
+       
         # Set the property in the highest priority layer
 
         highest_priority_layer.set_property(json_path, value, secure=secure)
@@ -378,8 +384,6 @@ class ProfileManager:
         """
         highest_priority_layer = self.get_highest_priority_layer(profile_path)
 
-        if not highest_priority_layer:
-            highest_priority_layer = self.project_user_config
         highest_priority_layer.set_profile(profile_path, profile_data)
     
     def save(self) -> None:

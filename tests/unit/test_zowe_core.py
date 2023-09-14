@@ -579,9 +579,7 @@ class TestZosmfProfileManager(TestCase):
         }
         self.assertEqual(props, expected_props)
 
-    @mock.patch("warnings.simplefilter")
-    @mock.patch("warnings.resetwarnings")
-    def test_get_highest_priority_layer(self, mock_resetwarnings, mock_simplefilter):
+    def test_get_highest_priority_layer(self):
         """
         Test that get_highest_priority_layer returns the highest priority layer with a valid profile data dictionary.
         """
@@ -593,15 +591,12 @@ class TestZosmfProfileManager(TestCase):
         # Set up the ProfileManager
         profile_manager = ProfileManager()
         profile_manager.project_user_config = project_user_config
-        profile_manager._show_warnings = False
         project_user_config.get_profile_name_from_path.return_value = "zosmf"
         # Call the function being tested
         result_layer = profile_manager.get_highest_priority_layer("zosmf")
         
         # Assert the results
         self.assertEqual(result_layer, project_user_config)
-        mock_simplefilter.assert_called_with("ignore")
-        mock_resetwarnings.assert_called()
 
     @patch("zowe.core_for_zowe_sdk.ProfileManager.get_highest_priority_layer")
     def test_profile_manager_set_property(self, get_highest_priority_layer_mock):
