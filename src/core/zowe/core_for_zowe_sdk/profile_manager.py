@@ -160,6 +160,7 @@ class ProfileManager:
         cfg: ConfigFile,
         profile_name: Optional[str],
         profile_type: Optional[str],
+        config_type: Optional[str],
         validate_schema: Optional[bool] = True,
     ) -> Profile:
         """
@@ -284,7 +285,7 @@ class ProfileManager:
 
         for i, (config_type, cfg) in enumerate(config_layers.items()):
             profile_loaded = self.get_profile(
-                cfg, profile_name, profile_type, validate_schema
+                cfg, profile_name, profile_type, config_type, validate_schema
             )
             # TODO Why don't user and password show up here for Project User Config?
             # Probably need to update load_profile_properties method in config_file.py
