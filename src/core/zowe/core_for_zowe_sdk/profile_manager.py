@@ -15,6 +15,7 @@ import os
 import warnings
 from typing import Optional
 from deepmerge import always_merger
+from copy import deepcopy
 
 from .config_file import ConfigFile, Profile
 from .custom_warnings import (
@@ -284,10 +285,18 @@ class ProfileManager:
 
         usrProject = self.project_user_config.profiles
         project = self.project_config.profiles
+
+        # Creating copies of the usrProject and project objects
+        usrProjectCopy = deepcopy(usrProject)
+        projectCopy = deepcopy(project)
         prjt = always_merger.merge(usrProject, project)
 
         usrGlobal = self.global_user_config.profiles
         glbal = self.global_config.profiles
+        
+        # Creating copies of the usrGlobal and glbal objects
+        usrGlobalCopy = deepcopy(usrGlobal)
+        glbalCopy = deepcopy(glbal)
         glbl = always_merger.merge(usrGlobal, glbal)
 
         if override_with_env:
