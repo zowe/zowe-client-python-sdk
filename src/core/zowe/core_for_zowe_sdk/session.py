@@ -45,7 +45,7 @@ class Session:
         if props.get("host") is not None:
             self.session: ISession = ISession(host=props.get("host"))
         else:
-            raise "Host must be supplied"
+            raise Exception("Host must be supplied")
 
         # determine authentication type
         if props.get("user") is not None and props.get("password") is not None:
@@ -61,7 +61,7 @@ class Session:
             self.session.tokenValue = props.get("tokenValue")
             self.session.type = session_constants.AUTH_TYPE_BEARER
         else:
-            raise "An authentication method must be supplied"
+            raise Exception("An authentication method must be supplied")
 
         # set additional parameters
         self.session.basePath = props.get("basePath")
