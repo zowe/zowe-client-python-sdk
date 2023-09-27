@@ -99,7 +99,7 @@ class ConfigFile:
     @property
     def location(self) -> Optional[str]:
         return self._location
-    
+
     @property
     def schema_path(self) -> Optional[str]:
         return self.schema_property
@@ -112,7 +112,7 @@ class ConfigFile:
             raise FileNotFoundError(f"given path {dirname} is not valid")
 
     def init_from_file(
-        self, 
+        self,
         validate_schema: Optional[bool] = True,
     ) -> None:
         """
@@ -155,22 +155,22 @@ class ConfigFile:
             warnings.warn(
                 f"$schema property could not found"
             )
-                
-        # validate the $schema property 
+
+        # validate the $schema property
         if path_schema_json:
             validate_config_json(self.jsonc, path_schema_json, cwd = self.location)
-        
+
     def schema_list(
         self,
     ) -> list:
         """
         Loads the schema properties
         in a sorted order according to the priority
-        
+
         Returns
         -------
         Dictionary
-        
+
             Returns the profile properties from schema (prop: value)
         """
 
@@ -181,12 +181,12 @@ class ConfigFile:
         if schema.startswith("https://") or schema.startswith("http://"):
             schema_json = requests.get(schema).json()
 
+        elif os.path.isfile(schema) or schema.startswith("file://"):
+            with open(schema.replace("file://", "")) as f:
+                schema_json = json.load(f)
+
         elif not os.path.isabs(schema):
             schema = os.path.join(self.location, schema)
-            with open(schema) as f:
-                schema_json = json.load(f)
-        
-        elif os.path.isfile(schema):
             with open(schema) as f:
                 schema_json = json.load(f)
         else:
@@ -194,10 +194,10 @@ class ConfigFile:
 
         profile_props:dict = {}
         schema_json = dict(schema_json)
-        
+
         for props in schema_json['properties']['profiles']['patternProperties']["^\\S*$"]["allOf"]:
             props = props["then"]
-            
+
             while "properties" in props:
                 props = props.pop("properties")
                 profile_props = props
@@ -303,7 +303,7 @@ class ConfigFile:
             profile_name=profile_type,
             error_msg=f"No profile with matching profile_type '{profile_type}' found",
         )
-        
+
     def find_profile(self, path: str, profiles: dict):
         """
         Find a profile at a specified location from within a set of nested profiles

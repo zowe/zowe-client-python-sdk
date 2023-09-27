@@ -10,8 +10,8 @@ SPDX-License-Identifier: EPL-2.0
 Copyright Contributors to the Zowe Project.
 """
 import sys
-import warnings 
-import base64 
+import warnings
+import base64
 import logging
 from typing import Optional
 import commentjson
@@ -30,7 +30,7 @@ except ImportError:
 class CredentialManager:
     secure_props = {}
 
-    
+
 
     @staticmethod
     def load_secure_props() -> None:
@@ -51,7 +51,7 @@ class CredentialManager:
             secret_value = CredentialManager._retrieve_credential(service_name)
             # Handle the case when secret_value is None
             if secret_value is None:
-                return 
+                return
 
         except Exception as exc:
             raise SecureProfileLoadFailed(
@@ -63,9 +63,9 @@ class CredentialManager:
         secure_config_json = commentjson.loads(base64.b64decode(secure_config).decode())
         # update the secure props
         CredentialManager.secure_props = secure_config_json
-        
-    
-    @staticmethod    
+
+
+    @staticmethod
     def _retrieve_credential(service_name: str) -> Optional[str]:
         """
         Retrieve the credential from the keyring or storage.
@@ -96,7 +96,7 @@ class CredentialManager:
                     encoded_credential += temp_value
                 index += 1
                 temp_value = keyring.get_password(f"{service_name}-{index}", f"{constants['ZoweAccountName']}-{index}")
-                
+
         if is_win32:
             try:
                 encoded_credential = encoded_credential.encode('utf-16le').decode()
@@ -106,10 +106,10 @@ class CredentialManager:
 
             if encoded_credential is not None and encoded_credential.endswith("\0"):
                 encoded_credential = encoded_credential[:-1]
-        
-        return encoded_credential        
-        
-    
+
+        return encoded_credential
+
+
     @staticmethod
     def delete_credential(service_name: str, account_name: str) -> None:
         """
@@ -125,7 +125,7 @@ class CredentialManager:
         -------
         None
         """
-        
+
         try:
             keyring.delete_password(service_name, account_name)
         except keyring.errors.PasswordDeleteError:
@@ -143,7 +143,7 @@ class CredentialManager:
                     break
                 index += 1
 
-    
+
     @staticmethod
     def save_secure_props()-> None:
         """
@@ -154,16 +154,16 @@ class CredentialManager:
         """
         if not HAS_KEYRING:
             return
-            
+
         service_name = constants["ZoweServiceName"]
         credential =  CredentialManager.secure_props
         # Check if credential is a non-empty string
         if credential:
             is_win32 = sys.platform == "win32"
-            
-            encoded_credential = base64.b64encode(commentjson.dumps(credential).encode()).decode() 
+
+            encoded_credential = base64.b64encode(commentjson.dumps(credential).encode()).decode()
             if is_win32:
-                service_name += "/" + constants["ZoweAccountName"] 
+                service_name += "/" + constants["ZoweAccountName"]
                 # Delete the existing credential
                 CredentialManager.delete_credential(service_name , constants["ZoweAccountName"])
             # Check if the encoded credential exceeds the maximum length for win32
@@ -177,9 +177,9 @@ class CredentialManager:
                     password=(chunk + '\0' *(len(chunk)%2)).encode().decode('utf-16le')
                     field_name = f"{constants['ZoweAccountName']}-{index}"
                     keyring.set_password(f"{service_name}-{index}", field_name, password)
-                    
+
             else:
                 # Credential length is within the maximum limit or not on win32, set it as a single keyring entry
                 keyring.set_password(
-                    service_name, constants["ZoweAccountName"], 
+                    service_name, constants["ZoweAccountName"],
                     encoded_credential)

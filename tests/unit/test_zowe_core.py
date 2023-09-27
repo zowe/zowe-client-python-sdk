@@ -129,7 +129,7 @@ class TestSdkApiClass(TestCase):
         """Test string is being adjusted to the correct URL parameter"""
 
         sdk_api = SdkApi(self.basic_props, self.default_url)
-        
+
         actual_not_empty = sdk_api._encode_uri_component('MY.STRING@.TEST#.$HERE(MBR#NAME)')
         expected_not_empty = 'MY.STRING%40.TEST%23.%24HERE(MBR%23NAME)'
         self.assertEqual(actual_not_empty, expected_not_empty)
@@ -183,7 +183,7 @@ class TestZosmfProfileManager(TestCase):
     def setUp(self):
         """Setup fixtures for ZosmfProfile class."""
         # setup pyfakefs
-        self.session_arguments = {"verify": False} 
+        self.session_arguments = {"verify": False}
         self.setUpPyfakefs()
         self.original_file_path = os.path.join(FIXTURES_PATH, "zowe.config.json")
         self.original_user_file_path = os.path.join(
@@ -207,6 +207,7 @@ class TestZosmfProfileManager(TestCase):
         self.original_invalidUri_schema_file_path = os.path.join(
             FIXTURES_PATH, "invalidUri.zowe.schema.json"
         )
+        self.fs.add_real_directory(os.path.join(FIXTURES_PATH, "../../../env/lib"))
         self.fs.add_real_file(self.original_file_path)
         self.fs.add_real_file(self.original_user_file_path)
         self.fs.add_real_file(self.original_nested_file_path)
@@ -398,7 +399,7 @@ class TestZosmfProfileManager(TestCase):
             prof_manager = ProfileManager()
             prof_manager.config_dir = self.custom_dir
             props: dict = prof_manager.load("base")
-    
+
     @patch("keyring.get_password", side_effect=keyring_get_password)
     def test_profile_not_found_warning(self, get_pass_func):
         """
@@ -416,7 +417,7 @@ class TestZosmfProfileManager(TestCase):
             prof_manager = ProfileManager()
             prof_manager.config_dir = self.custom_dir
             props: dict = prof_manager.load("non_existent_profile", validate_schema=False)
-            
+
     @patch("sys.platform", "win32")
     @patch("zowe.core_for_zowe_sdk.CredentialManager._retrieve_credential")
     def test_load_secure_props(self, retrieve_cred_func):
@@ -521,7 +522,7 @@ class TestZosmfProfileManager(TestCase):
         """
         Test the save_secure_props method for saving credentials to keyring.
         """
-        
+
         # Set up mock values and expected results
         service_name = constants["ZoweServiceName"] + "/" + constants["ZoweAccountName"]
         # Setup - copy profile to fake filesystem created by pyfakefs
@@ -556,7 +557,7 @@ class TestZosmfProfileManager(TestCase):
     @patch("keyring.set_password")
     @patch("zowe.core_for_zowe_sdk.CredentialManager.delete_credential")
     def test_save_secure_props_exceed_limit(self, delete_pass_func, set_pass_func, retrieve_cred_func):
-        
+
         # Set up mock values and expected results
         service_name = constants["ZoweServiceName"] + "/" + constants["ZoweAccountName"]
         # Setup - copy profile to fake filesystem created by pyfakefs
@@ -617,7 +618,7 @@ class TestZosmfProfileManager(TestCase):
         prof_manager = ProfileManager(appname="zowe")
         prof_manager.config_dir = self.custom_dir
         props: dict = prof_manager.load(profile_name="zosmf")
-    
+
     @patch("keyring.get_password", side_effect=keyring_get_password)
     def test_profile_loading_with_invalid_schema(self, get_pass_func):
         """

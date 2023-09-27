@@ -117,24 +117,24 @@ class ProfileManager:
     ) -> dict:
         """
         Maps the env variables to the profile properties
-        
+
         Returns
         -------
         Dictionary
 
             Containing profile properties from env variables (prop: value)
         """
-        
+
         props = cfg.schema_list()
         if props == []:
             return {}
-        
+
         env, env_var = {}, {}
-        
+
         for var in list(os.environ.keys()):
             if var.startswith("ZOWE_OPT"):
                 env[var[len("ZOWE_OPT_"):].lower()] = os.environ.get(var)
-                
+
         for k, v in env.items():
             word = k.split("_")
 
@@ -154,7 +154,7 @@ class ProfileManager:
                     env_var[k] = bool(v)
 
         return env_var
-                                 
+
     @staticmethod
     def get_profile(
         cfg: ConfigFile,
@@ -234,7 +234,7 @@ class ProfileManager:
                 f"because {type(exc).__name__}'{exc}'.",
                 ConfigNotFoundWarning,
             )
-        
+
         return cfg_profile
 
     def load(
@@ -294,7 +294,7 @@ class ProfileManager:
                     profile_loaded.name
                 )  # Define profile name that will be merged from other layers
             profile_props = {**profile_loaded.data, **profile_props}
-            
+
             missing_secure_props.extend(profile_loaded.missing_secure_props)
 
             if override_with_env:
