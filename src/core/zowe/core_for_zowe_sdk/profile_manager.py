@@ -13,6 +13,7 @@ Copyright Contributors to the Zowe Project.
 import os.path
 import os
 import warnings
+import jsonschema
 from typing import Optional
 
 from .config_file import ConfigFile, Profile
@@ -116,24 +117,24 @@ class ProfileManager:
     ) -> dict:
         """
         Maps the env variables to the profile properties
-        
+
         Returns
         -------
         Dictionary
 
             Containing profile properties from env variables (prop: value)
         """
-        
+
         props = cfg.schema_list()
         if props == []:
             return {}
-        
+
         env, env_var = {}, {}
-        
+
         for var in list(os.environ.keys()):
             if var.startswith("ZOWE_OPT"):
                 env[var[len("ZOWE_OPT_"):].lower()] = os.environ.get(var)
-                
+
         for k, v in env.items():
             word = k.split("_")
 
@@ -153,13 +154,14 @@ class ProfileManager:
                     env_var[k] = bool(v)
 
         return env_var
-                                 
+
     @staticmethod
     def get_profile(
         cfg: ConfigFile,
         profile_name: Optional[str],
         profile_type: Optional[str],
-        config_type: str,
+        config_type: Optional[str],
+        validate_schema: Optional[bool] = True,
     ) -> Profile:
         """
         Get just the profile from the config file (overriden with base props in the config file)
@@ -174,7 +176,27 @@ class ProfileManager:
         cfg_profile = Profile()
         try:
             cfg_profile = cfg.get_profile(
-                profile_name=profile_name, profile_type=profile_type
+                profile_name=profile_name, profile_type=profile_type, validate_schema=validate_schema
+            )
+        except jsonschema.exceptions.ValidationError as exc:
+            raise jsonschema.exceptions.ValidationError(
+                f"Instance was invalid under the provided $schema property, {exc}"
+            )
+        except jsonschema.exceptions.SchemaError as exc:
+            raise jsonschema.exceptions.SchemaError(
+                f"The provided schema is invalid, {exc}"
+            )
+        except jsonschema.exceptions.UndefinedTypeCheck as exc:
+            raise jsonschema.exceptions.UndefinedTypeCheck(
+                f"A type checker was asked to check a type it did not have registered, {exc}"
+            )
+        except jsonschema.exceptions.UnknownType as exc:
+            raise jsonschema.exceptions.UnknownType(
+                f"Unknown type is found in schema_json, exc"
+            )
+        except jsonschema.exceptions.FormatError as exc:
+            raise jsonschema.exceptions.FormatError(
+                f"Validating a format config_json failed for schema_json, {exc}"
             )
         except ProfileNotFound:
             if profile_name:
@@ -212,14 +234,15 @@ class ProfileManager:
                 f"because {type(exc).__name__}'{exc}'.",
                 ConfigNotFoundWarning,
             )
-        finally:
-            return cfg_profile
+
+        return cfg_profile
 
     def load(
         self,
         profile_name: Optional[str] = None,
         profile_type: Optional[str] = None,
         check_missing_props: bool = True,
+        validate_schema: Optional[bool] = True,
         override_with_env: Optional[bool] = False,
     ) -> dict:
         """Load connection details from a team config profile.
@@ -255,13 +278,14 @@ class ProfileManager:
             "Global Config": self.global_config,
         }
         profile_props: dict = {}
+        schema_path = None
         env_var: dict = {}
 
         missing_secure_props = []  # track which secure props were not loaded
 
         for i, (config_type, cfg) in enumerate(config_layers.items()):
             profile_loaded = self.get_profile(
-                cfg, profile_name, profile_type, config_type
+                cfg, profile_name, profile_type, config_type, validate_schema
             )
             # TODO Why don't user and password show up here for Project User Config?
             # Probably need to update load_profile_properties method in config_file.py

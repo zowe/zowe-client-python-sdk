@@ -2,18 +2,20 @@
 
 # Including necessary paths
 import base64
+import commentjson
+import importlib.util
 import json
+import keyring
 import os
 import shutil
-import keyring
-import sys
 import unittest
+
+from jsonschema import validate, ValidationError, SchemaError
+from pyfakefs.fake_filesystem_unittest import TestCase
 from unittest import mock
 from unittest.mock import patch
-from jsonschema import validate, ValidationError
+
 from zowe.core_for_zowe_sdk.validators import validate_config_json
-import commentjson
-from pyfakefs.fake_filesystem_unittest import TestCase
 from zowe.core_for_zowe_sdk import (
     ApiConnection,
     ConfigFile,
@@ -129,7 +131,7 @@ class TestSdkApiClass(TestCase):
         """Test string is being adjusted to the correct URL parameter"""
 
         sdk_api = SdkApi(self.basic_props, self.default_url)
-        
+
         actual_not_empty = sdk_api._encode_uri_component('MY.STRING@.TEST#.$HERE(MBR#NAME)')
         expected_not_empty = 'MY.STRING%40.TEST%23.%24HERE(MBR%23NAME)'
         self.assertEqual(actual_not_empty, expected_not_empty)
@@ -183,10 +185,14 @@ class TestZosmfProfileManager(TestCase):
     def setUp(self):
         """Setup fixtures for ZosmfProfile class."""
         # setup pyfakefs
+        self.session_arguments = {"verify": False}
         self.setUpPyfakefs()
         self.original_file_path = os.path.join(FIXTURES_PATH, "zowe.config.json")
         self.original_user_file_path = os.path.join(
             FIXTURES_PATH, "zowe.config.user.json"
+        )
+        self.original_invalid_file_path = os.path.join(
+            FIXTURES_PATH, "invalid.zowe.config.json"
         )
         self.original_nested_file_path = os.path.join(
             FIXTURES_PATH, "nested.zowe.config.json"
@@ -194,11 +200,28 @@ class TestZosmfProfileManager(TestCase):
         self.original_schema_file_path = os.path.join(
             FIXTURES_PATH, "zowe.schema.json"
         )
+        self.original_invalid_schema_file_path = os.path.join(
+            FIXTURES_PATH, "invalid.zowe.schema.json"
+        )
+        self.original_invalidUri_file_path = os.path.join(
+            FIXTURES_PATH, "invalidUri.zowe.config.json"
+        )
+        self.original_invalidUri_schema_file_path = os.path.join(
+            FIXTURES_PATH, "invalidUri.zowe.schema.json"
+        )
+
+        loader = importlib.util.find_spec('jsonschema')
+        module_path = loader.origin
+        self.fs.add_real_directory(os.path.dirname(module_path))
+
         self.fs.add_real_file(self.original_file_path)
         self.fs.add_real_file(self.original_user_file_path)
         self.fs.add_real_file(self.original_nested_file_path)
         self.fs.add_real_file(self.original_schema_file_path)
-
+        self.fs.add_real_file(self.original_invalid_file_path)
+        self.fs.add_real_file(self.original_invalid_schema_file_path)
+        self.fs.add_real_file(self.original_invalidUri_file_path)
+        self.fs.add_real_file(self.original_invalidUri_schema_file_path)
         self.custom_dir = os.path.dirname(FIXTURES_PATH)
         self.custom_appname = "zowe_abcd"
         self.custom_filename = f"{self.custom_appname}.config.json"
@@ -240,7 +263,7 @@ class TestZosmfProfileManager(TestCase):
 
         # Test
         prof_manager = ProfileManager()
-        props: dict = prof_manager.load(profile_type="base")
+        props: dict = prof_manager.load(profile_type="base", validate_schema=False)
         self.assertEqual(prof_manager.config_filepath, cwd_up_file_path)
 
         expected_props = {
@@ -270,7 +293,7 @@ class TestZosmfProfileManager(TestCase):
         # Test
         prof_manager = ProfileManager(appname=self.custom_appname)
         prof_manager.config_dir = self.custom_dir
-        props: dict = prof_manager.load(profile_name="zosmf")
+        props: dict = prof_manager.load(profile_name="zosmf", validate_schema=False)
         self.assertEqual(prof_manager.config_filepath, custom_file_path)
 
         expected_props = {
@@ -301,7 +324,7 @@ class TestZosmfProfileManager(TestCase):
         # Test
         prof_manager = ProfileManager(appname=self.custom_appname)
         prof_manager.config_dir = self.custom_dir
-        props: dict = prof_manager.load(profile_name="lpar1.zosmf")
+        props: dict = prof_manager.load(profile_name="lpar1.zosmf", validate_schema=False)
         self.assertEqual(prof_manager.config_filepath, custom_file_path)
 
         expected_props = {
@@ -332,7 +355,7 @@ class TestZosmfProfileManager(TestCase):
 
         # Test
         prof_manager = ProfileManager()
-        props: dict = prof_manager.load(profile_type="zosmf")
+        props: dict = prof_manager.load(profile_type="zosmf", validate_schema=False)
         self.assertEqual(prof_manager.config_filepath, cwd_up_file_path)
 
         expected_props = {
@@ -363,7 +386,7 @@ class TestZosmfProfileManager(TestCase):
 
             # Test
             config_file = ConfigFile(name=self.custom_appname, type="team_config")
-            props: dict = config_file.get_profile(profile_name="non_existent_profile")
+            props: dict = config_file.get_profile(profile_name="non_existent_profile", validate_schema=False)
 
     @patch("keyring.get_password", side_effect=keyring_get_password_exception)
     def test_secure_props_loading_warning(self, get_pass_func):
@@ -382,7 +405,25 @@ class TestZosmfProfileManager(TestCase):
             prof_manager = ProfileManager()
             prof_manager.config_dir = self.custom_dir
             props: dict = prof_manager.load("base")
-            
+
+    @patch("keyring.get_password", side_effect=keyring_get_password)
+    def test_profile_not_found_warning(self, get_pass_func):
+        """
+        Test correct warnings are being thrown when profile is not found
+        in config file.
+
+        Only the config folder will be set
+        """
+        with self.assertWarns(custom_warnings.ProfileNotFoundWarning):
+            # Setup
+            custom_file_path = os.path.join(self.custom_dir, "zowe.config.json")
+            shutil.copy(self.original_file_path, custom_file_path)
+
+            # Test
+            prof_manager = ProfileManager()
+            prof_manager.config_dir = self.custom_dir
+            props: dict = prof_manager.load("non_existent_profile", validate_schema=False)
+
     @patch("sys.platform", "win32")
     @patch("zowe.core_for_zowe_sdk.CredentialManager._retrieve_credential")
     def test_load_secure_props(self, retrieve_cred_func):
@@ -522,7 +563,7 @@ class TestZosmfProfileManager(TestCase):
     @patch("keyring.set_password")
     @patch("zowe.core_for_zowe_sdk.CredentialManager.delete_credential")
     def test_save_secure_props_exceed_limit(self, delete_pass_func, set_pass_func, retrieve_cred_func):
-        
+
         # Set up mock values and expected results
         service_name = constants["ZoweServiceName"] + "/" + constants["ZoweAccountName"]
         # Setup - copy profile to fake filesystem created by pyfakefs
@@ -563,7 +604,70 @@ class TestZosmfProfileManager(TestCase):
             ))
         set_pass_func.assert_has_calls(expected_calls)
 
-        
+    @patch("keyring.get_password", side_effect=keyring_get_password)
+    def test_profile_loading_with_valid_schema(self, get_pass_func):
+        """
+        Test Validation, no error should be raised for valid schema
+        """
+        # Setup - copy profile to fake filesystem created by pyfakefs
+        custom_file_path = os.path.join(self.custom_dir, "zowe.config.json")
+        shutil.copy(self.original_nested_file_path, custom_file_path)
+        shutil.copy(self.original_schema_file_path, self.custom_dir)
+        os.chdir(self.custom_dir)
+
+        self.setUpCreds(custom_file_path, {
+            "profiles.zosmf.properties.user": "user",
+            "profiles.zosmf.properties.password": "password",
+        })
+
+        # Test
+        prof_manager = ProfileManager(appname="zowe")
+        prof_manager.config_dir = self.custom_dir
+        props: dict = prof_manager.load(profile_name="zosmf")
+
+    @patch("keyring.get_password", side_effect=keyring_get_password)
+    def test_profile_loading_with_invalid_schema(self, get_pass_func):
+        """
+        Test Validation, no error should be raised for valid schema
+        """
+        # Setup - copy profile to fake filesystem created by pyfakefs
+        with self.assertRaises(ValidationError):
+            custom_file_path = os.path.join(self.custom_dir, "invalid.zowe.config.json")
+            shutil.copy(self.original_invalid_file_path, custom_file_path)
+            shutil.copy(self.original_invalid_schema_file_path, self.custom_dir)
+            os.chdir(self.custom_dir)
+
+            self.setUpCreds(custom_file_path, {
+                "profiles.zosmf.properties.user": "user",
+                "profiles.zosmf.properties.password": "password",
+            })
+
+            # Test
+            prof_manager = ProfileManager(appname="invalid.zowe")
+            prof_manager.config_dir = self.custom_dir
+            props: dict = prof_manager.load(profile_name="zosmf", validate_schema=True)
+
+    @patch("keyring.get_password", side_effect=keyring_get_password)
+    def test_profile_loading_with_invalid_schema_internet_URI(self, get_pass_func):
+        """
+        Test Validation, no error should be raised for valid schema
+        """
+        # Setup - copy profile to fake filesystem created by pyfakefs
+        with self.assertRaises(SchemaError):
+            custom_file_path = os.path.join(self.custom_dir, "invalidUri.zowe.config.json")
+            shutil.copy(self.original_invalidUri_file_path, custom_file_path)
+            shutil.copy(self.original_invalidUri_schema_file_path, self.custom_dir)
+            os.chdir(self.custom_dir)
+
+            self.setUpCreds(custom_file_path, {
+                "profiles.zosmf.properties.user": "user",
+                "profiles.zosmf.properties.password": "password",
+            })
+
+            # Test
+            prof_manager = ProfileManager(appname="invalidUri.zowe")
+            prof_manager.config_dir = self.custom_dir
+            props: dict = prof_manager.load(profile_name="zosmf", validate_schema=True)
 
     @patch("keyring.get_password", side_effect=keyring_get_password)
     def test_profile_loading_with_env_variables(self, get_pass_func):
@@ -610,7 +714,7 @@ class TestValidateConfigJsonClass(unittest.TestCase):
         schema_json = commentjson.load(open(path_to_schema))
 
         expected = validate(config_json, schema_json)
-        result = validate_config_json(path_to_config, path_to_schema)
+        result = validate_config_json(path_to_config, path_to_schema, cwd = FIXTURES_PATH)
 
         self.assertEqual(result, expected)
 
@@ -626,6 +730,6 @@ class TestValidateConfigJsonClass(unittest.TestCase):
             validate(invalid_config_json, invalid_schema_json)
 
         with self.assertRaises(ValidationError) as actual_info:
-            validate_config_json(path_to_invalid_config, path_to_invalid_schema)
+            validate_config_json(path_to_invalid_config, path_to_invalid_schema, cwd = FIXTURES_PATH)
 
         self.assertEqual(str(actual_info.exception), str(expected_info.exception))
