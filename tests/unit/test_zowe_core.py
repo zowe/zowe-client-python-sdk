@@ -207,7 +207,7 @@ class TestZosmfProfileManager(TestCase):
         self.original_invalidUri_schema_file_path = os.path.join(
             FIXTURES_PATH, "invalidUri.zowe.schema.json"
         )
-        self.fs.add_real_directory(os.path.join(FIXTURES_PATH, "../../../env/lib"))
+        # self.fs.add_real_directory(os.path.join(FIXTURES_PATH, "../../../env/lib"))
         self.fs.add_real_file(self.original_file_path)
         self.fs.add_real_file(self.original_user_file_path)
         self.fs.add_real_file(self.original_nested_file_path)
