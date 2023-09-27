@@ -20,6 +20,8 @@ from typing import Optional, NamedTuple
 
 import commentjson
 
+from .constants import constants
+from .validators import validate_config_json
 from .credential_manager import CredentialManager
 from .custom_warnings import (
     ProfileNotFoundWarning,
@@ -74,8 +76,9 @@ class ConfigFile:
     _location: Optional[str] = None
     profiles: Optional[dict] = None
     defaults: Optional[dict] = None
-    secure_props: Optional[dict] = None
     schema_property: Optional[dict] = None
+    secure_props: Optional[dict] = None
+    jsonc: Optional[dict] = None
     _missing_secure_props: list = field(default_factory=list)
 
     @property
@@ -101,7 +104,7 @@ class ConfigFile:
 
     @property
     def schema_path(self) -> Optional[str]:
-        self.schema_property
+        return self.schema_property
 
     @location.setter
     def location(self, dirname: str) -> None:
@@ -110,7 +113,10 @@ class ConfigFile:
         else:
             raise FileNotFoundError(f"given path {dirname} is not valid")
 
-    def init_from_file(self) -> None:
+    def init_from_file(
+        self,
+        validate_schema: Optional[bool] = True,
+    ) -> None:
         """
         Initializes the class variable after
         setting filepath (or if not set, autodiscover the file)
@@ -122,14 +128,39 @@ class ConfigFile:
             profile_jsonc = commentjson.load(fileobj)
 
         self.profiles = profile_jsonc.get("profiles", {})
+        self.schema_property = profile_jsonc.get("$schema", None)
         self.defaults = profile_jsonc.get("defaults", {})
         self.jsonc = profile_jsonc
-        self.schema_property = profile_jsonc.get("$schema", None)
 
+        if self.schema_property and validate_schema:
+            self.validate_schema()
         # loading secure props is done in load_profile_properties
         # since we want to try loading secure properties only when
         # we know that the profile has saved properties
         #  CredentialManager.load_secure_props()
+
+    def validate_schema(
+        self
+    ) -> None:
+        """
+        Get the $schema_property from the config and load the schema
+
+        Returns
+        -------
+        file_path to the $schema property
+        """
+
+        path_schema_json = None
+
+        path_schema_json = self.schema_path
+        if path_schema_json is None:    # check if the $schema property is not defined
+            warnings.warn(
+                f"$schema property could not found"
+            )
+
+        # validate the $schema property
+        if path_schema_json:
+            validate_config_json(self.jsonc, path_schema_json, cwd = self.location)
 
     def schema_list(
         self,
@@ -137,11 +168,11 @@ class ConfigFile:
         """
         Loads the schema properties
         in a sorted order according to the priority
-        
+
         Returns
         -------
         Dictionary
-        
+
             Returns the profile properties from schema (prop: value)
         """
 
@@ -152,12 +183,12 @@ class ConfigFile:
         if schema.startswith("https://") or schema.startswith("http://"):
             schema_json = requests.get(schema).json()
 
+        elif os.path.isfile(schema) or schema.startswith("file://"):
+            with open(schema.replace("file://", "")) as f:
+                schema_json = json.load(f)
+
         elif not os.path.isabs(schema):
             schema = os.path.join(self.location, schema)
-            with open(schema) as f:
-                schema_json = json.load(f)
-        
-        elif os.path.isfile(schema):
             with open(schema) as f:
                 schema_json = json.load(f)
         else:
@@ -165,10 +196,10 @@ class ConfigFile:
 
         profile_props:dict = {}
         schema_json = dict(schema_json)
-        
+
         for props in schema_json['properties']['profiles']['patternProperties']["^\\S*$"]["allOf"]:
             props = props["then"]
-            
+
             while "properties" in props:
                 props = props.pop("properties")
                 profile_props = props
@@ -179,6 +210,7 @@ class ConfigFile:
         self,
         profile_name: Optional[str] = None,
         profile_type: Optional[str] = None,
+        validate_schema: Optional[bool] = True,
     ) -> Profile:
         """
         Load given profile including secure properties and excluding values from base profile
@@ -188,7 +220,7 @@ class ConfigFile:
             Returns a namedtuple called Profile
         """
         if self.profiles is None:
-            self.init_from_file()
+            self.init_from_file(validate_schema)
 
         if profile_name is None and profile_type is None:
             raise ProfileNotFound(
