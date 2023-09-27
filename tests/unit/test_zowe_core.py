@@ -2,18 +2,20 @@
 
 # Including necessary paths
 import base64
+import commentjson
+import importlib.util
 import json
+import keyring
 import os
 import shutil
-import keyring
-import sys
 import unittest
+
+from jsonschema import validate, ValidationError, SchemaError
+from pyfakefs.fake_filesystem_unittest import TestCase
 from unittest import mock
 from unittest.mock import patch
-from jsonschema import validate, ValidationError, SchemaError
+
 from zowe.core_for_zowe_sdk.validators import validate_config_json
-import commentjson
-from pyfakefs.fake_filesystem_unittest import TestCase
 from zowe.core_for_zowe_sdk import (
     ApiConnection,
     ConfigFile,
@@ -207,7 +209,11 @@ class TestZosmfProfileManager(TestCase):
         self.original_invalidUri_schema_file_path = os.path.join(
             FIXTURES_PATH, "invalidUri.zowe.schema.json"
         )
-        # self.fs.add_real_directory(os.path.join(FIXTURES_PATH, "../../../env/lib"))
+
+        loader = importlib.util.find_spec('jsonschema')
+        module_path = loader.origin
+        self.fs.add_real_directory(os.path.dirname(module_path))
+
         self.fs.add_real_file(self.original_file_path)
         self.fs.add_real_file(self.original_user_file_path)
         self.fs.add_real_file(self.original_nested_file_path)
