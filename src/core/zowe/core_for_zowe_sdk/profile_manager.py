@@ -17,6 +17,7 @@ import jsonschema
 from typing import Optional
 
 from .config_file import ConfigFile, Profile
+from .credential_manager import CredentialManager
 from .custom_warnings import (
     ConfigNotFoundWarning,
     ProfileNotFoundWarning,
@@ -55,7 +56,8 @@ class ProfileManager:
         self.project_config = ConfigFile(type=TEAM_CONFIG, name=appname)
         self.project_user_config = ConfigFile(type=USER_CONFIG, name=appname)
 
-        self.global_config = ConfigFile(type=TEAM_CONFIG, name=GLOBAL_CONFIG_NAME)
+        self.global_config = ConfigFile(
+            type=TEAM_CONFIG, name=GLOBAL_CONFIG_NAME)
         try:
             self.global_config.location = GLOBAl_CONFIG_LOCATION
         except Exception:
@@ -64,7 +66,8 @@ class ProfileManager:
                 ConfigNotFoundWarning,
             )
 
-        self.global_user_config = ConfigFile(type=USER_CONFIG, name=GLOBAL_CONFIG_NAME)
+        self.global_user_config = ConfigFile(
+            type=USER_CONFIG, name=GLOBAL_CONFIG_NAME)
         try:
             self.global_user_config.location = GLOBAl_CONFIG_LOCATION
         except Exception:
@@ -325,3 +328,97 @@ class ProfileManager:
                 profile_props[k] = env_var[k]
 
         return profile_props
+
+    def get_highest_priority_layer(self, json_path: str) -> Optional[ConfigFile]:
+        """
+        Get the highest priority layer (configuration file) based on the given profile name
+
+        Parameters:
+            profile_name (str): The name of the profile to look for in the layers.
+
+        Returns:
+            Optional[ConfigFile]: The highest priority layer (configuration file) that contains the specified profile,
+                                or None if the profile is not found in any layer.
+        """
+        highest_layer = None
+        longest_match = ""
+        layers = [
+            self.project_user_config,
+            self.project_config,
+            self.global_user_config,
+            self.global_config
+        ]
+
+        original_name = layers[0].get_profile_name_from_path(json_path)
+        
+        for layer in layers:
+            try:
+                layer.init_from_file()
+            except FileNotFoundError:
+                continue
+            parts = original_name.split(".")
+            current_name = ""
+
+            while parts:
+                current_name = ".".join(parts)
+                profile = layer.find_profile(current_name, layer.profiles)
+
+                if profile is not None and len(current_name) > len(longest_match):
+                    highest_layer = layer
+                    longest_match = current_name
+
+                else:
+                    parts.pop()
+            if original_name == longest_match:
+                break
+
+            if highest_layer is None:
+                highest_layer = layer
+
+        if highest_layer is None:
+            raise FileNotFoundError(f"Could not find a valid layer for {json_path}")
+    
+        return highest_layer
+     
+       
+    def set_property(self, json_path, value, secure=None) -> None:
+        """
+        Set a property in the profile, storing it securely if necessary.
+
+        Parameters:
+            json_path (str): The JSON path of the property to set.
+            value (str): The value to be set for the property.
+            secure (bool): If True, the property will be stored securely. Default is None.
+        """
+
+        # highest priority layer for the given profile name
+        highest_priority_layer = self.get_highest_priority_layer(json_path)
+       
+        # Set the property in the highest priority layer
+
+        highest_priority_layer.set_property(json_path, value, secure=secure)
+
+    def set_profile(self, profile_path: str, profile_data: dict) -> None:
+        """
+        Set a profile in the highest priority layer (configuration file) based on the given profile name
+
+        Parameters:
+            profile_path (str): TThe path of the profile to be set. eg: profiles.zosmf
+            profile_data (dict): The data of the profile to set.
+        """
+        highest_priority_layer = self.get_highest_priority_layer(profile_path)
+
+        highest_priority_layer.set_profile(profile_path, profile_data)
+    
+    def save(self) -> None:
+        """
+        Save the layers (configuration files) to disk.
+        """
+        layers = [self.project_user_config,
+                  self.project_config,
+                  self.global_user_config,
+                  self.global_config]
+        
+        for layer in layers:
+            layer.save(False)
+        CredentialManager.save_secure_props()
