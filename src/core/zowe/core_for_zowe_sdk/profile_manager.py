@@ -162,7 +162,6 @@ class ProfileManager:
         cfg: ConfigFile,
         profile_name: Optional[str],
         profile_type: Optional[str],
-        config_type: Optional[str],
         validate_schema: Optional[bool] = True,
     ) -> Profile:
         """
@@ -232,7 +231,7 @@ class ProfileManager:
                 )
         except Exception as exc:
             warnings.warn(
-                f"Could not load {config_type} '{cfg.filename}' at '{cfg.filepath}'"
+                f"Could not load '{cfg.filename}' at '{cfg.filepath}'"
                 f"because {type(exc).__name__}'{exc}'.",
                 ConfigNotFoundWarning,
             )
@@ -273,58 +272,44 @@ class ProfileManager:
         if not self._show_warnings:
             warnings.simplefilter("ignore")
 
-        config_layers = {
-            "Project User Config": self.project_user_config,
-            "Project Config": self.project_config,
-            "Global User Config": self.global_user_config,
-            "Global Config": self.global_config,
-        }
         profile_props: dict = {}
-        schema_path = None
         env_var: dict = {}
-
         missing_secure_props = []  # track which secure props were not loaded
 
-        loaded_cfg: dict = {}
+        defaults_merged: dict = {}
+        profiles_merged: dict = {}
+        cfg_name = None
 
-        for i, (config_type, cfg) in enumerate(config_layers.items()):
-                
-            profile_loaded = self.get_profile(
-                cfg, profile_name, profile_type, config_type, validate_schema
-            )
-            # How about we update by iterating each layer and at last we will get the merged layer
-            # TODO Why don't user and password show up here for Project User Config?
-            # Probably need to update load_profile_properties method in config_file.py
-            if profile_loaded.name and not profile_name:
-                profile_name = (
-                    profile_loaded.name
-                )  # Define profile name that will be merged from other layers
-            profile_props = {**profile_loaded.data, **profile_props}
+        for cfg_layer in (self.project_user_config, self.project_config, self.global_user_config, self.global_config):
+            if cfg_layer.profiles is None:
+                cfg_layer.init_from_file(validate_schema)
+            if cfg_layer.defaults:
+                for name, value in cfg_layer.defaults.items():
+                    defaults_merged[name] = defaults_merged.get(name, value)
+            if not cfg_name and cfg_layer.name:
+                cfg_name = cfg_layer.name
 
+        usrProject = self.project_user_config.profiles or {}
+        project = self.project_config.profiles or {}
+        project_temp = always_merger.merge(deepcopy(usrProject), project)
+
+        usrGlobal = self.global_user_config.profiles or {}
+        glbal = self.global_config.profiles or {}
+        global_temp = always_merger.merge(deepcopy(usrGlobal), glbal)
+
+        profiles_merged = project_temp
+        for name, value in global_temp.items():
+            if name not in profiles_merged:
+                profiles_merged[name] = value
+
+        cfg = ConfigFile(type="Merged Config", name=cfg_name, profiles=profiles_merged, defaults=defaults_merged)
+        profile_loaded = self.get_profile(cfg, profile_name, profile_type, validate_schema)
+        if profile_loaded:
+            profile_props = profile_loaded.data
             missing_secure_props.extend(profile_loaded.missing_secure_props)
 
-
-            if i == 1 and profile_props:
-                break  # Skip loading from global config if profile was found in project config
-
-        usrProject = self.project_user_config.profiles
-        project = self.project_config.profiles
-
-        # Creating copies of the usrProject and project objects
-        usrProjectCopy = deepcopy(usrProject)
-        projectCopy = deepcopy(project)
-        prjt = always_merger.merge(usrProject, project)
-
-        usrGlobal = self.global_user_config.profiles
-        glbal = self.global_config.profiles
-        
-        # Creating copies of the usrGlobal and glbal objects
-        usrGlobalCopy = deepcopy(usrGlobal)
-        glbalCopy = deepcopy(glbal)
-        glbl = always_merger.merge(usrGlobal, glbal)
-
         if override_with_env:
-                env_var = {**self.get_env(cfg)}
+            env_var = {**self.get_env(cfg)}
 
         if profile_type != BASE_PROFILE:
             profile_props = {
@@ -343,7 +328,7 @@ class ProfileManager:
 
         warnings.resetwarnings()
 
-        for k, v in profile_props.items():
+        for k in profile_props.keys():
             if k in env_var:
                 profile_props[k] = env_var[k]
 

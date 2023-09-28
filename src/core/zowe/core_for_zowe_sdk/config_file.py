@@ -120,7 +120,14 @@ class ConfigFile:
         setting filepath (or if not set, autodiscover the file)
         """
         if self.filepath is None:
-            self.autodiscover_config_dir()
+            try:
+                self.autodiscover_config_dir()
+            except FileNotFoundError:
+                pass
+
+        if self.filepath is None or not os.path.isfile(self.filepath):
+            warnings.warn(f"Config file does not exist at {self.filepath}")
+            return
 
         with open(self.filepath, encoding="UTF-8", mode="r") as fileobj:
             profile_jsonc = commentjson.load(fileobj)
@@ -132,10 +139,9 @@ class ConfigFile:
 
         if self.schema_property and validate_schema:
             self.validate_schema()
-        # loading secure props is done in load_profile_properties
-        # since we want to try loading secure properties only when
-        # we know that the profile has saved properties
-        # self.load_secure_props()
+
+        CredentialManager.load_secure_props()
+        self.secure_props = CredentialManager.secure_props.get(self.filepath, {})
 
     def validate_schema(
         self
@@ -355,9 +361,7 @@ class ConfigFile:
 
 
         # load secure props only if there are secure fields
-        if secure_fields:
-            CredentialManager.load_secure_props()
-            self.secure_props = CredentialManager.secure_props.get(self.filepath, {})
+        if secure_fields and self.secure_props:
             # load properties with key as profile.{profile_name}.properties.{*}
             for (key, value) in self.secure_props.items():
                 if re.match(
@@ -372,3 +376,8 @@ class ConfigFile:
             #     self._missing_secure_props.extend(secure_fields)
 
         return props
+
+    def load_secure_properties(self, profile_name: str):
+        secure_props = {}
+        lst = profile_name.split(".")
+
