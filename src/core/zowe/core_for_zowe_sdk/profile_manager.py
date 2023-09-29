@@ -214,24 +214,6 @@ class ProfileManager:
                     f" instead.",
                     ProfileNotFoundWarning,
                 )
-        except SecureProfileLoadFailed:
-            warnings.warn(
-                f"Config '{cfg.filename}' has no saved secure properties.",
-                SecurePropsNotFoundWarning,
-            )
-        except SecurePropsNotFoundWarning:
-            if profile_name:
-                warnings.warn(
-                    f"Secure properties of profile '{profile_name}' from file '{cfg.filename}' were not found "
-                    f"hence profile not loaded.",
-                    SecurePropsNotFoundWarning,
-                )
-            else:
-                warnings.warn(
-                    f"Secure properties of profile type '{profile_type}' from file '{cfg.filename}' were not found "
-                    f"hence profile not loaded.",
-                    SecurePropsNotFoundWarning,
-                )
         except Exception as exc:
             warnings.warn(
                 f"Could not load '{cfg.filename}' at '{cfg.filepath}'"
@@ -282,30 +264,39 @@ class ProfileManager:
         defaults_merged: dict = {}
         profiles_merged: dict = {}
         cfg_name = None
+        cfg_schema = None
 
         for cfg_layer in (self.project_user_config, self.project_config, self.global_user_config, self.global_config):
             if cfg_layer.profiles is None:
-                cfg_layer.init_from_file(validate_schema)
+                try:
+                    cfg_layer.init_from_file(validate_schema)
+                except SecureProfileLoadFailed:
+                    warnings.warn(
+                        f"Could not load secure properties for {cfg_layer.filepath}",
+                        SecurePropsNotFoundWarning,
+                    )
             if cfg_layer.defaults:
                 for name, value in cfg_layer.defaults.items():
                     defaults_merged[name] = defaults_merged.get(name, value)
             if not cfg_name and cfg_layer.name:
                 cfg_name = cfg_layer.name
+            if not cfg_schema and cfg_layer.schema_property:
+                cfg_schema = cfg_layer.schema_property
 
         usrProject = self.project_user_config.profiles or {}
         project = self.project_config.profiles or {}
-        project_temp = always_merger.merge(deepcopy(usrProject), project)
+        project_temp = always_merger.merge(deepcopy(project), usrProject)
 
         usrGlobal = self.global_user_config.profiles or {}
-        glbal = self.global_config.profiles or {}
-        global_temp = always_merger.merge(deepcopy(usrGlobal), glbal)
+        global_ = self.global_config.profiles or {}
+        global_temp = always_merger.merge(deepcopy(global_), usrGlobal)
 
         profiles_merged = project_temp
         for name, value in global_temp.items():
             if name not in profiles_merged:
                 profiles_merged[name] = value
 
-        cfg = ConfigFile(type="Merged Config", name=cfg_name, profiles=profiles_merged, defaults=defaults_merged)
+        cfg = ConfigFile(type="Merged Config", name=cfg_name, profiles=profiles_merged, defaults=defaults_merged, schema_property=cfg_schema)
         profile_loaded = self.get_profile(cfg, profile_name, profile_type, validate_schema)
         if profile_loaded:
             profile_props = profile_loaded.data
@@ -331,7 +322,7 @@ class ProfileManager:
 
         warnings.resetwarnings()
 
-        for k in profile_props.keys():
+        for k in profile_props:
             if k in env_var:
                 profile_props[k] = env_var[k]
 
@@ -358,7 +349,7 @@ class ProfileManager:
         ]
 
         original_name = layers[0].get_profile_name_from_path(json_path)
-        
+
         for layer in layers:
             try:
                 layer.init_from_file()
@@ -385,10 +376,10 @@ class ProfileManager:
 
         if highest_layer is None:
             raise FileNotFoundError(f"Could not find a valid layer for {json_path}")
-    
+
         return highest_layer
-     
-       
+
+
     def set_property(self, json_path, value, secure=None) -> None:
         """
         Set a property in the profile, storing it securely if necessary.
@@ -401,7 +392,7 @@ class ProfileManager:
 
         # highest priority layer for the given profile name
         highest_priority_layer = self.get_highest_priority_layer(json_path)
-       
+
         # Set the property in the highest priority layer
 
         highest_priority_layer.set_property(json_path, value, secure=secure)
@@ -417,7 +408,7 @@ class ProfileManager:
         highest_priority_layer = self.get_highest_priority_layer(profile_path)
 
         highest_priority_layer.set_profile(profile_path, profile_data)
-    
+
     def save(self) -> None:
         """
         Save the layers (configuration files) to disk.
@@ -426,7 +417,7 @@ class ProfileManager:
                   self.project_config,
                   self.global_user_config,
                   self.global_config]
-        
+
         for layer in layers:
             layer.save(False)
         CredentialManager.save_secure_props()
