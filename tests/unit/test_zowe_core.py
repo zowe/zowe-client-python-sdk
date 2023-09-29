@@ -939,25 +939,35 @@ class TestZosmfProfileManager(TestCase):
         cwd_up_file_path = os.path.join(cwd_up_dir_path, "zowe.config.json")
         os.chdir(CWD)
         shutil.copy(self.original_file_path, cwd_up_file_path)
-        config_data = {
-            "profiles": {
-                "zosmf": {
-                    "properties": {
-                        "user": "admin",
-                        "port": 1443
-                    },
-                    "secure": ["user"]
-                }
+        profile_data = {
+            "lpar1": {
+                "profiles": {
+                    "zosmf": {
+                        "properties": {
+                            "port": 1443,
+                            "password": "secret"
+                        },
+                        "secure": ["password"]
+                    }
+                },
+                "properties": {
+                    "host": "example.com",
+                    "user": "admin"
+                },
+                "secure": ["user"]
             }
         }
         with mock.patch("builtins.open", mock.mock_open()) as mock_file:
-            config_file = ConfigFile("User Config", "zowe.config.json", cwd_up_dir_path , profiles=config_data.copy())
-            config_file.jsonc = config_data
+            config_file = ConfigFile("User Config", "zowe.config.json", cwd_up_dir_path, profiles=profile_data)
+            config_file.jsonc = {"profiles": profile_data}
             config_file.save()
 
-            mock_save_secure_props.assert_called_once()
-            mock_file.assert_called_once_with(cwd_up_file_path, 'w')
-            mock_file.return_value.__enter__.return_value.write.asser_called()
+        mock_save_secure_props.assert_called_once()
+        mock_file.assert_called_once_with(cwd_up_file_path, 'w')
+        mock_file.return_value.write.assert_called()
+        self.assertIn("user", profile_data["lpar1"]["properties"])
+        self.assertNotIn("user", config_file.jsonc["profiles"]["lpar1"]["properties"])
+        self.assertEqual(["port"], list(config_file.jsonc["profiles"]["lpar1"]["profiles"]["zosmf"]["properties"].keys()))
 
 
 class TestValidateConfigJsonClass(unittest.TestCase):
