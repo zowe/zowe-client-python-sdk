@@ -15,6 +15,7 @@ import re
 import json
 import requests
 import warnings
+from copy import deepcopy
 from dataclasses import dataclass, field
 from typing import Optional, NamedTuple
 
@@ -36,9 +37,9 @@ from .profile_constants import (
 
 
 HOME = os.path.expanduser("~")
-GLOBAl_CONFIG_LOCATION = os.path.join(HOME, ".zowe")
+GLOBAL_CONFIG_LOCATION = os.path.join(HOME, ".zowe")
 GLOBAL_CONFIG_PATH = os.path.join(
-    GLOBAl_CONFIG_LOCATION, f"{GLOBAL_CONFIG_NAME}.config.json"
+    GLOBAL_CONFIG_LOCATION, f"{GLOBAL_CONFIG_NAME}.config.json"
 )
 CURRENT_DIR = os.getcwd()
 
@@ -122,7 +123,14 @@ class ConfigFile:
         setting filepath (or if not set, autodiscover the file)
         """
         if self.filepath is None:
-            self.autodiscover_config_dir()
+            try:
+                self.autodiscover_config_dir()
+            except FileNotFoundError:
+                pass
+
+        if self.filepath is None or not os.path.isfile(self.filepath):
+            warnings.warn(f"Config file does not exist at {self.filepath}")
+            return
 
         with open(self.filepath, encoding="UTF-8", mode="r") as fileobj:
             profile_jsonc = commentjson.load(fileobj)
@@ -134,10 +142,9 @@ class ConfigFile:
 
         if self.schema_property and validate_schema:
             self.validate_schema()
-        # loading secure props is done in load_profile_properties
-        # since we want to try loading secure properties only when
-        # we know that the profile has saved properties
-        #  CredentialManager.load_secure_props()
+
+        CredentialManager.load_secure_props()
+        self.__load_secure_properties()
 
     def validate_schema(
         self
@@ -352,24 +359,38 @@ class ConfigFile:
                 )
             lst.pop()
 
-        # load secure props only if there are secure fields
-        if secure_fields:
-            CredentialManager.load_secure_props()
-            self.secure_props = CredentialManager.secure_props.get(self.filepath, {})
-            # load properties with key as profile.{profile_name}.properties.{*}
-            for (key, value) in self.secure_props.items():
-                if re.match(
-                    "profiles\\." + profile_name + "\\.properties\\.[a-z]+", key
-                ):
-                    property_name = key.split(".")[-1]
-                    if property_name in secure_fields:
-                        props[property_name] = value
-                        secure_fields.remove(property_name)
-
-            # if len(secure_fields) > 0:
-            #     self._missing_secure_props.extend(secure_fields)
-
         return props
+
+    def __load_secure_properties(self):
+        """
+        Inject secure properties that have been loaded from the vault into the profiles object.
+        """
+        secure_props = CredentialManager.secure_props.get(self.filepath, {})
+        for key, value in secure_props.items():
+            segments = [name for i, name in enumerate(key.split(".")) if i % 2 == 1]
+            profiles_obj = self.profiles
+            property_name = segments.pop()
+            for i, profile_name in enumerate(segments):
+                if profile_name in profiles_obj:
+                    profiles_obj = profiles_obj[profile_name]
+                    if i == len(segments) - 1:
+                        profiles_obj.setdefault("properties", {})
+                        profiles_obj["properties"][property_name] = value
+                else:
+                    break
+
+    def __extract_secure_properties(self, profiles_obj, json_path="profiles"):
+        """
+        Extract secure properties from the profiles object so they can be saved to the vault.
+        """
+        secure_props = {}
+        for key, value in profiles_obj.items():
+            for property_name in value.get("secure", []):
+                if property_name in value.get("properties", {}):
+                    secure_props[f"{json_path}.{key}.properties.{property_name}"] = value["properties"].pop(property_name)
+            if value.get("profiles"):
+                secure_props.update(self.__extract_secure_properties(value["profiles"], f"{json_path}.{key}.profiles"))
+        return secure_props
 
     def __set_or_create_nested_profile(self, profile_name, profile_data):
         """
@@ -422,26 +443,17 @@ class ConfigFile:
         current_profile = self.find_profile(profile_name, self.profiles) or {}
         current_properties = current_profile.setdefault("properties", {})
         current_secure = current_profile.setdefault("secure", [])
-        if is_secure:
-            CredentialManager.load_secure_props()
-            if not is_property_secure:
-                current_secure.append(property_name)
-
-            CredentialManager.secure_props[self.filepath] = {
-                **CredentialManager.secure_props.get(self.filepath, {}), json_path: value}
-            current_properties.pop(property_name, None)
-
-        else:
-            if is_property_secure:
-                CredentialManager.secure_props[self.filepath].pop(json_path,None)
-                current_secure.remove(property_name)
-            current_properties[property_name] = value
+        current_properties[property_name] = value
+        if is_secure and not is_property_secure:
+            current_secure.append(property_name)
+        elif not is_secure and is_property_secure:
+            current_secure.remove(property_name)
 
         current_profile["properties"] = current_properties
         current_profile["secure"] = current_secure
         self.__set_or_create_nested_profile(profile_name, current_profile)
 
-    def set_profile(self, profile_path: str, profile_data: dict) -> None: 
+    def set_profile(self, profile_path: str, profile_data: dict) -> None:
         """
         Set a profile in the config file.
 
@@ -455,50 +467,41 @@ class ConfigFile:
         if "secure" in profile_data:
             # Checking if the profile has a 'secure' field with values
             secure_fields = profile_data["secure"]
-            current_profile  = self.find_profile(profile_name,self.profiles) or {}
+            current_profile = self.find_profile(profile_name,self.profiles) or {}
             existing_secure_fields = current_profile.get("secure", [])
             new_secure_fields = [field for field in secure_fields if field not in existing_secure_fields]
 
-            # JSON paths for new secure properties and store their values in CredentialManager.secure_props
-            CredentialManager.load_secure_props()
-            CredentialManager.secure_props[self.filepath] = {}
-            for field in new_secure_fields:
-                json_path = f"{profile_path}.properties.{field}"
-                profile_value = profile_data["properties"][field]
-                CredentialManager.secure_props[self.filepath][json_path] = profile_value
             # Updating the 'secure' field of the profile with the combined list of secure fields
             profile_data["secure"] = existing_secure_fields + new_secure_fields
             # If a field is provided in the 'secure' list and its value exists in 'profile_data', remove it
             profile_data["properties"] = {
-                field: value
-                for field, value in profile_data.get("properties", {}).items()
-                if field not in profile_data["secure"]
+                **current_profile.get("properties", {}),
+                **profile_data.get("properties", {}),
             }
         self.__set_or_create_nested_profile(profile_name, profile_data)
-        
 
-    def save(self, secure_props=True):
+
+    def save(self, update_secure_props=True):
         """
         Save the config file to disk. and secure props to vault
         parameters:
-            secure_props (bool): If True, the secure properties will be stored in the vault. Default is False.
+            secure_props (bool): If True, the secure properties will be stored in the vault. Default is True.
         Returns:
             None
         """
         # Updating the config file with any changes
-        if self.profiles is None:
-            try:
-                self.init_from_file()
-            except FileNotFoundError:
-                pass
+        if not any(self.profiles.values()):
+            return
 
-        elif any(self.profiles.values()):
-            with open(self.filepath, 'w') as file:
-                self.jsonc["profiles"] = self.profiles
-                commentjson.dump(self.jsonc, file, indent=4)
-            if secure_props:
-                CredentialManager.save_secure_props()
-    
+        profiles_temp = deepcopy(self.profiles)
+        secure_props = self.__extract_secure_properties(profiles_temp)
+        CredentialManager.secure_props[self.filepath] = secure_props
+        with open(self.filepath, 'w') as file:
+            self.jsonc["profiles"] = profiles_temp
+            commentjson.dump(self.jsonc, file, indent=4)
+        if update_secure_props:
+            CredentialManager.save_secure_props()
+
 
     def get_profile_name_from_path(self, path: str) -> str:
         """
@@ -507,7 +510,7 @@ class ConfigFile:
         segments = path.split(".")
         profile_name = ".".join(segments[i] for i in range(1, len(segments), 2) if segments[i - 1] != "properties")
         return profile_name
-    
+
     def get_profile_path_from_name(self, short_path: str) -> str:
         """
         Get the path of the profile from the given name.
