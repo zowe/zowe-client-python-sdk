@@ -10,11 +10,12 @@ SPDX-License-Identifier: EPL-2.0
 Copyright Contributors to the Zowe Project.
 """
 
-import commentjson
-from jsonschema import validate
 import os
-from typing import Union, Optional
+from typing import Optional, Union
+
+import commentjson
 import requests
+from jsonschema import validate
 
 
 def validate_config_json(path_config_json: Union[str, dict], path_schema_json: str, cwd: str):
@@ -50,7 +51,7 @@ def validate_config_json(path_config_json: Union[str, dict], path_schema_json: s
             schema_json = commentjson.load(file)
 
     # if there is no path_schema_json it will return None
-    else: 
+    else:
         return None
 
     if isinstance(path_config_json, str):

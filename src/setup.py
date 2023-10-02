@@ -1,10 +1,13 @@
 import os.path
 import uuid
+
 from setuptools import setup
+
 from _version import __version__
 
 src_dir = os.path.realpath(os.path.dirname(__file__))
 uuid4 = uuid.uuid4()
+
 
 def resolve_sdk_dep(sdk_name, version_spec):
     # if os.path.exists(os.path.join(src_dir, sdk_name, "zowe")):
@@ -15,11 +18,12 @@ def resolve_sdk_dep(sdk_name, version_spec):
     # else:
     return f"zowe.{sdk_name}_for_zowe_sdk{version_spec}"
 
+
 if __name__ == "__main__":
     setup(
-        name='zowe',
+        name="zowe",
         version=__version__,
-        description='Zowe Python SDK',
+        description="Zowe Python SDK",
         url="https://github.com/zowe/zowe-client-python-sdk",
         author="Guilherme Cartier",
         author_email="gcartier94@gmail.com",
@@ -27,11 +31,14 @@ if __name__ == "__main__":
         classifiers=[
             "Programming Language :: Python :: 3",
             "Programming Language :: Python :: 3.7",
-            "License :: OSI Approved :: Eclipse Public License 2.0 (EPL-2.0)"],
-        install_requires=[resolve_sdk_dep('zos_console', '==' + __version__),
-                        resolve_sdk_dep('zos_files', '==' + __version__),
-                        resolve_sdk_dep('zos_tso', '==' + __version__),
-                        resolve_sdk_dep('zos_jobs', '==' + __version__),
-                        resolve_sdk_dep('zosmf', '==' + __version__)],
-        py_modules=[]
+            "License :: OSI Approved :: Eclipse Public License 2.0 (EPL-2.0)",
+        ],
+        install_requires=[
+            resolve_sdk_dep("zos_console", "==" + __version__),
+            resolve_sdk_dep("zos_files", "==" + __version__),
+            resolve_sdk_dep("zos_tso", "==" + __version__),
+            resolve_sdk_dep("zos_jobs", "==" + __version__),
+            resolve_sdk_dep("zosmf", "==" + __version__),
+        ],
+        py_modules=[],
     )

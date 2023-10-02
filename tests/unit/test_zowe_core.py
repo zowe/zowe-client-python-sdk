@@ -2,32 +2,31 @@
 
 # Including necessary paths
 import base64
-import commentjson
 import importlib.util
 import json
-import keyring
 import os
 import shutil
 import unittest
-
-from jsonschema import validate, ValidationError, SchemaError
-from pyfakefs.fake_filesystem_unittest import TestCase
 from unittest import mock
 
-from zowe.core_for_zowe_sdk.validators import validate_config_json
+import commentjson
+import keyring
+from jsonschema import SchemaError, ValidationError, validate
+from pyfakefs.fake_filesystem_unittest import TestCase
 from zowe.core_for_zowe_sdk import (
     ApiConnection,
     ConfigFile,
-    ProfileManager,
     CredentialManager,
+    ProfileManager,
     RequestHandler,
     SdkApi,
     ZosmfProfile,
+    constants,
+    custom_warnings,
     exceptions,
     session_constants,
-    custom_warnings,
-    constants,
 )
+from zowe.core_for_zowe_sdk.validators import validate_config_json
 
 FIXTURES_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fixtures")
 CWD = os.getcwd()
@@ -79,12 +78,7 @@ class TestSdkApiClass(TestCase):
 
     def setUp(self):
         """Setup fixtures for SdkApi class."""
-        common_props = {
-            "host": "mock-url.com",
-            "port": 443,
-            "protocol": "https",
-            "rejectUnauthorized": True
-        }
+        common_props = {"host": "mock-url.com", "port": 443, "protocol": "https", "rejectUnauthorized": True}
         self.basic_props = {**common_props, "user": "Username", "password": "Password"}
         self.bearer_props = {**common_props, "tokenValue": "BearerToken"}
         self.token_props = {
@@ -131,12 +125,12 @@ class TestSdkApiClass(TestCase):
 
         sdk_api = SdkApi(self.basic_props, self.default_url)
 
-        actual_not_empty = sdk_api._encode_uri_component('MY.STRING@.TEST#.$HERE(MBR#NAME)')
-        expected_not_empty = 'MY.STRING%40.TEST%23.%24HERE(MBR%23NAME)'
+        actual_not_empty = sdk_api._encode_uri_component("MY.STRING@.TEST#.$HERE(MBR#NAME)")
+        expected_not_empty = "MY.STRING%40.TEST%23.%24HERE(MBR%23NAME)"
         self.assertEqual(actual_not_empty, expected_not_empty)
 
-        actual_wildcard = sdk_api._encode_uri_component('GET.#DS.*')
-        expected_wildcard = 'GET.%23DS.*'
+        actual_wildcard = sdk_api._encode_uri_component("GET.#DS.*")
+        expected_wildcard = "GET.%23DS.*"
         self.assertEqual(actual_wildcard, expected_wildcard)
 
         actual_none = sdk_api._encode_uri_component(None)
@@ -178,6 +172,7 @@ class TestZosmfProfileClass(unittest.TestCase):
         zosmf_profile = ZosmfProfile(self.profile_name)
         self.assertIsInstance(zosmf_profile, ZosmfProfile)
 
+
 class TestZosmfProfileManager(TestCase):
     """ProfileManager class unit tests."""
 
@@ -187,29 +182,15 @@ class TestZosmfProfileManager(TestCase):
         self.session_arguments = {"verify": False}
         self.setUpPyfakefs()
         self.original_file_path = os.path.join(FIXTURES_PATH, "zowe.config.json")
-        self.original_user_file_path = os.path.join(
-            FIXTURES_PATH, "zowe.config.user.json"
-        )
-        self.original_invalid_file_path = os.path.join(
-            FIXTURES_PATH, "invalid.zowe.config.json"
-        )
-        self.original_nested_file_path = os.path.join(
-            FIXTURES_PATH, "nested.zowe.config.json"
-        )
-        self.original_schema_file_path = os.path.join(
-            FIXTURES_PATH, "zowe.schema.json"
-        )
-        self.original_invalid_schema_file_path = os.path.join(
-            FIXTURES_PATH, "invalid.zowe.schema.json"
-        )
-        self.original_invalidUri_file_path = os.path.join(
-            FIXTURES_PATH, "invalidUri.zowe.config.json"
-        )
-        self.original_invalidUri_schema_file_path = os.path.join(
-            FIXTURES_PATH, "invalidUri.zowe.schema.json"
-        )
+        self.original_user_file_path = os.path.join(FIXTURES_PATH, "zowe.config.user.json")
+        self.original_invalid_file_path = os.path.join(FIXTURES_PATH, "invalid.zowe.config.json")
+        self.original_nested_file_path = os.path.join(FIXTURES_PATH, "nested.zowe.config.json")
+        self.original_schema_file_path = os.path.join(FIXTURES_PATH, "zowe.schema.json")
+        self.original_invalid_schema_file_path = os.path.join(FIXTURES_PATH, "invalid.zowe.schema.json")
+        self.original_invalidUri_file_path = os.path.join(FIXTURES_PATH, "invalidUri.zowe.config.json")
+        self.original_invalidUri_schema_file_path = os.path.join(FIXTURES_PATH, "invalidUri.zowe.schema.json")
 
-        loader = importlib.util.find_spec('jsonschema')
+        loader = importlib.util.find_spec("jsonschema")
         module_path = loader.origin
         self.fs.add_real_directory(os.path.dirname(module_path))
 
@@ -255,10 +236,13 @@ class TestZosmfProfileManager(TestCase):
         os.chdir(CWD)
         shutil.copy(self.original_file_path, cwd_up_file_path)
 
-        self.setUpCreds(cwd_up_file_path, {
-            "profiles.base.properties.user": "user",
-            "profiles.base.properties.password": "password",
-        })
+        self.setUpCreds(
+            cwd_up_file_path,
+            {
+                "profiles.base.properties.user": "user",
+                "profiles.base.properties.password": "password",
+            },
+        )
 
         # Test
         prof_manager = ProfileManager()
@@ -284,10 +268,13 @@ class TestZosmfProfileManager(TestCase):
         custom_file_path = os.path.join(self.custom_dir, self.custom_filename)
         shutil.copy(self.original_file_path, custom_file_path)
 
-        self.setUpCreds(custom_file_path, {
-            "profiles.zosmf.properties.user": "user",
-            "profiles.zosmf.properties.password": "password",
-        })
+        self.setUpCreds(
+            custom_file_path,
+            {
+                "profiles.zosmf.properties.user": "user",
+                "profiles.zosmf.properties.password": "password",
+            },
+        )
 
         # Test
         prof_manager = ProfileManager(appname=self.custom_appname)
@@ -315,10 +302,13 @@ class TestZosmfProfileManager(TestCase):
         custom_file_path = os.path.join(self.custom_dir, self.custom_filename)
         shutil.copy(self.original_nested_file_path, custom_file_path)
 
-        self.setUpCreds(custom_file_path, {
-            "profiles.zosmf.properties.user": "user",
-            "profiles.zosmf.properties.password": "password",
-        })
+        self.setUpCreds(
+            custom_file_path,
+            {
+                "profiles.zosmf.properties.user": "user",
+                "profiles.zosmf.properties.password": "password",
+            },
+        )
 
         # Test
         prof_manager = ProfileManager(appname=self.custom_appname)
@@ -326,11 +316,7 @@ class TestZosmfProfileManager(TestCase):
         props: dict = prof_manager.load(profile_name="lpar1.zosmf", validate_schema=False)
         self.assertEqual(prof_manager.config_filepath, custom_file_path)
 
-        expected_props = {
-            "host": "example1.com",
-            "rejectUnauthorized": True,
-            "port": 443
-        }
+        expected_props = {"host": "example1.com", "rejectUnauthorized": True, "port": 443}
         self.assertEqual(props, expected_props)
 
     @mock.patch("keyring.get_password", side_effect=keyring_get_password)
@@ -347,10 +333,13 @@ class TestZosmfProfileManager(TestCase):
         shutil.copy(self.original_file_path, cwd_up_file_path)
         shutil.copy(self.original_user_file_path, cwd_up_dir_path)
 
-        self.setUpCreds(cwd_up_file_path, {
-            "profiles.zosmf.properties.user": "user",
-            "profiles.zosmf.properties.password": "password",
-        })
+        self.setUpCreds(
+            cwd_up_file_path,
+            {
+                "profiles.zosmf.properties.user": "user",
+                "profiles.zosmf.properties.password": "password",
+            },
+        )
 
         # Test
         prof_manager = ProfileManager()
@@ -377,9 +366,7 @@ class TestZosmfProfileManager(TestCase):
         with self.assertWarns(custom_warnings.ProfileNotFoundWarning):
             # Setup
             cwd_up_dir_path = os.path.dirname(CWD)
-            cwd_up_file_path = os.path.join(
-                cwd_up_dir_path, f"{self.custom_appname}.config.json"
-            )
+            cwd_up_file_path = os.path.join(cwd_up_dir_path, f"{self.custom_appname}.config.json")
             os.chdir(CWD)
             shutil.copy(self.original_file_path, cwd_up_file_path)
 
@@ -436,15 +423,11 @@ class TestZosmfProfileManager(TestCase):
         os.chdir(CWD)
         shutil.copy(self.original_file_path, cwd_up_file_path)
         credential = {
-            cwd_up_file_path:
-            {
-            "profiles.base.properties.user": "user",
-            "profiles.base.properties.password": "password"
-            }
+            cwd_up_file_path: {"profiles.base.properties.user": "user", "profiles.base.properties.password": "password"}
         }
         self.setUpCreds(cwd_up_file_path, credential)
         base64_encoded_credential = base64.b64encode(commentjson.dumps(credential).encode()).decode()
-        encoded_credential = base64_encoded_credential.encode('utf-16le').decode()
+        encoded_credential = base64_encoded_credential.encode("utf-16le").decode()
         retrieve_cred_func.return_value = encoded_credential
 
         # call the load_secure_props method
@@ -461,19 +444,21 @@ class TestZosmfProfileManager(TestCase):
         """
         Test the delete_credential method for deleting credentials from keyring.
         """
+
         def side_effect(*args, **kwargs):
             if side_effect.counter < 2:
                 side_effect.counter += 1
                 raise keyring.errors.PasswordDeleteError
             else:
                 return None
+
         side_effect.counter = 0
 
         # custom side effect function for the mock
         delete_pass_func.side_effect = side_effect
         credential_manager = CredentialManager()
-        service_name = constants['ZoweServiceName']
-        account_name = constants['ZoweAccountName']
+        service_name = constants["ZoweServiceName"]
+        account_name = constants["ZoweAccountName"]
         # Delete the credential
         credential_manager.delete_credential(service_name, account_name)
         expected_calls = [
@@ -492,15 +477,15 @@ class TestZosmfProfileManager(TestCase):
         service_name = f"{constants['ZoweServiceName']}/{constants['ZoweAccountName']}"
 
         # Scenario 1: Retrieve password directly
-        expected_password1 = "password".encode('utf-16le').decode()
+        expected_password1 = "password".encode("utf-16le").decode()
         expected_password1 = expected_password1[:-1]
-        retrieve_credential1 = credential_manager._retrieve_credential(constants['ZoweServiceName'])
+        retrieve_credential1 = credential_manager._retrieve_credential(constants["ZoweServiceName"])
         self.assertEqual(retrieve_credential1, expected_password1)
         get_pass_func.assert_called_with(service_name, constants["ZoweAccountName"])
 
         # Scenario 2: Retrieve password in parts
-        expected_password2 = "part1part2".encode('utf-16le').decode()
-        retrieve_credential2 = credential_manager._retrieve_credential(constants['ZoweServiceName'])
+        expected_password2 = "part1part2".encode("utf-16le").decode()
+        retrieve_credential2 = credential_manager._retrieve_credential(constants["ZoweServiceName"])
         retrieve_credential2 = retrieve_credential2[:-1]
         self.assertEqual(retrieve_credential2, expected_password2)
         get_pass_func.assert_any_call(service_name, constants["ZoweAccountName"])
@@ -508,16 +493,15 @@ class TestZosmfProfileManager(TestCase):
         get_pass_func.assert_any_call(f"{service_name}-2", f"{constants['ZoweAccountName']}-2")
 
     @mock.patch("sys.platform", "win32")
-    @mock.patch("keyring.get_password", side_effect=[None,None])
+    @mock.patch("keyring.get_password", side_effect=[None, None])
     def test_retrieve_credential_encoding_errors(self, get_pass_func):
         """
         Test the _retrieve_credential method for handling encoding errors and None values.
         """
         service_name = f"{constants['ZoweServiceName']}/{constants['ZoweAccountName']}"
-        result=CredentialManager._retrieve_credential(constants['ZoweServiceName'])
+        result = CredentialManager._retrieve_credential(constants["ZoweServiceName"])
         self.assertIsNone(result)
         get_pass_func.assert_called_with(f"{service_name}-1", f"{constants['ZoweAccountName']}-1")
-
 
     @mock.patch("sys.platform", "win32")
     @mock.patch("keyring.set_password")
@@ -536,33 +520,27 @@ class TestZosmfProfileManager(TestCase):
         os.chdir(CWD)
         shutil.copy(self.original_file_path, cwd_up_file_path)
         credential = {
-            cwd_up_file_path:
-            {
-            "profiles.base.properties.user": "samadpls",
-            "profiles.base.properties.password": "password"
+            cwd_up_file_path: {
+                "profiles.base.properties.user": "samadpls",
+                "profiles.base.properties.password": "password",
             }
         }
-        self.setUpCreds(cwd_up_file_path,credential)
+        self.setUpCreds(cwd_up_file_path, credential)
         encoded_credential = base64.b64encode(commentjson.dumps(credential).encode()).decode()
         retrieve_cred_func.return_value = None
 
-        CredentialManager.secure_props =  credential
+        CredentialManager.secure_props = credential
         CredentialManager.save_secure_props()
         # delete the existing credential
         delete_pass_func.return_value = None
         # Verify the keyring function call
-        set_pass_func.assert_called_once_with(
-            service_name,
-            constants['ZoweAccountName'],
-            encoded_credential
-        )
+        set_pass_func.assert_called_once_with(service_name, constants["ZoweAccountName"], encoded_credential)
 
     @mock.patch("sys.platform", "win32")
     @mock.patch("zowe.core_for_zowe_sdk.CredentialManager._retrieve_credential")
     @mock.patch("keyring.set_password")
     @mock.patch("zowe.core_for_zowe_sdk.CredentialManager.delete_credential")
     def test_save_secure_props_exceed_limit(self, delete_pass_func, set_pass_func, retrieve_cred_func):
-
         # Set up mock values and expected results
         service_name = constants["ZoweServiceName"] + "/" + constants["ZoweAccountName"]
         # Setup - copy profile to fake filesystem created by pyfakefs
@@ -571,19 +549,18 @@ class TestZosmfProfileManager(TestCase):
         os.chdir(CWD)
         shutil.copy(self.original_file_path, cwd_up_file_path)
         credential = {
-            cwd_up_file_path:
-            {
-            "profiles.base.properties.user": "user",
-            "profiles.base.properties.password": "a" * (constants["WIN32_CRED_MAX_STRING_LENGTH"] + 1)
+            cwd_up_file_path: {
+                "profiles.base.properties.user": "user",
+                "profiles.base.properties.password": "a" * (constants["WIN32_CRED_MAX_STRING_LENGTH"] + 1),
             }
         }
         self.setUpCreds(cwd_up_file_path, credential)
         base64_encoded_credential = base64.b64encode(commentjson.dumps(credential).encode()).decode()
-        base64_encoded_credential+='\0'
-        encoded_credential = base64_encoded_credential.encode('utf-16le').decode()
+        base64_encoded_credential += "\0"
+        encoded_credential = base64_encoded_credential.encode("utf-16le").decode()
         retrieve_cred_func.return_value = encoded_credential
 
-        CredentialManager.secure_props =  credential
+        CredentialManager.secure_props = credential
         CredentialManager.save_secure_props()
 
         # delete the existing credential
@@ -591,16 +568,14 @@ class TestZosmfProfileManager(TestCase):
 
         expected_calls = []
         chunk_size = constants["WIN32_CRED_MAX_STRING_LENGTH"]
-        chunks = [base64_encoded_credential[i: i + chunk_size] for i in range(0, len(base64_encoded_credential), chunk_size)]
+        chunks = [
+            base64_encoded_credential[i : i + chunk_size] for i in range(0, len(base64_encoded_credential), chunk_size)
+        ]
         for index, chunk in enumerate(chunks, start=1):
             field_name = f"{constants['ZoweAccountName']}-{index}"
             service_names = f"{service_name}-{index}"
-            password=(chunk + '\0' *(len(chunk)%2)).encode().decode('utf-16le')
-            expected_calls.append(mock.call(
-                service_names,
-                field_name,
-                password
-            ))
+            password = (chunk + "\0" * (len(chunk) % 2)).encode().decode("utf-16le")
+            expected_calls.append(mock.call(service_names, field_name, password))
         set_pass_func.assert_has_calls(expected_calls)
 
     @mock.patch("keyring.get_password", side_effect=keyring_get_password)
@@ -614,10 +589,13 @@ class TestZosmfProfileManager(TestCase):
         shutil.copy(self.original_schema_file_path, self.custom_dir)
         os.chdir(self.custom_dir)
 
-        self.setUpCreds(custom_file_path, {
-            "profiles.zosmf.properties.user": "user",
-            "profiles.zosmf.properties.password": "password",
-        })
+        self.setUpCreds(
+            custom_file_path,
+            {
+                "profiles.zosmf.properties.user": "user",
+                "profiles.zosmf.properties.password": "password",
+            },
+        )
 
         # Test
         prof_manager = ProfileManager(appname="zowe")
@@ -636,10 +614,13 @@ class TestZosmfProfileManager(TestCase):
             shutil.copy(self.original_invalid_schema_file_path, self.custom_dir)
             os.chdir(self.custom_dir)
 
-            self.setUpCreds(custom_file_path, {
-                "profiles.zosmf.properties.user": "user",
-                "profiles.zosmf.properties.password": "password",
-            })
+            self.setUpCreds(
+                custom_file_path,
+                {
+                    "profiles.zosmf.properties.user": "user",
+                    "profiles.zosmf.properties.password": "password",
+                },
+            )
 
             # Test
             prof_manager = ProfileManager(appname="invalid.zowe")
@@ -658,10 +639,13 @@ class TestZosmfProfileManager(TestCase):
             shutil.copy(self.original_invalidUri_schema_file_path, self.custom_dir)
             os.chdir(self.custom_dir)
 
-            self.setUpCreds(custom_file_path, {
-                "profiles.zosmf.properties.user": "user",
-                "profiles.zosmf.properties.password": "password",
-            })
+            self.setUpCreds(
+                custom_file_path,
+                {
+                    "profiles.zosmf.properties.user": "user",
+                    "profiles.zosmf.properties.password": "password",
+                },
+            )
 
             # Test
             prof_manager = ProfileManager(appname="invalidUri.zowe")
@@ -682,10 +666,13 @@ class TestZosmfProfileManager(TestCase):
         shutil.copy(self.original_schema_file_path, self.custom_dir)
         os.chdir(self.custom_dir)
 
-        self.setUpCreds(custom_file_path, {
-            "profiles.zosmf.properties.user": "user",
-            "profiles.zosmf.properties.password": "password",
-        })
+        self.setUpCreds(
+            custom_file_path,
+            {
+                "profiles.zosmf.properties.user": "user",
+                "profiles.zosmf.properties.password": "password",
+            },
+        )
 
         # Test
         prof_manager = ProfileManager(appname="zowe")
@@ -742,7 +729,6 @@ class TestZosmfProfileManager(TestCase):
         # Assert the method calls
         highest_priority_layer_mock.set_property.assert_called_with(json_path, value, secure=secure)
 
-
     @mock.patch("zowe.core_for_zowe_sdk.ConfigFile.save")
     @mock.patch("zowe.core_for_zowe_sdk.CredentialManager.save_secure_props")
     def test_profile_manager_save(self, mock_save_secure_props, mock_save):
@@ -761,12 +747,7 @@ class TestZosmfProfileManager(TestCase):
         Test that set_profile calls the set_profile method of the highest priority layer.
         """
         profile_path = "profiles.zosmf"
-        profile_data = {
-            "properties": {
-                "user": "admin",
-                "password": "password1"
-            }
-        }
+        profile_data = {"properties": {"user": "admin", "password": "password1"}}
 
         highest_priority_layer_mock = mock.MagicMock(spec=ConfigFile)
         get_highest_priority_layer_mock.return_value = highest_priority_layer_mock
@@ -783,22 +764,10 @@ class TestZosmfProfileManager(TestCase):
         Test that __set_or_create_nested_profile calls the get_profile_path_from_name method and sets the profile data.
         """
         mock_get_profile_path.return_value = "profiles.zosmf"
-        config_file = ConfigFile( name="zowe_abcd", type="User Config", profiles={})
-        profile_data = {
-            "properties": {
-                "user": "samadpls",
-                "password": "password1"
-            }
-        }
+        config_file = ConfigFile(name="zowe_abcd", type="User Config", profiles={})
+        profile_data = {"properties": {"user": "samadpls", "password": "password1"}}
         config_file._ConfigFile__set_or_create_nested_profile("zosmf", profile_data)
-        expected_profiles = {
-            "zosmf": {
-                "properties": {
-                    "user": "samadpls",
-                    "password": "password1"
-                }
-            }
-        }
+        expected_profiles = {"zosmf": {"properties": {"user": "samadpls", "password": "password1"}}}
         self.assertEqual(config_file.profiles, expected_profiles)
 
     @mock.patch("zowe.core_for_zowe_sdk.ConfigFile.find_profile")
@@ -807,10 +776,7 @@ class TestZosmfProfileManager(TestCase):
         Test that __is_secure returns True if the property is secure and False otherwise.
         """
         config_file = ConfigFile(name="zowe_abcd", type="User Config", profiles={})
-        mock_find_profile.return_value = {
-                                        "properties": {"user":"samadpls"},
-                                        "secure": ["password"]
-                                        }
+        mock_find_profile.return_value = {"properties": {"user": "samadpls"}, "secure": ["password"]}
         is_secure_secure = config_file._ConfigFile__is_secure("zosmf", "password")
         is_secure_non_secure = config_file._ConfigFile__is_secure("zosmf", "user")
 
@@ -829,10 +795,8 @@ class TestZosmfProfileManager(TestCase):
         cwd_up_file_path = os.path.join(cwd_up_dir_path, "zowe.config.json")
         os.chdir(CWD)
         shutil.copy(self.original_file_path, cwd_up_file_path)
-        self.setUpCreds(cwd_up_file_path, {
-            "profiles.zosmf.properties.user": "admin"
-        })
-        config_file = ConfigFile(name="zowe_abcd", type="User Config", profiles= {})
+        self.setUpCreds(cwd_up_file_path, {"profiles.zosmf.properties.user": "admin"})
+        config_file = ConfigFile(name="zowe_abcd", type="User Config", profiles={})
         mock_is_secure.return_value = False
         mock_find_profile.return_value = {"properties": {"port": 1443}, "secure": []}
         mock_get_profile_name.return_value = "zosmf"
@@ -842,12 +806,9 @@ class TestZosmfProfileManager(TestCase):
         mock_is_secure.assert_called_with("zosmf", "user")
         mock_find_profile.assert_called_with("zosmf", config_file.profiles)
         mock_get_profile_name.assert_called_with("profiles.zosmf.properties.user")
-        self.assertEqual(config_file.profiles, {
-            "zosmf": {
-                "properties": {"port": 1443, "user": "admin"},
-                "secure": ["user"]
-            }
-        })
+        self.assertEqual(
+            config_file.profiles, {"zosmf": {"properties": {"port": 1443, "user": "admin"}, "secure": ["user"]}}
+        )
 
     def test_get_profile_name_from_path(self):
         """
@@ -874,49 +835,30 @@ class TestZosmfProfileManager(TestCase):
         cwd_up_file_path = os.path.join(cwd_up_dir_path, "zowe.config.json")
         os.chdir(CWD)
         shutil.copy(self.original_file_path, cwd_up_file_path)
-        self.setUpCreds(cwd_up_file_path, {
-            "profiles.zosmf.properties.user": "abc",
-            "profiles.zosmf.properties.password": "def"
-        })
-        initial_profiles = {
-            "zosmf": {
-                "properties": {
-                    "port": 1443
-                },
-                "secure": []
-            }
-        }
-        config_file = ConfigFile("User Config", "zowe.config.json", cwd_up_dir_path , profiles=initial_profiles)
+        self.setUpCreds(
+            cwd_up_file_path, {"profiles.zosmf.properties.user": "abc", "profiles.zosmf.properties.password": "def"}
+        )
+        initial_profiles = {"zosmf": {"properties": {"port": 1443}, "secure": []}}
+        config_file = ConfigFile("User Config", "zowe.config.json", cwd_up_dir_path, profiles=initial_profiles)
         profile_data = {
             "type": "zosmf",
-            "properties": {
-                "port": 443,
-                "user": "abc",
-                "password": "def"
-            },
-            "secure": ["user", "password"]
+            "properties": {"port": 443, "user": "abc", "password": "def"},
+            "secure": ["user", "password"],
         }
 
         with mock.patch("zowe.core_for_zowe_sdk.ConfigFile.get_profile_name_from_path", return_value="zosmf"):
             with mock.patch("zowe.core_for_zowe_sdk.ConfigFile.find_profile", return_value=initial_profiles["zosmf"]):
                 config_file.set_profile("profiles.zosmf", profile_data)
 
-        expected_profiles = {
-            "zosmf": profile_data
-        }
+        expected_profiles = {"zosmf": profile_data}
         self.assertEqual(config_file.profiles, expected_profiles)
 
-        config_file.jsonc = {
-            "profiles": expected_profiles
-        }
+        config_file.jsonc = {"profiles": expected_profiles}
         with mock.patch("builtins.open", mock.mock_open()):
             config_file.save(False)
 
         expected_secure_props = {
-            cwd_up_file_path: {
-                "profiles.zosmf.properties.user": "abc",
-                "profiles.zosmf.properties.password": "def"
-            }
+            cwd_up_file_path: {"profiles.zosmf.properties.user": "abc", "profiles.zosmf.properties.password": "def"}
         }
         expected_profiles = {
             "zosmf": {
@@ -924,7 +866,7 @@ class TestZosmfProfileManager(TestCase):
                 "properties": {
                     "port": 443,
                 },
-                "secure": ["user", "password"]
+                "secure": ["user", "password"],
             }
         }
         self.assertEqual(CredentialManager.secure_props, expected_secure_props)
@@ -941,20 +883,9 @@ class TestZosmfProfileManager(TestCase):
         shutil.copy(self.original_file_path, cwd_up_file_path)
         profile_data = {
             "lpar1": {
-                "profiles": {
-                    "zosmf": {
-                        "properties": {
-                            "port": 1443,
-                            "password": "secret"
-                        },
-                        "secure": ["password"]
-                    }
-                },
-                "properties": {
-                    "host": "example.com",
-                    "user": "admin"
-                },
-                "secure": ["user"]
+                "profiles": {"zosmf": {"properties": {"port": 1443, "password": "secret"}, "secure": ["password"]}},
+                "properties": {"host": "example.com", "user": "admin"},
+                "secure": ["user"],
             }
         }
         with mock.patch("builtins.open", mock.mock_open()) as mock_file:
@@ -963,11 +894,13 @@ class TestZosmfProfileManager(TestCase):
             config_file.save()
 
         mock_save_secure_props.assert_called_once()
-        mock_file.assert_called_once_with(cwd_up_file_path, 'w')
+        mock_file.assert_called_once_with(cwd_up_file_path, "w")
         mock_file.return_value.write.assert_called()
         self.assertIn("user", profile_data["lpar1"]["properties"])
         self.assertNotIn("user", config_file.jsonc["profiles"]["lpar1"]["properties"])
-        self.assertEqual(["port"], list(config_file.jsonc["profiles"]["lpar1"]["profiles"]["zosmf"]["properties"].keys()))
+        self.assertEqual(
+            ["port"], list(config_file.jsonc["profiles"]["lpar1"]["profiles"]["zosmf"]["properties"].keys())
+        )
 
 
 class TestValidateConfigJsonClass(unittest.TestCase):
@@ -982,7 +915,7 @@ class TestValidateConfigJsonClass(unittest.TestCase):
         schema_json = commentjson.load(open(path_to_schema))
 
         expected = validate(config_json, schema_json)
-        result = validate_config_json(path_to_config, path_to_schema, cwd = FIXTURES_PATH)
+        result = validate_config_json(path_to_config, path_to_schema, cwd=FIXTURES_PATH)
 
         self.assertEqual(result, expected)
 
@@ -998,7 +931,6 @@ class TestValidateConfigJsonClass(unittest.TestCase):
             validate(invalid_config_json, invalid_schema_json)
 
         with self.assertRaises(ValidationError) as actual_info:
-            validate_config_json(path_to_invalid_config, path_to_invalid_schema, cwd = FIXTURES_PATH)
+            validate_config_json(path_to_invalid_config, path_to_invalid_schema, cwd=FIXTURES_PATH)
 
         self.assertEqual(str(actual_info.exception), str(expected_info.exception))
-
