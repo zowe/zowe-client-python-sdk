@@ -11,14 +11,16 @@ Copyright Contributors to the Zowe Project.
 """
 
 
-from zowe.core_for_zowe_sdk import SdkApi
-from zowe.core_for_zowe_sdk.exceptions import FileNotFound
-from zowe.zos_files_for_zowe_sdk import exceptions, constants
 import os
 import shutil
-from zowe.zos_files_for_zowe_sdk.constants import zos_file_constants, FileType
 
-_ZOWE_FILES_DEFAULT_ENCODING='utf-8'
+from zowe.core_for_zowe_sdk import SdkApi
+from zowe.core_for_zowe_sdk.exceptions import FileNotFound
+from zowe.zos_files_for_zowe_sdk import constants, exceptions
+from zowe.zos_files_for_zowe_sdk.constants import FileType, zos_file_constants
+
+_ZOWE_FILES_DEFAULT_ENCODING = "utf-8"
+
 
 class Files(SdkApi):
     """
@@ -46,7 +48,6 @@ class Files(SdkApi):
         super().__init__(connection, "/zosmf/restfiles/")
         self.default_headers["Accept-Encoding"] = "gzip"
 
-
     def list_files(self, path):
         """Retrieve a list of USS files based on a given pattern.
 
@@ -70,11 +71,11 @@ class Files(SdkApi):
             A JSON with the contents of the specified USS file
         """
         custom_args = self._create_custom_request_arguments()
-        #custom_args["params"] = {"filepath-name": filepath_name}
-        custom_args["url"] = "{}fs{}".format(self.request_endpoint,filepath_name)
+        # custom_args["params"] = {"filepath-name": filepath_name}
+        custom_args["url"] = "{}fs{}".format(self.request_endpoint, filepath_name)
         response_json = self.request_handler.perform_request("GET", custom_args)
         return response_json
-            
+
     def delete_uss(self, filepath_name, recursive=False):
         """
         Delete a file or directory
@@ -99,8 +100,7 @@ class Files(SdkApi):
         response_json = self.request_handler.perform_request("DELETE", custom_args, expected_code=[204])
         return response_json
 
-
-    def list_dsn(self, name_pattern, return_attributes= False):
+    def list_dsn(self, name_pattern, return_attributes=False):
         """Retrieve a list of datasets based on a given pattern.
 
         Parameters
@@ -113,24 +113,20 @@ class Files(SdkApi):
         Returns
         -------
             list of dict
-            
+
             A JSON with a list of dataset names (and attributes if specified) matching the given pattern.
         """
         custom_args = self._create_custom_request_arguments()
         custom_args["params"] = {"dslevel": self._encode_uri_component(name_pattern)}
         custom_args["url"] = "{}ds".format(self.request_endpoint)
-        
-        
+
         if return_attributes:
-            custom_args["headers"]["X-IBM-Attributes"] = "base"  
-           
+            custom_args["headers"]["X-IBM-Attributes"] = "base"
+
         response_json = self.request_handler.perform_request("GET", custom_args)
         return response_json
 
-
-
-    def list_dsn_members(self, dataset_name, member_pattern=None,
-                         member_start=None, limit=1000, attributes='member'):
+    def list_dsn_members(self, dataset_name, member_pattern=None, member_start=None, limit=1000, attributes="member"):
         """Retrieve the list of members on a given PDS/PDSE.
 
         Returns
@@ -141,21 +137,23 @@ class Files(SdkApi):
         custom_args = self._create_custom_request_arguments()
         additional_parms = {}
         if member_start is not None:
-            additional_parms['start'] = member_start
+            additional_parms["start"] = member_start
         if member_pattern is not None:
-            additional_parms['pattern'] = member_pattern
+            additional_parms["pattern"] = member_pattern
         url = "{}ds/{}/member".format(self.request_endpoint, dataset_name)
-        separator = '?'
-        for k,v in additional_parms.items():
-            url = "{}{}{}={}".format(url,separator,k,v)
-            separator = '&'
-        custom_args['url'] = self._encode_uri_component(url)
-        custom_args["headers"]["X-IBM-Max-Items"]  = "{}".format(limit)
+        separator = "?"
+        for k, v in additional_parms.items():
+            url = "{}{}{}={}".format(url, separator, k, v)
+            separator = "&"
+        custom_args["url"] = self._encode_uri_component(url)
+        custom_args["headers"]["X-IBM-Max-Items"] = "{}".format(limit)
         custom_args["headers"]["X-IBM-Attributes"] = attributes
         response_json = self.request_handler.perform_request("GET", custom_args)
-        return response_json['items']  # type: ignore
-    
-    def copy_uss_to_dataset(self, from_filename, to_dataset_name, to_member_name=None, type=FileType.TEXT,replace=False):
+        return response_json["items"]  # type: ignore
+
+    def copy_uss_to_dataset(
+        self, from_filename, to_dataset_name, to_member_name=None, type=FileType.TEXT, replace=False
+    ):
         """
         Copy a USS file to dataset.
 
@@ -177,25 +175,31 @@ class Files(SdkApi):
         json
             A JSON containing the result of the operation.
         """
-        
-        data={
-            "request":"copy",
-           "from-file":{
-               "filename":from_filename.strip(),
-                "type":type.value
-           },
-           "replace":replace
+
+        data = {
+            "request": "copy",
+            "from-file": {"filename": from_filename.strip(), "type": type.value},
+            "replace": replace,
         }
-        
+
         path_to_member = f"{to_dataset_name}({to_member_name})" if to_member_name else to_dataset_name
         custom_args = self._create_custom_request_arguments()
-        custom_args['json'] = data
+        custom_args["json"] = data
         custom_args["url"] = "{}ds/{}".format(self.request_endpoint, self._encode_uri_component(path_to_member))
         response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[200])
         return response_json
-    
-    def copy_dataset_or_member(self,from_dataset_name,to_dataset_name,from_member_name=None,volser=None,alias=None,
-                               to_member_name=None,enq=None,replace=False):
+
+    def copy_dataset_or_member(
+        self,
+        from_dataset_name,
+        to_dataset_name,
+        from_member_name=None,
+        volser=None,
+        alias=None,
+        to_member_name=None,
+        enq=None,
+        replace=False,
+    ):
         """
         Copy a dataset or member to another dataset or member.
         Parameters
@@ -208,7 +212,7 @@ class Files(SdkApi):
             Name of the member to copy from
         volser: str
             Volume serial number of the dataset to copy from
-        alias: bool  
+        alias: bool
             Alias of the dataset to copy from
         to_member_name: str
             Name of the member to copy to
@@ -216,39 +220,35 @@ class Files(SdkApi):
             Enqueue type for the dataset to copy from
         replace: bool
             If true, members in the target data set are replaced.
-        Returns 
+        Returns
         -------
         json
             A JSON containing the result of the operation
         """
-        
-        data={
-            "request":"copy",
-            "from-dataset":{
-                "dsn":from_dataset_name.strip(),
-                "member":from_member_name
-            },
-            "replace":replace
+
+        data = {
+            "request": "copy",
+            "from-dataset": {"dsn": from_dataset_name.strip(), "member": from_member_name},
+            "replace": replace,
         }
-        
-       
+
         path_to_member = f"{to_dataset_name}({to_member_name})" if to_member_name else to_dataset_name
         if enq:
-            if enq in ("SHR","SHRW","EXCLU"):
+            if enq in ("SHR", "SHRW", "EXCLU"):
                 data["enq"] = enq
             else:
                 raise ValueError("Invalid value for enq.")
         if volser:
-             data["from-dataset"]["volser"]=volser
-        if alias is not None: #because it can be false so
-            data["from-dataset"]["alias"]=alias
-            
+            data["from-dataset"]["volser"] = volser
+        if alias is not None:  # because it can be false so
+            data["from-dataset"]["alias"] = alias
+
         custom_args = self._create_custom_request_arguments()
-        custom_args['json'] = data
+        custom_args["json"] = data
         custom_args["url"] = "{}ds/{}".format(self.request_endpoint, self._encode_uri_component(path_to_member))
         response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[200])
         return response_json
-    
+
     def get_dsn_content(self, dataset_name):
         """Retrieve the contents of a given dataset.
 
@@ -262,8 +262,7 @@ class Files(SdkApi):
         response_json = self.request_handler.perform_request("GET", custom_args)
         return response_json
 
-    def create_data_set(self, dataset_name, options = {}):
-
+    def create_data_set(self, dataset_name, options={}):
         """
         Create a sequential or partitioned dataset.
         Parameters
@@ -278,11 +277,24 @@ class Files(SdkApi):
             if options.get("primary") is None or options.get("lrecl") is None:
                 raise ValueError("If 'like' is not specified, you must specify 'primary' or 'lrecl'.")
 
-            for opt in ("volser", "unit", "dsorg", "alcunit", 
-                "primary", "secondary", "dirblk", "avgblk", "recfm", 
-                "blksize", "lrecl", "storclass", "mgntclass", "dataclass", 
-                "dsntype", "like"):
-
+            for opt in (
+                "volser",
+                "unit",
+                "dsorg",
+                "alcunit",
+                "primary",
+                "secondary",
+                "dirblk",
+                "avgblk",
+                "recfm",
+                "blksize",
+                "lrecl",
+                "storclass",
+                "mgntclass",
+                "dataclass",
+                "dsntype",
+                "like",
+            ):
                 if opt == "dsorg":
                     if options.get(opt) is not None and options[opt] not in ("PO", "PS"):
                         raise KeyError
@@ -329,7 +341,7 @@ class Files(SdkApi):
         custom_args = self._create_custom_request_arguments()
         custom_args["url"] = "{}ds/{}".format(self.request_endpoint, self._encode_uri_component(dataset_name))
         custom_args["json"] = options
-        response_json = self.request_handler.perform_request("POST", custom_args, expected_code = [201])
+        response_json = self.request_handler.perform_request("POST", custom_args, expected_code=[201])
         return response_json
 
     def create_default_data_set(self, dataset_name: str, default_type: str):
@@ -361,7 +373,7 @@ class Files(SdkApi):
                 "dirblk": 5,
                 "recfm": "FB",
                 "blksize": 6160,
-                "lrecl": 80
+                "lrecl": 80,
             }
         elif default_type == "sequential":
             custom_args["json"] = {
@@ -370,7 +382,7 @@ class Files(SdkApi):
                 "primary": 1,
                 "recfm": "FB",
                 "blksize": 6160,
-                "lrecl": 80
+                "lrecl": 80,
             }
         elif default_type == "classic":
             custom_args["json"] = {
@@ -380,7 +392,7 @@ class Files(SdkApi):
                 "recfm": "FB",
                 "blksize": 6160,
                 "lrecl": 80,
-                "dirblk": 25
+                "dirblk": 25,
             }
         elif default_type == "c":
             custom_args["json"] = {
@@ -390,7 +402,7 @@ class Files(SdkApi):
                 "recfm": "VB",
                 "blksize": 32760,
                 "lrecl": 260,
-                "dirblk": 25
+                "dirblk": 25,
             }
         elif default_type == "binary":
             custom_args["json"] = {
@@ -400,14 +412,14 @@ class Files(SdkApi):
                 "recfm": "U",
                 "blksize": 27998,
                 "lrecl": 27998,
-                "dirblk": 25
+                "dirblk": 25,
             }
 
         custom_args["url"] = "{}ds/{}".format(self.request_endpoint, self._encode_uri_component(dataset_name))
         response_json = self.request_handler.perform_request("POST", custom_args, expected_code=[201])
         return response_json
 
-    def create_uss(self, file_path, type, mode = None):
+    def create_uss(self, file_path, type, mode=None):
         """
         Add a file or directory
         Parameters
@@ -418,15 +430,12 @@ class Files(SdkApi):
 
         """
 
-        data = {
-            "type": type,
-            "mode": mode
-        }
-        
+        data = {"type": type, "mode": mode}
+
         custom_args = self._create_custom_request_arguments()
         custom_args["json"] = data
         custom_args["url"] = "{}fs/{}".format(self.request_endpoint, file_path.lstrip("/"))
-        response_json = self.request_handler.perform_request("POST", custom_args, expected_code = [201])
+        response_json = self.request_handler.perform_request("POST", custom_args, expected_code=[201])
         return response_json
 
     def get_dsn_content_streamed(self, dataset_name):
@@ -460,9 +469,9 @@ class Files(SdkApi):
         custom_args["url"] = "{}ds/{}".format(self.request_endpoint, self._encode_uri_component(dataset_name))
         custom_args["headers"]["Accept"] = "application/octet-stream"
         if with_prefixes:
-            custom_args["headers"]["X-IBM-Data-Type"] = 'record'
+            custom_args["headers"]["X-IBM-Data-Type"] = "record"
         else:
-            custom_args["headers"]["X-IBM-Data-Type"] = 'binary'
+            custom_args["headers"]["X-IBM-Data-Type"] = "binary"
         content = self.request_handler.perform_request("GET", custom_args)
         return content
 
@@ -474,7 +483,7 @@ class Files(SdkApi):
         ----------
         dataset_name: str - Name of the dataset to retrieve
         with_prefixes: boolean - if True include a 4 byte big endian record len prefix
-                                 default: False 
+                                 default: False
         Returns
         -------
         raw
@@ -484,9 +493,9 @@ class Files(SdkApi):
         custom_args["url"] = "{}ds/{}".format(self.request_endpoint, self._encode_uri_component(dataset_name))
         custom_args["headers"]["Accept"] = "application/octet-stream"
         if with_prefixes:
-            custom_args["headers"]["X-IBM-Data-Type"] = 'record'
+            custom_args["headers"]["X-IBM-Data-Type"] = "record"
         else:
-            custom_args["headers"]["X-IBM-Data-Type"] = 'binary'
+            custom_args["headers"]["X-IBM-Data-Type"] = "binary"
         content = self.request_handler.perform_streamed_request("GET", custom_args)
         return content
 
@@ -501,16 +510,14 @@ class Files(SdkApi):
         custom_args = self._create_custom_request_arguments()
         custom_args["url"] = "{}ds/{}".format(self.request_endpoint, self._encode_uri_component(dataset_name))
         custom_args["data"] = data
-        custom_args['headers']['Content-Type'] = 'text/plain; charset={}'.format(encoding)
-        response_json = self.request_handler.perform_request(
-            "PUT", custom_args, expected_code=[204, 201]
-        )
+        custom_args["headers"]["Content-Type"] = "text/plain; charset={}".format(encoding)
+        response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[204, 201])
         return response_json
 
     def download_dsn(self, dataset_name, output_file):
         """Retrieve the contents of a dataset and saves it to a given file."""
         raw_response = self.get_dsn_content_streamed(dataset_name)
-        with open(output_file, 'w') as f:
+        with open(output_file, "w") as f:
             shutil.copyfileobj(raw_response, f)
 
     def download_binary_dsn(self, dataset_name, output_file, with_prefixes=False):
@@ -529,13 +536,13 @@ class Files(SdkApi):
             Binary content of the dataset.
         """
         content = self.get_dsn_binary_content_streamed(dataset_name, with_prefixes=with_prefixes)
-        with open(output_file, 'wb') as f:
+        with open(output_file, "wb") as f:
             shutil.copyfileobj(content, f)
 
     def upload_file_to_dsn(self, input_file, dataset_name, encoding=_ZOWE_FILES_DEFAULT_ENCODING):
         """Upload contents of a given file and uploads it to a dataset."""
         if os.path.isfile(input_file):
-            with open(input_file, 'rb') as in_file:
+            with open(input_file, "rb") as in_file:
                 response_json = self.write_to_dsn(dataset_name, in_file)
         else:
             raise FileNotFound(input_file)
@@ -550,16 +557,14 @@ class Files(SdkApi):
         custom_args = self._create_custom_request_arguments()
         custom_args["url"] = "{}fs/{}".format(self.request_endpoint, filepath_name.lstrip("/"))
         custom_args["data"] = data
-        custom_args['headers']['Content-Type'] = 'text/plain; charset={}'.format(encoding)
-        response_json = self.request_handler.perform_request(
-            "PUT", custom_args, expected_code=[204, 201]
-        )
+        custom_args["headers"]["Content-Type"] = "text/plain; charset={}".format(encoding)
+        response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[204, 201])
         return response_json
 
     def upload_file_to_uss(self, input_file, filepath_name, encoding=_ZOWE_FILES_DEFAULT_ENCODING):
         """Upload contents of a given file and uploads it to UNIX file"""
         if os.path.isfile(input_file):
-            in_file = open(input_file, 'r')
+            in_file = open(input_file, "r")
             file_contents = in_file.read()
             response_json = self.write_to_uss(filepath_name, file_contents)
         else:
@@ -569,40 +574,39 @@ class Files(SdkApi):
         """Deletes a sequential or partitioned data."""
         custom_args = self._create_custom_request_arguments()
         if member_name is not None:
-            dataset_name = f'{dataset_name}({member_name})'
+            dataset_name = f"{dataset_name}({member_name})"
         url = "{}ds/{}".format(self.request_endpoint, dataset_name)
         if volume is not None:
             url = "{}ds/-{}/{}".format(self.request_endpoint, volume, dataset_name)
         custom_args["url"] = self._encode_uri_component(url)
-        response_json = self.request_handler.perform_request(
-            "DELETE", custom_args, expected_code=[200, 202, 204])
+        response_json = self.request_handler.perform_request("DELETE", custom_args, expected_code=[200, 202, 204])
         return response_json
 
     def create_zFS_file_system(self, file_system_name, options={}):
         """
         Create a z/OS UNIX zFS Filesystem.
-        
+
         Parameter
         ---------
         file_system_name: str - the name for the file system
-        
+
         Returns
         -------
         json - A JSON containing the result of the operation
         """
         for key, value in options.items():
-            if key == 'perms':
+            if key == "perms":
                 if value < 0 or value > 777:
                     raise exceptions.InvalidPermsOption(value)
-            
+
             if key == "cylsPri" or key == "cylsSec":
-                if value > constants.zos_file_constants['MaxAllocationQuantity']:
+                if value > constants.zos_file_constants["MaxAllocationQuantity"]:
                     raise exceptions.MaxAllocationQuantityExceeded
 
         custom_args = self._create_custom_request_arguments()
         custom_args["url"] = "{}mfs/zfs/{}".format(self.request_endpoint, file_system_name)
         custom_args["json"] = options
-        response_json = self.request_handler.perform_request("POST", custom_args, expected_code = [201])
+        response_json = self.request_handler.perform_request("POST", custom_args, expected_code=[201])
         return response_json
 
     def delete_zFS_file_system(self, file_system_name):
@@ -613,7 +617,7 @@ class Files(SdkApi):
         custom_args["url"] = "{}mfs/zfs/{}".format(self.request_endpoint, file_system_name)
         response_json = self.request_handler.perform_request("DELETE", custom_args, expected_code=[204])
         return response_json
-    
+
     def mount_file_system(self, file_system_name, mount_point, options={}, encoding=_ZOWE_FILES_DEFAULT_ENCODING):
         """Mounts a z/OS UNIX file system on a specified directory.
         Parameter
@@ -631,7 +635,7 @@ class Files(SdkApi):
         custom_args = self._create_custom_request_arguments()
         custom_args["url"] = "{}mfs/{}".format(self.request_endpoint, file_system_name)
         custom_args["json"] = options
-        custom_args['headers']['Content-Type'] = 'text/plain; charset={}'.format(encoding)
+        custom_args["headers"]["Content-Type"] = "text/plain; charset={}".format(encoding)
         response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[204])
         return response_json
 
@@ -642,7 +646,7 @@ class Files(SdkApi):
         ---------
         file_system_name: str - the name for the file system
         options: dict - A JSON of request body options
-        
+
         Returns
         -------
         json - A JSON containing the result of the operation
@@ -651,7 +655,7 @@ class Files(SdkApi):
         custom_args = self._create_custom_request_arguments()
         custom_args["url"] = "{}mfs/{}".format(self.request_endpoint, file_system_name)
         custom_args["json"] = options
-        custom_args['headers']['Content-Type'] = 'text/plain; charset={}'.format(encoding)
+        custom_args["headers"]["Content-Type"] = "text/plain; charset={}".format(encoding)
         response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[204])
         return response_json
 
@@ -664,14 +668,14 @@ class Files(SdkApi):
         ---------
         file_path: str - the UNIX directory that contains the files and directories to be listed.
         file_system_name: str - the name for the file system to be listed
-        
+
         Returns
         -------
         json - A JSON containing the result of the operation
         """
         custom_args = self._create_custom_request_arguments()
 
-        custom_args["params"] = {"path":file_path_name, "fsname": file_system_name}
+        custom_args["params"] = {"path": file_path_name, "fsname": file_system_name}
         custom_args["url"] = "{}mfs".format(self.request_endpoint)
         response_json = self.request_handler.perform_request("GET", custom_args, expected_code=[200])
         return response_json
@@ -693,10 +697,7 @@ class Files(SdkApi):
         json - A JSON containing the result of the operation
         """
 
-        data = {
-            "request": "hrecall",
-            "wait": wait
-        }
+        data = {"request": "hrecall", "wait": wait}
 
         custom_args = self._create_custom_request_arguments()
         custom_args["json"] = data
@@ -713,10 +714,10 @@ class Files(SdkApi):
         ----------
         dataset_name: str
             Name of the data set
-        
+
         purge: bool
             If true, the function uses the PURGE=YES on ARCHDEL request, otherwise it uses the PURGE=NO.
-        
+
         wait: bool
             If true, the function waits for completion of the request, otherwise the request is queued.
 
@@ -755,10 +756,7 @@ class Files(SdkApi):
         json - A JSON containing the result of the operation
         """
 
-        data = {
-            "request": "hmigrate",
-            "wait": wait
-        }
+        data = {"request": "hmigrate", "wait": wait}
 
         custom_args = self._create_custom_request_arguments()
         custom_args["json"] = data
@@ -783,17 +781,14 @@ class Files(SdkApi):
         -------
         json - A JSON containing the result of the operation
         """
-        
-        data = {
-            "request": "rename",
-            "from-dataset": {
-                "dsn": before_dataset_name.strip()
-            }
-        }
+
+        data = {"request": "rename", "from-dataset": {"dsn": before_dataset_name.strip()}}
 
         custom_args = self._create_custom_request_arguments()
         custom_args["json"] = data
-        custom_args["url"] = "{}ds/{}".format(self.request_endpoint, self._encode_uri_component(after_dataset_name).strip())
+        custom_args["url"] = "{}ds/{}".format(
+            self.request_endpoint, self._encode_uri_component(after_dataset_name).strip()
+        )
 
         response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[200])
         return response_json
@@ -826,7 +821,7 @@ class Files(SdkApi):
             "from-dataset": {
                 "dsn": dataset_name.strip(),
                 "member": before_member_name.strip(),
-            }
+            },
         }
 
         path_to_member = dataset_name.strip() + "(" + after_member_name.strip() + ")"
@@ -838,7 +833,7 @@ class Files(SdkApi):
                 raise ValueError("Invalid value for enq.")
 
         custom_args = self._create_custom_request_arguments()
-        custom_args['json'] = data
+        custom_args["json"] = data
         custom_args["url"] = "{}ds/{}".format(self.request_endpoint, self._encode_uri_component(path_to_member))
 
         response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[200])

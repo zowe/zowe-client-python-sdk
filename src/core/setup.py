@@ -1,5 +1,7 @@
 import sys
-from setuptools import setup, find_namespace_packages
+
+from setuptools import find_namespace_packages, setup
+
 sys.path.append("..")
 from _version import __version__
 

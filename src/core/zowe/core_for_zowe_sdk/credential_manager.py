@@ -9,16 +9,15 @@ SPDX-License-Identifier: EPL-2.0
 
 Copyright Contributors to the Zowe Project.
 """
-import sys
-import warnings
 import base64
 import logging
+import sys
+import warnings
 from typing import Optional
+
 import commentjson
 from zowe.core_for_zowe_sdk import constants
-from zowe.core_for_zowe_sdk.exceptions import (
-    SecureProfileLoadFailed
-    )
+from zowe.core_for_zowe_sdk.exceptions import SecureProfileLoadFailed
 
 HAS_KEYRING = True
 try:
@@ -27,10 +26,9 @@ try:
 except ImportError:
     HAS_KEYRING = False
 
+
 class CredentialManager:
     secure_props = {}
-
-
 
     @staticmethod
     def load_secure_props() -> None:
@@ -54,16 +52,13 @@ class CredentialManager:
                 return
 
         except Exception as exc:
-            raise SecureProfileLoadFailed(
-                constants["ZoweServiceName"], error_msg=str(exc)
-            ) from exc
+            raise SecureProfileLoadFailed(constants["ZoweServiceName"], error_msg=str(exc)) from exc
 
         secure_config: str
         secure_config = secret_value.encode()
         secure_config_json = commentjson.loads(base64.b64decode(secure_config).decode())
         # update the secure props
         CredentialManager.secure_props = secure_config_json
-
 
     @staticmethod
     def _retrieve_credential(service_name: str) -> Optional[str]:
@@ -99,7 +94,7 @@ class CredentialManager:
 
         if is_win32:
             try:
-                encoded_credential = encoded_credential.encode('utf-16le').decode()
+                encoded_credential = encoded_credential.encode("utf-16le").decode()
             except (UnicodeDecodeError, AttributeError):
                 # The credential is not encoded in UTF-16
                 pass
@@ -108,7 +103,6 @@ class CredentialManager:
                 encoded_credential = encoded_credential[:-1]
 
         return encoded_credential
-
 
     @staticmethod
     def delete_credential(service_name: str, account_name: str) -> None:
@@ -143,9 +137,8 @@ class CredentialManager:
                     break
                 index += 1
 
-
     @staticmethod
-    def save_secure_props()-> None:
+    def save_secure_props() -> None:
         """
         Set secure_props for the given config file
         Returns
@@ -156,7 +149,7 @@ class CredentialManager:
             return
 
         service_name = constants["ZoweServiceName"]
-        credential =  CredentialManager.secure_props
+        credential = CredentialManager.secure_props
         # Check if credential is a non-empty string
         if credential:
             is_win32 = sys.platform == "win32"
@@ -165,21 +158,19 @@ class CredentialManager:
             if is_win32:
                 service_name += "/" + constants["ZoweAccountName"]
                 # Delete the existing credential
-                CredentialManager.delete_credential(service_name , constants["ZoweAccountName"])
+                CredentialManager.delete_credential(service_name, constants["ZoweAccountName"])
             # Check if the encoded credential exceeds the maximum length for win32
             if is_win32 and len(encoded_credential) > constants["WIN32_CRED_MAX_STRING_LENGTH"]:
                 # Split the encoded credential string into chunks of maximum length
                 chunk_size = constants["WIN32_CRED_MAX_STRING_LENGTH"]
-                encoded_credential+='\0'
-                chunks = [encoded_credential[i: i + chunk_size] for i in range(0, len(encoded_credential), chunk_size)]
+                encoded_credential += "\0"
+                chunks = [encoded_credential[i : i + chunk_size] for i in range(0, len(encoded_credential), chunk_size)]
                 # Set the individual chunks as separate keyring entries
                 for index, chunk in enumerate(chunks, start=1):
-                    password=(chunk + '\0' *(len(chunk)%2)).encode().decode('utf-16le')
+                    password = (chunk + "\0" * (len(chunk) % 2)).encode().decode("utf-16le")
                     field_name = f"{constants['ZoweAccountName']}-{index}"
                     keyring.set_password(f"{service_name}-{index}", field_name, password)
 
             else:
                 # Credential length is within the maximum limit or not on win32, set it as a single keyring entry
-                keyring.set_password(
-                    service_name, constants["ZoweAccountName"],
-                    encoded_credential)
+                keyring.set_password(service_name, constants["ZoweAccountName"], encoded_credential)

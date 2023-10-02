@@ -30,4 +30,6 @@ class MaxAllocationQuantityExceeded(Exception):
     """Class used to represent an invalid allocation quantity."""
 
     def __init__(self):
-        super().__init__("Maximum allocation quantity of {} exceeded".format(zos_file_constants['MaxAllocationQuantity']))
+        super().__init__(
+            "Maximum allocation quantity of {} exceeded".format(zos_file_constants["MaxAllocationQuantity"])
+        )

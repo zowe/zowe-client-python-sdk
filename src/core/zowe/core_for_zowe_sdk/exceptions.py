@@ -39,9 +39,7 @@ class UnexpectedStatus(Exception):
             The output from the request
         """
         super().__init__(
-            "The status code from z/OSMF was {} it was expected {}. \n {}".format(
-                received, expected, request_output
-            )
+            "The status code from z/OSMF was {} it was expected {}. \n {}".format(received, expected, request_output)
         )
 
 
@@ -57,11 +55,7 @@ class RequestFailed(Exception):
         request_output
             The output from the request
         """
-        super().__init__(
-            "HTTP Request has failed with status code {}. \n {}".format(
-                status_code, request_output
-            )
-        )
+        super().__init__("HTTP Request has failed with status code {}. \n {}".format(status_code, request_output))
 
 
 class FileNotFound(Exception):
@@ -100,11 +94,7 @@ class SecureProfileLoadFailed(Exception):
         error_msg
             The error message received while trying to load the profile
         """
-        super().__init__(
-            "Failed to load secure profile '{}' because '{}'".format(
-                profile_name, error_msg
-            )
-        )
+        super().__init__("Failed to load secure profile '{}' because '{}'".format(profile_name, error_msg))
 
 
 class ProfileNotFound(Exception):
@@ -120,9 +110,7 @@ class ProfileNotFound(Exception):
             The error message received while trying to load the profile
         """
 
-        super().__init__(
-            "Failed to load profile '{}' because '{}'".format(profile_name, error_msg)
-        )
+        super().__init__("Failed to load profile '{}' because '{}'".format(profile_name, error_msg))
 
 
 class SecureValuesNotFound(Exception):

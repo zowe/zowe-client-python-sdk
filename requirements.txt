@@ -1,3 +1,4 @@
+black
 certifi==2023.7.22
 chardet==4.0.0
 colorama==0.4.4
@@ -7,6 +8,7 @@ deepmerge==1.1.0
 flake8==3.8.4
 idna==2.10
 importlib-metadata==3.6.0
+isort
 jsonschema==4.17.3
 keyring
 lxml==4.9.3
@@ -28,7 +30,6 @@ Unidecode==1.2.0
 urllib3==1.26.5
 wheel
 zipp==3.4.0
-black
 -e ./src/core
 -e ./src/zos_console
 -e ./src/zos_files

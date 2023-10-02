@@ -10,13 +10,14 @@ SPDX-License-Identifier: EPL-2.0
 Copyright Contributors to the Zowe Project.
 """
 
-import os.path
 import os
+import os.path
 import warnings
-import jsonschema
-from typing import Optional
-from deepmerge import always_merger
 from copy import deepcopy
+from typing import Optional
+
+import jsonschema
+from deepmerge import always_merger
 
 from .config_file import ConfigFile, Profile
 from .credential_manager import CredentialManager
@@ -38,9 +39,7 @@ HAS_KEYRING = True
 
 HOME = os.path.expanduser("~")
 GLOBAl_CONFIG_LOCATION = os.path.join(HOME, ".zowe")
-GLOBAL_CONFIG_PATH = os.path.join(
-    GLOBAl_CONFIG_LOCATION, f"{GLOBAL_CONFIG_NAME}.config.json"
-)
+GLOBAL_CONFIG_PATH = os.path.join(GLOBAl_CONFIG_LOCATION, f"{GLOBAL_CONFIG_NAME}.config.json")
 CURRENT_DIR = os.getcwd()
 
 
@@ -58,8 +57,7 @@ class ProfileManager:
         self.project_config = ConfigFile(type=TEAM_CONFIG, name=appname)
         self.project_user_config = ConfigFile(type=USER_CONFIG, name=appname)
 
-        self.global_config = ConfigFile(
-            type=TEAM_CONFIG, name=GLOBAL_CONFIG_NAME)
+        self.global_config = ConfigFile(type=TEAM_CONFIG, name=GLOBAL_CONFIG_NAME)
         try:
             self.global_config.location = GLOBAl_CONFIG_LOCATION
         except Exception:
@@ -68,8 +66,7 @@ class ProfileManager:
                 ConfigNotFoundWarning,
             )
 
-        self.global_user_config = ConfigFile(
-            type=USER_CONFIG, name=GLOBAL_CONFIG_NAME)
+        self.global_user_config = ConfigFile(type=USER_CONFIG, name=GLOBAL_CONFIG_NAME)
         try:
             self.global_user_config.location = GLOBAl_CONFIG_LOCATION
         except Exception:
@@ -138,24 +135,24 @@ class ProfileManager:
 
         for var in list(os.environ.keys()):
             if var.startswith("ZOWE_OPT"):
-                env[var[len("ZOWE_OPT_"):].lower()] = os.environ.get(var)
+                env[var[len("ZOWE_OPT_") :].lower()] = os.environ.get(var)
 
         for k, v in env.items():
             word = k.split("_")
 
             if len(word) > 1:
-                k = word[0]+word[1].capitalize()
+                k = word[0] + word[1].capitalize()
             else:
                 k = word[0]
 
             if k in list(props.keys()):
-                if props[k]['type'] == "number":
+                if props[k]["type"] == "number":
                     env_var[k] = int(v)
 
-                elif props[k]['type'] == "string":
+                elif props[k]["type"] == "string":
                     env_var[k] = str(v)
 
-                elif props[k]['type'] == "boolean":
+                elif props[k]["type"] == "boolean":
                     env_var[k] = bool(v)
 
         return env_var
@@ -187,21 +184,15 @@ class ProfileManager:
                 f"Instance was invalid under the provided $schema property, {exc}"
             )
         except jsonschema.exceptions.SchemaError as exc:
-            raise jsonschema.exceptions.SchemaError(
-                f"The provided schema is invalid, {exc}"
-            )
+            raise jsonschema.exceptions.SchemaError(f"The provided schema is invalid, {exc}")
         except jsonschema.exceptions.UndefinedTypeCheck as exc:
             raise jsonschema.exceptions.UndefinedTypeCheck(
                 f"A type checker was asked to check a type it did not have registered, {exc}"
             )
         except jsonschema.exceptions.UnknownType as exc:
-            raise jsonschema.exceptions.UnknownType(
-                f"Unknown type is found in schema_json, exc"
-            )
+            raise jsonschema.exceptions.UnknownType(f"Unknown type is found in schema_json, exc")
         except jsonschema.exceptions.FormatError as exc:
-            raise jsonschema.exceptions.FormatError(
-                f"Validating a format config_json failed for schema_json, {exc}"
-            )
+            raise jsonschema.exceptions.FormatError(f"Validating a format config_json failed for schema_json, {exc}")
         except ProfileNotFound:
             if profile_name:
                 warnings.warn(
@@ -216,8 +207,7 @@ class ProfileManager:
                 )
         except Exception as exc:
             warnings.warn(
-                f"Could not load '{cfg.filename}' at '{cfg.filepath}'"
-                f"because {type(exc).__name__}'{exc}'.",
+                f"Could not load '{cfg.filename}' at '{cfg.filepath}'" f"because {type(exc).__name__}'{exc}'.",
                 ConfigNotFoundWarning,
             )
 
@@ -296,7 +286,13 @@ class ProfileManager:
             if name not in profiles_merged:
                 profiles_merged[name] = value
 
-        cfg = ConfigFile(type="Merged Config", name=cfg_name, profiles=profiles_merged, defaults=defaults_merged, schema_property=cfg_schema)
+        cfg = ConfigFile(
+            type="Merged Config",
+            name=cfg_name,
+            profiles=profiles_merged,
+            defaults=defaults_merged,
+            schema_property=cfg_schema,
+        )
         profile_loaded = self.get_profile(cfg, profile_name, profile_type, validate_schema)
         if profile_loaded:
             profile_props = profile_loaded.data
@@ -341,12 +337,7 @@ class ProfileManager:
         """
         highest_layer = None
         longest_match = ""
-        layers = [
-            self.project_user_config,
-            self.project_config,
-            self.global_user_config,
-            self.global_config
-        ]
+        layers = [self.project_user_config, self.project_config, self.global_user_config, self.global_config]
 
         original_name = layers[0].get_profile_name_from_path(json_path)
 
@@ -378,7 +369,6 @@ class ProfileManager:
             raise FileNotFoundError(f"Could not find a valid layer for {json_path}")
 
         return highest_layer
-
 
     def set_property(self, json_path, value, secure=None) -> None:
         """
@@ -413,10 +403,7 @@ class ProfileManager:
         """
         Save the layers (configuration files) to disk.
         """
-        layers = [self.project_user_config,
-                  self.project_config,
-                  self.global_user_config,
-                  self.global_config]
+        layers = [self.project_user_config, self.project_config, self.global_user_config, self.global_config]
 
         for layer in layers:
             layer.save(False)

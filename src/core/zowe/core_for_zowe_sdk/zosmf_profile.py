@@ -13,11 +13,12 @@ Copyright Contributors to the Zowe Project.
 import base64
 import os.path
 import sys
+
 import yaml
 
+from .connection import ApiConnection
 from .constants import constants
 from .exceptions import SecureProfileLoadFailed
-from .connection import ApiConnection
 
 HAS_KEYRING = True
 try:
@@ -32,8 +33,8 @@ class ZosmfProfile:
 
     Description
     -----------
-    This class is only used when there is already a Zowe z/OSMF profile created 
-    and the user opted to use the profile instead of passing the credentials directly 
+    This class is only used when there is already a Zowe z/OSMF profile created
+    and the user opted to use the profile instead of passing the credentials directly
     in the object constructor.
 
     Attributes
@@ -67,9 +68,7 @@ class ZosmfProfile:
         zosmf_connection
             z/OSMF connection object
         """
-        profile_file = os.path.join(
-            self.profiles_dir, "{}.yaml".format(self.profile_name)
-        )
+        profile_file = os.path.join(self.profiles_dir, "{}.yaml".format(self.profile_name))
 
         with open(profile_file, "r") as fileobj:
             profile_yaml = yaml.safe_load(fileobj)
@@ -80,18 +79,16 @@ class ZosmfProfile:
 
         zosmf_user = profile_yaml["user"]
         zosmf_password = profile_yaml["password"]
-        if zosmf_user.startswith(
+        if zosmf_user.startswith(constants["SecureValuePrefix"]) and zosmf_password.startswith(
             constants["SecureValuePrefix"]
-        ) and zosmf_password.startswith(constants["SecureValuePrefix"]):
+        ):
             zosmf_user, zosmf_password = self.__load_secure_credentials()
 
         zosmf_ssl_verification = True
         if "rejectUnauthorized" in profile_yaml:
             zosmf_ssl_verification = profile_yaml["rejectUnauthorized"]
 
-        return ApiConnection(
-            zosmf_host, zosmf_user, zosmf_password, zosmf_ssl_verification
-        )
+        return ApiConnection(zosmf_host, zosmf_user, zosmf_password, zosmf_ssl_verification)
 
     def __get_secure_value(self, name):
         service_name = constants["ZoweCredentialKey"]
@@ -101,7 +98,7 @@ class ZosmfProfile:
             service_name += "/" + account_name
 
         secret_value = keyring.get_password(service_name, account_name)
-        
+
         # Handle the case when secret_value is None
         if secret_value is None:
             secret_value = ""
@@ -116,9 +113,7 @@ class ZosmfProfile:
     def __load_secure_credentials(self):
         """Load secure credentials for a z/OSMF profile."""
         if not HAS_KEYRING:
-            raise SecureProfileLoadFailed(
-                self.profile_name, "Keyring module not installed"
-            )
+            raise SecureProfileLoadFailed(self.profile_name, "Keyring module not installed")
 
         try:
             zosmf_user = self.__get_secure_value("user")
@@ -131,6 +126,7 @@ class ZosmfProfile:
 
 if HAS_KEYRING and sys.platform.startswith("linux"):
     from contextlib import closing
+
     from keyring.backends import SecretService
 
     class KeyringBackend(SecretService.Keyring):

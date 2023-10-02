@@ -10,37 +10,27 @@ SPDX-License-Identifier: EPL-2.0
 Copyright Contributors to the Zowe Project.
 """
 
+import json
 import os.path
 import re
-import json
-import requests
 import warnings
 from copy import deepcopy
 from dataclasses import dataclass, field
-from typing import Optional, NamedTuple
+from typing import NamedTuple, Optional
 
 import commentjson
+import requests
 
 from .constants import constants
-from .validators import validate_config_json
 from .credential_manager import CredentialManager
-from .custom_warnings import (
-    ProfileNotFoundWarning,
-    ProfileParsingWarning,
-)
+from .custom_warnings import ProfileNotFoundWarning, ProfileParsingWarning
 from .exceptions import ProfileNotFound
-from .profile_constants import (
-    GLOBAL_CONFIG_NAME,
-    TEAM_CONFIG,
-    USER_CONFIG,
-)
-
+from .profile_constants import GLOBAL_CONFIG_NAME, TEAM_CONFIG, USER_CONFIG
+from .validators import validate_config_json
 
 HOME = os.path.expanduser("~")
 GLOBAL_CONFIG_LOCATION = os.path.join(HOME, ".zowe")
-GLOBAL_CONFIG_PATH = os.path.join(
-    GLOBAL_CONFIG_LOCATION, f"{GLOBAL_CONFIG_NAME}.config.json"
-)
+GLOBAL_CONFIG_PATH = os.path.join(GLOBAL_CONFIG_LOCATION, f"{GLOBAL_CONFIG_NAME}.config.json")
 CURRENT_DIR = os.getcwd()
 
 # Profile datatype is used by ConfigFile to return Profile Data along with
@@ -146,9 +136,7 @@ class ConfigFile:
         CredentialManager.load_secure_props()
         self.__load_secure_properties()
 
-    def validate_schema(
-        self
-    ) -> None:
+    def validate_schema(self) -> None:
         """
         Get the $schema_property from the config and load the schema
 
@@ -160,14 +148,12 @@ class ConfigFile:
         path_schema_json = None
 
         path_schema_json = self.schema_path
-        if path_schema_json is None:    # check if the $schema property is not defined
-            warnings.warn(
-                f"$schema property could not found"
-            )
+        if path_schema_json is None:  # check if the $schema property is not defined
+            warnings.warn(f"$schema property could not found")
 
         # validate the $schema property
         if path_schema_json:
-            validate_config_json(self.jsonc, path_schema_json, cwd = self.location)
+            validate_config_json(self.jsonc, path_schema_json, cwd=self.location)
 
     def schema_list(
         self,
@@ -201,10 +187,10 @@ class ConfigFile:
         else:
             return []
 
-        profile_props:dict = {}
+        profile_props: dict = {}
         schema_json = dict(schema_json)
 
-        for props in schema_json['properties']['profiles']['patternProperties']["^\\S*$"]["allOf"]:
+        for props in schema_json["properties"]["profiles"]["patternProperties"]["^\\S*$"]["allOf"]:
             props = props["then"]
 
             while "properties" in props:
@@ -236,9 +222,7 @@ class ConfigFile:
             )
 
         if profile_name is None:
-            profile_name = self.get_profilename_from_profiletype(
-                profile_type=profile_type
-            )
+            profile_name = self.get_profilename_from_profiletype(profile_type=profile_type)
         props: dict = self.load_profile_properties(profile_name=profile_name)
 
         return Profile(props, profile_name, self._missing_secure_props)
@@ -295,7 +279,7 @@ class ConfigFile:
             return profilename
 
         # iterate through the profiles and check if profile is found
-        for (key, value) in self.profiles.items():
+        for key, value in self.profiles.items():
             try:
                 temp_profile_type = value["type"]
                 if profile_type == temp_profile_type:
@@ -353,10 +337,7 @@ class ConfigFile:
                 props = {**profile.get("properties", {}), **props}
                 secure_fields.extend(profile.get("secure", []))
             else:
-                warnings.warn(
-                    f"Profile {profile_name} not found",
-                    ProfileNotFoundWarning
-                )
+                warnings.warn(f"Profile {profile_name} not found", ProfileNotFoundWarning)
             lst.pop()
 
         return props
@@ -387,7 +368,9 @@ class ConfigFile:
         for key, value in profiles_obj.items():
             for property_name in value.get("secure", []):
                 if property_name in value.get("properties", {}):
-                    secure_props[f"{json_path}.{key}.properties.{property_name}"] = value["properties"].pop(property_name)
+                    secure_props[f"{json_path}.{key}.properties.{property_name}"] = value["properties"].pop(
+                        property_name
+                    )
             if value.get("profiles"):
                 secure_props.update(self.__extract_secure_properties(value["profiles"], f"{json_path}.{key}.profiles"))
         return secure_props
@@ -467,7 +450,7 @@ class ConfigFile:
         if "secure" in profile_data:
             # Checking if the profile has a 'secure' field with values
             secure_fields = profile_data["secure"]
-            current_profile = self.find_profile(profile_name,self.profiles) or {}
+            current_profile = self.find_profile(profile_name, self.profiles) or {}
             existing_secure_fields = current_profile.get("secure", [])
             new_secure_fields = [field for field in secure_fields if field not in existing_secure_fields]
 
@@ -479,7 +462,6 @@ class ConfigFile:
                 **profile_data.get("properties", {}),
             }
         self.__set_or_create_nested_profile(profile_name, profile_data)
-
 
     def save(self, update_secure_props=True):
         """
@@ -496,12 +478,11 @@ class ConfigFile:
         profiles_temp = deepcopy(self.profiles)
         secure_props = self.__extract_secure_properties(profiles_temp)
         CredentialManager.secure_props[self.filepath] = secure_props
-        with open(self.filepath, 'w') as file:
+        with open(self.filepath, "w") as file:
             self.jsonc["profiles"] = profiles_temp
             commentjson.dump(self.jsonc, file, indent=4)
         if update_secure_props:
             CredentialManager.save_secure_props()
-
 
     def get_profile_name_from_path(self, path: str) -> str:
         """
@@ -515,4 +496,4 @@ class ConfigFile:
         """
         Get the path of the profile from the given name.
         """
-        return re.sub(r'(^|\.)', r'\1profiles.', short_path)
+        return re.sub(r"(^|\.)", r"\1profiles.", short_path)
