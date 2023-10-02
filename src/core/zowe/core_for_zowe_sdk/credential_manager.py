@@ -12,12 +12,12 @@ Copyright Contributors to the Zowe Project.
 import base64
 import logging
 import sys
-import warnings
 from typing import Optional
 
 import commentjson
-from zowe.core_for_zowe_sdk import constants
-from zowe.core_for_zowe_sdk.exceptions import SecureProfileLoadFailed
+
+from .constants import constants
+from .exceptions import SecureProfileLoadFailed
 
 HAS_KEYRING = True
 try:
