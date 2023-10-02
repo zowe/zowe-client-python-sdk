@@ -38,8 +38,8 @@ HAS_KEYRING = True
 
 
 HOME = os.path.expanduser("~")
-GLOBAl_CONFIG_LOCATION = os.path.join(HOME, ".zowe")
-GLOBAL_CONFIG_PATH = os.path.join(GLOBAl_CONFIG_LOCATION, f"{GLOBAL_CONFIG_NAME}.config.json")
+GLOBAL_CONFIG_LOCATION = os.path.join(HOME, ".zowe")
+GLOBAL_CONFIG_PATH = os.path.join(GLOBAL_CONFIG_LOCATION, f"{GLOBAL_CONFIG_NAME}.config.json")
 CURRENT_DIR = os.getcwd()
 
 
@@ -59,7 +59,7 @@ class ProfileManager:
 
         self.global_config = ConfigFile(type=TEAM_CONFIG, name=GLOBAL_CONFIG_NAME)
         try:
-            self.global_config.location = GLOBAl_CONFIG_LOCATION
+            self.global_config.location = GLOBAL_CONFIG_LOCATION
         except Exception:
             warnings.warn(
                 "Could not find Global Config Directory, please provide one.",
@@ -68,7 +68,7 @@ class ProfileManager:
 
         self.global_user_config = ConfigFile(type=USER_CONFIG, name=GLOBAL_CONFIG_NAME)
         try:
-            self.global_user_config.location = GLOBAl_CONFIG_LOCATION
+            self.global_user_config.location = GLOBAL_CONFIG_LOCATION
         except Exception:
             warnings.warn(
                 "Could not find Global User Config Directory, please provide one.",
