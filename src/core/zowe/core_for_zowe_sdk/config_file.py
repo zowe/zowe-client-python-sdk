@@ -158,6 +158,7 @@ class ConfigFile:
 
         # validate the $schema property
         if path_schema_json:
+            print(self.jsonc, path_schema_json)
             validate_config_json(self.jsonc, path_schema_json, cwd = self.location)
 
     def schema_list(

@@ -76,9 +76,9 @@
                                                 "description": "The z/OSMF server host name."
                                             },
                                             "port": {
-                                                "type": "number",
+                                                "type": "string",
                                                 "description": "The z/OSMF server port.",
-                                                "default": 443
+                                                "default": "443"
                                             },
                                             "user": {
                                                 "type": "string",
