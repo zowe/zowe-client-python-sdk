@@ -1,7 +1,8 @@
 """Integration tests for the Zowe Python SDK z/OSMF package."""
 import unittest
-from zowe.zosmf_for_zowe_sdk import Zosmf
+
 from zowe.core_for_zowe_sdk import ProfileManager
+from zowe.zosmf_for_zowe_sdk import Zosmf
 
 
 class TestZosmfIntegration(unittest.TestCase):

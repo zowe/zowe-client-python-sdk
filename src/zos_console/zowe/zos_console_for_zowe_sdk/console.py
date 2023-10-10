@@ -1,5 +1,6 @@
 from zowe.core_for_zowe_sdk import SdkApi
 
+
 class Console(SdkApi):
     """
     Class used to represent the base z/OSMF Console API.
@@ -47,7 +48,7 @@ class Console(SdkApi):
     def get_response(self, response_key, console=None):
         """
         Collect outstanding synchronous z/OS Console response messages.
-        
+
         Parameters
         ----------
         response_key
