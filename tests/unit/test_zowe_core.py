@@ -609,13 +609,11 @@ class TestZosmfProfileManager(TestCase):
         """
         # Setup - copy profile to fake filesystem created by pyfakefs
         with self.assertRaises(ValidationError):
-            custom_file_path = os.path.join(self.custom_dir, "invalid.zowe.config.json")
-            # shutil.copy(self.original_invalid_file_path, custom_file_path)
-            # shutil.copy(self.original_invalid_schema_file_path, self.custom_dir)
+            custom_file_path = os.path.join(self.custom_dir, "zowe.config.json")
             os.chdir(self.custom_dir)
             with open(self.original_file_path, 'r') as f:
                 original_config = commentjson.load(f)
-            original_config["$schema"] = "./invalid.zowe.schema.json"
+            original_config["$schema"] = "fixtures/invalid.zowe.schema.json"
             with open(os.path.join(self.custom_dir, "invalid.zowe.config.json"), 'w') as f:
                 commentjson.dump(original_config, f)
 
@@ -639,10 +637,13 @@ class TestZosmfProfileManager(TestCase):
         """
         # Setup - copy profile to fake filesystem created by pyfakefs
         with self.assertRaises(SchemaError):
-            custom_file_path = os.path.join(self.custom_dir, "invalidUri.zowe.config.json")
-            shutil.copy(self.original_invalidUri_file_path, custom_file_path)
-            shutil.copy(self.original_invalidUri_schema_file_path, self.custom_dir)
+            custom_file_path = os.path.join(self.custom_dir, "zowe.config.json")
             os.chdir(self.custom_dir)
+            with open(self.original_file_path, 'r') as f:
+                original_config = commentjson.load(f)
+            original_config["$schema"] = "fixtures/invalidUri.zowe.schema.json"
+            with open(os.path.join(self.custom_dir, "invalidUri.zowe.config.json"), 'w') as f:
+                commentjson.dump(original_config, f)
 
             self.setUpCreds(
                 custom_file_path,
