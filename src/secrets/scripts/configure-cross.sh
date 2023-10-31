@@ -7,7 +7,11 @@ set_env() {
     export PKG_CONFIG_PATH="$CHROOT$1/pkgconfig"
 }
 
-case "$1" in
+CROSS_DEB_ARCH=$1
+dpkg --add-architecture $CROSS_DEB_ARCH
+apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y libsecret-1-dev:$CROSS_DEB_ARCH
+
+case "$CROSS_DEB_ARCH" in
     "aarch64")
         set_env "/usr/lib/aarch64-linux-gnu"
         ;;
