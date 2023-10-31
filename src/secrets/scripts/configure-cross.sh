@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# Install libsecret for the architecture we are compiling for
+install_libs() {
+    dpkg --add-architecture $1
+    apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y libsecret-1-dev:$1
+}
+
 # Set environment variables needed for cross-compilation in current shell
 set_env() {
     export PKG_CONFIG_SYSROOT_DIR="${CHROOT:-/}"
@@ -8,17 +14,17 @@ set_env() {
 }
 
 CROSS_DEB_ARCH=$1
-dpkg --add-architecture $CROSS_DEB_ARCH
-apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y libsecret-1-dev:$CROSS_DEB_ARCH
-
-case "$CROSS_DEB_ARCH" in
+case "$1" in
     "aarch64")
+        CROSS_DEB_ARCH=arm64
         set_env "/usr/lib/aarch64-linux-gnu"
         ;;
     "armv7")
+        CROSS_DEB_ARCH=armhf
         set_env "/usr/lib/arm-linux-gnueabihf"
         ;;
     "ppc64le")
+        CROSS_DEB_ARCH=ppc64el
         set_env "/usr/lib/powerpc64le-unknown-linux-gnu"
         ;;
     "s390x")
@@ -33,3 +39,4 @@ case "$CROSS_DEB_ARCH" in
     *)
         ;;
 esac
+install_libs $CROSS_DEB_ARCH
