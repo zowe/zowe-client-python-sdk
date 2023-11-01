@@ -8,7 +8,7 @@ use secrets_core::*;
 fn set_password(service: String, account: String, password: String) -> PyResult<()> {
     match os::set_password(&service, &account, &password) {
         Ok(_) => Ok(()),
-        Err(e) => Err(PyValueError::new_err("error in set_password")),
+        Err(e) => Err(PyValueError::new_err(format!("{:#?}", e))),
     }
 }
 
@@ -16,7 +16,7 @@ fn set_password(service: String, account: String, password: String) -> PyResult<
 fn get_password(service: String, account: String) -> PyResult<String> {
     match os::get_password(&service, &account) {
         Ok(pw) => Ok(pw.unwrap_or("".to_string())),
-        Err(e) => Err(PyValueError::new_err("error in get_password")),
+        Err(e) => Err(PyValueError::new_err(format!("{:#?}", e))),
     }
 }
 
@@ -24,7 +24,7 @@ fn get_password(service: String, account: String) -> PyResult<String> {
 fn delete_password(service: String, account: String) -> PyResult<bool> {
     match os::delete_password(&service, &account) {
         Ok(res) => Ok(res),
-        Err(e) => Err(PyValueError::new_err("error in delete_password")),
+        Err(e) => Err(PyValueError::new_err(format!("{:#?}", e))),
     }
 }
 
@@ -35,7 +35,7 @@ fn find_password(service: String) -> PyResult<String> {
             Some(val) => Ok(val),
             _ => Ok("".to_owned()),
         },
-        Err(e) => Err(PyValueError::new_err("error in find_password")),
+        Err(e) => Err(PyValueError::new_err(format!("{:#?}", e))),
     }
 }
 
@@ -44,7 +44,7 @@ fn find_credentials(service: String) -> PyResult<Vec<(String, String)>> {
     let mut creds: Vec<(String, String)> = vec![];
     match os::find_credentials(&service, &mut creds) {
         Ok(res) => Ok(creds),
-        Err(e) => Err(PyValueError::new_err("error in find_credentials")),
+        Err(e) => Err(PyValueError::new_err(format!("{:#?}", e))),
     }
 }
 
