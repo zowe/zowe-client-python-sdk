@@ -16,10 +16,10 @@ case "$1" in
         set_env armhf "/usr/lib/arm-linux-gnueabihf"
         ;;
     "ppc64le")
-        set_env ppc64el "/usr/lib/powerpc64le-unknown-linux-gnu"
+        set_env ppc64el "/usr/lib/powerpc64le-linux-gnu"
         ;;
     "s390x")
-        set_env s390x "/usr/lib/s390x-unknown-linux-gnu"
+        set_env s390x "/usr/lib/s390x-linux-gnu"
         ;;
     "x86")
         set_env i686 "/usr/lib/i386-linux-gnu"
