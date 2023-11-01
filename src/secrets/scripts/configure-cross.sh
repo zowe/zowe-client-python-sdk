@@ -2,9 +2,9 @@
 
 # Set environment variables needed for cross-compilation in current shell
 set_env() {
-    echo "PKG_CONFIG_SYSROOT_DIR=\"/\"" >> $GITHUB_ENV
-    echo "RUSTFLAGS=\"-L $1\"" >> $GITHUB_ENV
-    echo "PKG_CONFIG_PATH=\"$1/pkgconfig\"" >> $GITHUB_ENV
+    echo "PKG_CONFIG_SYSROOT_DIR=/" >> $GITHUB_ENV
+    echo "RUSTFLAGS=-L $1 $RUSTFLAGS" >> $GITHUB_ENV
+    echo "PKG_CONFIG_PATH=$1/pkgconfig" >> $GITHUB_ENV
 }
 
 case "$1" in
