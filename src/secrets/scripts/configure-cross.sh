@@ -4,7 +4,7 @@
 set_env() {
     echo "CROSS_DEB_ARCH=$1" >> $GITHUB_ENV
     echo "PKG_CONFIG_SYSROOT_DIR=\"${CHROOT:-/}\"" >> $GITHUB_ENV
-    echo "RUSTFLAGS=\"-L $CHROOT$2 $RUSTFLAGS\"" >> $GITHUB_ENV
+    # echo "RUSTFLAGS=\"-L $CHROOT$2 $RUSTFLAGS\"" >> $GITHUB_ENV
     echo "PKG_CONFIG_PATH=\"$CHROOT$2/pkgconfig\"" >> $GITHUB_ENV
 }
 
