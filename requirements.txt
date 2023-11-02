@@ -12,6 +12,7 @@ isort
 jsonschema==4.17.3
 keyring
 lxml==4.9.3
+maturin
 mccabe==0.6.1
 nose2==0.10.0
 pycodestyle==2.6.0
