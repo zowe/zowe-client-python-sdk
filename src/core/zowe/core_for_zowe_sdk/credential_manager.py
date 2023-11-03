@@ -79,14 +79,14 @@ class CredentialManager:
         if encoded_credential is None and sys.platform == "win32":
             # Retrieve the secure value with an index
             index = 1
-            temp_value = keyring.get_password(f"{service_name}-{index}", f"{constants['ZoweAccountName']}-{index}")
+            temp_value = keyring.get_password(service_name, f"{constants['ZoweAccountName']}-{index}")
             while temp_value is not None:
                 if encoded_credential is None:
                     encoded_credential = temp_value
                 else:
                     encoded_credential += temp_value
                 index += 1
-                temp_value = keyring.get_password(f"{service_name}-{index}", f"{constants['ZoweAccountName']}-{index}")
+                temp_value = keyring.get_password(service_name, f"{constants['ZoweAccountName']}-{index}")
 
         return encoded_credential
 
@@ -106,10 +106,7 @@ class CredentialManager:
         None
         """
 
-        try:
-            keyring.delete_password(service_name, account_name)
-        except keyring.errors.PasswordDeleteError:
-            pass
+        keyring.delete_password(service_name, account_name)
 
         # Handling multiple credentials stored when the operating system is Windows
         if sys.platform == "win32":
@@ -117,9 +114,7 @@ class CredentialManager:
             while True:
                 field_name = f"{account_name}-{index}"
                 service_name = f"{service_name}-{index}"
-                try:
-                    keyring.delete_password(service_name, field_name)
-                except keyring.errors.PasswordDeleteError:
+                if not keyring.delete_password(service_name, field_name):
                     break
                 index += 1
 
@@ -153,7 +148,7 @@ class CredentialManager:
                 # Set the individual chunks as separate keyring entries
                 for index, chunk in enumerate(chunks, start=1):
                     field_name = f"{constants['ZoweAccountName']}-{index}"
-                    keyring.set_password(f"{service_name}-{index}", field_name, chunk)
+                    keyring.set_password(service_name, field_name, chunk)
 
             else:
                 # Credential length is within the maximum limit or not on win32, set it as a single keyring entry
