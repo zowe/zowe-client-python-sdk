@@ -10,7 +10,6 @@ SPDX-License-Identifier: EPL-2.0
 Copyright Contributors to the Zowe Project.
 """
 import base64
-import logging
 import sys
 from typing import Optional
 
@@ -73,8 +72,6 @@ class CredentialManager:
         str
             The retrieved  encoded credential
         """
-        # Configure the logger to ignore warning messages
-        logging.getLogger().setLevel(logging.ERROR)
         encoded_credential = keyring.get_password(service_name, constants["ZoweAccountName"])
         if encoded_credential is None and sys.platform == "win32":
             # Retrieve the secure value with an index
