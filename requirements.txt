@@ -32,6 +32,7 @@ urllib3==1.26.18
 wheel
 zipp==3.4.0
 -e ./src/core
+-e ./src/secrets
 -e ./src/zos_console
 -e ./src/zos_files
 -e ./src/zos_jobs

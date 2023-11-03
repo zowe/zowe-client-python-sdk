@@ -1,7 +1,7 @@
 {
     "editor.formatOnSave": true,
     "python.formatting.provider": "black",
-    "rust-analyzer.linkedProjects": ["./src/secrets/zowe/secrets_for_zowe_sdk/Cargo.toml"],
+    "rust-analyzer.linkedProjects": ["./src/secrets/Cargo.toml"],
     "[python]": {
         "editor.codeActionsOnSave": {
             "source.organizeImports": true
