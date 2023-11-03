@@ -10,7 +10,6 @@ idna==2.10
 importlib-metadata==3.6.0
 isort
 jsonschema==4.17.3
-keyring
 lxml==4.9.3
 maturin
 mccabe==0.6.1

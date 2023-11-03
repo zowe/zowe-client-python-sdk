@@ -2,8 +2,9 @@ import sys
 
 from setuptools import find_namespace_packages, setup
 
-sys.path.append("..")
+sys.path.insert(0, "..")
 from _version import __version__
+from setup import resolve_sdk_dep
 
 setup(
     name="zowe_core_for_zowe_sdk",
@@ -18,6 +19,12 @@ setup(
         "Programming Language :: Python :: 3.7",
         "License :: OSI Approved :: Eclipse Public License 2.0 (EPL-2.0)",
     ],
-    install_requires=["requests", "urllib3", "pyyaml", "commentjson"],
+    install_requires=[
+        "commentjson",
+        "pyyaml",
+        "requests",
+        "urllib3",
+        resolve_sdk_dep("secrets", "~=0.1.0"),
+    ],
     packages=find_namespace_packages(include=["zowe.*"]),
 )

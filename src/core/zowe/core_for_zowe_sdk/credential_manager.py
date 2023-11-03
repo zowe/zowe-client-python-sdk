@@ -21,8 +21,7 @@ from .exceptions import SecureProfileLoadFailed
 
 HAS_KEYRING = True
 try:
-    import keyring
-
+    from zowe.secrets_for_zowe_sdk import keyring
 except ImportError:
     HAS_KEYRING = False
 
@@ -76,11 +75,8 @@ class CredentialManager:
         """
         # Configure the logger to ignore warning messages
         logging.getLogger().setLevel(logging.ERROR)
-        is_win32 = sys.platform == "win32"
-        if is_win32:
-            service_name += "/" + constants["ZoweAccountName"]
         encoded_credential = keyring.get_password(service_name, constants["ZoweAccountName"])
-        if encoded_credential is None and is_win32:
+        if encoded_credential is None and sys.platform == "win32":
             # Retrieve the secure value with an index
             index = 1
             temp_value = keyring.get_password(f"{service_name}-{index}", f"{constants['ZoweAccountName']}-{index}")
@@ -91,16 +87,6 @@ class CredentialManager:
                     encoded_credential += temp_value
                 index += 1
                 temp_value = keyring.get_password(f"{service_name}-{index}", f"{constants['ZoweAccountName']}-{index}")
-
-        if is_win32:
-            try:
-                encoded_credential = encoded_credential.encode("utf-16le").decode()
-            except (UnicodeDecodeError, AttributeError):
-                # The credential is not encoded in UTF-16
-                pass
-
-            if encoded_credential is not None and encoded_credential.endswith("\0"):
-                encoded_credential = encoded_credential[:-1]
 
         return encoded_credential
 
@@ -156,7 +142,6 @@ class CredentialManager:
 
             encoded_credential = base64.b64encode(commentjson.dumps(credential).encode()).decode()
             if is_win32:
-                service_name += "/" + constants["ZoweAccountName"]
                 # Delete the existing credential
                 CredentialManager.delete_credential(service_name, constants["ZoweAccountName"])
             # Check if the encoded credential exceeds the maximum length for win32
@@ -167,9 +152,8 @@ class CredentialManager:
                 chunks = [encoded_credential[i : i + chunk_size] for i in range(0, len(encoded_credential), chunk_size)]
                 # Set the individual chunks as separate keyring entries
                 for index, chunk in enumerate(chunks, start=1):
-                    password = (chunk + "\0" * (len(chunk) % 2)).encode().decode("utf-16le")
                     field_name = f"{constants['ZoweAccountName']}-{index}"
-                    keyring.set_password(f"{service_name}-{index}", field_name, password)
+                    keyring.set_password(f"{service_name}-{index}", field_name, chunk)
 
             else:
                 # Credential length is within the maximum limit or not on win32, set it as a single keyring entry
