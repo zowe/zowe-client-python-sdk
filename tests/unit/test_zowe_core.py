@@ -411,12 +411,13 @@ class TestZosmfProfileManager(TestCase):
             props: dict = prof_manager.load("non_existent_profile", validate_schema=False)
 
     @mock.patch("sys.platform", "win32")
-    @mock.patch("zowe.core_for_zowe_sdk.CredentialManager._retrieve_credential")
+    @mock.patch("zowe.core_for_zowe_sdk.CredentialManager._get_credential")
     def test_load_secure_props(self, retrieve_cred_func):
         """
         Test loading secure_props from keyring or storage.
         """
         service_name = constants["ZoweServiceName"]
+        account_name = constants["ZoweAccountName"]
         # Setup - copy profile to fake filesystem created by pyfakefs
         cwd_up_dir_path = os.path.dirname(CWD)
         cwd_up_file_path = os.path.join(cwd_up_dir_path, "zowe.config.json")
@@ -426,14 +427,13 @@ class TestZosmfProfileManager(TestCase):
             cwd_up_file_path: {"profiles.base.properties.user": "user", "profiles.base.properties.password": "password"}
         }
         self.setUpCreds(cwd_up_file_path, credential)
-        base64_encoded_credential = base64.b64encode(commentjson.dumps(credential).encode()).decode()
-        encoded_credential = base64_encoded_credential.encode("utf-16le").decode()
+        encoded_credential = base64.b64encode(commentjson.dumps(credential).encode()).decode()
         retrieve_cred_func.return_value = encoded_credential
 
         # call the load_secure_props method
         credential_manager = CredentialManager()
         credential_manager.load_secure_props()
-        retrieve_cred_func.assert_called_once_with(service_name)
+        retrieve_cred_func.assert_called_once_with(service_name, account_name)
         # Verify the secure_props
         expected_secure_props = credential
         self.assertEqual(credential_manager.secure_props, expected_secure_props)
@@ -460,7 +460,7 @@ class TestZosmfProfileManager(TestCase):
         service_name = constants["ZoweServiceName"]
         account_name = constants["ZoweAccountName"]
         # Delete the credential
-        credential_manager.delete_credential(service_name, account_name)
+        credential_manager._delete_credential(service_name, account_name)
         expected_calls = [
             mock.call(service_name, account_name),
             mock.call(f"{service_name}-1", f"{account_name}-1"),
@@ -477,13 +477,13 @@ class TestZosmfProfileManager(TestCase):
 
         # Scenario 1: Retrieve password directly
         expected_password1 = "password"
-        retrieve_credential1 = credential_manager._retrieve_credential(constants["ZoweServiceName"])
+        retrieve_credential1 = credential_manager._get_credential(constants["ZoweServiceName"], constants["ZoweAccountName"])
         self.assertEqual(retrieve_credential1, expected_password1)
         get_pass_func.assert_called_with(constants["ZoweServiceName"], constants["ZoweAccountName"])
 
         # Scenario 2: Retrieve password in parts
         expected_password2 = "part1part2"
-        retrieve_credential2 = credential_manager._retrieve_credential(constants["ZoweServiceName"])
+        retrieve_credential2 = credential_manager._get_credential(constants["ZoweServiceName"], constants["ZoweAccountName"])
         retrieve_credential2 = retrieve_credential2[:-1]
         self.assertEqual(retrieve_credential2, expected_password2)
         get_pass_func.assert_any_call(constants["ZoweServiceName"], constants["ZoweAccountName"])
@@ -496,14 +496,14 @@ class TestZosmfProfileManager(TestCase):
         """
         Test the _retrieve_credential method for handling encoding errors and None values.
         """
-        result = CredentialManager._retrieve_credential(constants["ZoweServiceName"])
+        result = CredentialManager._get_credential(constants["ZoweServiceName"], constants["ZoweAccountName"])
         self.assertIsNone(result)
         get_pass_func.assert_called_with(constants["ZoweServiceName"], f"{constants['ZoweAccountName']}-1")
 
     @mock.patch("sys.platform", "win32")
-    @mock.patch("zowe.secrets_for_zowe_sdk.keyring.set_password")
-    @mock.patch("zowe.core_for_zowe_sdk.CredentialManager._retrieve_credential")
-    @mock.patch("zowe.core_for_zowe_sdk.CredentialManager.delete_credential")
+    @mock.patch("zowe.core_for_zowe_sdk.CredentialManager._set_credential")
+    @mock.patch("zowe.core_for_zowe_sdk.CredentialManager._get_credential")
+    @mock.patch("zowe.core_for_zowe_sdk.CredentialManager._delete_credential")
     def test_save_secure_props_normal_credential(self, delete_pass_func, retrieve_cred_func, set_pass_func):
         """
         Test the save_secure_props method for saving credentials to keyring.
@@ -532,9 +532,9 @@ class TestZosmfProfileManager(TestCase):
         set_pass_func.assert_called_once_with(constants["ZoweServiceName"], constants["ZoweAccountName"], encoded_credential)
 
     @mock.patch("sys.platform", "win32")
-    @mock.patch("zowe.core_for_zowe_sdk.CredentialManager._retrieve_credential")
+    @mock.patch("zowe.core_for_zowe_sdk.CredentialManager._get_credential")
     @mock.patch("zowe.secrets_for_zowe_sdk.keyring.set_password")
-    @mock.patch("zowe.core_for_zowe_sdk.CredentialManager.delete_credential")
+    @mock.patch("zowe.core_for_zowe_sdk.CredentialManager._delete_credential")
     def test_save_secure_props_exceed_limit(self, delete_pass_func, set_pass_func, retrieve_cred_func):
         # Setup - copy profile to fake filesystem created by pyfakefs
         cwd_up_dir_path = os.path.dirname(CWD)
@@ -548,9 +548,8 @@ class TestZosmfProfileManager(TestCase):
             }
         }
         self.setUpCreds(cwd_up_file_path, credential)
-        base64_encoded_credential = base64.b64encode(commentjson.dumps(credential).encode()).decode()
-        base64_encoded_credential += "\0"
-        encoded_credential = base64_encoded_credential.encode("utf-16le").decode()
+        encoded_credential = base64.b64encode(commentjson.dumps(credential).encode()).decode()
+        encoded_credential += "\0"
         retrieve_cred_func.return_value = encoded_credential
 
         CredentialManager.secure_props = credential
@@ -562,7 +561,7 @@ class TestZosmfProfileManager(TestCase):
         expected_calls = []
         chunk_size = constants["WIN32_CRED_MAX_STRING_LENGTH"]
         chunks = [
-            base64_encoded_credential[i : i + chunk_size] for i in range(0, len(base64_encoded_credential), chunk_size)
+            encoded_credential[i : i + chunk_size] for i in range(0, len(encoded_credential), chunk_size)
         ]
         for index, chunk in enumerate(chunks, start=1):
             field_name = f"{constants['ZoweAccountName']}-{index}"

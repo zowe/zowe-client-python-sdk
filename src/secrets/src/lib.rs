@@ -13,9 +13,9 @@ fn set_password(service: String, account: String, password: String) -> PyResult<
 }
 
 #[pyfunction]
-fn get_password(service: String, account: String) -> PyResult<String> {
+fn get_password(service: String, account: String) -> PyResult<Option<String>> {
     match os::get_password(&service, &account) {
-        Ok(pw) => Ok(pw.unwrap_or("".to_string())),
+        Ok(pw) => Ok(pw),
         Err(e) => Err(PyValueError::new_err(format!("{:#?}", e))),
     }
 }
@@ -29,12 +29,9 @@ fn delete_password(service: String, account: String) -> PyResult<bool> {
 }
 
 #[pyfunction]
-fn find_password(service: String) -> PyResult<String> {
+fn find_password(service: String) -> PyResult<Option<String>> {
     match os::find_password(&service) {
-        Ok(res) => match res {
-            Some(val) => Ok(val),
-            _ => Ok("".to_owned()),
-        },
+        Ok(res) => Ok(res),
         Err(e) => Err(PyValueError::new_err(format!("{:#?}", e))),
     }
 }
