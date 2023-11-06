@@ -28,7 +28,7 @@ setup(
         "urllib3",
     ],
     extras_require={
-        "secrets": [resolve_sdk_dep("secrets", "~=0.1.0")]
+        "secrets": [resolve_sdk_dep("secrets", "~=" + __version__)]
     },
     packages=find_namespace_packages(include=["zowe.*"]),
 )
