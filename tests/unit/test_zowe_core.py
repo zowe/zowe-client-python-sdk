@@ -463,7 +463,7 @@ class TestZosmfProfileManager(TestCase):
         credential_manager._delete_credential(service_name, account_name)
         expected_calls = [
             mock.call(service_name, account_name),
-            mock.call(f"{service_name}-1", f"{account_name}-1"),
+            mock.call(service_name, f"{account_name}-1"),
         ]
         delete_pass_func.assert_has_calls(expected_calls)
 
@@ -484,7 +484,6 @@ class TestZosmfProfileManager(TestCase):
         # Scenario 2: Retrieve password in parts
         expected_password2 = "part1part2"
         retrieve_credential2 = credential_manager._get_credential(constants["ZoweServiceName"], constants["ZoweAccountName"])
-        retrieve_credential2 = retrieve_credential2[:-1]
         self.assertEqual(retrieve_credential2, expected_password2)
         get_pass_func.assert_any_call(constants["ZoweServiceName"], constants["ZoweAccountName"])
         get_pass_func.assert_any_call(constants["ZoweServiceName"], f"{constants['ZoweAccountName']}-1")

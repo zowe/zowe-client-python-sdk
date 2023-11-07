@@ -104,6 +104,9 @@ class CredentialManager:
                 index += 1
                 temp_value = keyring.get_password(service_name, f"{account_name}-{index}")
 
+            if encoded_credential is not None and encoded_credential.endswith("\0"):
+                encoded_credential = encoded_credential[:-1]
+
         return encoded_credential
 
     @staticmethod
@@ -146,7 +149,6 @@ class CredentialManager:
             index = 1
             while True:
                 field_name = f"{account_name}-{index}"
-                service_name = f"{service_name}-{index}"
                 if not keyring.delete_password(service_name, field_name):
                     break
                 index += 1
