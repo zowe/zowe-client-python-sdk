@@ -198,9 +198,7 @@ class TestZosmfProfileManager(TestCase):
         self.fs.add_real_file(self.original_user_file_path)
         self.fs.add_real_file(self.original_nested_file_path)
         self.fs.add_real_file(self.original_schema_file_path)
-        self.fs.add_real_file(self.original_invalid_file_path)
         self.fs.add_real_file(self.original_invalid_schema_file_path)
-        self.fs.add_real_file(self.original_invalidUri_file_path)
         self.fs.add_real_file(self.original_invalidUri_schema_file_path)
         self.custom_dir = os.path.dirname(FIXTURES_PATH)
         self.custom_appname = "zowe_abcd"
@@ -611,10 +609,10 @@ class TestZosmfProfileManager(TestCase):
         with self.assertRaises(ValidationError):
             custom_file_path = os.path.join(self.custom_dir, "zowe.config.json")
             os.chdir(self.custom_dir)
-            with open(self.original_file_path, 'r') as f:
+            with open(self.original_file_path, "r") as f:
                 original_config = commentjson.load(f)
             original_config["$schema"] = "fixtures/invalid.zowe.schema.json"
-            with open(os.path.join(self.custom_dir, "invalid.zowe.config.json"), 'w') as f:
+            with open(os.path.join(self.custom_dir, "invalid.zowe.config.json"), "w") as f:
                 commentjson.dump(original_config, f)
 
             self.setUpCreds(
@@ -639,10 +637,10 @@ class TestZosmfProfileManager(TestCase):
         with self.assertRaises(SchemaError):
             custom_file_path = os.path.join(self.custom_dir, "zowe.config.json")
             os.chdir(self.custom_dir)
-            with open(self.original_file_path, 'r') as f:
+            with open(self.original_file_path, "r") as f:
                 original_config = commentjson.load(f)
             original_config["$schema"] = "fixtures/invalidUri.zowe.schema.json"
-            with open(os.path.join(self.custom_dir, "invalidUri.zowe.config.json"), 'w') as f:
+            with open(os.path.join(self.custom_dir, "invalidUri.zowe.config.json"), "w") as f:
                 commentjson.dump(original_config, f)
 
             self.setUpCreds(
