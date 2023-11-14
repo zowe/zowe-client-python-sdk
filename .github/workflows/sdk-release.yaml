@@ -68,7 +68,7 @@ jobs:
           GIT_COMMITTER_EMAIL: ${{ secrets.ZOWE_ROBOT_EMAIL }}
           GIT_CREDENTIALS: x-access-token:${{ secrets.ZOWE_ROBOT_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TWINE_USERNAME: _token_
+          TWINE_USERNAME: __token__
           TWINE_PASSWORD: ${{ secrets.PYPI_ROBOT_TOKEN }}
         with:
           dry-run: ${{ inputs.dry-run }}
