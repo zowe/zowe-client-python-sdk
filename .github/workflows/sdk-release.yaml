@@ -57,6 +57,7 @@ jobs:
       - name: Archive artifacts
         uses: actions/upload-artifact@v3
         with:
+          name: sdist
           path: dist/
 
       - uses: zowe-actions/octorelease@feat/add-pypi-plugin
