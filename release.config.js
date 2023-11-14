@@ -10,7 +10,7 @@ module.exports = {
         },
         {
             name: "fix/update-release-workflow",
-            level: "patch"
+            level: "major"
         }
         // {
         //     name: "next",
