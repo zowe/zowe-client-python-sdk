@@ -51,6 +51,9 @@ jobs:
         run: cargo install cargo-edit && cargo set-version ${{ steps.update-version.outputs.cargo-version }}
         working-directory: src/secrets
 
+      - name: Update version (git)
+        run: git add src/_version.py src/secrets/Cargo.*
+
       - name: Build dist wheels
         run: bash build.sh
 
