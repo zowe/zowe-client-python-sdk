@@ -1,0 +1,71 @@
+name: Zowe SDK Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Update project version before publish
+        required: false
+        type: string
+      dry-run:
+        description: Dry run mode
+        required: false
+        type: boolean
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      - name: Update version
+        id: update-version
+        shell: python
+        run: |
+          import sys
+          sys.path.append("src")
+          from _version import __version__
+          new_version = "${{ inputs.version }}"
+          if new_version:
+            with open("src/_version.py", 'w') as f:
+              f.write("__version__ = \"" + new_version + "\"\n")
+          else:
+            new_version = __version__
+          print("::set-output name=version::" + new_version)
+          print("::set-output name=cargo-version::" + ("-".join(new_version.rsplit(".", 1)) if new_version.count(".") > 2 else new_version))
+
+      - name: Update version (cargo)
+        run: cargo install cargo-edit && cargo set-version ${{ steps.update-version.outputs.cargo-version }}
+        working-directory: src/secrets
+
+      - name: Build dist wheels
+        run: bash build.sh
+
+      - name: Archive artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          path: dist/
+
+      - uses: zowe-actions/octorelease@feat/add-pypi-plugin
+        env:
+          GIT_COMMITTER_NAME: ${{ secrets.ZOWE_ROBOT_USER }}
+          GIT_COMMITTER_EMAIL: ${{ secrets.ZOWE_ROBOT_EMAIL }}
+          GIT_CREDENTIALS: x-access-token:${{ secrets.ZOWE_ROBOT_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TWINE_USERNAME: _token_
+          TWINE_PASSWORD: ${{ secrets.PYPI_ROBOT_TOKEN }}
+        with:
+          dry-run: ${{ inputs.dry-run }}
+          new-version: ${{ steps.update-version.outputs.version }}
