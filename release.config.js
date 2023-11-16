@@ -7,10 +7,6 @@ module.exports = {
         {
             name: "zowe-v?-lts",
             level: "patch"
-        },
-        {
-            name: "fix/update-release-workflow",
-            level: "major"
         }
         // {
         //     name: "next",
