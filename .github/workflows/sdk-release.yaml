@@ -27,14 +27,14 @@ jobs:
 
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
+          python -m pip install --upgrade pip twine
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
       - name: Update version
         id: update-version
         shell: python
         run: |
-          import sys
+          import os, sys
           sys.path.append("src")
           from _version import __version__
           new_version = "${{ inputs.version }}"
@@ -43,19 +43,23 @@ jobs:
               f.write("__version__ = \"" + new_version + "\"\n")
           else:
             new_version = __version__
-          print("::set-output name=version::" + new_version)
-          print("::set-output name=cargo-version::" + ("-".join(new_version.rsplit(".", 1)) if new_version.count(".") > 2 else new_version))
+          with open(os.environ["GITHUB_OUTPUT"], 'a') as f:
+            print("version=" + ("-".join(new_version.rsplit(".", 1)) if new_version.count(".") > 2 else new_version), file=f)
 
       - name: Update version (cargo)
-        run: cargo install cargo-edit && cargo set-version ${{ steps.update-version.outputs.cargo-version }}
+        run: cargo install cargo-edit && cargo set-version ${{ steps.update-version.outputs.version }}
         working-directory: src/secrets
 
-      - name: Build dist wheels
+      - name: Update version (git)
+        run: git add src/_version.py src/secrets/Cargo.*
+
+      - name: Build wheels
         run: bash build.sh
 
-      - name: Archive artifacts
+      - name: Upload wheels
         uses: actions/upload-artifact@v3
         with:
+          name: wheels
           path: dist/
 
       - uses: zowe-actions/octorelease@feat/add-pypi-plugin
@@ -64,7 +68,7 @@ jobs:
           GIT_COMMITTER_EMAIL: ${{ secrets.ZOWE_ROBOT_EMAIL }}
           GIT_CREDENTIALS: x-access-token:${{ secrets.ZOWE_ROBOT_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TWINE_USERNAME: _token_
+          TWINE_USERNAME: __token__
           TWINE_PASSWORD: ${{ secrets.PYPI_ROBOT_TOKEN }}
         with:
           dry-run: ${{ inputs.dry-run }}
