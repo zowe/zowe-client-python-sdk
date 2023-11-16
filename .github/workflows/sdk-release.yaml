@@ -53,13 +53,13 @@ jobs:
       - name: Update version (git)
         run: git add src/_version.py src/secrets/Cargo.*
 
-      - name: Build dist wheels
+      - name: Build wheels
         run: bash build.sh
 
-      - name: Archive artifacts
+      - name: Upload wheels
         uses: actions/upload-artifact@v3
         with:
-          name: sdist
+          name: wheels
           path: dist/
 
       - uses: zowe-actions/octorelease@feat/add-pypi-plugin
