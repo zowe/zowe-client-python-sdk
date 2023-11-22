@@ -22,7 +22,7 @@ from .exceptions import SecureProfileLoadFailed
 
 HAS_KEYRING = True
 try:
-    import keyring
+    from zowe.secrets_for_zowe_sdk import keyring
 except ImportError:
     HAS_KEYRING = False
 
@@ -94,17 +94,11 @@ class ZosmfProfile:
         service_name = constants["ZoweCredentialKey"]
         account_name = "zosmf_{}_{}".format(self.profile_name, name)
 
-        if sys.platform == "win32":
-            service_name += "/" + account_name
-
         secret_value = keyring.get_password(service_name, account_name)
 
         # Handle the case when secret_value is None
         if secret_value is None:
             secret_value = ""
-
-        if sys.platform == "win32":
-            secret_value = secret_value.encode("utf-16")
 
         secret_value = base64.b64decode(secret_value).decode().strip('"')
 
@@ -122,38 +116,3 @@ class ZosmfProfile:
             raise SecureProfileLoadFailed(self.profile_name, e)
         else:
             return (zosmf_user, zosmf_password)
-
-
-if HAS_KEYRING and sys.platform.startswith("linux"):
-    from contextlib import closing
-
-    from keyring.backends import SecretService
-
-    class KeyringBackend(SecretService.Keyring):
-        """
-        Class used to handle secured profiles.
-
-        Methods
-        -------
-        get_password(service, username)
-            Get the decoded password
-        """
-
-        def __get_password(self, service, username, collection):
-            items = collection.search_items({"account": username, "service": service})
-            for item in items:
-                if hasattr(item, "unlock"):
-                    if item.is_locked() and item.unlock()[0]:
-                        raise keyring.errors.InitError("failed to unlock item")
-                return item.get_secret().decode("utf-8")
-
-        def get_password(self, service, username):
-            """Get password of the username for the service."""
-            collection = self.get_preferred_collection()
-            if hasattr(collection, "connection"):
-                with closing(collection.connection):
-                    return self.__get_password(service, username, collection)
-            else:
-                return self.__get_password(service, username, collection)
-
-    keyring.set_keyring(KeyringBackend())
