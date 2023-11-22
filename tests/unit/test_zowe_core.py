@@ -183,11 +183,8 @@ class TestZosmfProfileManager(TestCase):
         self.setUpPyfakefs()
         self.original_file_path = os.path.join(FIXTURES_PATH, "zowe.config.json")
         self.original_user_file_path = os.path.join(FIXTURES_PATH, "zowe.config.user.json")
-        self.original_invalid_file_path = os.path.join(FIXTURES_PATH, "invalid.zowe.config.json")
         self.original_nested_file_path = os.path.join(FIXTURES_PATH, "nested.zowe.config.json")
         self.original_schema_file_path = os.path.join(FIXTURES_PATH, "zowe.schema.json")
-        self.original_invalid_schema_file_path = os.path.join(FIXTURES_PATH, "invalid.zowe.schema.json")
-        self.original_invalidUri_file_path = os.path.join(FIXTURES_PATH, "invalidUri.zowe.config.json")
         self.original_invalidUri_schema_file_path = os.path.join(FIXTURES_PATH, "invalidUri.zowe.schema.json")
 
         loader = importlib.util.find_spec("jsonschema")
@@ -198,8 +195,6 @@ class TestZosmfProfileManager(TestCase):
         self.fs.add_real_file(self.original_user_file_path)
         self.fs.add_real_file(self.original_nested_file_path)
         self.fs.add_real_file(self.original_schema_file_path)
-        self.fs.add_real_file(self.original_invalid_schema_file_path)
-        self.fs.add_real_file(self.original_invalidUri_schema_file_path)
         self.custom_dir = os.path.dirname(FIXTURES_PATH)
         self.custom_appname = "zowe_abcd"
         self.custom_filename = f"{self.custom_appname}.config.json"
@@ -611,10 +606,14 @@ class TestZosmfProfileManager(TestCase):
             os.chdir(self.custom_dir)
             with open(self.original_file_path, "r") as f:
                 original_config = commentjson.load(f)
-            original_config["$schema"] = "fixtures/invalid.zowe.schema.json"
+            original_config["$schema"] = "invalid.zowe.schema.json"
+            original_config["profiles"]["zosmf"]["properties"]["port"] = "10443"
             with open(os.path.join(self.custom_dir, "invalid.zowe.config.json"), "w") as f:
                 commentjson.dump(original_config, f)
-
+            with open(self.original_schema_file_path, "r") as f:
+                original_schema = commentjson.load(f)
+            with open(os.path.join(self.custom_dir, "invalid.zowe.schema.json"), "w") as f:
+                commentjson.dump(original_schema, f)
             self.setUpCreds(
                 custom_file_path,
                 {
@@ -639,9 +638,14 @@ class TestZosmfProfileManager(TestCase):
             os.chdir(self.custom_dir)
             with open(self.original_file_path, "r") as f:
                 original_config = commentjson.load(f)
-            original_config["$schema"] = "fixtures/invalidUri.zowe.schema.json"
+            original_config["$schema"] = "invalidUri.zowe.schema.json"
             with open(os.path.join(self.custom_dir, "invalidUri.zowe.config.json"), "w") as f:
                 commentjson.dump(original_config, f)
+            with open(self.original_schema_file_path, "r") as f:
+                original_schema = commentjson.load(f)
+            original_schema["type"] = "invalid"
+            with open(os.path.join(self.custom_dir, "invalidUri.zowe.schema.json"), "w") as f:
+                commentjson.dump(original_schema, f)
 
             self.setUpCreds(
                 custom_file_path,
@@ -925,9 +929,24 @@ class TestValidateConfigJsonClass(unittest.TestCase):
 
     def test_validate_config_json_invalid(self):
         """Test validate_config_json with invalid config.json that does not match schema.json"""
-        path_to_invalid_config = FIXTURES_PATH + "/invalid.zowe.config.json"
-        path_to_invalid_schema = FIXTURES_PATH + "/invalid.zowe.schema.json"
+        path_to_config = FIXTURES_PATH + "/zowe.config.json"
+        path_to_schema = FIXTURES_PATH + "/zowe.schema.json"
+        path_to_invalid_config = "invalid.zowe.config.json"
+        path_to_invalid_schema = "invalid.zowe.schema.json"
 
+        custom_dir = os.path.dirname(FIXTURES_PATH)
+        custom_file_path = os.path.join(custom_dir, "zowe.config.json")
+        os.chdir(custom_dir)
+        with open(path_to_config, "r") as f:
+            original_config = commentjson.load(f)
+        original_config["$schema"] = "invalid.zowe.schema.json"
+        original_config["profiles"]["zosmf"]["properties"]["port"] = "10443"
+        with open(os.path.join(custom_dir, "invalid.zowe.config.json"), "w") as f:
+            commentjson.dump(original_config, f)
+        with open(path_to_schema, "r") as f:
+            original_schema = commentjson.load(f)
+        with open(os.path.join(custom_dir, "invalid.zowe.schema.json"), "w") as f:
+            commentjson.dump(original_schema, f)
         invalid_config_json = commentjson.load(open(path_to_invalid_config))
         invalid_schema_json = commentjson.load(open(path_to_invalid_schema))
 
