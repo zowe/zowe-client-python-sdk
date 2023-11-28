@@ -40,6 +40,7 @@ class Console(SdkApi):
             A JSON containing the response from the console command
         """
         custom_args = self._create_custom_request_arguments()
+        custom_args["url"] = self.request_endpoint.replace("defcn", console or "defcn")
         request_body = {"cmd": command}
         custom_args["json"] = request_body
         response_json = self.request_handler.perform_request("PUT", custom_args)
