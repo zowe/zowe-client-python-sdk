@@ -24,6 +24,8 @@ if __name__ == "__main__":
         name="zowe",
         version=__version__,
         description="Zowe Python SDK",
+        long_description=open("../README.md", 'r').read(),
+        long_description_content_type="text/markdown",
         url="https://github.com/zowe/zowe-client-python-sdk",
         author="Guilherme Cartier",
         author_email="gcartier94@gmail.com",

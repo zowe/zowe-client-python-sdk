@@ -10,6 +10,8 @@ setup(
     name="zowe_zos_jobs_for_zowe_sdk",
     version=__version__,
     description="Zowe Python SDK - z/OS Jobs package",
+    long_description=open("README.md", 'r').read(),
+    long_description_content_type="text/markdown",
     url="https://github.com/zowe/zowe-client-python-sdk",
     author="Guilherme Cartier",
     author_email="gcartier94@gmail.com",
