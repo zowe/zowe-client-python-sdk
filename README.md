@@ -64,7 +64,11 @@ pip install zowe.core-for-zowe-sdk[secrets]
 
 ### Developer setup
 
-**Prerequisite:** The minimum supported Python version is 3.7.
+Ensure the following prerequisites are installed and on your PATH:
+
+- Python >= 3.7 and `pip`
+- Cargo >= 1.72 (to build Rust bindings for Secrets SDK)
+- Visual Studio Build Tools >= 2015 (Windows only)
 
 Clone the repository using `git`:
 
@@ -81,7 +85,7 @@ git checkout main
 
 We recommend that developers make a virtual environment to install all required dependencies.
 
-Create a virtual environment in the root of the repository folder using the `venv` module.  
+Create a virtual environment in the root of the repository folder using the `venv` module.
 The command below assumes that `python` is a version of Python3:
 
 ```
@@ -90,7 +94,7 @@ python -m venv venv
 
 _(If this isn't the case for your environment, use the appropriate command alias for Python3)_
 
-Activate your virtual environment so that Python uses it to manage dependencies.  
+Activate your virtual environment so that Python uses it to manage dependencies.
 Assuming that you are using Bash shell, reference the command below:
 
 ```
@@ -105,7 +109,7 @@ Install the dependencies listed in `requirements.txt` using `pip`:
 pip install -r requirements.txt
 ```
 
-You can now develop the Python SDK with the installed dependencies.  
+You can now develop the Python SDK with the installed dependencies.
 When you are finished with your development session, deactivate your virtual environment:
 
 ```
