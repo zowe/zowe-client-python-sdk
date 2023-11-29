@@ -67,4 +67,4 @@ This project follows the [PEP 8](https://www.python.org/dev/peps/pep-0008/) styl
 
 This project also uses `flake8` for code linting. Make sure to run `flake8` on your code before submitting a pull request.
 
-We recommend using `black` as a code formatter. Please format your code using `black` before creating a pull request.
+We recommend using `black` and `isort` as code formatters. Please format your code using these tools before creating a pull request.

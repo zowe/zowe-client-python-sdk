@@ -1,0 +1,10 @@
+{
+    "editor.formatOnSave": true,
+    "python.formatting.provider": "black",
+    "rust-analyzer.linkedProjects": ["./src/secrets/Cargo.toml"],
+    "[python]": {
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": true
+        }
+    }
+}

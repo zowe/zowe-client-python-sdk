@@ -27,11 +27,7 @@ class ApiConnection:
     ssl_verification: bool
     """
 
-    def __init__(self,
-                 host_url,
-                 user,
-                 password,
-                 ssl_verification=True):
+    def __init__(self, host_url, user, password, ssl_verification=True):
         """Construct an ApiConnection object."""
         if not host_url or not user or not password:
             raise MissingConnectionArgs()
