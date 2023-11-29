@@ -2,11 +2,12 @@
 
 All notable changes to the Zowe Client Python SDK will be documented in this file.
 
-## Recent Changes
+## `1.0.0-dev12`
 
 ### Bug Fixes
 
 - Fixed Secrets SDK requiring LD_LIBRARY_PATH to be defined when installed from wheel on Linux [#229](https://github.com/zowe/zowe-client-python-sdk/issues/229)
+- Fixed 'issue_command' Console API function to provide custom console name [#231](https://github.com/zowe/zowe-client-python-sdk/issues/231)
 
 ## `1.0.0-dev11`
 
