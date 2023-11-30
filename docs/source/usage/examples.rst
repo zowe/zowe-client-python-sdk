@@ -21,9 +21,9 @@ Alternatively you can use an existing Zowe CLI profile instead:
 .. code-block:: python
 
   from zowe.zos_console_for_zowe_sdk import Console
-  from zowe.zos_core_for_zowe_sdk import ProfileManager
+  from zowe.core_for_zowe_sdk import ProfileManager
 
   # Load the profile using ProfileManager
-  profile = ProfileManager().load(profile_type="<profile name>")
+  profile = ProfileManager().load(profile_name="<profile name>")
 
   my_console = Console(profile)
