@@ -356,6 +356,39 @@ class TestFilesClass(TestCase):
                 with self.assertRaises(ValueError) as e_info:
                     files_test_profile.rename_dataset_member(*test_case[0])
                 self.assertEqual(str(e_info.exception), "Invalid value for enq.")
+             
+    @mock.patch("requests.Session.send")   
+    def test_create_data_set_accept_valid_recfm(self, mock_send_request):
+        """Test if create dataset does accept all accepted record formats"""
+        mock_send_request.return_value = mock.Mock(headers={"Content-Type": "application/json"}, status_code=201)
+        for recfm in ["F", "FB", "V", "VB", "U", "FBA", "FBM", "VBA", "VBM"]:
+            Files(self.test_profile).create_data_set(
+                "DSNAME123", options={
+                    "alcunit": "CYL",
+                    "dsorg": "PO",
+                    "primary": 1,
+                    "dirblk": 5,
+                    "recfm": recfm,
+                    "blksize": 6160,
+                    "lrecl": 80
+                }
+            )
+        mock_send_request.assert_called()
+        
+    def test_create_data_set_does_not_accept_invalid_recfm(self):
+        """Test if create dataset raises an error for invalid record formats"""
+        with self.assertRaises(KeyError):
+            Files(self.test_profile).create_data_set(
+                "DSNAME123", options={
+                    "alcunit": "CYL",
+                    "dsorg": "PO",
+                    "primary": 1,
+                    "dirblk": 5,
+                    "recfm": "XX",
+                    "blksize": 6160,
+                    "lrecl": 80
+                }
+            )
 
     def test_create_data_set_raises_error_without_required_arguments(self):
         """Test not providing required arguments raises an error"""
