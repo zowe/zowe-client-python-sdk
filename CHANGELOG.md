@@ -8,6 +8,7 @@ All notable changes to the Zowe Client Python SDK will be documented in this fil
 
 - Fixed Secrets SDK requiring LD_LIBRARY_PATH to be defined when installed from wheel on Linux [#229](https://github.com/zowe/zowe-client-python-sdk/issues/229)
 - Fixed 'issue_command' Console API function to provide custom console name [#231](https://github.com/zowe/zowe-client-python-sdk/issues/231)
+- Fixed 'create_data_set' to accept "FBA", "FBM", "VBA", "VBM" as valid recfm [#240](https://github.com/zowe/zowe-client-python-sdk/issues/240)
 
 ## `1.0.0-dev11`
 
