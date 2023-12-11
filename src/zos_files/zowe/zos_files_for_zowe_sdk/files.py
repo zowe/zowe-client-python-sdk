@@ -331,7 +331,7 @@ class Files(SdkApi):
                     if options.get(opt) is None:
                         options[opt] = "F"
                     else:
-                        if options[opt] not in ("F", "FB", "V", "VB", "U"):
+                        if options[opt] not in ("F", "FB", "V", "VB", "U", "FBA", "FBM", "VBA", "VBM"):
                             raise KeyError
 
                 if opt == "blksize":

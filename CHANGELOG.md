@@ -2,6 +2,12 @@
 
 All notable changes to the Zowe Client Python SDK will be documented in this file.
 
+## Recent Changes
+
+### Bug Fixes
+
+- Fixed 'create_data_set' to accept "FBA", "FBM", "VBA", "VBM" as valid recfm [#240](https://github.com/zowe/zowe-client-python-sdk/issues/240)
+
 ## `1.0.0-dev12`
 
 ### Bug Fixes
