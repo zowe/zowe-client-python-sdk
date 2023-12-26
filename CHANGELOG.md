@@ -9,7 +9,6 @@ All notable changes to the Zowe Client Python SDK will be documented in this fil
 - Fixed `create_data_set` to accept "FBA", "FBM", "VBA", "VBM" as valid recfm [#240](https://github.com/zowe/zowe-client-python-sdk/issues/240)
 - Fixed an issue with `list_jobs` user correlator parameter [#242](https://github.com/zowe/zowe-client-python-sdk/issues/242)
 
-
 ## `1.0.0-dev12`
 
 ### Bug Fixes
