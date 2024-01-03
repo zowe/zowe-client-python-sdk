@@ -41,9 +41,7 @@ class Zosmf(SdkApi):
         json
             A JSON containing the z/OSMF Info REST API data
         """
-        response_json = self.request_handler.perform_request(
-            "GET", self.request_arguments
-        )
+        response_json = self.request_handler.perform_request("GET", self.request_arguments)
         return response_json
 
     def list_systems(self):
@@ -56,5 +54,5 @@ class Zosmf(SdkApi):
 
         custom_args = self._create_custom_request_arguments()
         custom_args["url"] = "{}/systems".format(self.request_endpoint)
-        response_json = self.request_handler.perform_request("GET", custom_args, expected_code = [200])
+        response_json = self.request_handler.perform_request("GET", custom_args, expected_code=[200])
         return response_json

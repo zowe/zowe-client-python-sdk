@@ -1,0 +1,55 @@
+{
+    "$schema": "./invalidUri.zowe.schema.json",
+    "profiles": {
+        "zosmf": {
+            "type": "zosmf",
+            "properties": {
+                "port": 10443
+            },
+            "secure": []
+        },
+        "tso": {
+            "type": "tso",
+            "properties": {
+                "account": "",
+                "codePage": "1047",
+                "logonProcedure": "IZUFPROC"
+            },
+            "secure": []
+        },
+        "ssh": {
+            "type": "ssh",
+            "properties": {
+                "port": 22
+            },
+            "secure": ["user"]
+        },
+        "zftp": {
+            "type": "zftp",
+            "properties": {
+                "port": 21,
+                "secureFtp": true
+            },
+            "secure": []
+        },
+        "base": {
+            "type": "base",
+            "properties": {
+                "host": "zowe.test.cloud",
+                "rejectUnauthorized": false
+            },
+            "secure": [
+                "user",
+                "password"
+            ]
+        }
+    },
+    "defaults": {
+        "zosmf": "zosmf",
+        "tso": "tso",
+        "ssh": "ssh",
+        "zftp": "zftp",
+        "base": "base"
+    },
+    "autoStore": true
+}

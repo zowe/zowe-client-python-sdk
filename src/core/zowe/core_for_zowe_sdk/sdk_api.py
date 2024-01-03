@@ -10,10 +10,12 @@ SPDX-License-Identifier: EPL-2.0
 Copyright Contributors to the Zowe Project.
 """
 
+import urllib
+
+from . import session_constants
 from .exceptions import UnsupportedAuthType
 from .request_handler import RequestHandler
-from .session import Session, ISession
-from . import session_constants
+from .session import ISession, Session
 
 
 class SdkApi:
@@ -21,7 +23,7 @@ class SdkApi:
     Abstract class used to represent the base SDK API.
     """
 
-    def __init__(self, profile, default_url):  
+    def __init__(self, profile, default_url):
         self.profile = profile
         session = Session(profile)
         self.session: ISession = session.load()
@@ -60,3 +62,14 @@ class SdkApi:
         dictionary creation
         """
         return self.request_arguments.copy()
+
+    def _encode_uri_component(self, str_to_adjust):
+        """Adjust string to be correct in a URL
+
+        Returns
+        -------
+        adjusted_str
+            A string with special characters, acceptable for a URL
+        """
+
+        return urllib.parse.quote(str_to_adjust, safe="!~*'()") if str_to_adjust is not None else None
