@@ -25,13 +25,13 @@ Alternatively, you can choose to install only a single subpackage for a smaller 
 To install all Zowe SDK packages using pip:
 
 ```
-pip install zowe
+pip install -U --pre zowe
 ```
 
 Or, to install a subpackage using pip:
 
 ```
-pip install zowe.<subpackage>_for_zowe_sdk
+pip install -U --pre zowe.<subpackage>_for_zowe_sdk
 ```
 
 For more information on the available sub-packages click [HERE](https://zowe-client-python-sdk.readthedocs.io/en/latest/packages/packages.html)
@@ -59,7 +59,7 @@ urllib3
 It also has an optional dependency on the Zowe Secrets SDK for storing client secrets which can be installed with the `secrets` extra:
 
 ```
-pip install zowe.core-for-zowe-sdk[secrets]
+pip install -U --pre zowe.core-for-zowe-sdk[secrets]
 ```
 
 ### Developer setup
