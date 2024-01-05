@@ -93,7 +93,7 @@ class RequestHandler:
         self.__validate_method()
         self.__send_request(stream=True)
         self.__validate_response()
-        return self.response.raw
+        return self.response
 
     def __validate_method(self):
         """Check if the input request method for the request is supported.
