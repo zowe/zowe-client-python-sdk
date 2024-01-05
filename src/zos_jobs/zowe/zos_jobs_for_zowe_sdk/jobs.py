@@ -9,8 +9,9 @@ SPDX-License-Identifier: EPL-2.0
 
 Copyright Contributors to the Zowe Project.
 """
-from zowe.core_for_zowe_sdk import SdkApi
 import os
+
+from zowe.core_for_zowe_sdk import SdkApi
 
 
 class Jobs(SdkApi):
@@ -51,7 +52,7 @@ class Jobs(SdkApi):
         """
         custom_args = self._create_custom_request_arguments()
         job_url = "{}/{}".format(jobname, jobid)
-        request_url = "{}{}".format(self.request_endpoint, job_url)
+        request_url = "{}{}".format(self.request_endpoint, self._encode_uri_component(job_url))
         custom_args["url"] = request_url
         response_json = self.request_handler.perform_request("GET", custom_args)
         return response_json
@@ -78,12 +79,9 @@ class Jobs(SdkApi):
 
         custom_args = self._create_custom_request_arguments()
         job_url = "{}/{}".format(jobname, jobid)
-        request_url = "{}{}".format(self.request_endpoint, job_url)
+        request_url = "{}{}".format(self.request_endpoint, self._encode_uri_component(job_url))
         custom_args["url"] = request_url
-        custom_args["json"] = {
-            "request": "cancel",
-            "version": modify_version
-        }
+        custom_args["json"] = {"request": "cancel", "version": modify_version}
 
         response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[202, 200])
         return response_json
@@ -110,7 +108,7 @@ class Jobs(SdkApi):
 
         custom_args = self._create_custom_request_arguments()
         job_url = "{}/{}".format(jobname, jobid)
-        request_url = "{}{}".format(self.request_endpoint, job_url)
+        request_url = "{}{}".format(self.request_endpoint, self._encode_uri_component(job_url))
         custom_args["url"] = request_url
         custom_args["headers"]["X-IBM-Job-Modify-Version"] = modify_version
 
@@ -118,21 +116,17 @@ class Jobs(SdkApi):
         return response_json
 
     def _issue_job_request(self, req: dict, jobname: str, jobid: str, modify_version):
-
         custom_args = self._create_custom_request_arguments()
         job_url = "{}/{}".format(jobname, jobid)
-        request_url = "{}{}".format(self.request_endpoint, job_url)
+        request_url = "{}{}".format(self.request_endpoint, self._encode_uri_component(job_url))
         custom_args["url"] = request_url
-        custom_args["json"] = {
-            **req,
-            "version": modify_version 
-        }
+        custom_args["json"] = {**req, "version": modify_version}
 
         custom_args["headers"]["X-IBM-Job-Modify-Version"] = modify_version
-            
+
         response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[202, 200])
         return response_json
-       
+
     def change_job_class(self, jobname: str, jobid: str, class_name: str, modify_version="2.0"):
         """Changes the job class
 
@@ -158,7 +152,7 @@ class Jobs(SdkApi):
 
     def hold_job(self, jobname: str, jobid: str, modify_version="2.0"):
         """Hold the given job on JES
-        
+
         Parameters
         ----------
         jobname: str
@@ -175,13 +169,13 @@ class Jobs(SdkApi):
         """
         if modify_version not in ("1.0", "2.0"):
             raise ValueError('Accepted values for modify_version: "1.0" or "2.0"')
-        
+
         response_json = self._issue_job_request({"request": "hold"}, jobname, jobid, modify_version)
         return response_json
 
     def release_job(self, jobname: str, jobid: str, modify_version="2.0"):
         """Release the given job on JES
-        
+
         Parameters
         ----------
         jobname: str
@@ -198,11 +192,11 @@ class Jobs(SdkApi):
         """
         if modify_version not in ("1.0", "2.0"):
             raise ValueError('Accepted values for modify_version: "1.0" or "2.0"')
-        
+
         response_json = self._issue_job_request({"request": "release"}, jobname, jobid, modify_version)
         return response_json
 
-    def list_jobs(self, owner=None,  prefix="*", max_jobs=1000, user_correlator=None):
+    def list_jobs(self, owner=None, prefix="*", max_jobs=1000, user_correlator=None):
         """Retrieve list of jobs on JES based on the provided arguments.
 
         Parameters
@@ -244,11 +238,9 @@ class Jobs(SdkApi):
             A JSON containing the result of the request execution
         """
         custom_args = self._create_custom_request_arguments()
-        request_body = {"file": "//\'%s\'" % jcl_path}
+        request_body = {"file": "//'%s'" % jcl_path}
         custom_args["json"] = request_body
-        response_json = self.request_handler.perform_request(
-            "PUT", custom_args, expected_code=[201]
-        )
+        response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[201])
         return response_json
 
     def submit_from_local_file(self, jcl_path):
@@ -297,9 +289,7 @@ class Jobs(SdkApi):
         custom_args = self._create_custom_request_arguments()
         custom_args["data"] = str(jcl)
         custom_args["headers"] = {"Content-Type": "text/plain", "X-CSRF-ZOSMF-HEADER": ""}
-        response_json = self.request_handler.perform_request(
-            "PUT", custom_args, expected_code=[201]
-        )
+        response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[201])
         return response_json
 
     def get_spool_files(self, correlator):
@@ -317,11 +307,11 @@ class Jobs(SdkApi):
         """
         custom_args = self._create_custom_request_arguments()
         job_url = "{}/files".format(correlator)
-        request_url = "{}{}".format(self.request_endpoint, job_url)
+        request_url = "{}{}".format(self.request_endpoint, self._encode_uri_component(job_url))
         custom_args["url"] = request_url
         response_json = self.request_handler.perform_request("GET", custom_args)
         return response_json
-        
+
     def get_jcl_text(self, correlator):
         """Retrieve the input JCL text for job with specified correlator
         Parameters
@@ -336,10 +326,10 @@ class Jobs(SdkApi):
         """
         custom_args = self._create_custom_request_arguments()
         job_url = "{}/files/JCL/records".format(correlator)
-        request_url = "{}{}".format(self.request_endpoint, job_url)
+        request_url = "{}{}".format(self.request_endpoint, self._encode_uri_component(job_url))
         custom_args["url"] = request_url
         response_json = self.request_handler.perform_request("GET", custom_args)
-        return response_json        
+        return response_json
 
     def get_spool_file_contents(self, correlator, id):
         """Retrieve the contents of a single spool file from a job
@@ -360,7 +350,7 @@ class Jobs(SdkApi):
         """
         custom_args = self._create_custom_request_arguments()
         job_url = "{}/files/{}/records".format(correlator, id)
-        request_url = "{}{}".format(self.request_endpoint, job_url)
+        request_url = "{}{}".format(self.request_endpoint, self._encode_uri_component(job_url))
         custom_args["url"] = request_url
         response_json = self.request_handler.perform_request("GET", custom_args)
         return response_json
@@ -380,7 +370,7 @@ class Jobs(SdkApi):
                         dir: stepname
                             |
                             file: spool file <nn>
-                            ...         
+                            ...
 
 
         Parameters
@@ -397,31 +387,31 @@ class Jobs(SdkApi):
             A JSON containing the result of the request execution
         """
 
-        _job_name   = status['jobname']
-        _job_id     = status['jobid']
-        _job_correlator = status['job-correlator']
+        _job_name = status["jobname"]
+        _job_id = status["jobid"]
+        _job_correlator = status["job-correlator"]
 
         _output_dir = os.path.join(output_dir, _job_name, _job_id)
         os.makedirs(_output_dir, exist_ok=True)
-        _output_file = os.path.join(output_dir, _job_name, _job_id, 'jcl.txt')
+        _output_file = os.path.join(output_dir, _job_name, _job_id, "jcl.txt")
         _data_spool_file = self.get_jcl_text(_job_correlator)
-        _dataset_content = _data_spool_file['response']
-        _out_file = open(_output_file, 'w', encoding="utf-8")
+        _dataset_content = _data_spool_file["response"]
+        _out_file = open(_output_file, "w", encoding="utf-8")
         _out_file.write(_dataset_content)
         _out_file.close()
 
         _spool = self.get_spool_files(_job_correlator)
         for _spool_file in _spool:
-            _stepname = _spool_file['stepname']
-            _ddname = _spool_file['ddname']
-            _spoolfile_id = _spool_file['id']
+            _stepname = _spool_file["stepname"]
+            _ddname = _spool_file["ddname"]
+            _spoolfile_id = _spool_file["id"]
             _output_dir = os.path.join(output_dir, _job_name, _job_id, _stepname)
             os.makedirs(_output_dir, exist_ok=True)
-        
+
             _output_file = os.path.join(output_dir, _job_name, _job_id, _stepname, _ddname)
             _data_spool_file = self.get_spool_file_contents(_job_correlator, _spoolfile_id)
-            _dataset_content = _data_spool_file['response']
-            _out_file = open(_output_file, 'w', encoding="utf-8")
+            _dataset_content = _data_spool_file["response"]
+            _out_file = open(_output_file, "w", encoding="utf-8")
             _out_file.write(_dataset_content)
             _out_file.close()
 

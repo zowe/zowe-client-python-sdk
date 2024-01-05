@@ -1,7 +1,8 @@
 """Integration tests for the Zowe Python SDK z/OS Tso package."""
 import unittest
-from zowe.zos_tso_for_zowe_sdk import Tso
+
 from zowe.core_for_zowe_sdk import ProfileManager
+from zowe.zos_tso_for_zowe_sdk import Tso
 
 
 class TestTsoIntegration(unittest.TestCase):
@@ -35,4 +36,3 @@ class TestTsoIntegration(unittest.TestCase):
         """Executing the ping_tso_session method should return a failure message for invalid TSO session."""
         command_output = self.tso.ping_tso_session("INVALID")
         self.assertEqual(command_output, "Ping failed")
-

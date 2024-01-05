@@ -10,11 +10,10 @@ SPDX-License-Identifier: EPL-2.0
 Copyright Contributors to the Zowe Project.
 """
 
-from .exceptions import UnexpectedStatus
-from .exceptions import RequestFailed
-from .exceptions import InvalidRequestMethod
 import requests
 import urllib3
+
+from .exceptions import InvalidRequestMethod, RequestFailed, UnexpectedStatus
 
 
 class RequestHandler:
@@ -44,7 +43,7 @@ class RequestHandler:
 
     def __handle_ssl_warnings(self):
         """Turn off warnings if the SSL verification argument if off."""
-        if not self.session_arguments['verify']:
+        if not self.session_arguments["verify"]:
             urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
     def perform_request(self, method, request_arguments, expected_code=[200]):
@@ -94,7 +93,7 @@ class RequestHandler:
         self.__validate_method()
         self.__send_request(stream=True)
         self.__validate_response()
-        return self.response.raw
+        return self.response
 
     def __validate_method(self):
         """Check if the input request method for the request is supported.
@@ -142,8 +141,8 @@ class RequestHandler:
         -------
         A bytes object if the response content type is application/octet-stream,
         a normalized JSON for the request response otherwise
-        """  
-        if self.response.headers.get('Content-Type') == 'application/octet-stream':
+        """
+        if self.response.headers.get("Content-Type") == "application/octet-stream":
             return self.response.content
         else:
             try:
