@@ -274,7 +274,7 @@ class Jobs(SdkApi):
             A JSON containing the result of the request execution
         """
         if os.path.isfile(jcl_path):
-            jcl_file = open(jcl_path, "r")
+            jcl_file = open(jcl_path, "r", encoding="utf-8")
             file_content = jcl_file.read()
             jcl_file.close()
             return self.submit_plaintext(file_content)
