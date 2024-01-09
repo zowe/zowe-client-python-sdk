@@ -2,6 +2,19 @@
 
 All notable changes to the Zowe Client Python SDK will be documented in this file.
 
+## Recent Changes
+
+### Bug Fixes
+
+- Fixed `Files.download_dsn` and `Files.download_binary_dsn` failing to write contents to disk [#179](https://github.com/zowe/zowe-client-python-sdk/issues/179)
+- Fixed `Files.delete_data_set` and `Files.list_dsn_members` so they encode URLs correctly
+- Fixed loading environment variables when there is no schema file in current directory
+
+### Enhancements
+
+- Added method `Files.download_uss` to download USS files to disk
+- Added support to `Tso` class for loading TSO profile properties
+
 ## `1.0.0-dev13`
 
 ### Bug Fixes

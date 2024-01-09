@@ -9,6 +9,7 @@ from zowe.zos_files_for_zowe_sdk import Files
 
 FIXTURES_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fixtures")
 FILES_FIXTURES_PATH = os.path.join(FIXTURES_PATH, "files.json")
+SAMPLE_JCL_FIXTURE_PATH = os.path.join(FIXTURES_PATH, "sample.jcl")
 
 
 class TestFilesIntegration(unittest.TestCase):
@@ -16,16 +17,18 @@ class TestFilesIntegration(unittest.TestCase):
 
     def setUp(self):
         """Setup fixtures for Files class."""
-        test_profile = ProfileManager().load(profile_type="zosmf")
+        test_profile = ProfileManager(show_warnings=False).load(profile_type="zosmf")
         self.user_name = test_profile["user"]
         with open(FILES_FIXTURES_PATH, "r") as fixtures_json:
             self.files_fixtures = json.load(fixtures_json)
         self.files = Files(test_profile)
         self.test_member_jcl = f'{self.files_fixtures["TEST_PDS"]}({self.files_fixtures["TEST_MEMBER"]})'
         self.test_member_generic = f'{self.files_fixtures["TEST_PDS"]}(TEST)'
+        self.test_ds_upload = f'{self.files_fixtures["TEST_PDS"]}({self.files_fixtures["TEST_MEMBER_NEW"]})'
+        self.test_uss_upload = self.files_fixtures["TEST_USS_NEW"]
         self.test1_zfs_file_system = f'{self.user_name}.{self.files_fixtures["TEST1_ZFS"]}'
         self.test2_zfs_file_system = f'{self.user_name}.{self.files_fixtures["TEST2_ZFS"]}'
-        self.create_zfs_options = {"perms": 755, "cylsPri": 10, "cylsSec": 2, "timeout": 20, "volumes": ["VPMVSC"]}
+        self.create_zfs_options = {"perms": 755, "cylsPri": 10, "cylsSec": 2, "timeout": 20}
         self.mount_zfs_file_system_options = {"fs-type": "ZFS", "mode": "rdonly"}
 
     def test_list_dsn_should_return_a_list_of_datasets(self):
@@ -65,15 +68,20 @@ class TestFilesIntegration(unittest.TestCase):
         command_output = self.files.get_dsn_content(self.test_member_jcl)
         self.assertIsInstance(command_output["response"], str)
 
-    def test_get_dsn_content_streamed_should_return_a_raw_response_content(self):
-        """Executing get_dsn_content_streamed should return raw socket response from the server."""
+    def test_get_dsn_content_streamed_should_return_response_content(self):
+        """Executing get_dsn_content_streamed should return response object from the server."""
         command_output = self.files.get_dsn_content_streamed(self.test_member_jcl)
-        self.assertIsInstance(command_output, urllib3.response.HTTPResponse)
+        self.assertIsInstance(command_output.raw, urllib3.response.HTTPResponse)
 
-    def test_get_dsn_binary_content_streamed_should_return_a_raw_response_content(self):
-        """Executing get_dsn_binary_content_streamed should return raw socket response from the server."""
+    def test_get_dsn_binary_content_streamed_should_return_response_content(self):
+        """Executing get_dsn_binary_content_streamed should return response object from the server."""
         command_output = self.files.get_dsn_binary_content_streamed(self.test_member_jcl)
-        self.assertIsInstance(command_output, urllib3.response.HTTPResponse)
+        self.assertIsInstance(command_output.raw, urllib3.response.HTTPResponse)
+
+    def test_get_file_content_streamed_should_return_response_content(self):
+        """Executing get_dsn_binary_content_streamed should return response object from the server."""
+        command_output = self.files.get_file_content_streamed(self.files_fixtures["TEST_USS"])
+        self.assertIsInstance(command_output.raw, urllib3.response.HTTPResponse)
 
     def test_write_to_dsn_should_be_possible(self):
         """Executing write_to_dsn should be possible."""
@@ -83,7 +91,7 @@ class TestFilesIntegration(unittest.TestCase):
     def test_copy_uss_to_dataset_should_be_possible(self):
         """Executing copy_uss_to_dataset should be possible."""
         command_output = self.files.copy_uss_to_dataset(
-            self.files_fixtures["TEST_USS"], "ZOWE.TESTS.JCL(TEST2)", replace=True
+            self.files_fixtures["TEST_USS"], self.files_fixtures["TEST_PDS"] + "(TEST2)", replace=True
         )
         self.assertTrue(command_output["response"] == "")
 
@@ -102,7 +110,7 @@ class TestFilesIntegration(unittest.TestCase):
     def test_mount_unmount_zfs_file_system(self):
         """Mounting a zfs filesystem should be possible"""
         username = self.user_name.lower()
-        mount_point = f"/u/{username}/mount"  # Assuming a dir called mount exist in zOS USS
+        mount_point = self.files_fixtures["TEST_USS_MOUNT"]
 
         # Create a zfs file system
         zfs_file_system = self.files.create_zFS_file_system(self.test2_zfs_file_system, self.create_zfs_options)
@@ -114,7 +122,7 @@ class TestFilesIntegration(unittest.TestCase):
         self.assertTrue(command_output["response"] == "")
 
         # List a zfs file system
-        command_output = self.files.list_unix_file_systems(file_system_name=self.test2_zfs_file_system)
+        command_output = self.files.list_unix_file_systems(file_system_name=self.test2_zfs_file_system.upper())
         self.assertTrue(len(command_output["items"]) > 0)
 
         # Unmount file system
@@ -125,4 +133,28 @@ class TestFilesIntegration(unittest.TestCase):
         command_output = self.files.delete_zFS_file_system(self.test2_zfs_file_system)
         self.assertTrue(command_output["response"] == "")
 
-    # TODO implement tests for download/upload datasets
+    def test_upload_download_delete_dataset(self):
+        self.files.upload_file_to_dsn(SAMPLE_JCL_FIXTURE_PATH, self.test_ds_upload)
+        self.files.download_dsn(self.test_ds_upload, SAMPLE_JCL_FIXTURE_PATH + ".tmp")
+
+        with open(SAMPLE_JCL_FIXTURE_PATH, "r") as in_file:
+            old_file_content = in_file.read()
+        with open(SAMPLE_JCL_FIXTURE_PATH + ".tmp", "r") as in_file:
+            new_file_content = in_file.read().rstrip()
+        self.assertEqual(old_file_content, new_file_content)
+
+        self.files.delete_data_set(self.files_fixtures["TEST_PDS"], member_name=self.files_fixtures["TEST_MEMBER_NEW"])
+        os.unlink(SAMPLE_JCL_FIXTURE_PATH + ".tmp")
+
+    def test_upload_download_delete_uss(self):
+        self.files.upload_file_to_uss(SAMPLE_JCL_FIXTURE_PATH, self.test_uss_upload)
+        self.files.download_uss(self.test_uss_upload, SAMPLE_JCL_FIXTURE_PATH + ".tmp")
+
+        with open(SAMPLE_JCL_FIXTURE_PATH, "r") as in_file:
+            old_file_content = in_file.read()
+        with open(SAMPLE_JCL_FIXTURE_PATH + ".tmp", "r") as in_file:
+            new_file_content = in_file.read()
+        self.assertEqual(old_file_content, new_file_content)
+
+        self.files.delete_uss(self.test_uss_upload)
+        os.unlink(SAMPLE_JCL_FIXTURE_PATH + ".tmp")

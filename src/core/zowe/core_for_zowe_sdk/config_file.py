@@ -152,11 +152,9 @@ class ConfigFile:
 
         # validate the $schema property
         if path_schema_json:
-            validate_config_json(self.jsonc, path_schema_json, cwd = self.location)
+            validate_config_json(self.jsonc, path_schema_json, cwd=self.location)
 
-    def schema_list(
-        self,
-    ) -> list:
+    def schema_list(self, cwd=None) -> list:
         """
         Loads the schema properties
         in a sorted order according to the priority
@@ -180,7 +178,7 @@ class ConfigFile:
                 schema_json = json.load(f)
 
         elif not os.path.isabs(schema):
-            schema = os.path.join(self.location, schema)
+            schema = os.path.join(self.location or cwd, schema)
             with open(schema) as f:
                 schema_json = json.load(f)
         else:

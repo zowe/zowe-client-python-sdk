@@ -267,9 +267,8 @@ class Jobs(SdkApi):
             A JSON containing the result of the request execution
         """
         if os.path.isfile(jcl_path):
-            jcl_file = open(jcl_path, "r", encoding="utf-8")
-            file_content = jcl_file.read()
-            jcl_file.close()
+            with open(jcl_path, "r", encoding="utf-8") as jcl_file:
+                file_content = jcl_file.read()
             return self.submit_plaintext(file_content)
         else:
             raise FileNotFoundError("Provided argument is not a file path {}".format(jcl_path))
@@ -388,32 +387,30 @@ class Jobs(SdkApi):
             A JSON containing the result of the request execution
         """
 
-        _job_name = status["jobname"]
-        _job_id = status["jobid"]
-        _job_correlator = status["job-correlator"]
+        job_name = status["jobname"]
+        job_id = status["jobid"]
+        job_correlator = status["job-correlator"]
 
-        _output_dir = os.path.join(output_dir, _job_name, _job_id)
-        os.makedirs(_output_dir, exist_ok=True)
-        _output_file = os.path.join(output_dir, _job_name, _job_id, "jcl.txt")
-        _data_spool_file = self.get_jcl_text(_job_correlator)
-        _dataset_content = _data_spool_file["response"]
-        _out_file = open(_output_file, "w", encoding="utf-8")
-        _out_file.write(_dataset_content)
-        _out_file.close()
+        output_dir = os.path.join(output_dir, job_name, job_id)
+        os.makedirs(output_dir, exist_ok=True)
+        output_file = os.path.join(output_dir, job_name, job_id, "jcl.txt")
+        data_spool_file = self.get_jcl_text(job_correlator)
+        dataset_content = data_spool_file["response"]
+        with open(output_file, "w", encoding="utf-8") as out_file:
+            out_file.write(dataset_content)
 
-        _spool = self.get_spool_files(_job_correlator)
-        for _spool_file in _spool:
-            _stepname = _spool_file["stepname"]
-            _ddname = _spool_file["ddname"]
-            _spoolfile_id = _spool_file["id"]
-            _output_dir = os.path.join(output_dir, _job_name, _job_id, _stepname)
-            os.makedirs(_output_dir, exist_ok=True)
+        spool = self.get_spool_files(job_correlator)
+        for spool_file in spool:
+            stepname = spool_file["stepname"]
+            ddname = spool_file["ddname"]
+            spoolfile_id = spool_file["id"]
+            output_dir = os.path.join(output_dir, job_name, job_id, stepname)
+            os.makedirs(output_dir, exist_ok=True)
 
-            _output_file = os.path.join(output_dir, _job_name, _job_id, _stepname, _ddname)
-            _data_spool_file = self.get_spool_file_contents(_job_correlator, _spoolfile_id)
-            _dataset_content = _data_spool_file["response"]
-            _out_file = open(_output_file, "w", encoding="utf-8")
-            _out_file.write(_dataset_content)
-            _out_file.close()
+            output_file = os.path.join(output_dir, job_name, job_id, stepname, ddname)
+            data_spool_file = self.get_spool_file_contents(job_correlator, spoolfile_id)
+            dataset_content = data_spool_file["response"]
+            with open(output_file, "w", encoding="utf-8") as out_file:
+                out_file.write(dataset_content)
 
         return

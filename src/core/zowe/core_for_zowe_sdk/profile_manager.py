@@ -114,9 +114,7 @@ class ProfileManager:
         return self.project_config.filepath
 
     @staticmethod
-    def get_env(
-        cfg: ConfigFile,
-    ) -> dict:
+    def get_env(cfg: ConfigFile, cwd=None) -> dict:
         """
         Maps the env variables to the profile properties
 
@@ -127,7 +125,7 @@ class ProfileManager:
             Containing profile properties from env variables (prop: value)
         """
 
-        props = cfg.schema_list()
+        props = cfg.schema_list(cwd)
         if props == []:
             return {}
 
@@ -255,6 +253,7 @@ class ProfileManager:
         profiles_merged: dict = {}
         cfg_name = None
         cfg_schema = None
+        cfg_schema_dir = None
 
         for cfg_layer in (self.project_user_config, self.project_config, self.global_user_config, self.global_config):
             if cfg_layer.profiles is None:
@@ -272,6 +271,7 @@ class ProfileManager:
                 cfg_name = cfg_layer.name
             if not cfg_schema and cfg_layer.schema_property:
                 cfg_schema = cfg_layer.schema_property
+                cfg_schema_dir = cfg_layer._location
 
         usrProject = self.project_user_config.profiles or {}
         project = self.project_config.profiles or {}
@@ -299,7 +299,7 @@ class ProfileManager:
             missing_secure_props.extend(profile_loaded.missing_secure_props)
 
         if override_with_env:
-            env_var = {**self.get_env(cfg)}
+            env_var = {**self.get_env(cfg, cfg_schema_dir)}
 
         if profile_type != BASE_PROFILE:
             profile_props = {
