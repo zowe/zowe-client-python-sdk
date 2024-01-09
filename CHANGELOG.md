@@ -8,6 +8,7 @@ All notable changes to the Zowe Client Python SDK will be documented in this fil
 
 - Fixed `Files.download_dsn` and `Files.download_binary_dsn` failing to write contents to disk [#179](https://github.com/zowe/zowe-client-python-sdk/issues/179)
 - Fixed `Files.delete_data_set` and `Files.list_dsn_members` so they encode URLs correctly
+- Fixed `Files.upload_to_uss` displaying an unclosed file warning
 - Fixed loading environment variables when there is no schema file in current directory
 
 ### Enhancements
