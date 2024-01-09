@@ -217,7 +217,8 @@ class Jobs(SdkApi):
         """
         custom_args = self._create_custom_request_arguments()
         params = {"prefix": prefix, "max-jobs": max_jobs}
-        params["owner"] = owner if owner else self.session.user
+        if owner:
+            params["owner"] = owner
         if user_correlator:
             params["user-correlator"] = user_correlator
         custom_args["params"] = params
