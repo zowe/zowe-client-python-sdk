@@ -267,7 +267,7 @@ class Jobs(SdkApi):
             A JSON containing the result of the request execution
         """
         if os.path.isfile(jcl_path):
-            jcl_file = open(jcl_path, "r")
+            jcl_file = open(jcl_path, "r", encoding="utf-8")
             file_content = jcl_file.read()
             jcl_file.close()
             return self.submit_plaintext(file_content)
@@ -397,7 +397,7 @@ class Jobs(SdkApi):
         _output_file = os.path.join(output_dir, _job_name, _job_id, "jcl.txt")
         _data_spool_file = self.get_jcl_text(_job_correlator)
         _dataset_content = _data_spool_file["response"]
-        _out_file = open(_output_file, "w")
+        _out_file = open(_output_file, "w", encoding="utf-8")
         _out_file.write(_dataset_content)
         _out_file.close()
 
@@ -412,7 +412,7 @@ class Jobs(SdkApi):
             _output_file = os.path.join(output_dir, _job_name, _job_id, _stepname, _ddname)
             _data_spool_file = self.get_spool_file_contents(_job_correlator, _spoolfile_id)
             _dataset_content = _data_spool_file["response"]
-            _out_file = open(_output_file, "w")
+            _out_file = open(_output_file, "w", encoding="utf-8")
             _out_file.write(_dataset_content)
             _out_file.close()
 

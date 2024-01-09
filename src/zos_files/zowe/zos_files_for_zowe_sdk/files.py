@@ -517,7 +517,7 @@ class Files(SdkApi):
     def download_dsn(self, dataset_name, output_file):
         """Retrieve the contents of a dataset and saves it to a given file."""
         raw_response = self.get_dsn_content_streamed(dataset_name)
-        with open(output_file, "w") as f:
+        with open(output_file, "w", encoding="utf-8") as f:
             shutil.copyfileobj(raw_response, f)
 
     def download_binary_dsn(self, dataset_name, output_file, with_prefixes=False):
@@ -564,7 +564,7 @@ class Files(SdkApi):
     def upload_file_to_uss(self, input_file, filepath_name, encoding=_ZOWE_FILES_DEFAULT_ENCODING):
         """Upload contents of a given file and uploads it to UNIX file"""
         if os.path.isfile(input_file):
-            in_file = open(input_file, "r")
+            in_file = open(input_file, "r", encoding="utf-8")
             file_contents = in_file.read()
             response_json = self.write_to_uss(filepath_name, file_contents)
         else:
