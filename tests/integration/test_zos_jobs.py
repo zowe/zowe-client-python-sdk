@@ -16,7 +16,7 @@ class TestJobsIntegration(unittest.TestCase):
 
     def setUp(self):
         """Setup fixtures for Jobs class."""
-        test_profile = ProfileManager().load(profile_type="zosmf")
+        test_profile = ProfileManager(show_warnings=False).load(profile_type="zosmf")
         with open(JOBS_FIXTURES_JSON_JSON_PATH, "r") as fixtures_json:
             self.jobs_fixtures_json = json.load(fixtures_json)
         self.jobs = Jobs(test_profile)

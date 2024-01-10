@@ -12,7 +12,6 @@ Copyright Contributors to the Zowe Project.
 
 
 import os
-import shutil
 
 from zowe.core_for_zowe_sdk import SdkApi
 from zowe.core_for_zowe_sdk.exceptions import FileNotFound
@@ -140,12 +139,8 @@ class Files(SdkApi):
             additional_parms["start"] = member_start
         if member_pattern is not None:
             additional_parms["pattern"] = member_pattern
-        url = "{}ds/{}/member".format(self.request_endpoint, dataset_name)
-        separator = "?"
-        for k, v in additional_parms.items():
-            url = "{}{}{}={}".format(url, separator, k, v)
-            separator = "&"
-        custom_args["url"] = self._encode_uri_component(url)
+        custom_args["params"] = additional_parms
+        custom_args["url"] = "{}ds/{}/member".format(self.request_endpoint, self._encode_uri_component(dataset_name))
         custom_args["headers"]["X-IBM-Max-Items"] = "{}".format(limit)
         custom_args["headers"]["X-IBM-Attributes"] = attributes
         response_json = self.request_handler.perform_request("GET", custom_args)
@@ -443,13 +438,13 @@ class Files(SdkApi):
 
         Returns
         -------
-        raw
-            A raw socket response
+        response
+            A response object from the requests library
         """
         custom_args = self._create_custom_request_arguments()
         custom_args["url"] = "{}ds/{}".format(self.request_endpoint, self._encode_uri_component(dataset_name))
-        raw_response = self.request_handler.perform_streamed_request("GET", custom_args)
-        return raw_response
+        response = self.request_handler.perform_streamed_request("GET", custom_args)
+        return response
 
     def get_dsn_binary_content(self, dataset_name, with_prefixes=False):
         """
@@ -462,8 +457,8 @@ class Files(SdkApi):
                                  default: False
         Returns
         -------
-        bytes
-            The contents of the dataset with no transformation
+        response
+            A response object from the requests library
         """
         custom_args = self._create_custom_request_arguments()
         custom_args["url"] = "{}ds/{}".format(self.request_endpoint, self._encode_uri_component(dataset_name))
@@ -472,8 +467,8 @@ class Files(SdkApi):
             custom_args["headers"]["X-IBM-Data-Type"] = "record"
         else:
             custom_args["headers"]["X-IBM-Data-Type"] = "binary"
-        content = self.request_handler.perform_request("GET", custom_args)
-        return content
+        response = self.request_handler.perform_request("GET", custom_args)
+        return response
 
     def get_dsn_binary_content_streamed(self, dataset_name, with_prefixes=False):
         """
@@ -486,8 +481,8 @@ class Files(SdkApi):
                                  default: False
         Returns
         -------
-        raw
-            The raw socket response
+        response
+            A response object from the requests library
         """
         custom_args = self._create_custom_request_arguments()
         custom_args["url"] = "{}ds/{}".format(self.request_endpoint, self._encode_uri_component(dataset_name))
@@ -496,8 +491,8 @@ class Files(SdkApi):
             custom_args["headers"]["X-IBM-Data-Type"] = "record"
         else:
             custom_args["headers"]["X-IBM-Data-Type"] = "binary"
-        content = self.request_handler.perform_streamed_request("GET", custom_args)
-        return content
+        response = self.request_handler.perform_streamed_request("GET", custom_args)
+        return response
 
     def write_to_dsn(self, dataset_name, data, encoding=_ZOWE_FILES_DEFAULT_ENCODING):
         """Write content to an existing dataset.
@@ -516,9 +511,10 @@ class Files(SdkApi):
 
     def download_dsn(self, dataset_name, output_file):
         """Retrieve the contents of a dataset and saves it to a given file."""
-        raw_response = self.get_dsn_content_streamed(dataset_name)
+        response = self.get_dsn_content_streamed(dataset_name)
         with open(output_file, "w", encoding="utf-8") as f:
-            shutil.copyfileobj(raw_response, f)
+            for chunk in response.iter_content(chunk_size=4096, decode_unicode=True):
+                f.write(chunk)
 
     def download_binary_dsn(self, dataset_name, output_file, with_prefixes=False):
         """Retrieve the contents of a binary dataset and saves it to a given file.
@@ -529,15 +525,11 @@ class Files(SdkApi):
         output_file:str - Name of the local file to create
         with_prefixes:boolean - If true, include a four big endian bytes record length prefix.
                                 The default is False
-
-        Returns
-        -------
-        bytes
-            Binary content of the dataset.
         """
-        content = self.get_dsn_binary_content_streamed(dataset_name, with_prefixes=with_prefixes)
+        response = self.get_dsn_binary_content_streamed(dataset_name, with_prefixes=with_prefixes)
         with open(output_file, "wb") as f:
-            shutil.copyfileobj(content, f)
+            for chunk in response.iter_content(chunk_size=4096):
+                f.write(chunk)
 
     def upload_file_to_dsn(self, input_file, dataset_name, encoding=_ZOWE_FILES_DEFAULT_ENCODING):
         """Upload contents of a given file and uploads it to a dataset."""
@@ -564,21 +556,42 @@ class Files(SdkApi):
     def upload_file_to_uss(self, input_file, filepath_name, encoding=_ZOWE_FILES_DEFAULT_ENCODING):
         """Upload contents of a given file and uploads it to UNIX file"""
         if os.path.isfile(input_file):
-            in_file = open(input_file, "r", encoding="utf-8")
-            file_contents = in_file.read()
-            response_json = self.write_to_uss(filepath_name, file_contents)
+            with open(input_file, "r", encoding="utf-8") as in_file:
+                response_json = self.write_to_uss(filepath_name, in_file)
         else:
             raise FileNotFound(input_file)
+
+    def get_file_content_streamed(self, file_path, binary=False):
+        """Retrieve the contents of a given USS file streamed.
+
+        Returns
+        -------
+        response
+            A response object from the requests library
+        """
+        custom_args = self._create_custom_request_arguments()
+        custom_args["url"] = "{}fs/{}".format(self.request_endpoint, self._encode_uri_component(file_path.lstrip("/")))
+        if binary:
+            custom_args["headers"]["X-IBM-Data-Type"] = "binary"
+        response = self.request_handler.perform_streamed_request("GET", custom_args)
+        return response
+
+    def download_uss(self, file_path, output_file, binary=False):
+        """Retrieve the contents of a USS file and saves it to a local file."""
+        response = self.get_file_content_streamed(file_path, binary)
+        with open(output_file, "wb" if binary else "w", encoding="utf-8") as f:
+            for chunk in response.iter_content(chunk_size=4096, decode_unicode=not binary):
+                f.write(chunk)
 
     def delete_data_set(self, dataset_name, volume=None, member_name=None):
         """Deletes a sequential or partitioned data."""
         custom_args = self._create_custom_request_arguments()
         if member_name is not None:
             dataset_name = f"{dataset_name}({member_name})"
-        url = "{}ds/{}".format(self.request_endpoint, dataset_name)
+        url = "{}ds/{}".format(self.request_endpoint, self._encode_uri_component(dataset_name))
         if volume is not None:
-            url = "{}ds/-{}/{}".format(self.request_endpoint, volume, dataset_name)
-        custom_args["url"] = self._encode_uri_component(url)
+            url = "{}ds/-{}/{}".format(self.request_endpoint, volume, self._encode_uri_component(dataset_name))
+        custom_args["url"] = url
         response_json = self.request_handler.perform_request("DELETE", custom_args, expected_code=[200, 202, 204])
         return response_json
 

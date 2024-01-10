@@ -27,7 +27,7 @@ class Tso(SdkApi):
         Constant for the session not found tso message id
     """
 
-    def __init__(self, connection):
+    def __init__(self, connection, tso_profile=None):
         """
         Construct a Tso object.
 
@@ -38,6 +38,7 @@ class Tso(SdkApi):
         """
         super().__init__(connection, "/zosmf/tsoApp/tso")
         self.session_not_found = constants["TsoSessionNotFound"]
+        self.tso_profile = tso_profile or {}
 
     def issue_command(self, command):
         """Issues a TSO command.
@@ -63,13 +64,13 @@ class Tso(SdkApi):
 
     def start_tso_session(
         self,
-        proc="IZUFPROC",
-        chset="697",
-        cpage="1047",
-        rows="204",
-        cols="160",
-        rsize="4096",
-        acct="DEFAULT",
+        proc=None,
+        chset=None,
+        cpage=None,
+        rows=None,
+        cols=None,
+        rsize=None,
+        acct=None,
     ):
         """Start a TSO session.
 
@@ -97,13 +98,13 @@ class Tso(SdkApi):
         """
         custom_args = self._create_custom_request_arguments()
         custom_args["params"] = {
-            "proc": proc,
-            "chset": chset,
-            "cpage": cpage,
-            "rows": rows,
-            "cols": cols,
-            "rsize": rsize,
-            "acct": acct,
+            "proc": proc or self.tso_profile.get("logonProcedure", "IZUFPROC"),
+            "chset": chset or self.tso_profile.get("characterSet", "697"),
+            "cpage": cpage or self.tso_profile.get("codePage", "1047"),
+            "rows": rows or self.tso_profile.get("rows", "204"),
+            "cols": cols or self.tso_profile.get("columns", "160"),
+            "rsize": rsize or self.tso_profile.get("regionSize", "4096"),
+            "acct": acct or self.tso_profile.get("account", "DEFAULT"),
         }
         response_json = self.request_handler.perform_request("POST", custom_args)
         return response_json["servletKey"]

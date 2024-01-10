@@ -184,8 +184,8 @@ class TestZosmfProfileManager(TestCase):
         self.original_file_path = os.path.join(FIXTURES_PATH, "zowe.config.json")
         self.original_user_file_path = os.path.join(FIXTURES_PATH, "zowe.config.user.json")
         self.original_nested_file_path = os.path.join(FIXTURES_PATH, "nested.zowe.config.json")
+        self.original_nested_user_file_path = os.path.join(FIXTURES_PATH, "nested.zowe.config.user.json")
         self.original_schema_file_path = os.path.join(FIXTURES_PATH, "zowe.schema.json")
-        self.original_invalidUri_schema_file_path = os.path.join(FIXTURES_PATH, "invalidUri.zowe.schema.json")
 
         loader = importlib.util.find_spec("jsonschema")
         module_path = loader.origin
@@ -194,6 +194,7 @@ class TestZosmfProfileManager(TestCase):
         self.fs.add_real_file(self.original_file_path)
         self.fs.add_real_file(self.original_user_file_path)
         self.fs.add_real_file(self.original_nested_file_path)
+        self.fs.add_real_file(self.original_nested_user_file_path)
         self.fs.add_real_file(self.original_schema_file_path)
         self.custom_dir = os.path.dirname(FIXTURES_PATH)
         self.custom_appname = "zowe_abcd"
@@ -226,7 +227,6 @@ class TestZosmfProfileManager(TestCase):
         # Setup - copy profile to fake filesystem created by pyfakefs
         cwd_up_dir_path = os.path.dirname(CWD)
         cwd_up_file_path = os.path.join(cwd_up_dir_path, "zowe.config.json")
-        os.chdir(CWD)
         shutil.copy(self.original_file_path, cwd_up_file_path)
 
         self.setUpCreds(
@@ -294,6 +294,7 @@ class TestZosmfProfileManager(TestCase):
         # Setup - copy profile to fake filesystem created by pyfakefs
         custom_file_path = os.path.join(self.custom_dir, self.custom_filename)
         shutil.copy(self.original_nested_file_path, custom_file_path)
+        shutil.copy(self.original_nested_user_file_path, custom_file_path.replace(".json", ".user.json"))
 
         self.setUpCreds(
             custom_file_path,
@@ -309,7 +310,13 @@ class TestZosmfProfileManager(TestCase):
         props: dict = prof_manager.load(profile_name="lpar1.zosmf", validate_schema=False)
         self.assertEqual(prof_manager.config_filepath, custom_file_path)
 
-        expected_props = {"host": "example1.com", "rejectUnauthorized": True, "port": 443}
+        expected_props = {
+            "host": "example1.com",
+            "rejectUnauthorized": True,
+            "port": 443,
+            "user": "admin",
+            "password": "password1",
+        }
         self.assertEqual(props, expected_props)
 
     @mock.patch("zowe.secrets_for_zowe_sdk.keyring.get_password", side_effect=keyring_get_password)
@@ -322,9 +329,8 @@ class TestZosmfProfileManager(TestCase):
 
         cwd_up_dir_path = os.path.dirname(CWD)
         cwd_up_file_path = os.path.join(cwd_up_dir_path, "zowe.config.json")
-        os.chdir(CWD)
         shutil.copy(self.original_file_path, cwd_up_file_path)
-        shutil.copy(self.original_user_file_path, cwd_up_dir_path)
+        shutil.copy(self.original_user_file_path, cwd_up_file_path.replace(".json", ".user.json"))
 
         self.setUpCreds(
             cwd_up_file_path,
@@ -360,7 +366,6 @@ class TestZosmfProfileManager(TestCase):
             # Setup
             cwd_up_dir_path = os.path.dirname(CWD)
             cwd_up_file_path = os.path.join(cwd_up_dir_path, f"{self.custom_appname}.config.json")
-            os.chdir(CWD)
             shutil.copy(self.original_file_path, cwd_up_file_path)
 
             # Test
@@ -414,7 +419,6 @@ class TestZosmfProfileManager(TestCase):
         # Setup - copy profile to fake filesystem created by pyfakefs
         cwd_up_dir_path = os.path.dirname(CWD)
         cwd_up_file_path = os.path.join(cwd_up_dir_path, "zowe.config.json")
-        os.chdir(CWD)
         shutil.copy(self.original_file_path, cwd_up_file_path)
         credential = {
             cwd_up_file_path: {"profiles.base.properties.user": "user", "profiles.base.properties.password": "password"}
@@ -461,7 +465,9 @@ class TestZosmfProfileManager(TestCase):
         delete_pass_func.assert_has_calls(expected_calls)
 
     @mock.patch("sys.platform", "win32")
-    @mock.patch("zowe.secrets_for_zowe_sdk.keyring.get_password", side_effect=["password", None, "part1", "part2\0", None])
+    @mock.patch(
+        "zowe.secrets_for_zowe_sdk.keyring.get_password", side_effect=["password", None, "part1", "part2\0", None]
+    )
     def test_retrieve_credential(self, get_pass_func):
         """
         Test the _retrieve_credential method for retrieving credentials from keyring.
@@ -470,13 +476,17 @@ class TestZosmfProfileManager(TestCase):
 
         # Scenario 1: Retrieve password directly
         expected_password1 = "password"
-        retrieve_credential1 = credential_manager._get_credential(constants["ZoweServiceName"], constants["ZoweAccountName"])
+        retrieve_credential1 = credential_manager._get_credential(
+            constants["ZoweServiceName"], constants["ZoweAccountName"]
+        )
         self.assertEqual(retrieve_credential1, expected_password1)
         get_pass_func.assert_called_with(constants["ZoweServiceName"], constants["ZoweAccountName"])
 
         # Scenario 2: Retrieve password in parts
         expected_password2 = "part1part2"
-        retrieve_credential2 = credential_manager._get_credential(constants["ZoweServiceName"], constants["ZoweAccountName"])
+        retrieve_credential2 = credential_manager._get_credential(
+            constants["ZoweServiceName"], constants["ZoweAccountName"]
+        )
         self.assertEqual(retrieve_credential2, expected_password2)
         get_pass_func.assert_any_call(constants["ZoweServiceName"], constants["ZoweAccountName"])
         get_pass_func.assert_any_call(constants["ZoweServiceName"], f"{constants['ZoweAccountName']}-1")
@@ -504,7 +514,6 @@ class TestZosmfProfileManager(TestCase):
         # Setup - copy profile to fake filesystem created by pyfakefs
         cwd_up_dir_path = os.path.dirname(CWD)
         cwd_up_file_path = os.path.join(cwd_up_dir_path, "zowe.config.json")
-        os.chdir(CWD)
         shutil.copy(self.original_file_path, cwd_up_file_path)
         credential = {
             cwd_up_file_path: {
@@ -521,7 +530,9 @@ class TestZosmfProfileManager(TestCase):
         # delete the existing credential
         delete_pass_func.return_value = None
         # Verify the keyring function call
-        set_pass_func.assert_called_once_with(constants["ZoweServiceName"], constants["ZoweAccountName"], encoded_credential)
+        set_pass_func.assert_called_once_with(
+            constants["ZoweServiceName"], constants["ZoweAccountName"], encoded_credential
+        )
 
     @mock.patch("sys.platform", "win32")
     @mock.patch("zowe.core_for_zowe_sdk.CredentialManager._get_credential")
@@ -531,7 +542,6 @@ class TestZosmfProfileManager(TestCase):
         # Setup - copy profile to fake filesystem created by pyfakefs
         cwd_up_dir_path = os.path.dirname(CWD)
         cwd_up_file_path = os.path.join(cwd_up_dir_path, "zowe.config.json")
-        os.chdir(CWD)
         shutil.copy(self.original_file_path, cwd_up_file_path)
         credential = {
             cwd_up_file_path: {
@@ -552,9 +562,7 @@ class TestZosmfProfileManager(TestCase):
 
         expected_calls = []
         chunk_size = constants["WIN32_CRED_MAX_STRING_LENGTH"]
-        chunks = [
-            encoded_credential[i : i + chunk_size] for i in range(0, len(encoded_credential), chunk_size)
-        ]
+        chunks = [encoded_credential[i : i + chunk_size] for i in range(0, len(encoded_credential), chunk_size)]
         for index, chunk in enumerate(chunks, start=1):
             field_name = f"{constants['ZoweAccountName']}-{index}"
             expected_calls.append(mock.call(constants["ZoweServiceName"], field_name, chunk))
@@ -569,7 +577,6 @@ class TestZosmfProfileManager(TestCase):
         custom_file_path = os.path.join(self.custom_dir, "zowe.config.json")
         shutil.copy(self.original_nested_file_path, custom_file_path)
         shutil.copy(self.original_schema_file_path, self.custom_dir)
-        os.chdir(self.custom_dir)
 
         self.setUpCreds(
             custom_file_path,
@@ -592,7 +599,6 @@ class TestZosmfProfileManager(TestCase):
         # Setup - copy profile to fake filesystem created by pyfakefs
         with self.assertRaises(ValidationError):
             custom_file_path = os.path.join(self.custom_dir, "zowe.config.json")
-            os.chdir(self.custom_dir)
             with open(self.original_file_path, "r") as f:
                 original_config = commentjson.load(f)
             original_config["$schema"] = "invalid.zowe.schema.json"
@@ -624,7 +630,6 @@ class TestZosmfProfileManager(TestCase):
         # Setup - copy profile to fake filesystem created by pyfakefs
         with self.assertRaises(SchemaError):
             custom_file_path = os.path.join(self.custom_dir, "zowe.config.json")
-            os.chdir(self.custom_dir)
             with open(self.original_file_path, "r") as f:
                 original_config = commentjson.load(f)
             original_config["$schema"] = "invalidUri.zowe.schema.json"
@@ -659,9 +664,9 @@ class TestZosmfProfileManager(TestCase):
         # Setup - copy profile to fake filesystem created by pyfakefs
         os.environ["ZOWE_OPT_HOST"] = "aaditya"
         custom_file_path = os.path.join(self.custom_dir, "zowe.config.json")
+        custom_schema_file_path = os.path.join(self.custom_dir, "zowe.schema.json")
         shutil.copy(self.original_nested_file_path, custom_file_path)
-        shutil.copy(self.original_schema_file_path, self.custom_dir)
-        os.chdir(self.custom_dir)
+        shutil.copy(self.original_schema_file_path, custom_schema_file_path)
 
         self.setUpCreds(
             custom_file_path,
@@ -790,7 +795,6 @@ class TestZosmfProfileManager(TestCase):
         """
         cwd_up_dir_path = os.path.dirname(CWD)
         cwd_up_file_path = os.path.join(cwd_up_dir_path, "zowe.config.json")
-        os.chdir(CWD)
         shutil.copy(self.original_file_path, cwd_up_file_path)
         self.setUpCreds(cwd_up_file_path, {"profiles.zosmf.properties.user": "admin"})
         config_file = ConfigFile(name="zowe_abcd", type="User Config", profiles={})
@@ -830,7 +834,6 @@ class TestZosmfProfileManager(TestCase):
         """
         cwd_up_dir_path = os.path.dirname(CWD)
         cwd_up_file_path = os.path.join(cwd_up_dir_path, "zowe.config.json")
-        os.chdir(CWD)
         shutil.copy(self.original_file_path, cwd_up_file_path)
         self.setUpCreds(
             cwd_up_file_path, {"profiles.zosmf.properties.user": "abc", "profiles.zosmf.properties.password": "def"}
@@ -876,7 +879,6 @@ class TestZosmfProfileManager(TestCase):
         """
         cwd_up_dir_path = os.path.dirname(CWD)
         cwd_up_file_path = os.path.join(cwd_up_dir_path, "zowe.config.json")
-        os.chdir(CWD)
         shutil.copy(self.original_file_path, cwd_up_file_path)
         profile_data = {
             "lpar1": {
@@ -900,41 +902,42 @@ class TestZosmfProfileManager(TestCase):
         )
 
 
-class TestValidateConfigJsonClass(unittest.TestCase):
+class TestValidateConfigJsonClass(TestCase):
     """Testing the validate_config_json function"""
+
+    def setUp(self):
+        self.setUpPyfakefs()
+
+        self.original_file_path = os.path.join(FIXTURES_PATH, "zowe.config.json")
+        self.original_schema_file_path = os.path.join(FIXTURES_PATH, "zowe.schema.json")
+        self.fs.add_real_file(self.original_file_path)
+        self.fs.add_real_file(self.original_schema_file_path)
 
     def test_validate_config_json_valid(self):
         """Test validate_config_json with valid config.json matching schema.json"""
-        path_to_config = FIXTURES_PATH + "/zowe.config.json"
-        path_to_schema = FIXTURES_PATH + "/zowe.schema.json"
-
-        config_json = commentjson.load(open(path_to_config))
-        schema_json = commentjson.load(open(path_to_schema))
+        config_json = commentjson.load(open(self.original_file_path))
+        schema_json = commentjson.load(open(self.original_schema_file_path))
 
         expected = validate(config_json, schema_json)
-        result = validate_config_json(path_to_config, path_to_schema, cwd=FIXTURES_PATH)
+        result = validate_config_json(self.original_file_path, self.original_schema_file_path, cwd=FIXTURES_PATH)
 
         self.assertEqual(result, expected)
 
     def test_validate_config_json_invalid(self):
         """Test validate_config_json with invalid config.json that does not match schema.json"""
-        path_to_config = FIXTURES_PATH + "/zowe.config.json"
-        path_to_schema = FIXTURES_PATH + "/zowe.schema.json"
-        path_to_invalid_config = "invalid.zowe.config.json"
-        path_to_invalid_schema = "invalid.zowe.schema.json"
-
         custom_dir = os.path.dirname(FIXTURES_PATH)
-        custom_file_path = os.path.join(custom_dir, "zowe.config.json")
-        os.chdir(custom_dir)
-        with open(path_to_config, "r") as f:
+        path_to_invalid_config = os.path.join(custom_dir, "invalid.zowe.config.json")
+        path_to_invalid_schema = os.path.join(custom_dir, "invalid.zowe.schema.json")
+
+        with open(self.original_file_path, "r") as f:
             original_config = commentjson.load(f)
         original_config["$schema"] = "invalid.zowe.schema.json"
         original_config["profiles"]["zosmf"]["properties"]["port"] = "10443"
-        with open(os.path.join(custom_dir, "invalid.zowe.config.json"), "w") as f:
+        with open(path_to_invalid_config, "w") as f:
             commentjson.dump(original_config, f)
-        with open(path_to_schema, "r") as f:
+        with open(self.original_schema_file_path, "r") as f:
             original_schema = commentjson.load(f)
-        with open(os.path.join(custom_dir, "invalid.zowe.schema.json"), "w") as f:
+        with open(path_to_invalid_schema, "w") as f:
             commentjson.dump(original_schema, f)
         invalid_config_json = commentjson.load(open(path_to_invalid_config))
         invalid_schema_json = commentjson.load(open(path_to_invalid_schema))

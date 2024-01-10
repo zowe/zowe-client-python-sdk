@@ -10,7 +10,7 @@ class TestConsoleIntegration(unittest.TestCase):
 
     def setUp(self):
         """Setup fixtures for Console class."""
-        test_profile = ProfileManager().load(profile_type="zosmf")
+        test_profile = ProfileManager(show_warnings=False).load(profile_type="zosmf")
         self.console = Console(test_profile)
 
     def test_console_command_time_should_return_time(self):
