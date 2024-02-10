@@ -31,7 +31,8 @@ class TestJobsIntegration(unittest.TestCase):
 
     def test_list_jobs_should_return_valid_spool_information(self):
         """Executing the list_jobs method should return a list of found jobs in JES spool."""
-        command_output = self.jobs.list_jobs(owner=self.jobs_fixtures_json["TEST_JCL_OWNER"])
+        
+        command_output = self.jobs.list_jobs(owner=self.jobs_fixtures_json["TEST_JCL_OWNER"])["response"]
         self.assertIsInstance(command_output, list)
 
     def test_change_job_class(self):

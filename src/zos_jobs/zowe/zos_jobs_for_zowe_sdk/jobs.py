@@ -10,6 +10,7 @@ SPDX-License-Identifier: EPL-2.0
 Copyright Contributors to the Zowe Project.
 """
 import os
+import json
 
 from zowe.core_for_zowe_sdk import SdkApi
 
@@ -223,7 +224,7 @@ class Jobs(SdkApi):
             params["user-correlator"] = user_correlator
         custom_args["params"] = params
         response_json = self.request_handler.perform_request("GET", custom_args)
-        return response_json
+        return json.dumps({"response": response_json})
 
     def submit_from_mainframe(self, jcl_path):
         """Submit a job from a given dataset.
