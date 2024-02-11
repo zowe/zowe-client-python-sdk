@@ -2,6 +2,11 @@
 
 All notable changes to the Zowe Client Python SDK will be documented in this file.
 
+## Recent changes
+### Bug Fixes
+
+- Fixed return type of `Jobs.list.jobs()` .[#27](https://github.com/zowe/zowe-client-python-sdk/issues/27)
+  
 ## `1.0.0-dev14`
 
 ### Bug Fixes
