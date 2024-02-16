@@ -72,7 +72,7 @@ class Jobs(SdkApi):
         Returns
         -------
         response_json
-            A JSON containing the result of the request execution
+            A JSON object containing the result of the request execution
         """
         if modify_version not in ("1.0", "2.0"):
             raise ValueError('Accepted values for modify_version: "1.0" or "2.0"')
@@ -101,7 +101,7 @@ class Jobs(SdkApi):
         Returns
         -------
         response_json
-            A JSON containing the result of the request execution
+            A JSON object containing the result of the request execution
         """
         if modify_version not in ("1.0", "2.0"):
             raise ValueError('Accepted values for modify_version: "1.0" or "2.0"')
@@ -142,7 +142,7 @@ class Jobs(SdkApi):
         Returns
         -------
         response_json
-            A JSON containing the result of the request execution
+            A JSON object containing the result of the request execution
         """
         if modify_version not in ("1.0", "2.0"):
             raise ValueError('Accepted values for modify_version: "1.0" or "2.0"')
@@ -165,7 +165,7 @@ class Jobs(SdkApi):
         Returns
         -------
         response_json
-            A JSON containing the result of the request execution
+            A JSON object containing the result of the request execution
         """
         if modify_version not in ("1.0", "2.0"):
             raise ValueError('Accepted values for modify_version: "1.0" or "2.0"')
@@ -188,7 +188,7 @@ class Jobs(SdkApi):
         Returns
         -------
         response_json
-            A JSON containing the result of the request execution
+            A JSON object containing the result of the request execution
         """
         if modify_version not in ("1.0", "2.0"):
             raise ValueError('Accepted values for modify_version: "1.0" or "2.0"')
@@ -213,7 +213,7 @@ class Jobs(SdkApi):
         Returns
         -------
         json
-            A JSON containing a list of jobs on JES queue based on the given parameters
+            A JSON object containing a list of jobs on JES queue based on the given parameters
         """
         custom_args = self._create_custom_request_arguments()
         params = {"prefix": prefix, "max-jobs": max_jobs}
@@ -236,7 +236,7 @@ class Jobs(SdkApi):
         Returns
         -------
         json
-            A JSON containing the result of the request execution
+            A JSON object containing the result of the request execution
         """
         custom_args = self._create_custom_request_arguments()
         request_body = {"file": "//'%s'" % jcl_path}
@@ -264,7 +264,7 @@ class Jobs(SdkApi):
         Returns
         -------
         json
-            A JSON containing the result of the request execution
+            A JSON object containing the result of the request execution
         """
         if os.path.isfile(jcl_path):
             with open(jcl_path, "r", encoding="utf-8") as jcl_file:
@@ -284,7 +284,7 @@ class Jobs(SdkApi):
         Returns
         -------
         json
-            A JSON containing the result of the request execution
+            A JSON object containing the result of the request execution
         """
         custom_args = self._create_custom_request_arguments()
         custom_args["data"] = str(jcl)
@@ -303,7 +303,7 @@ class Jobs(SdkApi):
         Returns
         -------
         json
-            A JSON containing the result of the request execution
+            A JSON object containing the result of the request execution
         """
         custom_args = self._create_custom_request_arguments()
         job_url = "{}/files".format(correlator)
@@ -322,7 +322,7 @@ class Jobs(SdkApi):
         Returns
         -------
         json
-            A JSON containing the result of the request execution
+            A JSON object containing the result of the request execution
         """
         custom_args = self._create_custom_request_arguments()
         job_url = "{}/files/JCL/records".format(correlator)
@@ -346,7 +346,7 @@ class Jobs(SdkApi):
         Returns
         -------
         json
-            A JSON containing the result of the request execution
+            A JSON object containing the result of the request execution
         """
         custom_args = self._create_custom_request_arguments()
         job_url = "{}/files/{}/records".format(correlator, id)
@@ -384,7 +384,7 @@ class Jobs(SdkApi):
         Returns
         -------
         json
-            A JSON containing the result of the request execution
+            A JSON object containing the result of the request execution
         """
 
         job_name = status["jobname"]
