@@ -1,3 +1,4 @@
+PyEnchant>=3.3.0rc1
 sphinx_rtd_theme>=0.5.1
 sphinxcontrib-spelling==8.0.0
 -e ./src/core

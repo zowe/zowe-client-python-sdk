@@ -9,7 +9,7 @@ Create a dictionary to handle communication with the plug-in:
     from zowe.zos_console_for_zowe_sdk import Console
     profile = {
         "host": "<host address>",
-        "port" : 443 , # Include the port if different from the default (443)
+        "port": 443, # Include the port if different from the default (443)
         "user": "<user>",
         "password": "<password>",
     }
