@@ -4,6 +4,11 @@ All notable changes to the Zowe Client Python SDK will be documented in this fil
 
 ## `1.0.0-dev14`
 
+### Enhancements
+
+- Added method `Files.download_uss` to download USS files to disk
+- Added support to `Tso` class for loading TSO profile properties
+
 ### Bug Fixes
 
 - Fixed `Files.download_dsn` and `Files.download_binary_dsn` failing to write contents to disk [#179](https://github.com/zowe/zowe-client-python-sdk/issues/179)
@@ -11,22 +16,17 @@ All notable changes to the Zowe Client Python SDK will be documented in this fil
 - Fixed `Files.upload_to_uss` displaying an unclosed file warning
 - Fixed loading environment variables when there is no schema file in current directory
 
+## `1.0.0-dev13`
+
 ### Enhancements
 
-- Added method `Files.download_uss` to download USS files to disk
-- Added support to `Tso` class for loading TSO profile properties
-
-## `1.0.0-dev13`
+- Next Breaking: Updated core SDK method `RequestHandler.perform_streamed_request` to return response object instead of raw buffer. [#245](https://github.com/zowe/zowe-client-python-sdk/pull/245)
 
 ### Bug Fixes
 
 - Fixed `Files.create_data_set` to accept "FBA", "FBM", "VBA", "VBM" as valid recfm [#240](https://github.com/zowe/zowe-client-python-sdk/issues/240)
 - Fixed an issue with `Jobs.list_jobs` user correlator parameter [#242](https://github.com/zowe/zowe-client-python-sdk/issues/242)
 - Fixed default encoding for I/O operations to be UTF-8 on Windows [#243](https://github.com/zowe/zowe-client-python-sdk/issues/243)
-
-### Enhancements
-
-- Next Breaking: Updated core SDK method `RequestHandler.perform_streamed_request` to return response object instead of raw buffer. [#245](https://github.com/zowe/zowe-client-python-sdk/pull/245)
 
 ## `1.0.0-dev12`
 
