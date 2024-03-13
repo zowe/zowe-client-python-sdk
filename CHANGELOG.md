@@ -2,7 +2,7 @@
 
 All notable changes to the Zowe Client Python SDK will be documented in this file.
 
-## Recent Changes
+## `1.0.0-undefined.202403131940`
 
 ### Bug Fixes
 
