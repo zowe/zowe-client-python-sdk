@@ -16,7 +16,9 @@ module.exports = {
     plugins: [
         "@octorelease/changelog",
         "@octorelease/pypi",
-        "@octorelease/github",
+        ["@octorelease/github", {
+            publishRelease: true
+        }],
         "@octorelease/git"
     ]
 };
