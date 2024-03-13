@@ -2,6 +2,12 @@
 
 All notable changes to the Zowe Client Python SDK will be documented in this file.
 
+## Recent Changes
+
+### Bug Fixes
+
+- Fixed error when issuing TSO commands [#255](https://github.com/zowe/zowe-client-python-sdk/issues/255)
+
 ## `1.0.0-dev14`
 
 ### Bug Fixes

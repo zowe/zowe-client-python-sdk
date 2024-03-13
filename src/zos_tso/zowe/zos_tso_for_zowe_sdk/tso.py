@@ -10,6 +10,8 @@ SPDX-License-Identifier: EPL-2.0
 Copyright Contributors to the Zowe Project.
 """
 
+import json
+
 from zowe.core_for_zowe_sdk import SdkApi, constants
 
 
@@ -126,7 +128,9 @@ class Tso(SdkApi):
         """
         custom_args = self._create_custom_request_arguments()
         custom_args["url"] = "{}/{}".format(self.request_endpoint, str(session_key))
-        custom_args["json"] = {"TSO RESPONSE": {"VERSION": "0100", "DATA": str(message)}}
+        # z/OSMF TSO API requires json to be formatted in specific way without spaces
+        request_json = {"TSO RESPONSE": {"VERSION": "0100", "DATA": str(message)}}
+        custom_args["data"] = json.dumps(request_json, separators=(",", ":"))
         response_json = self.request_handler.perform_request("PUT", custom_args)
         return response_json["tsoData"]
 

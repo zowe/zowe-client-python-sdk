@@ -1,4 +1,5 @@
 """Integration tests for the Zowe Python SDK z/OS Tso package."""
+
 import unittest
 
 from zowe.core_for_zowe_sdk import ProfileManager
@@ -17,6 +18,7 @@ class TestTsoIntegration(unittest.TestCase):
         """Executing the issue_command method should return a valid response from TSO"""
         command_output = self.tso.issue_command("TIME")
         self.assertIsInstance(command_output, list)
+        self.assertIn("TIME", command_output[0])
 
     def test_start_tso_session_should_return_a_session_key(self):
         """Executing the start_tso_session method should return a valid TSO session key"""
