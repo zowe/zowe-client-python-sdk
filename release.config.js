@@ -2,7 +2,8 @@ module.exports = {
     branches: [
         {
             name: "main",
-            level: "minor"
+            level: "none",
+            prerelease: true
         },
         {
             name: "zowe-v?-lts",
