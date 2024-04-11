@@ -6,7 +6,7 @@ commentjson==0.9.0
 coverage==5.4
 deepmerge==1.1.0
 flake8==5.0.0
-idna==2.10
+idna==3.7
 importlib-metadata==3.6.0;python_version<"3.8"
 isort
 jsonschema==4.17.3
