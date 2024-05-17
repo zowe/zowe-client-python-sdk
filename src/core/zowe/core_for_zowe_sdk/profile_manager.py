@@ -10,12 +10,17 @@ SPDX-License-Identifier: EPL-2.0
 Copyright Contributors to the Zowe Project.
 """
 
-import os.path
 import os
+import os.path
 import warnings
+from copy import deepcopy
 from typing import Optional
 
+import jsonschema
+from deepmerge import always_merger
+
 from .config_file import ConfigFile, Profile
+from .credential_manager import CredentialManager
 from .custom_warnings import (
     ConfigNotFoundWarning,
     ProfileNotFoundWarning,
@@ -33,10 +38,8 @@ HAS_KEYRING = True
 
 
 HOME = os.path.expanduser("~")
-GLOBAl_CONFIG_LOCATION = os.path.join(HOME, ".zowe")
-GLOBAL_CONFIG_PATH = os.path.join(
-    GLOBAl_CONFIG_LOCATION, f"{GLOBAL_CONFIG_NAME}.config.json"
-)
+GLOBAL_CONFIG_LOCATION = os.path.join(HOME, ".zowe")
+GLOBAL_CONFIG_PATH = os.path.join(GLOBAL_CONFIG_LOCATION, f"{GLOBAL_CONFIG_NAME}.config.json")
 CURRENT_DIR = os.getcwd()
 
 
@@ -56,7 +59,7 @@ class ProfileManager:
 
         self.global_config = ConfigFile(type=TEAM_CONFIG, name=GLOBAL_CONFIG_NAME)
         try:
-            self.global_config.location = GLOBAl_CONFIG_LOCATION
+            self.global_config.location = GLOBAL_CONFIG_LOCATION
         except Exception:
             warnings.warn(
                 "Could not find Global Config Directory, please provide one.",
@@ -65,7 +68,7 @@ class ProfileManager:
 
         self.global_user_config = ConfigFile(type=USER_CONFIG, name=GLOBAL_CONFIG_NAME)
         try:
-            self.global_user_config.location = GLOBAl_CONFIG_LOCATION
+            self.global_user_config.location = GLOBAL_CONFIG_LOCATION
         except Exception:
             warnings.warn(
                 "Could not find Global User Config Directory, please provide one.",
@@ -111,55 +114,53 @@ class ProfileManager:
         return self.project_config.filepath
 
     @staticmethod
-    def get_env(
-        cfg: ConfigFile,
-    ) -> dict:
+    def get_env(cfg: ConfigFile, cwd=None) -> dict:
         """
         Maps the env variables to the profile properties
-        
+
         Returns
         -------
         Dictionary
 
             Containing profile properties from env variables (prop: value)
         """
-        
-        props = cfg.schema_list()
+
+        props = cfg.schema_list(cwd)
         if props == []:
             return {}
-        
+
         env, env_var = {}, {}
-        
+
         for var in list(os.environ.keys()):
             if var.startswith("ZOWE_OPT"):
-                env[var[len("ZOWE_OPT_"):].lower()] = os.environ.get(var)
-                
+                env[var[len("ZOWE_OPT_") :].lower()] = os.environ.get(var)
+
         for k, v in env.items():
             word = k.split("_")
 
             if len(word) > 1:
-                k = word[0]+word[1].capitalize()
+                k = word[0] + word[1].capitalize()
             else:
                 k = word[0]
 
             if k in list(props.keys()):
-                if props[k]['type'] == "number":
+                if props[k]["type"] == "number":
                     env_var[k] = int(v)
 
-                elif props[k]['type'] == "string":
+                elif props[k]["type"] == "string":
                     env_var[k] = str(v)
 
-                elif props[k]['type'] == "boolean":
+                elif props[k]["type"] == "boolean":
                     env_var[k] = bool(v)
 
         return env_var
-                                 
+
     @staticmethod
     def get_profile(
         cfg: ConfigFile,
         profile_name: Optional[str],
         profile_type: Optional[str],
-        config_type: str,
+        validate_schema: Optional[bool] = True,
     ) -> Profile:
         """
         Get just the profile from the config file (overriden with base props in the config file)
@@ -174,8 +175,22 @@ class ProfileManager:
         cfg_profile = Profile()
         try:
             cfg_profile = cfg.get_profile(
-                profile_name=profile_name, profile_type=profile_type
+                profile_name=profile_name, profile_type=profile_type, validate_schema=validate_schema
             )
+        except jsonschema.exceptions.ValidationError as exc:
+            raise jsonschema.exceptions.ValidationError(
+                f"Instance was invalid under the provided $schema property, {exc}"
+            )
+        except jsonschema.exceptions.SchemaError as exc:
+            raise jsonschema.exceptions.SchemaError(f"The provided schema is invalid, {exc}")
+        except jsonschema.exceptions.UndefinedTypeCheck as exc:
+            raise jsonschema.exceptions.UndefinedTypeCheck(
+                f"A type checker was asked to check a type it did not have registered, {exc}"
+            )
+        except jsonschema.exceptions.UnknownType as exc:
+            raise jsonschema.exceptions.UnknownType(f"Unknown type is found in schema_json, exc")
+        except jsonschema.exceptions.FormatError as exc:
+            raise jsonschema.exceptions.FormatError(f"Validating a format config_json failed for schema_json, {exc}")
         except ProfileNotFound:
             if profile_name:
                 warnings.warn(
@@ -188,38 +203,20 @@ class ProfileManager:
                     f" instead.",
                     ProfileNotFoundWarning,
                 )
-        except SecureProfileLoadFailed:
-            warnings.warn(
-                f"Config '{cfg.filename}' has no saved secure properties.",
-                SecurePropsNotFoundWarning,
-            )
-        except SecurePropsNotFoundWarning:
-            if profile_name:
-                warnings.warn(
-                    f"Secure properties of profile '{profile_name}' from file '{cfg.filename}' were not found "
-                    f"hence profile not loaded.",
-                    SecurePropsNotFoundWarning,
-                )
-            else:
-                warnings.warn(
-                    f"Secure properties of profile type '{profile_type}' from file '{cfg.filename}' were not found "
-                    f"hence profile not loaded.",
-                    SecurePropsNotFoundWarning,
-                )
         except Exception as exc:
             warnings.warn(
-                f"Could not load {config_type} '{cfg.filename}' at '{cfg.filepath}'"
-                f"because {type(exc).__name__}'{exc}'.",
+                f"Could not load '{cfg.filename}' at '{cfg.filepath}'" f"because {type(exc).__name__}'{exc}'.",
                 ConfigNotFoundWarning,
             )
-        finally:
-            return cfg_profile
+
+        return cfg_profile
 
     def load(
         self,
         profile_name: Optional[str] = None,
         profile_type: Optional[str] = None,
         check_missing_props: bool = True,
+        validate_schema: Optional[bool] = True,
         override_with_env: Optional[bool] = False,
     ) -> dict:
         """Load connection details from a team config profile.
@@ -248,36 +245,61 @@ class ProfileManager:
         if not self._show_warnings:
             warnings.simplefilter("ignore")
 
-        config_layers = {
-            "Project User Config": self.project_user_config,
-            "Project Config": self.project_config,
-            "Global User Config": self.global_user_config,
-            "Global Config": self.global_config,
-        }
         profile_props: dict = {}
         env_var: dict = {}
-
         missing_secure_props = []  # track which secure props were not loaded
 
-        for i, (config_type, cfg) in enumerate(config_layers.items()):
-            profile_loaded = self.get_profile(
-                cfg, profile_name, profile_type, config_type
-            )
-            # TODO Why don't user and password show up here for Project User Config?
-            # Probably need to update load_profile_properties method in config_file.py
-            if profile_loaded.name and not profile_name:
-                profile_name = (
-                    profile_loaded.name
-                )  # Define profile name that will be merged from other layers
-            profile_props = {**profile_loaded.data, **profile_props}
+        defaults_merged: dict = {}
+        profiles_merged: dict = {}
+        cfg_name = None
+        cfg_schema = None
+        cfg_schema_dir = None
 
+        for cfg_layer in (self.project_user_config, self.project_config, self.global_user_config, self.global_config):
+            if cfg_layer.profiles is None:
+                try:
+                    cfg_layer.init_from_file(validate_schema)
+                except SecureProfileLoadFailed:
+                    warnings.warn(
+                        f"Could not load secure properties for {cfg_layer.filepath}",
+                        SecurePropsNotFoundWarning,
+                    )
+            if cfg_layer.defaults:
+                for name, value in cfg_layer.defaults.items():
+                    defaults_merged[name] = defaults_merged.get(name, value)
+            if not cfg_name and cfg_layer.name:
+                cfg_name = cfg_layer.name
+            if not cfg_schema and cfg_layer.schema_property:
+                cfg_schema = cfg_layer.schema_property
+                cfg_schema_dir = cfg_layer._location
+
+        usrProject = self.project_user_config.profiles or {}
+        project = self.project_config.profiles or {}
+        project_temp = always_merger.merge(deepcopy(project), usrProject)
+
+        usrGlobal = self.global_user_config.profiles or {}
+        global_ = self.global_config.profiles or {}
+        global_temp = always_merger.merge(deepcopy(global_), usrGlobal)
+
+        profiles_merged = project_temp
+        for name, value in global_temp.items():
+            if name not in profiles_merged:
+                profiles_merged[name] = value
+
+        cfg = ConfigFile(
+            type="Merged Config",
+            name=cfg_name,
+            profiles=profiles_merged,
+            defaults=defaults_merged,
+            schema_property=cfg_schema,
+        )
+        profile_loaded = self.get_profile(cfg, profile_name, profile_type, validate_schema)
+        if profile_loaded:
+            profile_props = profile_loaded.data
             missing_secure_props.extend(profile_loaded.missing_secure_props)
 
-            if override_with_env:
-                env_var = {**self.get_env(cfg)}
-
-            if i == 1 and profile_props:
-                break  # Skip loading from global config if profile was found in project config
+        if override_with_env:
+            env_var = {**self.get_env(cfg, cfg_schema_dir)}
 
         if profile_type != BASE_PROFILE:
             profile_props = {
@@ -296,8 +318,93 @@ class ProfileManager:
 
         warnings.resetwarnings()
 
-        for k, v in profile_props.items():
+        for k in profile_props:
             if k in env_var:
                 profile_props[k] = env_var[k]
 
         return profile_props
+
+    def get_highest_priority_layer(self, json_path: str) -> Optional[ConfigFile]:
+        """
+        Get the highest priority layer (configuration file) based on the given profile name
+
+        Parameters:
+            profile_name (str): The name of the profile to look for in the layers.
+
+        Returns:
+            Optional[ConfigFile]: The highest priority layer (configuration file) that contains the specified profile,
+                                or None if the profile is not found in any layer.
+        """
+        highest_layer = None
+        longest_match = ""
+        layers = [self.project_user_config, self.project_config, self.global_user_config, self.global_config]
+
+        original_name = layers[0].get_profile_name_from_path(json_path)
+
+        for layer in layers:
+            try:
+                layer.init_from_file()
+            except FileNotFoundError:
+                continue
+            parts = original_name.split(".")
+            current_name = ""
+
+            while parts:
+                current_name = ".".join(parts)
+                profile = layer.find_profile(current_name, layer.profiles)
+
+                if profile is not None and len(current_name) > len(longest_match):
+                    highest_layer = layer
+                    longest_match = current_name
+
+                else:
+                    parts.pop()
+            if original_name == longest_match:
+                break
+
+            if highest_layer is None:
+                highest_layer = layer
+
+        if highest_layer is None:
+            raise FileNotFoundError(f"Could not find a valid layer for {json_path}")
+
+        return highest_layer
+
+    def set_property(self, json_path, value, secure=None) -> None:
+        """
+        Set a property in the profile, storing it securely if necessary.
+
+        Parameters:
+            json_path (str): The JSON path of the property to set.
+            value (str): The value to be set for the property.
+            secure (bool): If True, the property will be stored securely. Default is None.
+        """
+
+        # highest priority layer for the given profile name
+        highest_priority_layer = self.get_highest_priority_layer(json_path)
+
+        # Set the property in the highest priority layer
+
+        highest_priority_layer.set_property(json_path, value, secure=secure)
+
+    def set_profile(self, profile_path: str, profile_data: dict) -> None:
+        """
+        Set a profile in the highest priority layer (configuration file) based on the given profile name
+
+        Parameters:
+            profile_path (str): TThe path of the profile to be set. eg: profiles.zosmf
+            profile_data (dict): The data of the profile to set.
+        """
+        highest_priority_layer = self.get_highest_priority_layer(profile_path)
+
+        highest_priority_layer.set_profile(profile_path, profile_data)
+
+    def save(self) -> None:
+        """
+        Save the layers (configuration files) to disk.
+        """
+        layers = [self.project_user_config, self.project_config, self.global_user_config, self.global_config]
+
+        for layer in layers:
+            layer.save(False)
+        CredentialManager.save_secure_props()

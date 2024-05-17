@@ -1,5 +1,6 @@
 from zowe.core_for_zowe_sdk import SdkApi
 
+
 class Console(SdkApi):
     """
     Class used to represent the base z/OSMF Console API.
@@ -39,6 +40,7 @@ class Console(SdkApi):
             A JSON containing the response from the console command
         """
         custom_args = self._create_custom_request_arguments()
+        custom_args["url"] = self.request_endpoint.replace("defcn", console or "defcn")
         request_body = {"cmd": command}
         custom_args["json"] = request_body
         response_json = self.request_handler.perform_request("PUT", custom_args)
@@ -47,7 +49,7 @@ class Console(SdkApi):
     def get_response(self, response_key, console=None):
         """
         Collect outstanding synchronous z/OS Console response messages.
-        
+
         Parameters
         ----------
         response_key

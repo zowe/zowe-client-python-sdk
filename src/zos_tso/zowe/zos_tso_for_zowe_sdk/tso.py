@@ -10,6 +10,8 @@ SPDX-License-Identifier: EPL-2.0
 Copyright Contributors to the Zowe Project.
 """
 
+import json
+
 from zowe.core_for_zowe_sdk import SdkApi, constants
 
 
@@ -27,7 +29,7 @@ class Tso(SdkApi):
         Constant for the session not found tso message id
     """
 
-    def __init__(self, connection):
+    def __init__(self, connection, tso_profile=None):
         """
         Construct a Tso object.
 
@@ -38,6 +40,7 @@ class Tso(SdkApi):
         """
         super().__init__(connection, "/zosmf/tsoApp/tso")
         self.session_not_found = constants["TsoSessionNotFound"]
+        self.tso_profile = tso_profile or {}
 
     def issue_command(self, command):
         """Issues a TSO command.
@@ -63,13 +66,13 @@ class Tso(SdkApi):
 
     def start_tso_session(
         self,
-        proc="IZUFPROC",
-        chset="697",
-        cpage="1047",
-        rows="204",
-        cols="160",
-        rsize="4096",
-        acct="DEFAULT",
+        proc=None,
+        chset=None,
+        cpage=None,
+        rows=None,
+        cols=None,
+        rsize=None,
+        acct=None,
     ):
         """Start a TSO session.
 
@@ -97,13 +100,13 @@ class Tso(SdkApi):
         """
         custom_args = self._create_custom_request_arguments()
         custom_args["params"] = {
-            "proc": proc,
-            "chset": chset,
-            "cpage": cpage,
-            "rows": rows,
-            "cols": cols,
-            "rsize": rsize,
-            "acct": acct,
+            "proc": proc or self.tso_profile.get("logonProcedure", "IZUFPROC"),
+            "chset": chset or self.tso_profile.get("characterSet", "697"),
+            "cpage": cpage or self.tso_profile.get("codePage", "1047"),
+            "rows": rows or self.tso_profile.get("rows", "204"),
+            "cols": cols or self.tso_profile.get("columns", "160"),
+            "rsize": rsize or self.tso_profile.get("regionSize", "4096"),
+            "acct": acct or self.tso_profile.get("account", "DEFAULT"),
         }
         response_json = self.request_handler.perform_request("POST", custom_args)
         return response_json["servletKey"]
@@ -125,7 +128,9 @@ class Tso(SdkApi):
         """
         custom_args = self._create_custom_request_arguments()
         custom_args["url"] = "{}/{}".format(self.request_endpoint, str(session_key))
-        custom_args["json"] = {"TSO RESPONSE":{"VERSION":"0100","DATA":str(message)}}
+        # z/OSMF TSO API requires json to be formatted in specific way without spaces
+        request_json = {"TSO RESPONSE": {"VERSION": "0100", "DATA": str(message)}}
+        custom_args["data"] = json.dumps(request_json, separators=(",", ":"))
         response_json = self.request_handler.perform_request("PUT", custom_args)
         return response_json["tsoData"]
 
@@ -144,16 +149,10 @@ class Tso(SdkApi):
             Where the options are: 'Ping successful' or 'Ping failed'
         """
         custom_args = self._create_custom_request_arguments()
-        custom_args["url"] = "{}/{}/{}".format(
-            self.request_endpoint, "ping", str(session_key)
-        )
+        custom_args["url"] = "{}/{}/{}".format(self.request_endpoint, "ping", str(session_key))
         response_json = self.request_handler.perform_request("PUT", custom_args)
         message_id_list = self.parse_message_ids(response_json)
-        return (
-            "Ping successful"
-            if self.session_not_found not in message_id_list
-            else "Ping failed"
-        )
+        return "Ping successful" if self.session_not_found not in message_id_list else "Ping failed"
 
     def end_tso_session(self, session_key):
         """Terminates an existing TSO session.
@@ -172,11 +171,7 @@ class Tso(SdkApi):
         custom_args["url"] = "{}/{}".format(self.request_endpoint, session_key)
         response_json = self.request_handler.perform_request("DELETE", custom_args)
         message_id_list = self.parse_message_ids(response_json)
-        return (
-            "Session ended"
-            if self.session_not_found not in message_id_list
-            else "Session already ended"
-        )
+        return "Session ended" if self.session_not_found not in message_id_list else "Session already ended"
 
     def parse_message_ids(self, response_json):
         """Parse TSO response and retrieve only the message ids.
@@ -191,11 +186,7 @@ class Tso(SdkApi):
         list
             A list containing the TSO response message ids
         """
-        return (
-            [message["messageId"] for message in response_json["msgData"]]
-            if "msgData" in response_json
-            else []
-        )
+        return [message["messageId"] for message in response_json["msgData"]] if "msgData" in response_json else []
 
     def retrieve_tso_messages(self, response_json):
         """Parse the TSO response and retrieve all messages.
@@ -210,8 +201,4 @@ class Tso(SdkApi):
         list
             A list containing the TSO response messages
         """
-        return [
-            message["TSO MESSAGE"]["DATA"]
-            for message in response_json
-            if "TSO MESSAGE" in message
-        ]
+        return [message["TSO MESSAGE"]["DATA"] for message in response_json if "TSO MESSAGE" in message]

@@ -2,7 +2,10 @@
     "TEST_HLQ": "ZOWE",
     "TEST_PDS": "ZOWE.TESTS.JCL",
     "TEST_MEMBER": "IEFBR14T",
+    "TEST_MEMBER_NEW": "TESTNEW",
     "TEST1_ZFS": "TEST1.ZFS",
     "TEST2_ZFS": "TEST2.ZFS",
-    "TEST_USS": "/tmp/zowe-test.txt"
+    "TEST_USS": "/tmp/zowe-test.txt",
+    "TEST_USS_MOUNT": "/tmp/zowe/mount",
+    "TEST_USS_NEW": "/tmp/zowe-test-new.txt"
 }

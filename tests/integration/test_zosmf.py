@@ -1,7 +1,8 @@
 """Integration tests for the Zowe Python SDK z/OSMF package."""
 import unittest
-from zowe.zosmf_for_zowe_sdk import Zosmf
+
 from zowe.core_for_zowe_sdk import ProfileManager
+from zowe.zosmf_for_zowe_sdk import Zosmf
 
 
 class TestZosmfIntegration(unittest.TestCase):
@@ -9,7 +10,7 @@ class TestZosmfIntegration(unittest.TestCase):
 
     def setUp(self):
         """Setup fixtures for Zosmf class."""
-        test_profile = ProfileManager().load(profile_type="zosmf")
+        test_profile = ProfileManager(show_warnings=False).load(profile_type="zosmf")
         self.zosmf = Zosmf(test_profile)
 
     def test_get_info_should_return_valid_response(self):

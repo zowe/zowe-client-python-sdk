@@ -16,4 +16,5 @@ constants = {
     "ZoweCredentialKey": "Zowe-Plugin",
     "ZoweServiceName": "Zowe",
     "ZoweAccountName": "secure_config_props",
+    "WIN32_CRED_MAX_STRING_LENGTH": 2560,
 }
