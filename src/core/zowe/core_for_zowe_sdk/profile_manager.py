@@ -218,6 +218,7 @@ class ProfileManager:
         check_missing_props: bool = True,
         validate_schema: Optional[bool] = True,
         override_with_env: Optional[bool] = False,
+        suppress_config_file_warnings: Optional[bool] = True,
     ) -> dict:
         """Load connection details from a team config profile.
         Returns
@@ -258,7 +259,7 @@ class ProfileManager:
         for cfg_layer in (self.project_user_config, self.project_config, self.global_user_config, self.global_config):
             if cfg_layer.profiles is None:
                 try:
-                    cfg_layer.init_from_file(validate_schema)
+                    cfg_layer.init_from_file(validate_schema, suppress_config_file_warnings)
                 except SecureProfileLoadFailed:
                     warnings.warn(
                         f"Could not load secure properties for {cfg_layer.filepath}",

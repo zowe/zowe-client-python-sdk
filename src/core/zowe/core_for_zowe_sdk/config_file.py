@@ -106,6 +106,7 @@ class ConfigFile:
     def init_from_file(
         self,
         validate_schema: Optional[bool] = True,
+        suppress_config_file_warnings: Optional[bool] = True,
     ) -> None:
         """
         Initializes the class variable after
@@ -118,7 +119,8 @@ class ConfigFile:
                 pass
 
         if self.filepath is None or not os.path.isfile(self.filepath):
-            warnings.warn(f"Config file does not exist at {self.filepath}")
+            if not suppress_config_file_warnings:
+                warnings.warn(f"Config file does not exist at {self.filepath}")
             return
 
         with open(self.filepath, encoding="UTF-8", mode="r") as fileobj:
