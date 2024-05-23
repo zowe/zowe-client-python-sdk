@@ -12,6 +12,7 @@ Copyright Contributors to the Zowe Project.
 
 import requests
 import urllib3
+import logging
 
 from .exceptions import InvalidRequestMethod, RequestFailed, UnexpectedStatus
 
@@ -40,6 +41,7 @@ class RequestHandler:
         self.session_arguments = session_arguments
         self.valid_methods = ["GET", "POST", "PUT", "DELETE"]
         self.__handle_ssl_warnings()
+        self.__logger = logging.getLogger(__name__)
 
     def __handle_ssl_warnings(self):
         """Turn off warnings if the SSL verification argument if off."""
@@ -104,6 +106,7 @@ class RequestHandler:
             If the input request method is not supported
         """
         if self.method not in self.valid_methods:
+            self.__logger.error(f"Invalid HTTP method input {self.method}")
             raise InvalidRequestMethod(self.method)
 
     def __send_request(self, stream=False):
@@ -126,12 +129,14 @@ class RequestHandler:
         # Automatically checks if status code is between 200 and 400
         if self.response:
             if self.response.status_code not in self.expected_code:
+                self.__logger.error(f"The status code from z/OSMF was: {self.expected_code}\nExpected: {self.response.status_code}\nRequest output:{self.response.text}")
                 raise UnexpectedStatus(self.expected_code, self.response.status_code, self.response.text)
         else:
             output_str = str(self.response.request.url)
             output_str += "\n" + str(self.response.request.headers)
             output_str += "\n" + str(self.response.request.body)
             output_str += "\n" + str(self.response.text)
+            self.__logger.error(f"HTTP Request has failed with status code {self.response.status_code}. \n {output_str}")
             raise RequestFailed(self.response.status_code, output_str)
 
     def __normalize_response(self):

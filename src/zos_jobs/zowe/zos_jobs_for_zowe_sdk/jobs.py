@@ -9,6 +9,7 @@ SPDX-License-Identifier: EPL-2.0
 
 Copyright Contributors to the Zowe Project.
 """
+
 import os
 
 from zowe.core_for_zowe_sdk import SdkApi
@@ -75,6 +76,7 @@ class Jobs(SdkApi):
             A JSON object containing the result of the request execution
         """
         if modify_version not in ("1.0", "2.0"):
+            self.logger.error('Modify version not accepted; Must be "1.0" or "2.0"')
             raise ValueError('Accepted values for modify_version: "1.0" or "2.0"')
 
         custom_args = self._create_custom_request_arguments()
@@ -104,6 +106,7 @@ class Jobs(SdkApi):
             A JSON object containing the result of the request execution
         """
         if modify_version not in ("1.0", "2.0"):
+            self.logger.error('Modify version not accepted; Must be "1.0" or "2.0"')
             raise ValueError('Accepted values for modify_version: "1.0" or "2.0"')
 
         custom_args = self._create_custom_request_arguments()
@@ -145,6 +148,7 @@ class Jobs(SdkApi):
             A JSON object containing the result of the request execution
         """
         if modify_version not in ("1.0", "2.0"):
+            self.logger.error('Accepted values for modify_version: "1.0" or "2.0"')
             raise ValueError('Accepted values for modify_version: "1.0" or "2.0"')
 
         response_json = self._issue_job_request({"class": class_name}, jobname, jobid, modify_version)
@@ -168,6 +172,7 @@ class Jobs(SdkApi):
             A JSON object containing the result of the request execution
         """
         if modify_version not in ("1.0", "2.0"):
+            self.logger.error('Accepted values for modify_version: "1.0" or "2.0"')
             raise ValueError('Accepted values for modify_version: "1.0" or "2.0"')
 
         response_json = self._issue_job_request({"request": "hold"}, jobname, jobid, modify_version)
@@ -191,6 +196,7 @@ class Jobs(SdkApi):
             A JSON object containing the result of the request execution
         """
         if modify_version not in ("1.0", "2.0"):
+            self.logger.error('Modify version not accepted; Must be "1.0" or "2.0"')
             raise ValueError('Accepted values for modify_version: "1.0" or "2.0"')
 
         response_json = self._issue_job_request({"request": "release"}, jobname, jobid, modify_version)
@@ -271,6 +277,7 @@ class Jobs(SdkApi):
                 file_content = jcl_file.read()
             return self.submit_plaintext(file_content)
         else:
+            self.logger.error("Provided argument is not a file path {}".format(jcl_path))
             raise FileNotFoundError("Provided argument is not a file path {}".format(jcl_path))
 
     def submit_plaintext(self, jcl):

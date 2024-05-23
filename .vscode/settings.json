@@ -9,5 +9,13 @@
     "python.testing.pytestArgs": ["tests"],
     "python.testing.pytestEnabled": true,
     "python.testing.unittestEnabled": false,
-    "rust-analyzer.linkedProjects": ["./src/secrets/Cargo.toml"],
+    "rust-analyzer.linkedProjects": [
+        "./src/secrets/Cargo.toml"
+    ],
+    "python.analysis.extraPaths": [
+        "./src/core",
+        "./src/zos_console",
+        "./src/zos_files",
+        "./src/zos_jobs"
+    ],
 }

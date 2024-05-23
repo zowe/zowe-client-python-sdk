@@ -15,6 +15,7 @@ import os.path
 import warnings
 from copy import deepcopy
 from typing import Optional
+import logging
 
 import jsonschema
 from deepmerge import always_merger
@@ -57,10 +58,13 @@ class ProfileManager:
         self.project_config = ConfigFile(type=TEAM_CONFIG, name=appname)
         self.project_user_config = ConfigFile(type=USER_CONFIG, name=appname)
 
+        self.__logger = logging.getLogger(__name__)
+
         self.global_config = ConfigFile(type=TEAM_CONFIG, name=GLOBAL_CONFIG_NAME)
         try:
             self.global_config.location = GLOBAL_CONFIG_LOCATION
         except Exception:
+            self.__logger.warning("Could not find Global Config Directory")
             warnings.warn(
                 "Could not find Global Config Directory, please provide one.",
                 ConfigNotFoundWarning,
@@ -70,6 +74,7 @@ class ProfileManager:
         try:
             self.global_user_config.location = GLOBAL_CONFIG_LOCATION
         except Exception:
+            self.__logger.warning("Could not find Global User Config Directory")
             warnings.warn(
                 "Could not find Global User Config Directory, please provide one.",
                 ConfigNotFoundWarning,
@@ -218,6 +223,7 @@ class ProfileManager:
         check_missing_props: bool = True,
         validate_schema: Optional[bool] = True,
         override_with_env: Optional[bool] = False,
+        suppress_config_file_warnings: Optional[bool] = True,
     ) -> dict:
         """Load connection details from a team config profile.
         Returns
@@ -236,7 +242,9 @@ class ProfileManager:
         If `profile_type` is not base, then we will load properties from both
         `profile_type` and base profiles and merge them together.
         """
+        
         if profile_name is None and profile_type is None:
+            self.__logger.error(f"Failed to load profile as both profile_name and profile_type are not set")
             raise ProfileNotFound(
                 profile_name=profile_name,
                 error_msg="Could not find profile as both profile_name and profile_type is not set.",
@@ -254,12 +262,13 @@ class ProfileManager:
         cfg_name = None
         cfg_schema = None
         cfg_schema_dir = None
-
+        
         for cfg_layer in (self.project_user_config, self.project_config, self.global_user_config, self.global_config):
             if cfg_layer.profiles is None:
                 try:
-                    cfg_layer.init_from_file(validate_schema)
+                    cfg_layer.init_from_file(validate_schema, suppress_config_file_warnings)
                 except SecureProfileLoadFailed:
+                    self.__logger.warning(f"Could not load secure properties for {cfg_layer.filepath}")
                     warnings.warn(
                         f"Could not load secure properties for {cfg_layer.filepath}",
                         SecurePropsNotFoundWarning,
@@ -314,6 +323,7 @@ class ProfileManager:
                     missing_props.add(item)
 
             if len(missing_props) > 0:
+                self.__logger.error(f"Failed to load secure values: {missing_props}")
                 raise SecureValuesNotFound(values=missing_props)
 
         warnings.resetwarnings()
@@ -366,6 +376,7 @@ class ProfileManager:
                 highest_layer = layer
 
         if highest_layer is None:
+            self.__logger.error(f"Could not find a valid layer for {json_path}")
             raise FileNotFoundError(f"Could not find a valid layer for {json_path}")
 
         return highest_layer

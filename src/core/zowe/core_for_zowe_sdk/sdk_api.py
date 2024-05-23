@@ -11,6 +11,7 @@ Copyright Contributors to the Zowe Project.
 """
 
 import urllib
+import logging
 
 from . import session_constants
 from .exceptions import UnsupportedAuthType
@@ -27,6 +28,8 @@ class SdkApi:
         self.profile = profile
         session = Session(profile)
         self.session: ISession = session.load()
+
+        self.logger = logging.getLogger(__name__)
 
         self.default_service_url = default_url
         self.default_headers = {
@@ -53,6 +56,7 @@ class SdkApi:
         elif self.session.type == session_constants.AUTH_TYPE_TOKEN:
             self.default_headers["Cookie"] = f"{self.session.tokenType}={self.session.tokenValue}"
         else:
+            self.logger.error("Unsupported authorization type")
             raise UnsupportedAuthType(self.session.type)
 
     def _create_custom_request_arguments(self):
