@@ -53,7 +53,7 @@ class CredentialManager:
                 return
 
         except Exception as exc:
-            CredentialManager.__logger.error(f"Fail to load secure profile {constants["ZoweServiceName"]}")
+            CredentialManager.__logger.error(f"Fail to load secure profile {constants['ZoweServiceName']}")
             raise SecureProfileLoadFailed(constants["ZoweServiceName"], error_msg=str(exc)) from exc
 
         secure_config: str
