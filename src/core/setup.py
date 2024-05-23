@@ -26,7 +26,7 @@ setup(
         "deepmerge~=1.1.0",
         "jsonschema~=4.17.3",
         "pyyaml~=6.0.1",
-        "requests~=2.31.0",
+        "requests~=2.32.0",
         "urllib3~=1.26.18",
     ],
     extras_require={
