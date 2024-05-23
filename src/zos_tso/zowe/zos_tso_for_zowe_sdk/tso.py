@@ -38,7 +38,7 @@ class Tso(SdkApi):
         connection
             The connection object
         """
-        super().__init__(connection, "/zosmf/tsoApp/tso")
+        super().__init__(connection, "/zosmf/tsoApp/tso", logger_name=__name__)
         self.session_not_found = constants["TsoSessionNotFound"]
         self.tso_profile = tso_profile or {}
 

@@ -43,7 +43,7 @@ class Files(SdkApi):
 
         Also update header to accept gzip encoded responses
         """
-        super().__init__(connection, "/zosmf/restfiles/")
+        super().__init__(connection, "/zosmf/restfiles/", logger_name=__name__)
         self.default_headers["Accept-Encoding"] = "gzip"
 
     def list_files(self, path):
@@ -452,7 +452,7 @@ class Files(SdkApi):
         """
         custom_args = self._create_custom_request_arguments()
         custom_args["url"] = "{}ds/{}".format(self.request_endpoint, self._encode_uri_component(dataset_name))
-        response = self.request_handler.perform_streamed_request("GET", custom_args)
+        response = self.request_handler.perform_request("GET", custom_args, stream = True)
         return response
 
     def get_dsn_binary_content(self, dataset_name, with_prefixes=False):
@@ -500,7 +500,7 @@ class Files(SdkApi):
             custom_args["headers"]["X-IBM-Data-Type"] = "record"
         else:
             custom_args["headers"]["X-IBM-Data-Type"] = "binary"
-        response = self.request_handler.perform_streamed_request("GET", custom_args)
+        response = self.request_handler.perform_request("GET", custom_args, stream = True)
         return response
 
     def write_to_dsn(self, dataset_name, data, encoding=_ZOWE_FILES_DEFAULT_ENCODING):
@@ -584,7 +584,7 @@ class Files(SdkApi):
         custom_args["url"] = "{}fs/{}".format(self.request_endpoint, self._encode_uri_component(file_path.lstrip("/")))
         if binary:
             custom_args["headers"]["X-IBM-Data-Type"] = "binary"
-        response = self.request_handler.perform_streamed_request("GET", custom_args)
+        response = self.request_handler.perform_request("GET", custom_args, stream=True)
         return response
 
     def download_uss(self, file_path, output_file, binary=False):

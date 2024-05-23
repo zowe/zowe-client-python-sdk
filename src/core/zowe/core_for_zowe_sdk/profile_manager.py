@@ -177,6 +177,8 @@ class ProfileManager:
             NamedTuple (data, name, secure_props_not_found)
         """
 
+        logger = logging.getLogger(__name__)
+
         cfg_profile = Profile()
         try:
             cfg_profile = cfg.get_profile(
@@ -198,17 +200,20 @@ class ProfileManager:
             raise jsonschema.exceptions.FormatError(f"Validating a format config_json failed for schema_json, {exc}")
         except ProfileNotFound:
             if profile_name:
+                logger.warning(f"Profile '{profile_name}' not found in file '{cfg.filename}'")
                 warnings.warn(
                     f"Profile '{profile_name}' not found in file '{cfg.filename}', returning empty profile instead.",
                     ProfileNotFoundWarning,
                 )
             else:
+                logger.warning(f"Profile of type '{profile_type}' not found in file '{cfg.filename}'")
                 warnings.warn(
                     f"Profile of type '{profile_type}' not found in file '{cfg.filename}', returning empty profile"
                     f" instead.",
                     ProfileNotFoundWarning,
                 )
         except Exception as exc:
+            logger.warning(f"Could not load '{cfg.filename}' at '{cfg.filepath}'" f"because {type(exc).__name__}'{exc}'")
             warnings.warn(
                 f"Could not load '{cfg.filename}' at '{cfg.filepath}'" f"because {type(exc).__name__}'{exc}'.",
                 ConfigNotFoundWarning,

@@ -29,7 +29,7 @@ class RequestHandler:
         List of supported request methods
     """
 
-    def __init__(self, session_arguments):
+    def __init__(self, session_arguments, logger_name = __name__):
         """
         Construct a RequestHandler object.
 
@@ -41,14 +41,14 @@ class RequestHandler:
         self.session_arguments = session_arguments
         self.valid_methods = ["GET", "POST", "PUT", "DELETE"]
         self.__handle_ssl_warnings()
-        self.__logger = logging.getLogger(__name__)
+        self.__logger = logging.getLogger(logger_name)
 
     def __handle_ssl_warnings(self):
         """Turn off warnings if the SSL verification argument if off."""
         if not self.session_arguments["verify"]:
             urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-    def perform_request(self, method, request_arguments, expected_code=[200]):
+    def perform_request(self, method, request_arguments, expected_code=[200], stream = False):
         """Execute an HTTP/HTTPS requests from given arguments and return validated response (JSON).
 
         Parameters
@@ -68,34 +68,13 @@ class RequestHandler:
         self.method = method
         self.request_arguments = request_arguments
         self.expected_code = expected_code
+        self.__logger.debug(f"Request method: {self.method}, Request arguments: {self.request_arguments}, Expected code: {expected_code}")
         self.__validate_method()
-        self.__send_request()
+        self.__send_request(stream = stream)
         self.__validate_response()
+        if stream:
+            return self.response
         return self.__normalize_response()
-
-    def perform_streamed_request(self, method, request_arguments, expected_code=[200]):
-        """Execute a streamed HTTP/HTTPS requests from given arguments and return a raw response.
-
-        Parameters
-        ----------
-        method: str
-            The request method that should be used
-        request_arguments: dict
-            The dictionary containing the required arguments for the execution of the request
-        expected_code: int
-            The list containing the acceptable response codes (default is [200])
-
-        Returns
-        -------
-        A raw response data
-        """
-        self.method = method
-        self.request_arguments = request_arguments
-        self.expected_code = expected_code
-        self.__validate_method()
-        self.__send_request(stream=True)
-        self.__validate_response()
-        return self.response
 
     def __validate_method(self):
         """Check if the input request method for the request is supported.

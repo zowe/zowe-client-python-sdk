@@ -155,7 +155,7 @@ class TestRequestHandlerClass(unittest.TestCase):
         """Performing a streamed request should call 'send_request' method"""
         mock_send_request.return_value = mock.Mock(status_code=200)
         request_handler = RequestHandler(self.session_arguments)
-        request_handler.perform_streamed_request("GET", {"url": "https://www.zowe.org"})
+        request_handler.perform_request("GET", {"url": "https://www.zowe.org"}, stream = True)
         mock_send_request.assert_called_once()
         self.assertTrue(mock_send_request.call_args[1]["stream"])
 

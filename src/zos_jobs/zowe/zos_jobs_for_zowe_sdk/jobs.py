@@ -34,7 +34,7 @@ class Jobs(SdkApi):
         connection
             The connection object
         """
-        super().__init__(connection, "/zosmf/restjobs/jobs/")
+        super().__init__(connection, "/zosmf/restjobs/jobs/", logger_name=__name__)
 
     def get_job_status(self, jobname, jobid):
         """Retrieve the status of a given job on JES.
