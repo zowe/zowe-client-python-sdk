@@ -95,6 +95,14 @@ class TestSdkApiClass(TestCase):
         sdk_api = SdkApi(self.basic_props, self.default_url)
         self.assertIsInstance(sdk_api, SdkApi)
 
+    @mock.patch("logging.Logger.error")
+    def test_session_no_host_logger(self, mock_logger_error: mock.MagicMock):
+        props = {}
+        try:
+            sdk_api = SdkApi(props, self.default_url)
+        except Exception:
+            mock_logger_error.assert_called()
+
     def test_should_handle_basic_auth(self):
         """Created object should handle basic authentication."""
         sdk_api = SdkApi(self.basic_props, self.default_url)
