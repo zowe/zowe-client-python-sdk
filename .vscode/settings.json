@@ -16,6 +16,7 @@
         "./src/core",
         "./src/zos_console",
         "./src/zos_files",
-        "./src/zos_jobs"
+        "./src/zos_jobs",
+        "./src/zosmf"
     ],
 }

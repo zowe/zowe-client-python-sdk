@@ -37,6 +37,9 @@ class RequestHandler:
         ----------
         session_arguments
             The Zowe SDK session arguments
+
+        logger_name
+            The logger name of the modules calling request handler
         """
         self.session_arguments = session_arguments
         self.valid_methods = ["GET", "POST", "PUT", "DELETE"]
@@ -59,6 +62,8 @@ class RequestHandler:
             The dictionary containing the required arguments for the execution of the request
         expected_code: int
             The list containing the acceptable response codes (default is [200])
+        stream: boolean
+            The boolean value whether the request is stream
 
         Returns
         -------

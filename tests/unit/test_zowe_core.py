@@ -8,6 +8,7 @@ import os
 import shutil
 import unittest
 from unittest import mock
+import logging
 
 import commentjson
 from jsonschema import SchemaError, ValidationError, validate
@@ -24,6 +25,7 @@ from zowe.core_for_zowe_sdk import (
     custom_warnings,
     exceptions,
     session_constants,
+    logger
 )
 from zowe.core_for_zowe_sdk.validators import validate_config_json
 from zowe.secrets_for_zowe_sdk import keyring
@@ -150,12 +152,25 @@ class TestRequestHandlerClass(unittest.TestCase):
         request_handler = RequestHandler(self.session_arguments)
         self.assertIsInstance(request_handler, RequestHandler)
 
+    @mock.patch("logging.Logger.debug")
+    @mock.patch("logging.Logger.error")
     @mock.patch("requests.Session.send")
-    def test_perform_streamed_request(self, mock_send_request):
+    def test_perform_streamed_request(self, mock_send_request, mock_logger_error: mock.MagicMock, mock_logger_debug: mock.MagicMock):
         """Performing a streamed request should call 'send_request' method"""
         mock_send_request.return_value = mock.Mock(status_code=200)
         request_handler = RequestHandler(self.session_arguments)
         request_handler.perform_request("GET", {"url": "https://www.zowe.org"}, stream = True)
+
+        mock_logger_error.assert_not_called()
+        mock_logger_debug.assert_called()
+
+        #
+        # # This will fail because parameter also contains the arguments of perform_request
+        # mock_logger_debug.assert_called_with("Request method: GET")
+        #
+        #  But this will pass because we are partially looking for the request method in the first argument
+        self.assertIn("Request method: GET", mock_logger_debug.call_args[0][0])
+
         mock_send_request.assert_called_once()
         self.assertTrue(mock_send_request.call_args[1]["stream"])
 
@@ -949,3 +964,12 @@ class TestValidateConfigJsonClass(TestCase):
             validate_config_json(path_to_invalid_config, path_to_invalid_schema, cwd=FIXTURES_PATH)
 
         self.assertEqual(str(actual_info.exception), str(expected_info.exception))
+
+
+class test_logger_setLoggerLevel(TestCase):
+    
+    def test_logger_setLoggerLevel(self):
+        test_logging = logger.Log()
+        test_value = logging.INFO
+        test_logging.setLoggerLevel(test_value)
+        self.assertEqual(logging.root.level, test_value)
