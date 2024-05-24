@@ -55,9 +55,6 @@ class SdkApi:
             self.default_headers["Authorization"] = f"Bearer {self.session.tokenValue}"
         elif self.session.type == session_constants.AUTH_TYPE_TOKEN:
             self.default_headers["Cookie"] = f"{self.session.tokenType}={self.session.tokenValue}"
-        else:
-            self.logger.error("Unsupported authorization type")
-            raise UnsupportedAuthType(self.session.type)
 
     def _create_custom_request_arguments(self):
         """Create a copy of the default request arguments dictionary.

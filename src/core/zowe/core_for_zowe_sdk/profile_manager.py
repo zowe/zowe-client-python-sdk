@@ -185,18 +185,23 @@ class ProfileManager:
                 profile_name=profile_name, profile_type=profile_type, validate_schema=validate_schema
             )
         except jsonschema.exceptions.ValidationError as exc:
+            logger.error(f"Instance was invalid under the provided $schema property, {exc}")
             raise jsonschema.exceptions.ValidationError(
                 f"Instance was invalid under the provided $schema property, {exc}"
             )
         except jsonschema.exceptions.SchemaError as exc:
+            logger.error(f"The provided schema is invalid, {exc}")
             raise jsonschema.exceptions.SchemaError(f"The provided schema is invalid, {exc}")
         except jsonschema.exceptions.UndefinedTypeCheck as exc:
+            logger.error(f"A type checker was asked to check a type it did not have registered, {exc}")
             raise jsonschema.exceptions.UndefinedTypeCheck(
                 f"A type checker was asked to check a type it did not have registered, {exc}"
             )
         except jsonschema.exceptions.UnknownType as exc:
+            logger.error(f"Unknown type is found in schema_json, exc")
             raise jsonschema.exceptions.UnknownType(f"Unknown type is found in schema_json, exc")
         except jsonschema.exceptions.FormatError as exc:
+            logger.error(f"Validating a format config_json failed for schema_json, {exc}")
             raise jsonschema.exceptions.FormatError(f"Validating a format config_json failed for schema_json, {exc}")
         except ProfileNotFound:
             if profile_name:

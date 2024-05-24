@@ -111,7 +111,7 @@ class RequestHandler:
             If the HTTP/HTTPS request fails
         """
         # Automatically checks if status code is between 200 and 400
-        if self.response:
+        if self.response.ok:
             if self.response.status_code not in self.expected_code:
                 self.__logger.error(f"The status code from z/OSMF was: {self.expected_code}\nExpected: {self.response.status_code}\nRequest output:{self.response.text}")
                 raise UnexpectedStatus(self.expected_code, self.response.status_code, self.response.text)
