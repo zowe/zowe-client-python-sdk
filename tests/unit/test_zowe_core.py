@@ -181,20 +181,14 @@ class TestRequestHandlerClass(unittest.TestCase):
 
         mock_logger_error.assert_not_called()
         mock_logger_debug.assert_called()
-
-        #
-        # # This will fail because parameter also contains the arguments of perform_request
-        # mock_logger_debug.assert_called_with("Request method: GET")
-        #
-        #  But this will pass because we are partially looking for the request method in the first argument
         self.assertIn("Request method: GET", mock_logger_debug.call_args[0][0])
-
         mock_send_request.assert_called_once()
         self.assertTrue(mock_send_request.call_args[1]["stream"])
 
 
     @mock.patch("logging.Logger.error")
     def test_logger_unmatched_status_code(self, mock_logger_error: mock.MagicMock):
+        """Test logger with unexpeceted status code"""
         request_handler = RequestHandler(self.session_arguments)
         try:
             request_handler.perform_request("GET", {"url": "https://www.zowe.org"}, expected_code= [0], stream = True)
@@ -204,6 +198,7 @@ class TestRequestHandlerClass(unittest.TestCase):
     
     @mock.patch("logging.Logger.error")
     def test_logger_perform_request_invalid_method(self, mock_logger_error: mock.MagicMock):
+        """Test logger with invalid request method"""
         request_handler = RequestHandler(self.session_arguments)
         try:
             request_handler.perform_request("Invalid method", {"url": "https://www.zowe.org"}, stream = True)
@@ -482,7 +477,7 @@ class TestZosmfProfileManager(TestCase):
     @mock.patch("zowe.secrets_for_zowe_sdk.keyring.get_password", side_effect=keyring_get_password)
     def test_validate_schema_logger(self, get_pass_func, mock_logger_warning: mock.MagicMock):
         """
-        Test correct exceptions are being thrown when schema property is empty.
+        Test correct exceptions are being thrown when schema property is not set.
 
         Schema property will be initialized to None.
         """
@@ -1074,7 +1069,8 @@ class TestValidateConfigJsonClass(TestCase):
 class test_logger_setLoggerLevel(TestCase):
     
     def test_logger_setLoggerLevel(self):
+        """Test setLoggerLevel"""
         test_logging = logger.Log()
-        test_value = logging.INFO
+        test_value = logging.DEBUG
         test_logging.setLoggerLevel(test_value)
         self.assertEqual(logging.root.level, test_value)
