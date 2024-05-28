@@ -458,7 +458,7 @@ class TestZosmfProfileManager(TestCase):
             self.setUpCreds(cwd_up_file_path, secure_props={})
             config_file = ConfigFile(name=self.custom_appname, type="team_config")
             props: dict = config_file.get_profile(profile_name=None,profile_type=None,validate_schema=False)
-            self.assertEqual(mock_logger_error.call_args[0][0], "Failed to load profile 'None' because Could not find profile as both profile_name and profile_type is not set")
+        self.assertEqual(mock_logger_error.call_args[0][0], "Failed to load profile 'None' because Could not find profile as both profile_name and profile_type is not set")
 
     @mock.patch("logging.Logger.error")
     @mock.patch("logging.Logger.warning")
@@ -470,11 +470,13 @@ class TestZosmfProfileManager(TestCase):
 
         """
         with self.assertRaises(exceptions.ProfileNotFound):
-            config_file = ConfigFile(name=self.custom_appname, type="team_config", defaults={}, profiles={'a': {'type' : 'none'}})
-            config_file.get_profilename_from_profiletype('test')
-            self.assertEqual(mock_logger_warning.call_args[0][0], "Given profile type 'test' has no default profile name")
-            self.assertEqual(mock_logger_warning.call_args[1][0], "Profile 'a' has no type attribute")
-            self.assertEqual(mock_logger_error.call_args[0][0], "No profile with matching profile_type 'test' found")
+                config_file = ConfigFile(name="name", type="team_config", defaults={}, profiles={'a': {'none' : 'none'}})
+                config_file.get_profilename_from_profiletype('test')
+
+        mock_logger_warning.assert_any_call("Given profile type 'test' has no default profile name")
+        mock_logger_warning.assert_any_call("Profile 'a' has no type attribute")
+        mock_logger_error.assert_called_once_with("No profile with matching profile_type 'test' found")
+
 
     @mock.patch("logging.Logger.warning")
     @mock.patch("zowe.secrets_for_zowe_sdk.keyring.get_password", side_effect=keyring_get_password)
@@ -485,7 +487,7 @@ class TestZosmfProfileManager(TestCase):
         Schema property will be initialized to None.
         """
         with self.assertWarns(UserWarning):
-            config_file = ConfigFile(name=self.custom_appname, type="team_config")
+            config_file = ConfigFile(name="name", type="team_config")
             config_file.validate_schema()
             self.assertEqual(mock_logger_warning.call_args[0][0], "Could not find $schema property")
 
