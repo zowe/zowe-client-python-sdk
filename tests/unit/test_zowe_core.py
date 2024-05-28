@@ -434,9 +434,60 @@ class TestZosmfProfileManager(TestCase):
             shutil.copy(self.original_file_path, cwd_up_file_path)
 
             # Test
+            self.setUpCreds(cwd_up_file_path, secure_props={})
             config_file = ConfigFile(name=self.custom_appname, type="team_config")
             props: dict = config_file.get_profile(profile_name="non_existent_profile", validate_schema=False)
-            mock_logger_warning.assert_called()
+            self.assertEqual(mock_logger_warning.call_args[0][0], "Profile non_existent_profile not found")
+
+    @mock.patch("logging.Logger.error")
+    @mock.patch("zowe.secrets_for_zowe_sdk.keyring.get_password", side_effect=keyring_get_password)
+    def test_profile_empty_exception(self, get_pass_func, mock_logger_error: mock.MagicMock):
+        """
+        Test correct exceptions are being thrown when a profile is
+        not found.
+
+        Filename and Filetype will be set to None.
+        """
+        with self.assertRaises(exceptions.ProfileNotFound):
+            # Setup
+            cwd_up_dir_path = os.path.dirname(CWD)
+            cwd_up_file_path = os.path.join(cwd_up_dir_path, f"{self.custom_appname}.config.json")
+            shutil.copy(self.original_file_path, cwd_up_file_path)
+
+            # Test
+            self.setUpCreds(cwd_up_file_path, secure_props={})
+            config_file = ConfigFile(name=self.custom_appname, type="team_config")
+            props: dict = config_file.get_profile(profile_name=None,profile_type=None,validate_schema=False)
+            self.assertEqual(mock_logger_error.call_args[0][0], "Failed to load profile 'None' because Could not find profile as both profile_name and profile_type is not set")
+
+    @mock.patch("logging.Logger.error")
+    @mock.patch("logging.Logger.warning")
+    @mock.patch("zowe.secrets_for_zowe_sdk.keyring.get_password", side_effect=keyring_get_password)
+    def test_get_profilename_from_profiletype_invalid_profile_type(self, get_pass_func, mock_logger_warning: mock.MagicMock, mock_logger_error: mock.MagicMock):
+        """
+        Test correct warnings and exceptions are being thrown with
+        empty default, invalid profile type.
+
+        """
+        with self.assertRaises(exceptions.ProfileNotFound):
+            config_file = ConfigFile(name=self.custom_appname, type="team_config", defaults={}, profiles={'a': {'type' : 'none'}})
+            config_file.get_profilename_from_profiletype('test')
+            self.assertEqual(mock_logger_warning.call_args[0][0], "Given profile type 'test' has no default profile name")
+            self.assertEqual(mock_logger_warning.call_args[1][0], "Profile 'a' has no type attribute")
+            self.assertEqual(mock_logger_error.call_args[0][0], "No profile with matching profile_type 'test' found")
+
+    @mock.patch("logging.Logger.warning")
+    @mock.patch("zowe.secrets_for_zowe_sdk.keyring.get_password", side_effect=keyring_get_password)
+    def test_validate_schema(self, get_pass_func, mock_logger_warning: mock.MagicMock):
+        """
+        Test correct exceptions are being thrown when schema property is empty.
+
+        Schema property will be initialized to None.
+        """
+        with self.assertWarns(UserWarning):
+            config_file = ConfigFile(name=self.custom_appname, type="team_config")
+            config_file.validate_schema()
+            self.assertEqual(mock_logger_warning.call_args[0][0], "Could not find $schema property")
 
     @mock.patch("zowe.secrets_for_zowe_sdk.keyring.get_password", side_effect=keyring_get_password_exception)
     def test_secure_props_loading_warning(self, get_pass_func):

@@ -96,10 +96,6 @@ class ConfigFile:
     def location(self) -> Optional[str]:
         return self._location
 
-    @property
-    def schema_path(self) -> Optional[str]:
-        return self.schema_property
-
     @location.setter
     def location(self, dirname: str) -> None:
         if os.path.isdir(dirname):
@@ -137,7 +133,7 @@ class ConfigFile:
         self.defaults = profile_jsonc.get("defaults", {})
         self.jsonc = profile_jsonc
 
-        if self.schema_property and validate_schema:
+        if validate_schema:
             self.validate_schema()
 
         CredentialManager.load_secure_props()
@@ -151,17 +147,11 @@ class ConfigFile:
         -------
         file_path to the $schema property
         """
-
-        path_schema_json = None
-
-        path_schema_json = self.schema_path
-        if path_schema_json is None:  # check if the $schema property is not defined
+        if self.schema_property is None:  # check if the $schema property is not defined
             self.__logger.warning(f"Could not find $schema property")
             warnings.warn(f"Could not find $schema property")
-
-        # validate the $schema property
-        if path_schema_json:
-            validate_config_json(self.jsonc, path_schema_json, cwd=self.location)
+        else:
+            validate_config_json(self.jsonc, self.schema_property, cwd=self.location)
 
     def schema_list(self, cwd=None) -> list:
         """
@@ -277,9 +267,9 @@ class ConfigFile:
         try:
             profilename = self.defaults[profile_type]
         except KeyError:
-            self.__logger.warn(f"Given profile type '{profile_type}' has no default profilename")
+            self.__logger.warn(f"Given profile type '{profile_type}' has no default profile name")
             warnings.warn(
-                f"Given profile type '{profile_type}' has no default profilename",
+                f"Given profile type '{profile_type}' has no default profile name",
                 ProfileParsingWarning,
             )
         else:
