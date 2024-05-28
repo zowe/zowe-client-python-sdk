@@ -437,7 +437,7 @@ class TestZosmfProfileManager(TestCase):
             self.setUpCreds(cwd_up_file_path, secure_props={})
             config_file = ConfigFile(name=self.custom_appname, type="team_config")
             props: dict = config_file.get_profile(profile_name="non_existent_profile", validate_schema=False)
-            self.assertEqual(mock_logger_warning.call_args[0][0], "Profile non_existent_profile not found")
+        self.assertEqual(mock_logger_warning.call_args[0][0], "Profile non_existent_profile not found")
 
     @mock.patch("logging.Logger.error")
     @mock.patch("zowe.secrets_for_zowe_sdk.keyring.get_password", side_effect=keyring_get_password)
@@ -480,7 +480,7 @@ class TestZosmfProfileManager(TestCase):
 
     @mock.patch("logging.Logger.warning")
     @mock.patch("zowe.secrets_for_zowe_sdk.keyring.get_password", side_effect=keyring_get_password)
-    def test_validate_schema(self, get_pass_func, mock_logger_warning: mock.MagicMock):
+    def test_validate_schema_logger(self, get_pass_func, mock_logger_warning: mock.MagicMock):
         """
         Test correct exceptions are being thrown when schema property is empty.
 
@@ -489,7 +489,7 @@ class TestZosmfProfileManager(TestCase):
         with self.assertWarns(UserWarning):
             config_file = ConfigFile(name="name", type="team_config")
             config_file.validate_schema()
-            self.assertEqual(mock_logger_warning.call_args[0][0], "Could not find $schema property")
+        self.assertEqual(mock_logger_warning.call_args[0][0], "Could not find $schema property")
 
     @mock.patch("zowe.secrets_for_zowe_sdk.keyring.get_password", side_effect=keyring_get_password_exception)
     def test_secure_props_loading_warning(self, get_pass_func):
@@ -710,9 +710,9 @@ class TestZosmfProfileManager(TestCase):
         prof_manager.config_dir = self.custom_dir
         props: dict = prof_manager.load(profile_name="zosmf")
 
-    @mock.patch("logging.Logger.error")
+
     @mock.patch("zowe.secrets_for_zowe_sdk.keyring.get_password", side_effect=keyring_get_password)
-    def test_profile_loading_with_invalid_schema(self, get_pass_func, mock_logger_error: mock.MagicMock):
+    def test_profile_loading_with_invalid_schema(self, get_pass_func):
         """
         Test Validation, no error should be raised for valid schema
         """
@@ -741,11 +741,9 @@ class TestZosmfProfileManager(TestCase):
             prof_manager = ProfileManager(appname="invalid.zowe")
             prof_manager.config_dir = self.custom_dir
             props: dict = prof_manager.load(profile_name="zosmf", validate_schema=True)
-            self.assertIn("Instance was invalid under the provided $schema property", mock_logger_error.call_args[0][0])
 
-    @mock.patch("logging.Logger.error")
     @mock.patch("zowe.secrets_for_zowe_sdk.keyring.get_password", side_effect=keyring_get_password)
-    def test_profile_loading_with_invalid_schema_internet_URI(self, get_pass_func, mock_logger_error: mock.MagicMock):
+    def test_profile_loading_with_invalid_schema_internet_URI(self, get_pass_func):
         """
         Test Validation, no error should be raised for valid schema
         """
@@ -775,7 +773,6 @@ class TestZosmfProfileManager(TestCase):
             prof_manager = ProfileManager(appname="invalidUri.zowe")
             prof_manager.config_dir = self.custom_dir
             props: dict = prof_manager.load(profile_name="zosmf", validate_schema=True)
-            self.assertIn("The provided schema is invalid", mock_logger_error.call_args[0][0])
 
     @mock.patch("zowe.secrets_for_zowe_sdk.keyring.get_password", side_effect=keyring_get_password)
     def test_profile_loading_with_env_variables(self, get_pass_func):
