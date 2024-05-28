@@ -2,6 +2,12 @@
 
 All notable changes to the Zowe Client Python SDK will be documented in this file.
 
+## Recent Changes
+
+### Enhancements
+
+- Added logger class to core SDK
+
 ## `1.0.0-dev15`
 
 ### Bug Fixes
