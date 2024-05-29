@@ -6,7 +6,7 @@ All notable changes to the Zowe Client Python SDK will be documented in this fil
 
 ### Enhancements
 
-- Added logger class to core SDK [#185] https://github.com/zowe/zowe-client-python-sdk/issues/185
+- Added logger class to core SDK [#185](https://github.com/zowe/zowe-client-python-sdk/issues/185)
 
 ## `1.0.0-dev15`
 
