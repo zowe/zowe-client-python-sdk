@@ -15,6 +15,12 @@ class Log:
         datefmt="%m/%d/%Y %I:%M:%S %p",
     )
 
+    loggers = []
+    @staticmethod
+    def registerLogger(name: string):
+        Log.loggers.append(logging.getLogger(name))
+
     @staticmethod
     def setLoggerLevel(level: int):
-        logging.root.setLevel(level)
+        for logger in Log.loggers:
+            logger.setLevel(level)
