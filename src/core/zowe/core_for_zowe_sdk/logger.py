@@ -17,7 +17,7 @@ class Log:
 
     loggers = []
     @staticmethod
-    def registerLogger(name: string):
+    def registerLogger(name: str):
         Log.loggers.append(logging.getLogger(name))
 
     @staticmethod
