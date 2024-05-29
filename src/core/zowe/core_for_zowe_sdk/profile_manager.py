@@ -21,6 +21,7 @@ import jsonschema
 from deepmerge import always_merger
 
 from .config_file import ConfigFile, Profile
+from .logger import Log
 from .credential_manager import CredentialManager
 from .custom_warnings import (
     ConfigNotFoundWarning,
@@ -59,6 +60,7 @@ class ProfileManager:
         self.project_user_config = ConfigFile(type=USER_CONFIG, name=appname)
 
         self.__logger = logging.getLogger(__name__)
+        Log.registerLogger(__name__)
 
         self.global_config = ConfigFile(type=TEAM_CONFIG, name=GLOBAL_CONFIG_NAME)
         try:

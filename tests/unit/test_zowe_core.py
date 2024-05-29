@@ -1070,7 +1070,8 @@ class test_logger_setLoggerLevel(TestCase):
     
     def test_logger_setLoggerLevel(self):
         """Test setLoggerLevel"""
-        test_logging = logger.Log()
+        profile = ProfileManager()
+        test_logger = logging.getLogger("zowe.core_for_zowe_sdk.profile_manager")
         test_value = logging.DEBUG
-        test_logging.setLoggerLevel(test_value)
-        self.assertEqual(logging.root.level, test_value)
+        logger.Log.setLoggerLevel(test_value)
+        self.assertEqual(test_logger.level, test_value)
