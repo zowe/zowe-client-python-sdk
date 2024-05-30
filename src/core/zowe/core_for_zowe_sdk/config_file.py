@@ -212,7 +212,7 @@ class ConfigFile:
             self.init_from_file(validate_schema)
 
         if profile_name is None and profile_type is None:
-            self.__logger.error(f"Failed to load profile '{profile_name}' because Could not find profile as both profile_name and profile_type is not set")
+            self.__logger.error(f"Failed to load profile: profile_name and profile_type were not provided.")
             raise ProfileNotFound(
                 profile_name=profile_name,
                 error_msg="Could not find profile as both profile_name and profile_type is not set.",
