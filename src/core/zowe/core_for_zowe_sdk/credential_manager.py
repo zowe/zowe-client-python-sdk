@@ -20,6 +20,7 @@ import logging
 
 from .constants import constants
 from .exceptions import SecureProfileLoadFailed
+from .logger import Log
 
 HAS_KEYRING = True
 try:
@@ -30,7 +31,7 @@ except ImportError:
 
 class CredentialManager:
     secure_props = {}
-    __logger = logging.getLogger(__name__)
+    __logger = Log.registerLogger(__name__)
 
     @staticmethod
     def load_secure_props() -> None:

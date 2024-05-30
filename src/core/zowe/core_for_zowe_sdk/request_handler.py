@@ -15,6 +15,7 @@ import urllib3
 import logging
 
 from .exceptions import InvalidRequestMethod, RequestFailed, UnexpectedStatus
+from .logger import Log
 
 
 class RequestHandler:
@@ -44,7 +45,7 @@ class RequestHandler:
         self.session_arguments = session_arguments
         self.valid_methods = ["GET", "POST", "PUT", "DELETE"]
         self.__handle_ssl_warnings()
-        self.__logger = logging.getLogger(logger_name)
+        self.__logger = Log.registerLogger(__name__)
 
     def __handle_ssl_warnings(self):
         """Turn off warnings if the SSL verification argument if off."""

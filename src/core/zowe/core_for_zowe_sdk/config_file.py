@@ -28,6 +28,7 @@ from .custom_warnings import ProfileNotFoundWarning, ProfileParsingWarning
 from .exceptions import ProfileNotFound
 from .profile_constants import GLOBAL_CONFIG_NAME, TEAM_CONFIG, USER_CONFIG
 from .validators import validate_config_json
+from .logger import Log
 
 HOME = os.path.expanduser("~")
 GLOBAL_CONFIG_LOCATION = os.path.join(HOME, ".zowe")
@@ -73,7 +74,7 @@ class ConfigFile:
     jsonc: Optional[dict] = None
     _missing_secure_props: list = field(default_factory=list)
 
-    __logger = logging.getLogger(__name__)
+    __logger = Log.registerLogger(__name__)
 
     @property
     def filename(self) -> str:

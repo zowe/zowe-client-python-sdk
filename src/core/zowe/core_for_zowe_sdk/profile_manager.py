@@ -59,8 +59,7 @@ class ProfileManager:
         self.project_config = ConfigFile(type=TEAM_CONFIG, name=appname)
         self.project_user_config = ConfigFile(type=USER_CONFIG, name=appname)
 
-        self.__logger = logging.getLogger(__name__)
-        Log.registerLogger(__name__)
+        self.__logger = Log.registerLogger(__name__)
 
         self.global_config = ConfigFile(type=TEAM_CONFIG, name=GLOBAL_CONFIG_NAME)
         try:

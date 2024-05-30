@@ -18,7 +18,10 @@ class Log:
     loggers = []
     @staticmethod
     def registerLogger(name: str):
-        Log.loggers.append(logging.getLogger(name))
+        """A function to get Logger and registered for level setting"""
+        logger = logging.getLogger(name)
+        Log.loggers.append(logger)
+        return logger
 
     @staticmethod
     def setLoggerLevel(level: int):
