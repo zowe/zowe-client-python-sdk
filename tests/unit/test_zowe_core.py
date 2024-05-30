@@ -1022,7 +1022,7 @@ class TestValidateConfigJsonClass(TestCase):
 
     def setUp(self):
         self.setUpPyfakefs()
-
+        
         self.original_file_path = os.path.join(FIXTURES_PATH, "zowe.config.json")
         self.original_schema_file_path = os.path.join(FIXTURES_PATH, "zowe.schema.json")
         self.fs.add_real_file(self.original_file_path)
