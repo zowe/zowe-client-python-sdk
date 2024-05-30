@@ -200,7 +200,7 @@ class ProfileManager:
                 f"A type checker was asked to check a type it did not have registered, {exc}"
             )
         except jsonschema.exceptions.UnknownType as exc:
-            logger.error(f"Unknown type is found in schema_json, exc")
+            logger.error(f"Unknown type is found in schema_json, {exc}")
             raise jsonschema.exceptions.UnknownType(f"Unknown type is found in schema_json, exc")
         except jsonschema.exceptions.FormatError as exc:
             logger.error(f"Validating a format config_json failed for schema_json, {exc}")
