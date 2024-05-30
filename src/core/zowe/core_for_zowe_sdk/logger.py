@@ -2,7 +2,7 @@ import logging
 import os
 
 class Log:
-    """root logger setup and a funtion to customize logger level"""
+    """root logger setup and a function to customize logger level"""
 
     dirname = os.path.join(os.path.expanduser("~"), ".zowe/logs")
 
