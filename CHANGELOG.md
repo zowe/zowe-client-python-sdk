@@ -8,6 +8,8 @@ All notable changes to the Zowe Client Python SDK will be documented in this fil
 
 - Refactor Files class into proper classes [#264](https://github.com/zowe/zowe-client-python-sdk/issues/264)
 
+- Refactor testings into proper folders and files [#265](https://github.com/zowe/zowe-client-python-sdk/issues/265)
+
 ## `1.0.0-dev15`
 
 ### Bug Fixes
