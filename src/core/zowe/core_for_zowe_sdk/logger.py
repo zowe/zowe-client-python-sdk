@@ -2,7 +2,7 @@ import logging
 import os
 
 class Log:
-    """root logger setup and a funtion to customize logger level"""
+    """root logger setup and a function to customize logger level"""
 
     dirname = os.path.join(os.path.expanduser("~"), ".zowe/logs")
 
@@ -18,7 +18,10 @@ class Log:
     loggers = []
     @staticmethod
     def registerLogger(name: str):
-        Log.loggers.append(logging.getLogger(name))
+        """A function to get Logger and registered for level setting"""
+        logger = logging.getLogger(name)
+        Log.loggers.append(logger)
+        return logger
 
     @staticmethod
     def setLoggerLevel(level: int):

@@ -28,6 +28,7 @@ from .custom_warnings import ProfileNotFoundWarning, ProfileParsingWarning
 from .exceptions import ProfileNotFound
 from .profile_constants import GLOBAL_CONFIG_NAME, TEAM_CONFIG, USER_CONFIG
 from .validators import validate_config_json
+from .logger import Log
 
 HOME = os.path.expanduser("~")
 GLOBAL_CONFIG_LOCATION = os.path.join(HOME, ".zowe")
@@ -73,7 +74,7 @@ class ConfigFile:
     jsonc: Optional[dict] = None
     _missing_secure_props: list = field(default_factory=list)
 
-    __logger = logging.getLogger(__name__)
+    __logger = Log.registerLogger(__name__)
 
     @property
     def filename(self) -> str:
@@ -212,7 +213,7 @@ class ConfigFile:
             self.init_from_file(validate_schema)
 
         if profile_name is None and profile_type is None:
-            self.__logger.error(f"Failed to load profile '{profile_name}' because Could not find profile as both profile_name and profile_type is not set")
+            self.__logger.error(f"Failed to load profile: profile_name and profile_type were not provided.")
             raise ProfileNotFound(
                 profile_name=profile_name,
                 error_msg="Could not find profile as both profile_name and profile_type is not set.",

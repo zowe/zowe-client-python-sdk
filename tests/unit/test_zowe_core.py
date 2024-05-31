@@ -453,7 +453,7 @@ class TestZosmfProfileManager(TestCase):
             self.setUpCreds(cwd_up_file_path, secure_props={})
             config_file = ConfigFile(name=self.custom_appname, type="team_config")
             props: dict = config_file.get_profile(profile_name=None,profile_type=None,validate_schema=False)
-        self.assertEqual(mock_logger_error.call_args[0][0], "Failed to load profile 'None' because Could not find profile as both profile_name and profile_type is not set")
+        self.assertEqual(mock_logger_error.call_args[0][0], "Failed to load profile: profile_name and profile_type were not provided.")
 
     @mock.patch("logging.Logger.error")
     @mock.patch("logging.Logger.warning")

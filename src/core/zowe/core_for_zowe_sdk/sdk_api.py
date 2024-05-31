@@ -17,6 +17,7 @@ from . import session_constants
 from .exceptions import UnsupportedAuthType
 from .request_handler import RequestHandler
 from .session import ISession, Session
+from .logger import Log
 
 
 class SdkApi:
@@ -29,7 +30,7 @@ class SdkApi:
         session = Session(profile)
         self.session: ISession = session.load()
 
-        self.logger = logging.getLogger(logger_name)
+        self.logger = Log.registerLogger(logger_name)
 
         self.default_service_url = default_url
         self.default_headers = {

@@ -59,8 +59,7 @@ class ProfileManager:
         self.project_config = ConfigFile(type=TEAM_CONFIG, name=appname)
         self.project_user_config = ConfigFile(type=USER_CONFIG, name=appname)
 
-        self.__logger = logging.getLogger(__name__)
-        Log.registerLogger(__name__)
+        self.__logger = Log.registerLogger(__name__)
 
         self.global_config = ConfigFile(type=TEAM_CONFIG, name=GLOBAL_CONFIG_NAME)
         try:
@@ -200,7 +199,7 @@ class ProfileManager:
                 f"A type checker was asked to check a type it did not have registered, {exc}"
             )
         except jsonschema.exceptions.UnknownType as exc:
-            logger.error(f"Unknown type is found in schema_json, exc")
+            logger.error(f"Unknown type is found in schema_json, {exc}")
             raise jsonschema.exceptions.UnknownType(f"Unknown type is found in schema_json, exc")
         except jsonschema.exceptions.FormatError as exc:
             logger.error(f"Validating a format config_json failed for schema_json, {exc}")
