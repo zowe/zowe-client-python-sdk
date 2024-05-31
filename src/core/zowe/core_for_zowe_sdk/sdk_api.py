@@ -11,11 +11,13 @@ Copyright Contributors to the Zowe Project.
 """
 
 import urllib
+import logging
 
 from . import session_constants
 from .exceptions import UnsupportedAuthType
 from .request_handler import RequestHandler
 from .session import ISession, Session
+from .logger import Log
 
 
 class SdkApi:
@@ -23,10 +25,12 @@ class SdkApi:
     Abstract class used to represent the base SDK API.
     """
 
-    def __init__(self, profile, default_url):
+    def __init__(self, profile, default_url, logger_name = __name__):
         self.profile = profile
         session = Session(profile)
         self.session: ISession = session.load()
+
+        self.logger = Log.registerLogger(logger_name)
 
         self.default_service_url = default_url
         self.default_headers = {
@@ -44,7 +48,7 @@ class SdkApi:
             "verify": self.session.rejectUnauthorized,
             "timeout": 30,
         }
-        self.request_handler = RequestHandler(self.session_arguments)
+        self.request_handler = RequestHandler(self.session_arguments, logger_name = logger_name)
 
         if self.session.type == session_constants.AUTH_TYPE_BASIC:
             self.request_arguments["auth"] = (self.session.user, self.session.password)
@@ -52,8 +56,6 @@ class SdkApi:
             self.default_headers["Authorization"] = f"Bearer {self.session.tokenValue}"
         elif self.session.type == session_constants.AUTH_TYPE_TOKEN:
             self.default_headers["Cookie"] = f"{self.session.tokenType}={self.session.tokenValue}"
-        else:
-            raise UnsupportedAuthType(self.session.type)
 
     def _create_custom_request_arguments(self):
         """Create a copy of the default request arguments dictionary.

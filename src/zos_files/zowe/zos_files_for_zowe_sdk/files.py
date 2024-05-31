@@ -10,7 +10,6 @@ SPDX-License-Identifier: EPL-2.0
 Copyright Contributors to the Zowe Project.
 """
 
-
 import os
 
 from zowe.core_for_zowe_sdk import SdkApi
@@ -44,7 +43,7 @@ class Files(SdkApi):
 
         Also update header to accept gzip encoded responses
         """
-        super().__init__(connection, "/zosmf/restfiles/")
+        super().__init__(connection, "/zosmf/restfiles/", logger_name=__name__)
         self.default_headers["Accept-Encoding"] = "gzip"
 
     def list_files(self, path):
@@ -232,6 +231,7 @@ class Files(SdkApi):
             if enq in ("SHR", "SHRW", "EXCLU"):
                 data["enq"] = enq
             else:
+                self.logger.error("Invalid value for enq.")
                 raise ValueError("Invalid value for enq.")
         if volser:
             data["from-dataset"]["volser"] = volser
@@ -270,6 +270,7 @@ class Files(SdkApi):
 
         if options.get("like") is None:
             if options.get("primary") is None or options.get("lrecl") is None:
+                self.logger.error("If 'like' is not specified, you must specify 'primary' or 'lrecl'.")
                 raise ValueError("If 'like' is not specified, you must specify 'primary' or 'lrecl'.")
 
             for opt in (
@@ -292,44 +293,51 @@ class Files(SdkApi):
             ):
                 if opt == "dsorg":
                     if options.get(opt) is not None and options[opt] not in ("PO", "PS"):
+                        self.logger.error(f"{opt} is not 'PO' or 'PS'.")
                         raise KeyError
 
-                if opt == "alcunit":
+                elif opt == "alcunit":
                     if options.get(opt) is None:
                         options[opt] = "TRK"
                     else:
                         if options[opt] not in ("CYL", "TRK"):
+                            self.logger.error(f"{opt} is not 'CYL' or 'TRK'.")
                             raise KeyError
 
-                if opt == "primary":
+                elif opt == "primary":
                     if options.get(opt) is not None:
                         if options["primary"] > 16777215:
+                            self.logger.error("Specified value exceeds limit.")
                             raise ValueError
 
-                if opt == "secondary":
+                elif opt == "secondary":
                     if options.get("primary") is not None:
                         if options.get(opt) is None:
                             options["secondary"] = int(options["primary"] / 10)
                         if options["secondary"] > 16777215:
+                            self.logger.error("Specified value exceeds limit.")
                             raise ValueError
 
-                if opt == "dirblk":
+                elif opt == "dirblk":
                     if options.get(opt) is not None:
                         if options.get("dsorg") == "PS":
                             if options["dirblk"] != 0:
+                                self.logger.error("Can't allocate directory blocks for files.")
                                 raise ValueError
                         elif options.get("dsorg") == "PO":
                             if options["dirblk"] == 0:
+                                self.logger.error("Can't allocate empty directory blocks.")
                                 raise ValueError
 
-                if opt == "recfm":
+                elif opt == "recfm":
                     if options.get(opt) is None:
                         options[opt] = "F"
                     else:
                         if options[opt] not in ("F", "FB", "V", "VB", "U", "FBA", "FBM", "VBA", "VBM"):
+                            self.logger.error("Invalid record format.")
                             raise KeyError
 
-                if opt == "blksize":
+                elif opt == "blksize":
                     if options.get(opt) is None and options.get("lrecl") is not None:
                         options[opt] = options["lrecl"]
 
@@ -356,6 +364,7 @@ class Files(SdkApi):
         """
 
         if default_type not in ("partitioned", "sequential", "classic", "c", "binary"):
+            self.logger.error("Invalid type for default data set.")
             raise ValueError("Invalid type for default data set.")
 
         custom_args = self._create_custom_request_arguments()
@@ -443,7 +452,7 @@ class Files(SdkApi):
         """
         custom_args = self._create_custom_request_arguments()
         custom_args["url"] = "{}ds/{}".format(self.request_endpoint, self._encode_uri_component(dataset_name))
-        response = self.request_handler.perform_streamed_request("GET", custom_args)
+        response = self.request_handler.perform_request("GET", custom_args, stream = True)
         return response
 
     def get_dsn_binary_content(self, dataset_name, with_prefixes=False):
@@ -491,7 +500,7 @@ class Files(SdkApi):
             custom_args["headers"]["X-IBM-Data-Type"] = "record"
         else:
             custom_args["headers"]["X-IBM-Data-Type"] = "binary"
-        response = self.request_handler.perform_streamed_request("GET", custom_args)
+        response = self.request_handler.perform_request("GET", custom_args, stream = True)
         return response
 
     def write_to_dsn(self, dataset_name, data, encoding=_ZOWE_FILES_DEFAULT_ENCODING):
@@ -537,6 +546,7 @@ class Files(SdkApi):
             with open(input_file, "rb") as in_file:
                 response_json = self.write_to_dsn(dataset_name, in_file)
         else:
+            self.logger.error(f"File {input_file} not found.")
             raise FileNotFound(input_file)
 
     def write_to_uss(self, filepath_name, data, encoding=_ZOWE_FILES_DEFAULT_ENCODING):
@@ -559,6 +569,7 @@ class Files(SdkApi):
             with open(input_file, "r", encoding="utf-8") as in_file:
                 response_json = self.write_to_uss(filepath_name, in_file)
         else:
+            self.logger.error(f"File {input_file} not found.")
             raise FileNotFound(input_file)
 
     def get_file_content_streamed(self, file_path, binary=False):
@@ -573,7 +584,7 @@ class Files(SdkApi):
         custom_args["url"] = "{}fs/{}".format(self.request_endpoint, self._encode_uri_component(file_path.lstrip("/")))
         if binary:
             custom_args["headers"]["X-IBM-Data-Type"] = "binary"
-        response = self.request_handler.perform_streamed_request("GET", custom_args)
+        response = self.request_handler.perform_request("GET", custom_args, stream=True)
         return response
 
     def download_uss(self, file_path, output_file, binary=False):
@@ -610,10 +621,12 @@ class Files(SdkApi):
         for key, value in options.items():
             if key == "perms":
                 if value < 0 or value > 777:
+                    self.logger.error("Invalid Permissions Option.")
                     raise exceptions.InvalidPermsOption(value)
 
             if key == "cylsPri" or key == "cylsSec":
                 if value > constants.zos_file_constants["MaxAllocationQuantity"]:
+                    self.logger.error("Maximum allocation quantity exceeded.")
                     raise exceptions.MaxAllocationQuantityExceeded
 
         custom_args = self._create_custom_request_arguments()
@@ -843,6 +856,7 @@ class Files(SdkApi):
             if enq in ("SHRW", "EXCLU"):
                 data["enq"] = enq.strip()
             else:
+                self.logger.error("Invalid value for enq.")
                 raise ValueError("Invalid value for enq.")
 
         custom_args = self._create_custom_request_arguments()

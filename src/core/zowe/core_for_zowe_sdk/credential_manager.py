@@ -9,14 +9,18 @@ SPDX-License-Identifier: EPL-2.0
 
 Copyright Contributors to the Zowe Project.
 """
+
 import base64
 import sys
 from typing import Optional
 
 import commentjson
 
+import logging
+
 from .constants import constants
 from .exceptions import SecureProfileLoadFailed
+from .logger import Log
 
 HAS_KEYRING = True
 try:
@@ -27,6 +31,7 @@ except ImportError:
 
 class CredentialManager:
     secure_props = {}
+    __logger = Log.registerLogger(__name__)
 
     @staticmethod
     def load_secure_props() -> None:
@@ -49,6 +54,7 @@ class CredentialManager:
                 return
 
         except Exception as exc:
+            CredentialManager.__logger.error(f"Fail to load secure profile {constants['ZoweServiceName']}")
             raise SecureProfileLoadFailed(constants["ZoweServiceName"], error_msg=str(exc)) from exc
 
         secure_config: str
@@ -75,7 +81,9 @@ class CredentialManager:
             if sys.platform == "win32":
                 # Delete the existing credential
                 CredentialManager._delete_credential(constants["ZoweServiceName"], constants["ZoweAccountName"])
-            CredentialManager._set_credential(constants["ZoweServiceName"], constants["ZoweAccountName"], encoded_credential)
+            CredentialManager._set_credential(
+                constants["ZoweServiceName"], constants["ZoweAccountName"], encoded_credential
+            )
 
     @staticmethod
     def _get_credential(service_name: str, account_name: str) -> Optional[str]:
