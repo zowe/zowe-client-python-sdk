@@ -6,31 +6,21 @@ import importlib.util
 import json
 import os
 import shutil
-import unittest
 from unittest import mock
-import logging
 
 import commentjson
-from jsonschema import SchemaError, ValidationError, validate
+from jsonschema import SchemaError, ValidationError
 from pyfakefs.fake_filesystem_unittest import TestCase
 from zowe.core_for_zowe_sdk import (
-    ApiConnection,
     ConfigFile,
     CredentialManager,
     ProfileManager,
-    RequestHandler,
-    SdkApi,
-    ZosmfProfile,
     constants,
     custom_warnings,
-    exceptions,
-    session_constants,
-    logger
+    exceptions
 )
-from zowe.core_for_zowe_sdk.validators import validate_config_json
-from zowe.secrets_for_zowe_sdk import keyring
 
-FIXTURES_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fixtures")
+FIXTURES_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "fixtures")
 CWD = os.getcwd()
 CRED_DICT: dict = {}
 SECURE_CONFIG_PROPS: bytes
@@ -40,196 +30,8 @@ def keyring_get_password(serviceName: str, username: str):
     global SECURE_CONFIG_PROPS
     return SECURE_CONFIG_PROPS
 
-
 def keyring_get_password_exception():
     raise Exception
-
-
-class TestApiConnectionClass(unittest.TestCase):
-    """ApiConnection class unit tests."""
-
-    def setUp(self):
-        """Setup ApiConnection fixtures."""
-        self.url = "https://mock-url.com"
-        self.user = "Username"
-        self.password = "Password"
-
-    def test_object_should_be_instance_of_class(self):
-        """Created object should be instance of ApiConnection class."""
-        api_connection = ApiConnection(self.url, self.user, self.password)
-        self.assertIsInstance(api_connection, ApiConnection)
-
-    def test_object_should_raise_custom_error_without_url(self):
-        """Instantiation of ApiConnection object should raise MissingConnectionArgs if host_url is blank."""
-        with self.assertRaises(exceptions.MissingConnectionArgs):
-            ApiConnection(host_url="", user=self.user, password=self.password)
-
-    def test_object_should_raise_custom_error_without_user(self):
-        """Instantiation of ApiConnection object should raise MissingConnectionArgs if user is blank."""
-        with self.assertRaises(exceptions.MissingConnectionArgs):
-            ApiConnection(host_url=self.url, user="", password=self.password)
-
-    def test_object_should_raise_custom_error_without_password(self):
-        """Instantiation of ApiConnection object should raise MissingConnectionArgs if password is blank."""
-        with self.assertRaises(exceptions.MissingConnectionArgs):
-            ApiConnection(host_url=self.url, user=self.user, password="")
-
-
-class TestSdkApiClass(TestCase):
-    """SdkApi class unit tests."""
-
-    def setUp(self):
-        """Setup fixtures for SdkApi class."""
-        common_props = {"host": "mock-url.com", "port": 443, "protocol": "https", "rejectUnauthorized": True}
-        self.basic_props = {**common_props, "user": "Username", "password": "Password"}
-        self.bearer_props = {**common_props, "tokenValue": "BearerToken"}
-        self.token_props = {
-            **common_props,
-            "tokenType": "MyToken",
-            "tokenValue": "TokenValue",
-        }
-        self.default_url = "https://default-api.com/"
-
-    def test_object_should_be_instance_of_class(self):
-        """Created object should be instance of SdkApi class."""
-        sdk_api = SdkApi(self.basic_props, self.default_url)
-        self.assertIsInstance(sdk_api, SdkApi)
-
-    @mock.patch("logging.Logger.error")
-    def test_session_no_host_logger(self, mock_logger_error: mock.MagicMock):
-        props = {}
-        try:
-            sdk_api = SdkApi(props, self.default_url)
-        except Exception:
-            mock_logger_error.assert_called()
-            self.assertIn("Host", mock_logger_error.call_args[0][0])
-
-    @mock.patch("logging.Logger.error")
-    def test_session_no_authentication_logger(self, mock_logger_error: mock.MagicMock):
-        props = {"host": "test"}
-        try:
-            sdk_api = SdkApi(props, self.default_url)
-        except Exception:
-            mock_logger_error.assert_called()
-            self.assertIn("Authentication", mock_logger_error.call_args[0][0])
-
-    def test_should_handle_basic_auth(self):
-        """Created object should handle basic authentication."""
-        sdk_api = SdkApi(self.basic_props, self.default_url)
-        self.assertEqual(sdk_api.session.type, session_constants.AUTH_TYPE_BASIC)
-        self.assertEqual(
-            sdk_api.request_arguments["auth"],
-            (self.basic_props["user"], self.basic_props["password"]),
-        )
-
-    def test_should_handle_bearer_auth(self):
-        """Created object should handle bearer authentication."""
-        sdk_api = SdkApi(self.bearer_props, self.default_url)
-        self.assertEqual(sdk_api.session.type, session_constants.AUTH_TYPE_BEARER)
-        self.assertEqual(
-            sdk_api.default_headers["Authorization"],
-            "Bearer " + self.bearer_props["tokenValue"],
-        )
-
-    def test_should_handle_token_auth(self):
-        """Created object should handle token authentication."""
-        sdk_api = SdkApi(self.token_props, self.default_url)
-        self.assertEqual(sdk_api.session.type, session_constants.AUTH_TYPE_TOKEN)
-        self.assertEqual(
-            sdk_api.default_headers["Cookie"],
-            self.token_props["tokenType"] + "=" + self.token_props["tokenValue"],
-        )
-
-    def test_encode_uri_component(self):
-        """Test string is being adjusted to the correct URL parameter"""
-
-        sdk_api = SdkApi(self.basic_props, self.default_url)
-
-        actual_not_empty = sdk_api._encode_uri_component("MY.STRING@.TEST#.$HERE(MBR#NAME)")
-        expected_not_empty = "MY.STRING%40.TEST%23.%24HERE(MBR%23NAME)"
-        self.assertEqual(actual_not_empty, expected_not_empty)
-
-        actual_wildcard = sdk_api._encode_uri_component("GET.#DS.*")
-        expected_wildcard = "GET.%23DS.*"
-        self.assertEqual(actual_wildcard, expected_wildcard)
-
-        actual_none = sdk_api._encode_uri_component(None)
-        expected_none = None
-        self.assertEqual(actual_none, expected_none)
-
-
-class TestRequestHandlerClass(unittest.TestCase):
-    """RequestHandler class unit tests."""
-
-    def setUp(self):
-        """Setup fixtures for RequestHandler class."""
-        self.session_arguments = {"verify": False}
-
-    def test_object_should_be_instance_of_class(self):
-        """Created object should be instance of RequestHandler class."""
-        request_handler = RequestHandler(self.session_arguments)
-        self.assertIsInstance(request_handler, RequestHandler)
-
-    @mock.patch("logging.Logger.debug")
-    @mock.patch("logging.Logger.error")
-    @mock.patch("requests.Session.send")
-    def test_perform_streamed_request(self, mock_send_request, mock_logger_error: mock.MagicMock, mock_logger_debug: mock.MagicMock):
-        """Performing a streamed request should call 'send_request' method"""
-        mock_send_request.return_value = mock.Mock(status_code=200)
-        request_handler = RequestHandler(self.session_arguments)
-        request_handler.perform_request("GET", {"url": "https://www.zowe.org"}, stream = True)
-
-        mock_logger_error.assert_not_called()
-        mock_logger_debug.assert_called()
-        self.assertIn("Request method: GET", mock_logger_debug.call_args[0][0])
-        mock_send_request.assert_called_once()
-        self.assertTrue(mock_send_request.call_args[1]["stream"])
-
-
-    @mock.patch("logging.Logger.error")
-    def test_logger_unmatched_status_code(self, mock_logger_error: mock.MagicMock):
-        """Test logger with unexpeceted status code"""
-        request_handler = RequestHandler(self.session_arguments)
-        try:
-            request_handler.perform_request("GET", {"url": "https://www.zowe.org"}, expected_code= [0], stream = True)
-        except exceptions.UnexpectedStatus:
-            mock_logger_error.assert_called_once()
-            self.assertIn("The status code", mock_logger_error.call_args[0][0])
-    
-    @mock.patch("logging.Logger.error")
-    def test_logger_perform_request_invalid_method(self, mock_logger_error: mock.MagicMock):
-        """Test logger with invalid request method"""
-        request_handler = RequestHandler(self.session_arguments)
-        try:
-            request_handler.perform_request("Invalid method", {"url": "https://www.zowe.org"}, stream = True)
-        except exceptions.InvalidRequestMethod:
-            mock_logger_error.assert_called_once()
-            self.assertIn("Invalid HTTP method input", mock_logger_error.call_args[0][0])
-
-    @mock.patch("logging.Logger.error")
-    @mock.patch("requests.Session.send")
-    def test_logger_invalid_status_code(self, mock_send_request, mock_logger_error: mock.MagicMock):
-        mock_send_request.return_value = mock.Mock(ok=False)
-        request_handler = RequestHandler(self.session_arguments)
-        try:
-            request_handler.perform_request("GET", {"url": "https://www.zowe.org"}, stream = True)
-        except exceptions.RequestFailed:
-            mock_logger_error.assert_called_once()
-            self.assertIn("HTTP Request has failed", mock_logger_error.call_args[0][0])
-        mock_logger_error.assert_called_once
-
-
-class TestZosmfProfileClass(unittest.TestCase):
-    """ZosmfProfile class unit tests."""
-
-    def setUp(self):
-        """Setup fixtures for ZosmfProfile class."""
-        self.profile_name = "MOCK"
-
-    def test_object_should_be_instance_of_class(self):
-        """Created object should be instance of ZosmfProfile class."""
-        zosmf_profile = ZosmfProfile(self.profile_name)
-        self.assertIsInstance(zosmf_profile, ZosmfProfile)
 
 
 class TestZosmfProfileManager(TestCase):
@@ -1015,63 +817,3 @@ class TestZosmfProfileManager(TestCase):
         self.assertEqual(
             ["port"], list(config_file.jsonc["profiles"]["lpar1"]["profiles"]["zosmf"]["properties"].keys())
         )
-
-
-class TestValidateConfigJsonClass(TestCase):
-    """Testing the validate_config_json function"""
-
-    def setUp(self):
-        self.setUpPyfakefs()
-        
-        self.original_file_path = os.path.join(FIXTURES_PATH, "zowe.config.json")
-        self.original_schema_file_path = os.path.join(FIXTURES_PATH, "zowe.schema.json")
-        self.fs.add_real_file(self.original_file_path)
-        self.fs.add_real_file(self.original_schema_file_path)
-
-    def test_validate_config_json_valid(self):
-        """Test validate_config_json with valid config.json matching schema.json"""
-        config_json = commentjson.load(open(self.original_file_path))
-        schema_json = commentjson.load(open(self.original_schema_file_path))
-
-        expected = validate(config_json, schema_json)
-        result = validate_config_json(self.original_file_path, self.original_schema_file_path, cwd=FIXTURES_PATH)
-
-        self.assertEqual(result, expected)
-
-    def test_validate_config_json_invalid(self):
-        """Test validate_config_json with invalid config.json that does not match schema.json"""
-        custom_dir = os.path.dirname(FIXTURES_PATH)
-        path_to_invalid_config = os.path.join(custom_dir, "invalid.zowe.config.json")
-        path_to_invalid_schema = os.path.join(custom_dir, "invalid.zowe.schema.json")
-
-        with open(self.original_file_path, "r") as f:
-            original_config = commentjson.load(f)
-        original_config["$schema"] = "invalid.zowe.schema.json"
-        original_config["profiles"]["zosmf"]["properties"]["port"] = "10443"
-        with open(path_to_invalid_config, "w") as f:
-            commentjson.dump(original_config, f)
-        with open(self.original_schema_file_path, "r") as f:
-            original_schema = commentjson.load(f)
-        with open(path_to_invalid_schema, "w") as f:
-            commentjson.dump(original_schema, f)
-        invalid_config_json = commentjson.load(open(path_to_invalid_config))
-        invalid_schema_json = commentjson.load(open(path_to_invalid_schema))
-
-        with self.assertRaises(ValidationError) as expected_info:
-            validate(invalid_config_json, invalid_schema_json)
-
-        with self.assertRaises(ValidationError) as actual_info:
-            validate_config_json(path_to_invalid_config, path_to_invalid_schema, cwd=FIXTURES_PATH)
-
-        self.assertEqual(str(actual_info.exception), str(expected_info.exception))
-
-
-class test_logger_setLoggerLevel(TestCase):
-    
-    def test_logger_setLoggerLevel(self):
-        """Test setLoggerLevel"""
-        profile = ProfileManager()
-        test_logger = logging.getLogger("zowe.core_for_zowe_sdk.profile_manager")
-        test_value = logging.DEBUG
-        logger.Log.setLoggerLevel(test_value)
-        self.assertEqual(test_logger.level, test_value)
