@@ -14,8 +14,7 @@ import os
 
 from zowe.core_for_zowe_sdk import SdkApi
 from zowe.core_for_zowe_sdk.exceptions import FileNotFound
-from zowe.zos_files_for_zowe_sdk import constants, exceptions
-from zowe.zos_files_for_zowe_sdk.constants import FileType, zos_file_constants
+from zowe.zos_files_for_zowe_sdk.constants import FileType
 
 _ZOWE_FILES_DEFAULT_ENCODING = "utf-8"
 
@@ -152,19 +151,6 @@ class Datasets(SdkApi):
         custom_args["json"] = data
         custom_args["url"] = "{}ds/{}".format(self.request_endpoint, self._encode_uri_component(path_to_member))
         response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[200])
-        return response_json
-    
-    def get_content(self, dataset_name, stream=False):
-        """Retrieve the contents of a given dataset.
-
-        Returns
-        -------
-        json
-            A JSON with the contents of a given dataset
-        """
-        custom_args = self._create_custom_request_arguments()
-        custom_args["url"] = "{}ds/{}".format(self.request_endpoint, self._encode_uri_component(dataset_name))
-        response_json = self.request_handler.perform_request("GET", custom_args, stream=stream)
         return response_json
     
     def create(self, dataset_name, options={}):
@@ -333,6 +319,19 @@ class Datasets(SdkApi):
         response_json = self.request_handler.perform_request("POST", custom_args, expected_code=[201])
         return response_json
 
+    def get_content(self, dataset_name, stream=False):
+        """Retrieve the contents of a given dataset.
+
+        Returns
+        -------
+        json
+            A JSON with the contents of a given dataset
+        """
+        custom_args = self._create_custom_request_arguments()
+        custom_args["url"] = "{}ds/{}".format(self.request_endpoint, self._encode_uri_component(dataset_name))
+        response_json = self.request_handler.perform_request("GET", custom_args, stream=stream)
+        return response_json
+
     def get_binary_content(self, dataset_name, stream = False, with_prefixes=False):
         """
         Retrieve the contents of a given dataset as a binary bytes object.
@@ -394,11 +393,15 @@ class Datasets(SdkApi):
             for chunk in response.iter_content(chunk_size=4096):
                 f.write(chunk)
 
-    def upload_file(self, input_file, dataset_name, encoding=_ZOWE_FILES_DEFAULT_ENCODING):
+    def upload_file(self, input_file, dataset_name, encoding=_ZOWE_FILES_DEFAULT_ENCODING, binary = False):
         """Upload contents of a given file and uploads it to a dataset."""
         if os.path.isfile(input_file):
-            with open(input_file, "rb") as in_file:
-                response_json = self.write(dataset_name, in_file)
+            if binary:
+                with open(input_file, "rb") as in_file:
+                    response_json = self.write(dataset_name, in_file)
+            else:
+                with open(input_file, "r") as in_file:
+                    response_json = self.write(dataset_name, in_file.read())
         else:
             self.logger.error(f"File {input_file} not found.")
             raise FileNotFound(input_file)

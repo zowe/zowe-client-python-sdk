@@ -15,7 +15,7 @@ from typing import Optional
 
 from . import session_constants
 
-import logging
+from .logger import Log
 
 @dataclass
 class ISession:
@@ -43,7 +43,7 @@ class Session:
 
     def __init__(self, props: dict) -> None:
         # set host and port
-        self.__logger = logging.getLogger(__name__)
+        self.__logger = Log.registerLogger(__name__)
 
         if props.get("host") is not None:
             self.session: ISession = ISession(host=props.get("host"))

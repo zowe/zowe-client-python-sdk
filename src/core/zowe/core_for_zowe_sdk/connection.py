@@ -11,7 +11,7 @@ Copyright Contributors to the Zowe Project.
 """
 
 from .exceptions import MissingConnectionArgs
-import logging
+from .logger import Log
 
 
 class ApiConnection:
@@ -30,11 +30,11 @@ class ApiConnection:
     """
 
     def __init__(self, host_url, user, password, ssl_verification=True):
-        logger = logging.getLogger(__name__)
+        __logger = Log.registerLogger(__name__)
 
         """Construct an ApiConnection object."""
         if not host_url or not user or not password:
-            logger.error("Missing connection argument")
+            __logger.error("Missing connection argument")
             raise MissingConnectionArgs()
 
         self.host_url = host_url

@@ -39,7 +39,7 @@ class TestRequestHandlerClass(unittest.TestCase):
 
     @mock.patch("logging.Logger.error")
     def test_logger_unmatched_status_code(self, mock_logger_error: mock.MagicMock):
-        """Test logger with unexpeceted status code"""
+        """Test logger with unexpected status code"""
         request_handler = RequestHandler(self.session_arguments)
         try:
             request_handler.perform_request("GET", {"url": "https://www.zowe.org"}, expected_code= [0], stream = True)

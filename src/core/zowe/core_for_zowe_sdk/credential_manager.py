@@ -16,7 +16,7 @@ from typing import Optional
 
 import commentjson
 
-import logging
+from .logger import Log
 
 from .constants import constants
 from .exceptions import SecureProfileLoadFailed
@@ -30,7 +30,7 @@ except ImportError:
 
 class CredentialManager:
     secure_props = {}
-    __logger = logging.getLogger(__name__)
+    __logger = Log.registerLogger(__name__)
 
     @staticmethod
     def load_secure_props() -> None:

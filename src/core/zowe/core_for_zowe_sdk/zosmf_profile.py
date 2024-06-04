@@ -12,11 +12,10 @@ Copyright Contributors to the Zowe Project.
 
 import base64
 import os.path
-import sys
 
 import yaml
 
-import logging
+from .logger import Log
 
 from .connection import ApiConnection
 from .constants import constants
@@ -55,7 +54,7 @@ class ZosmfProfile:
             The name of the Zowe z/OSMF profile
         """
         self.profile_name = profile_name
-        self.__logger = logging.getLogger(__name__)
+        self.__logger = Log.registerLogger(__name__)
 
     @property
     def profiles_dir(self):

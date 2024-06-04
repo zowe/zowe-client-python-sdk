@@ -10,12 +10,9 @@ SPDX-License-Identifier: EPL-2.0
 Copyright Contributors to the Zowe Project.
 """
 
-import os
 
 from zowe.core_for_zowe_sdk import SdkApi
-from zowe.core_for_zowe_sdk.exceptions import FileNotFound
 from zowe.zos_files_for_zowe_sdk import constants, exceptions
-from zowe.zos_files_for_zowe_sdk.constants import FileType, zos_file_constants
 
 _ZOWE_FILES_DEFAULT_ENCODING = "utf-8"
 

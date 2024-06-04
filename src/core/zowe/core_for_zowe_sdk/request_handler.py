@@ -12,7 +12,7 @@ Copyright Contributors to the Zowe Project.
 
 import requests
 import urllib3
-import logging
+from .logger import Log
 
 from .exceptions import InvalidRequestMethod, RequestFailed, UnexpectedStatus
 
@@ -44,7 +44,7 @@ class RequestHandler:
         self.session_arguments = session_arguments
         self.valid_methods = ["GET", "POST", "PUT", "DELETE"]
         self.__handle_ssl_warnings()
-        self.__logger = logging.getLogger(logger_name)
+        self.__logger = Log.registerLogger(logger_name)
 
     def __handle_ssl_warnings(self):
         """Turn off warnings if the SSL verification argument if off."""
