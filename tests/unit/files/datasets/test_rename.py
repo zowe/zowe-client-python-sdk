@@ -36,7 +36,7 @@ class TestCreateClass(TestCase):
         files_test_profile = Files(self.test_profile)
 
         for test_case in test_values:
-            files_test_profile.dsn.request_handler.perform_request = mock.Mock()
+            files_test_profile.ds.request_handler.perform_request = mock.Mock()
 
             data = {
                 "request": "rename",
@@ -50,7 +50,7 @@ class TestCreateClass(TestCase):
             custom_args = files_test_profile._create_custom_request_arguments()
             custom_args["json"] = data
             custom_args["url"] = "https://mock-url.com:443/zosmf/restfiles/ds/{}".format(test_case[0][1])
-            files_test_profile.dsn.request_handler.perform_request.assert_called_once_with(
+            files_test_profile.ds.request_handler.perform_request.assert_called_once_with(
                 "PUT", custom_args, expected_code=[200]
             )
 
@@ -81,7 +81,7 @@ class TestCreateClass(TestCase):
         files_test_profile = Files(self.test_profile)
 
         for test_case in test_values:
-            files_test_profile.dsn.request_handler.perform_request = mock.Mock()
+            files_test_profile.ds.request_handler.perform_request = mock.Mock()
 
             data = {
                 "request": "rename",
@@ -102,7 +102,7 @@ class TestCreateClass(TestCase):
                 self.assertNotRegex(ds_path_adjusted, r"[\$\@\#]")
                 self.assertRegex(ds_path_adjusted, r"[\(" + re.escape(test_case[0][2]) + r"\)]")
                 custom_args["url"] = "https://mock-url.com:443/zosmf/restfiles/ds/{}".format(ds_path_adjusted)
-                files_test_profile.dsn.request_handler.perform_request.assert_called_once_with(
+                files_test_profile.ds.request_handler.perform_request.assert_called_once_with(
                     "PUT", custom_args, expected_code=[200]
                 )
             else:

@@ -112,7 +112,7 @@ class TestCreateClass(TestCase):
 
         for test_case in test_values:
             with self.assertRaises((KeyError, ValueError)):
-                obj = Files(self.test_profile).create_data_set("MY.OLD.DSN", options=test_case)
+                obj = Files(self.test_profile).create_data_set("MY.OLD.ds", options=test_case)
 
     def test_create_dataset_parameterized(self):
         """Test create dataset with different values"""
@@ -183,14 +183,14 @@ class TestCreateClass(TestCase):
         files_test_profile = Files(self.test_profile)
 
         for test_case in test_values:
-            files_test_profile.dsn.request_handler.perform_request = mock.Mock()
+            files_test_profile.ds.request_handler.perform_request = mock.Mock()
 
             if test_case[1]:
                 files_test_profile.create_data_set(*test_case[0])
                 custom_args = files_test_profile._create_custom_request_arguments()
                 custom_args["json"] = test_case[0][1]
                 custom_args["url"] = "https://mock-url.com:443/zosmf/restfiles/ds/{}".format(test_case[0][0])
-                files_test_profile.dsn.request_handler.perform_request.assert_called_once_with(
+                files_test_profile.ds.request_handler.perform_request.assert_called_once_with(
                     "POST", custom_args, expected_code=[201]
                 )
             else:
@@ -222,7 +222,7 @@ class TestCreateClass(TestCase):
         files_test_profile = Files(self.test_profile)
 
         for test_case in test_values:
-            files_test_profile.dsn.request_handler.perform_request = mock.Mock()
+            files_test_profile.ds.request_handler.perform_request = mock.Mock()
 
             options = {
                 "partitioned": {
@@ -276,7 +276,7 @@ class TestCreateClass(TestCase):
                 custom_args = files_test_profile._create_custom_request_arguments()
                 custom_args["json"] = options.get(test_case[0][1])
                 custom_args["url"] = "https://mock-url.com:443/zosmf/restfiles/ds/{}".format(test_case[0][0])
-                files_test_profile.dsn.request_handler.perform_request.assert_called_once_with(
+                files_test_profile.ds.request_handler.perform_request.assert_called_once_with(
                     "POST", custom_args, expected_code=[201]
                 )
             else:

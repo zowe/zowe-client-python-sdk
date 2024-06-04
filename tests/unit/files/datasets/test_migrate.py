@@ -38,7 +38,7 @@ class TestCreateClass(TestCase):
         files_test_profile = Files(self.test_profile)
 
         for test_case in test_values:
-            files_test_profile.dsn.request_handler.perform_request = mock.Mock()
+            files_test_profile.ds.request_handler.perform_request = mock.Mock()
 
             data = {"request": "hrecall", "wait": test_case[1]}
 
@@ -46,7 +46,7 @@ class TestCreateClass(TestCase):
             custom_args = files_test_profile._create_custom_request_arguments()
             custom_args["json"] = data
             custom_args["url"] = "https://mock-url.com:443/zosmf/restfiles/ds/{}".format(test_case[0])
-            files_test_profile.dsn.request_handler.perform_request.assert_called_once_with(
+            files_test_profile.ds.request_handler.perform_request.assert_called_once_with(
                 "PUT", custom_args, expected_code=[200]
             )
     
@@ -73,7 +73,7 @@ class TestCreateClass(TestCase):
         files_test_profile = Files(self.test_profile)
 
         for test_case in test_values:
-            files_test_profile.dsn.request_handler.perform_request = mock.Mock()
+            files_test_profile.ds.request_handler.perform_request = mock.Mock()
 
             data = {
                 "request": "hdelete",
@@ -85,7 +85,7 @@ class TestCreateClass(TestCase):
             custom_args = files_test_profile._create_custom_request_arguments()
             custom_args["json"] = data
             custom_args["url"] = "https://mock-url.com:443/zosmf/restfiles/ds/{}".format(test_case[0])
-            files_test_profile.dsn.request_handler.perform_request.assert_called_once_with(
+            files_test_profile.ds.request_handler.perform_request.assert_called_once_with(
                 "PUT", custom_args, expected_code=[200]
             )
 
@@ -110,7 +110,7 @@ class TestCreateClass(TestCase):
         files_test_profile = Files(self.test_profile)
 
         for test_case in test_values:
-            files_test_profile.dsn.request_handler.perform_request = mock.Mock()
+            files_test_profile.ds.request_handler.perform_request = mock.Mock()
 
             data = {
                 "request": "hmigrate",
@@ -122,6 +122,6 @@ class TestCreateClass(TestCase):
             custom_args = files_test_profile._create_custom_request_arguments()
             custom_args["json"] = data
             custom_args["url"] = "https://mock-url.com:443/zosmf/restfiles/ds/{}".format(test_case[0])
-            files_test_profile.dsn.request_handler.perform_request.assert_called_once_with(
+            files_test_profile.ds.request_handler.perform_request.assert_called_once_with(
                 "PUT", custom_args, expected_code=[200]
             )
