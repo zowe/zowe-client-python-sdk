@@ -15,11 +15,11 @@ class Log:
         datefmt="%m/%d/%Y %I:%M:%S %p",
     )
 
-    loggers = []
+    loggers = set()
     @staticmethod
     def registerLogger(name: str):
         logger = logging.getLogger(name)
-        Log.loggers.append(logger)
+        Log.loggers.add(logger)
         return logger
 
     @staticmethod
