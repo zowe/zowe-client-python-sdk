@@ -121,7 +121,7 @@ class Files(SdkApi):
 
     def get_dsn_binary_content_streamed(self, dataset_name, with_prefixes=False):
         """Deprecated function. Please use ds.get_binary_content() instead"""
-        return self.ds.get_binary_content(dataset_name, with_prefixes, stream=True)
+        return self.ds.get_binary_content(dataset_name, stream=True, with_prefixes=with_prefixes)
 
     def write_to_dsn(self, dataset_name, data, encoding=_ZOWE_FILES_DEFAULT_ENCODING):
         """Deprecated function. Please use ds.write() instead"""

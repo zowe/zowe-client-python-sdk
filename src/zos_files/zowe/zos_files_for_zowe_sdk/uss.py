@@ -155,7 +155,7 @@ class USSFiles(SdkApi):
         """Upload contents of a given file and uploads it to UNIX file"""
         if os.path.isfile(input_file):
             with open(input_file, "r", encoding="utf-8") as in_file:
-                response_json = self.write(filepath_name, in_file)
+                response_json = self.write(filepath_name, in_file.read())
         else:
             self.logger.error(f"File {input_file} not found.")
             raise FileNotFound(input_file)
