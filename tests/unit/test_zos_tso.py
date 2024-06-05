@@ -26,7 +26,11 @@ class TestTsoClass(TestCase):
     @mock.patch("requests.Session.send")
     def test_issue_command(self, mock_send_request):
         """Test issuing a command sends a request"""
-        fake_response = {"servletKey": None, "tsoData": "READY"}
+        message = {"TSO MESSAGE": {
+                "DATA": "READY"
+            }
+        }
+        fake_response = {"servletKey": None, "tsoData": ["TSO PROMPT", message]}
         mock_send_request.return_value = mock.Mock(
             headers={"Content-Type": "application/json"}, status_code=200, json=lambda: fake_response
         )
