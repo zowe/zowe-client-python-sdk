@@ -26,7 +26,7 @@ class TestDeleteClass(TestCase):
         mock_send_request.assert_called_once()
 
     @mock.patch("requests.Session.send")
-    def test_delete(self, mock_send_request):
+    def test_delete_param(self, mock_send_request):
         """Test list members sends request"""
         self.files_instance = Files(self.test_profile)
         mock_send_request.return_value = mock.Mock(headers={"Content-Type": "application/json"}, status_code=200)
