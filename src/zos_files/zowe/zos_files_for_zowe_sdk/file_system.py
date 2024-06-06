@@ -14,7 +14,7 @@ Copyright Contributors to the Zowe Project.
 from zowe.core_for_zowe_sdk import SdkApi
 from zowe.zos_files_for_zowe_sdk import constants, exceptions
 
-_ZOWE_FILES_DEFAULT_ENCODING = "utf-8"
+_ZOWE_FILES_DEFAULT_ENCODING = constants.zos_file_constants["ZoweFilesDefaultEncoding"]
 
 
 class FileSystems(SdkApi):

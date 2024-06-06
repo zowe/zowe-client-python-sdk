@@ -14,8 +14,9 @@ import os
 
 from zowe.core_for_zowe_sdk import SdkApi
 from zowe.core_for_zowe_sdk.exceptions import FileNotFound
+from zowe.zos_files_for_zowe_sdk.constants import zos_file_constants
 
-_ZOWE_FILES_DEFAULT_ENCODING = "utf-8"
+_ZOWE_FILES_DEFAULT_ENCODING = zos_file_constants["ZoweFilesDefaultEncoding"]
 
 class USSFiles(SdkApi):
     """
