@@ -25,7 +25,7 @@ class TestCreateClass(TestCase):
         Files(self.test_profile).rename_dataset("MY.OLD.DSN", "MY.NEW.DSN")
         mock_send_request.assert_called_once()
 
-    def test_rename_dataset_parametrized(self):
+    def test_rename_dataset_parameterized(self):
         """Test renaming a dataset with different values"""
         test_values = [
             (("DSN.OLD", "DSN.NEW"), True),
@@ -68,7 +68,7 @@ class TestCreateClass(TestCase):
             Files(self.test_profile).rename_dataset_member("MY.DS.NAME", "MEMBER1", "MEMBER1N", "RANDOM")
         self.assertEqual(str(e_info.exception), "Invalid value for enq.")
 
-    def test_rename_dataset_member_parametrized(self):
+    def test_rename_dataset_member_parameterized(self):
         """Test renaming a dataset member with different values"""
         test_values = [
             (("DSN", "MBROLD$", "MBRNEW$", "EXCLU"), True),

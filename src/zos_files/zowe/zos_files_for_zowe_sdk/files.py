@@ -12,12 +12,12 @@ Copyright Contributors to the Zowe Project.
 
 
 from zowe.core_for_zowe_sdk import SdkApi
-from zowe.zos_files_for_zowe_sdk.constants import FileType
+from zowe.zos_files_for_zowe_sdk.constants import FileType, zos_file_constants
 from .datasets import Datasets
 from .uss import USSFiles
 from .file_system import FileSystems
 
-_ZOWE_FILES_DEFAULT_ENCODING = "utf-8"
+_ZOWE_FILES_DEFAULT_ENCODING = zos_file_constants["ZoweFilesDefaultEncoding"]
 
 
 class Files(SdkApi):
