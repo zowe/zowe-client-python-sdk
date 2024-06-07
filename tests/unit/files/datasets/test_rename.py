@@ -1,7 +1,7 @@
 import re
 from unittest import TestCase, mock
-
-from zowe.zos_files_for_zowe_sdk import Files, exceptions, Datasets
+from zowe.zos_files_for_zowe_sdk import Files
+from unit.files.constants import profile
 
 
 class TestCreateClass(TestCase):
@@ -9,13 +9,7 @@ class TestCreateClass(TestCase):
 
     def setUp(self):
         """Setup fixtures for File class."""
-        self.test_profile = {
-            "host": "mock-url.com",
-            "user": "Username",
-            "password": "Password",
-            "port": 443,
-            "rejectUnauthorized": True,
-        }
+        self.test_profile = profile
 
     @mock.patch("requests.Session.send")
     def test_rename_dataset(self, mock_send_request):
