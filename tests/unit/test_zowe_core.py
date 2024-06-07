@@ -8,6 +8,7 @@ import os
 import shutil
 import unittest
 from unittest import mock
+import logging
 
 import commentjson
 from jsonschema import SchemaError, ValidationError, validate
@@ -24,6 +25,7 @@ from zowe.core_for_zowe_sdk import (
     custom_warnings,
     exceptions,
     session_constants,
+    logger
 )
 from zowe.core_for_zowe_sdk.validators import validate_config_json
 from zowe.secrets_for_zowe_sdk import keyring
@@ -93,6 +95,24 @@ class TestSdkApiClass(TestCase):
         sdk_api = SdkApi(self.basic_props, self.default_url)
         self.assertIsInstance(sdk_api, SdkApi)
 
+    @mock.patch("logging.Logger.error")
+    def test_session_no_host_logger(self, mock_logger_error: mock.MagicMock):
+        props = {}
+        try:
+            sdk_api = SdkApi(props, self.default_url)
+        except Exception:
+            mock_logger_error.assert_called()
+            self.assertIn("Host", mock_logger_error.call_args[0][0])
+
+    @mock.patch("logging.Logger.error")
+    def test_session_no_authentication_logger(self, mock_logger_error: mock.MagicMock):
+        props = {"host": "test"}
+        try:
+            sdk_api = SdkApi(props, self.default_url)
+        except Exception:
+            mock_logger_error.assert_called()
+            self.assertIn("Authentication", mock_logger_error.call_args[0][0])
+
     def test_should_handle_basic_auth(self):
         """Created object should handle basic authentication."""
         sdk_api = SdkApi(self.basic_props, self.default_url)
@@ -150,14 +170,53 @@ class TestRequestHandlerClass(unittest.TestCase):
         request_handler = RequestHandler(self.session_arguments)
         self.assertIsInstance(request_handler, RequestHandler)
 
+    @mock.patch("logging.Logger.debug")
+    @mock.patch("logging.Logger.error")
     @mock.patch("requests.Session.send")
-    def test_perform_streamed_request(self, mock_send_request):
+    def test_perform_streamed_request(self, mock_send_request, mock_logger_error: mock.MagicMock, mock_logger_debug: mock.MagicMock):
         """Performing a streamed request should call 'send_request' method"""
         mock_send_request.return_value = mock.Mock(status_code=200)
         request_handler = RequestHandler(self.session_arguments)
-        request_handler.perform_streamed_request("GET", {"url": "https://www.zowe.org"})
+        request_handler.perform_request("GET", {"url": "https://www.zowe.org"}, stream = True)
+
+        mock_logger_error.assert_not_called()
+        mock_logger_debug.assert_called()
+        self.assertIn("Request method: GET", mock_logger_debug.call_args[0][0])
         mock_send_request.assert_called_once()
         self.assertTrue(mock_send_request.call_args[1]["stream"])
+
+
+    @mock.patch("logging.Logger.error")
+    def test_logger_unmatched_status_code(self, mock_logger_error: mock.MagicMock):
+        """Test logger with unexpeceted status code"""
+        request_handler = RequestHandler(self.session_arguments)
+        try:
+            request_handler.perform_request("GET", {"url": "https://www.zowe.org"}, expected_code= [0], stream = True)
+        except exceptions.UnexpectedStatus:
+            mock_logger_error.assert_called_once()
+            self.assertIn("The status code", mock_logger_error.call_args[0][0])
+    
+    @mock.patch("logging.Logger.error")
+    def test_logger_perform_request_invalid_method(self, mock_logger_error: mock.MagicMock):
+        """Test logger with invalid request method"""
+        request_handler = RequestHandler(self.session_arguments)
+        try:
+            request_handler.perform_request("Invalid method", {"url": "https://www.zowe.org"}, stream = True)
+        except exceptions.InvalidRequestMethod:
+            mock_logger_error.assert_called_once()
+            self.assertIn("Invalid HTTP method input", mock_logger_error.call_args[0][0])
+
+    @mock.patch("logging.Logger.error")
+    @mock.patch("requests.Session.send")
+    def test_logger_invalid_status_code(self, mock_send_request, mock_logger_error: mock.MagicMock):
+        mock_send_request.return_value = mock.Mock(ok=False)
+        request_handler = RequestHandler(self.session_arguments)
+        try:
+            request_handler.perform_request("GET", {"url": "https://www.zowe.org"}, stream = True)
+        except exceptions.RequestFailed:
+            mock_logger_error.assert_called_once()
+            self.assertIn("HTTP Request has failed", mock_logger_error.call_args[0][0])
+        mock_logger_error.assert_called_once
 
 
 class TestZosmfProfileClass(unittest.TestCase):
@@ -354,8 +413,9 @@ class TestZosmfProfileManager(TestCase):
         }
         self.assertEqual(props, expected_props)
 
+    @mock.patch("logging.Logger.warning")
     @mock.patch("zowe.secrets_for_zowe_sdk.keyring.get_password", side_effect=keyring_get_password)
-    def test_profile_loading_exception(self, get_pass_func):
+    def test_profile_loading_exception(self, get_pass_func, mock_logger_warning: mock.MagicMock):
         """
         Test correct exceptions are being thrown when a profile is
         not found.
@@ -369,8 +429,62 @@ class TestZosmfProfileManager(TestCase):
             shutil.copy(self.original_file_path, cwd_up_file_path)
 
             # Test
+            self.setUpCreds(cwd_up_file_path, secure_props={})
             config_file = ConfigFile(name=self.custom_appname, type="team_config")
             props: dict = config_file.get_profile(profile_name="non_existent_profile", validate_schema=False)
+        self.assertEqual(mock_logger_warning.call_args[0][0], "Profile non_existent_profile not found")
+
+    @mock.patch("logging.Logger.error")
+    @mock.patch("zowe.secrets_for_zowe_sdk.keyring.get_password", side_effect=keyring_get_password)
+    def test_profile_empty_exception(self, get_pass_func, mock_logger_error: mock.MagicMock):
+        """
+        Test correct exceptions are being thrown when a profile is
+        not found.
+
+        Filename and Filetype will be set to None.
+        """
+        with self.assertRaises(exceptions.ProfileNotFound):
+            # Setup
+            cwd_up_dir_path = os.path.dirname(CWD)
+            cwd_up_file_path = os.path.join(cwd_up_dir_path, f"{self.custom_appname}.config.json")
+            shutil.copy(self.original_file_path, cwd_up_file_path)
+
+            # Test
+            self.setUpCreds(cwd_up_file_path, secure_props={})
+            config_file = ConfigFile(name=self.custom_appname, type="team_config")
+            props: dict = config_file.get_profile(profile_name=None,profile_type=None,validate_schema=False)
+        self.assertEqual(mock_logger_error.call_args[0][0], "Failed to load profile: profile_name and profile_type were not provided.")
+
+    @mock.patch("logging.Logger.error")
+    @mock.patch("logging.Logger.warning")
+    @mock.patch("zowe.secrets_for_zowe_sdk.keyring.get_password", side_effect=keyring_get_password)
+    def test_get_profilename_from_profiletype_invalid_profile_type(self, get_pass_func, mock_logger_warning: mock.MagicMock, mock_logger_error: mock.MagicMock):
+        """
+        Test correct warnings and exceptions are being thrown with
+        empty default, invalid profile type.
+
+        """
+        with self.assertRaises(exceptions.ProfileNotFound):
+                config_file = ConfigFile(name="name", type="team_config", defaults={}, profiles={'a': {'none' : 'none'}})
+                config_file.get_profilename_from_profiletype('test')
+
+        mock_logger_warning.assert_any_call("Given profile type 'test' has no default profile name")
+        mock_logger_warning.assert_any_call("Profile 'a' has no type attribute")
+        mock_logger_error.assert_called_once_with("No profile with matching profile_type 'test' found")
+
+
+    @mock.patch("logging.Logger.warning")
+    @mock.patch("zowe.secrets_for_zowe_sdk.keyring.get_password", side_effect=keyring_get_password)
+    def test_validate_schema_logger(self, get_pass_func, mock_logger_warning: mock.MagicMock):
+        """
+        Test correct exceptions are being thrown when schema property is not set.
+
+        Schema property will be initialized to None.
+        """
+        with self.assertWarns(UserWarning):
+            config_file = ConfigFile(name="name", type="team_config")
+            config_file.validate_schema()
+        self.assertEqual(mock_logger_warning.call_args[0][0], "Could not find $schema property")
 
     @mock.patch("zowe.secrets_for_zowe_sdk.keyring.get_password", side_effect=keyring_get_password_exception)
     def test_secure_props_loading_warning(self, get_pass_func):
@@ -591,6 +705,7 @@ class TestZosmfProfileManager(TestCase):
         prof_manager.config_dir = self.custom_dir
         props: dict = prof_manager.load(profile_name="zosmf")
 
+
     @mock.patch("zowe.secrets_for_zowe_sdk.keyring.get_password", side_effect=keyring_get_password)
     def test_profile_loading_with_invalid_schema(self, get_pass_func):
         """
@@ -616,7 +731,7 @@ class TestZosmfProfileManager(TestCase):
                     "profiles.zosmf.properties.password": "password",
                 },
             )
-
+            
             # Test
             prof_manager = ProfileManager(appname="invalid.zowe")
             prof_manager.config_dir = self.custom_dir
@@ -949,3 +1064,14 @@ class TestValidateConfigJsonClass(TestCase):
             validate_config_json(path_to_invalid_config, path_to_invalid_schema, cwd=FIXTURES_PATH)
 
         self.assertEqual(str(actual_info.exception), str(expected_info.exception))
+
+
+class test_logger_setLoggerLevel(TestCase):
+    
+    def test_logger_setLoggerLevel(self):
+        """Test setLoggerLevel"""
+        profile = ProfileManager()
+        test_logger = logging.getLogger("zowe.core_for_zowe_sdk.profile_manager")
+        test_value = logging.DEBUG
+        logger.Log.setLoggerLevel(test_value)
+        self.assertEqual(test_logger.level, test_value)

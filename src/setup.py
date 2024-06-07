@@ -24,7 +24,7 @@ if __name__ == "__main__":
         name="zowe",
         version=__version__,
         description="Zowe Python SDK",
-        long_description=open("../README.md", 'r').read(),
+        long_description=open("../README.md", "r").read(),
         long_description_content_type="text/markdown",
         url="https://github.com/zowe/zowe-client-python-sdk",
         author="Guilherme Cartier",
@@ -32,7 +32,7 @@ if __name__ == "__main__":
         license="EPL-2.0",
         classifiers=[
             "Programming Language :: Python :: 3",
-            "Programming Language :: Python :: 3.7",
+            "Programming Language :: Python :: 3.8",
             "License :: OSI Approved :: Eclipse Public License 2.0 (EPL-2.0)",
         ],
         install_requires=[

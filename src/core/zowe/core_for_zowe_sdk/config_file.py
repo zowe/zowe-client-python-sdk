@@ -21,11 +21,14 @@ from typing import NamedTuple, Optional
 import commentjson
 import requests
 
+import logging
+
 from .credential_manager import CredentialManager
 from .custom_warnings import ProfileNotFoundWarning, ProfileParsingWarning
 from .exceptions import ProfileNotFound
 from .profile_constants import GLOBAL_CONFIG_NAME, TEAM_CONFIG, USER_CONFIG
 from .validators import validate_config_json
+from .logger import Log
 
 HOME = os.path.expanduser("~")
 GLOBAL_CONFIG_LOCATION = os.path.join(HOME, ".zowe")
@@ -71,6 +74,8 @@ class ConfigFile:
     jsonc: Optional[dict] = None
     _missing_secure_props: list = field(default_factory=list)
 
+    __logger = Log.registerLogger(__name__)
+
     @property
     def filename(self) -> str:
         if self.type == TEAM_CONFIG:
@@ -92,20 +97,18 @@ class ConfigFile:
     def location(self) -> Optional[str]:
         return self._location
 
-    @property
-    def schema_path(self) -> Optional[str]:
-        return self.schema_property
-
     @location.setter
     def location(self, dirname: str) -> None:
         if os.path.isdir(dirname):
             self._location = dirname
         else:
+            self.__logger.error(f"given path {dirname} is not valid")
             raise FileNotFoundError(f"given path {dirname} is not valid")
 
     def init_from_file(
         self,
         validate_schema: Optional[bool] = True,
+        suppress_config_file_warnings: Optional[bool] = True,
     ) -> None:
         """
         Initializes the class variable after
@@ -118,7 +121,9 @@ class ConfigFile:
                 pass
 
         if self.filepath is None or not os.path.isfile(self.filepath):
-            warnings.warn(f"Config file does not exist at {self.filepath}")
+            if not suppress_config_file_warnings:
+                self.__logger.warning(f"Config file does not exist at {self.filepath}")
+                warnings.warn(f"Config file does not exist at {self.filepath}")
             return
 
         with open(self.filepath, encoding="UTF-8", mode="r") as fileobj:
@@ -129,7 +134,7 @@ class ConfigFile:
         self.defaults = profile_jsonc.get("defaults", {})
         self.jsonc = profile_jsonc
 
-        if self.schema_property and validate_schema:
+        if validate_schema:
             self.validate_schema()
 
         CredentialManager.load_secure_props()
@@ -143,16 +148,11 @@ class ConfigFile:
         -------
         file_path to the $schema property
         """
-
-        path_schema_json = None
-
-        path_schema_json = self.schema_path
-        if path_schema_json is None:  # check if the $schema property is not defined
-            warnings.warn(f"$schema property could not found")
-
-        # validate the $schema property
-        if path_schema_json:
-            validate_config_json(self.jsonc, path_schema_json, cwd=self.location)
+        if self.schema_property is None:  # check if the $schema property is not defined
+            self.__logger.warning(f"Could not find $schema property")
+            warnings.warn(f"Could not find $schema property")
+        else:
+            validate_config_json(self.jsonc, self.schema_property, cwd=self.location)
 
     def schema_list(self, cwd=None) -> list:
         """
@@ -213,6 +213,7 @@ class ConfigFile:
             self.init_from_file(validate_schema)
 
         if profile_name is None and profile_type is None:
+            self.__logger.error(f"Failed to load profile: profile_name and profile_type were not provided.")
             raise ProfileNotFound(
                 profile_name=profile_name,
                 error_msg="Could not find profile as both profile_name and profile_type is not set.",
@@ -250,7 +251,6 @@ class ConfigFile:
                 break
 
             current_dir = os.path.dirname(current_dir)
-
         raise FileNotFoundError(f"Could not find the file {self.filename}")
 
     def get_profilename_from_profiletype(self, profile_type: str) -> str:
@@ -268,8 +268,9 @@ class ConfigFile:
         try:
             profilename = self.defaults[profile_type]
         except KeyError:
+            self.__logger.warn(f"Given profile type '{profile_type}' has no default profile name")
             warnings.warn(
-                f"Given profile type '{profile_type}' has no default profilename",
+                f"Given profile type '{profile_type}' has no default profile name",
                 ProfileParsingWarning,
             )
         else:
@@ -282,12 +283,14 @@ class ConfigFile:
                 if profile_type == temp_profile_type:
                     return key
             except KeyError:
+                self.__logger.warning(f"Profile '{key}' has no type attribute")
                 warnings.warn(
                     f"Profile '{key}' has no type attribute",
                     ProfileParsingWarning,
                 )
 
         # if no profile with matching type found, we raise an exception
+        self.__logger.error(f"No profile with matching profile_type '{profile_type}' found")
         raise ProfileNotFound(
             profile_name=profile_type,
             error_msg=f"No profile with matching profile_type '{profile_type}' found",
@@ -334,6 +337,7 @@ class ConfigFile:
                 props = {**profile.get("properties", {}), **props}
                 secure_fields.extend(profile.get("secure", []))
             else:
+                self.__logger.warning(f"Profile {profile_name} not found")
                 warnings.warn(f"Profile {profile_name} not found", ProfileNotFoundWarning)
             lst.pop()
 

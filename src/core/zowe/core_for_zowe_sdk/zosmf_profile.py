@@ -19,6 +19,7 @@ import yaml
 from .connection import ApiConnection
 from .constants import constants
 from .exceptions import SecureProfileLoadFailed
+from .logger import Log
 
 HAS_KEYRING = True
 try:
@@ -53,6 +54,7 @@ class ZosmfProfile:
             The name of the Zowe z/OSMF profile
         """
         self.profile_name = profile_name
+        self.__logger = Log.registerLogger(__name__)
 
     @property
     def profiles_dir(self):
@@ -107,12 +109,14 @@ class ZosmfProfile:
     def __load_secure_credentials(self):
         """Load secure credentials for a z/OSMF profile."""
         if not HAS_KEYRING:
+            self.__logger.error(f"{self.profile_name} keyring module not installed")
             raise SecureProfileLoadFailed(self.profile_name, "Keyring module not installed")
 
         try:
             zosmf_user = self.__get_secure_value("user")
             zosmf_password = self.__get_secure_value("password")
         except Exception as e:
+            self.__logger.error(f"Failed to load secure profile '{self.profile_name}' because '{e}'")
             raise SecureProfileLoadFailed(self.profile_name, e)
         else:
             return (zosmf_user, zosmf_password)
