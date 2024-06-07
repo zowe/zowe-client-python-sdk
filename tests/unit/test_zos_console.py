@@ -2,7 +2,7 @@
 
 import unittest
 from unittest import mock
-from unit.files.constants import profile
+
 from zowe.zos_console_for_zowe_sdk import Console
 
 
@@ -11,7 +11,13 @@ class TestConsoleClass(unittest.TestCase):
 
     def setUp(self):
         """Setup fixtures for Console class."""
-        self.session_details = profile
+        self.session_details = {
+            "host": "mock-url.com",
+            "user": "Username",
+            "password": "Password",
+            "port": 443,
+            "rejectUnauthorized": True,
+        }
 
     def test_object_should_be_instance_of_class(self):
         """Created object should be instance of Console class."""
