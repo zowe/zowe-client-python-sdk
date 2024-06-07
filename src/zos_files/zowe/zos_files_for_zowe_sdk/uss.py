@@ -125,7 +125,6 @@ class USSFiles(SdkApi):
             A JSON with the contents of the specified USS file
         """
         custom_args = self._create_custom_request_arguments()
-        # custom_args["params"] = {"filepath-name": filepath_name}
         custom_args["url"] = "{}fs{}".format(self.request_endpoint, filepath_name)
         response_json = self.request_handler.perform_request("GET", custom_args)
         return response_json
