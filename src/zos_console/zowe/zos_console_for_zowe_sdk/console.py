@@ -22,7 +22,7 @@ class Console(SdkApi):
         connection
             The connection object
         """
-        super().__init__(connection, "/zosmf/restconsoles/consoles/defcn")
+        super().__init__(connection, "/zosmf/restconsoles/consoles/defcn", logger_name=__name__)
 
     def issue_command(self, command, console=None):
         """Issues a command on z/OS Console.

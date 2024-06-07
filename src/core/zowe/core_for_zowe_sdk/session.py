@@ -14,6 +14,7 @@ from dataclasses import dataclass
 from typing import Optional
 
 from . import session_constants
+from .logger import Log
 
 
 @dataclass
@@ -42,9 +43,12 @@ class Session:
 
     def __init__(self, props: dict) -> None:
         # set host and port
+        self.__logger = Log.registerLogger(__name__)
+
         if props.get("host") is not None:
             self.session: ISession = ISession(host=props.get("host"))
         else:
+            self.__logger.error("Host not supplied")
             raise Exception("Host must be supplied")
 
         # determine authentication type
@@ -61,6 +65,7 @@ class Session:
             self.session.tokenValue = props.get("tokenValue")
             self.session.type = session_constants.AUTH_TYPE_BEARER
         else:
+            self.__logger.error("Authentication method not supplied")
             raise Exception("An authentication method must be supplied")
 
         # set additional parameters

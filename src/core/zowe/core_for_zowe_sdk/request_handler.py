@@ -12,8 +12,10 @@ Copyright Contributors to the Zowe Project.
 
 import requests
 import urllib3
+import logging
 
 from .exceptions import InvalidRequestMethod, RequestFailed, UnexpectedStatus
+from .logger import Log
 
 
 class RequestHandler:
@@ -28,7 +30,7 @@ class RequestHandler:
         List of supported request methods
     """
 
-    def __init__(self, session_arguments):
+    def __init__(self, session_arguments, logger_name = __name__):
         """
         Construct a RequestHandler object.
 
@@ -36,17 +38,21 @@ class RequestHandler:
         ----------
         session_arguments
             The Zowe SDK session arguments
+
+        logger_name
+            The logger name of the modules calling request handler
         """
         self.session_arguments = session_arguments
         self.valid_methods = ["GET", "POST", "PUT", "DELETE"]
         self.__handle_ssl_warnings()
+        self.__logger = Log.registerLogger(__name__)
 
     def __handle_ssl_warnings(self):
         """Turn off warnings if the SSL verification argument if off."""
         if not self.session_arguments["verify"]:
             urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-    def perform_request(self, method, request_arguments, expected_code=[200]):
+    def perform_request(self, method, request_arguments, expected_code=[200], stream = False):
         """Execute an HTTP/HTTPS requests from given arguments and return validated response (JSON).
 
         Parameters
@@ -57,6 +63,8 @@ class RequestHandler:
             The dictionary containing the required arguments for the execution of the request
         expected_code: int
             The list containing the acceptable response codes (default is [200])
+        stream: boolean
+            The boolean value whether the request is stream
 
         Returns
         -------
@@ -66,34 +74,13 @@ class RequestHandler:
         self.method = method
         self.request_arguments = request_arguments
         self.expected_code = expected_code
+        self.__logger.debug(f"Request method: {self.method}, Request arguments: {self.request_arguments}, Expected code: {expected_code}")
         self.__validate_method()
-        self.__send_request()
+        self.__send_request(stream = stream)
         self.__validate_response()
+        if stream:
+            return self.response
         return self.__normalize_response()
-
-    def perform_streamed_request(self, method, request_arguments, expected_code=[200]):
-        """Execute a streamed HTTP/HTTPS requests from given arguments and return a raw response.
-
-        Parameters
-        ----------
-        method: str
-            The request method that should be used
-        request_arguments: dict
-            The dictionary containing the required arguments for the execution of the request
-        expected_code: int
-            The list containing the acceptable response codes (default is [200])
-
-        Returns
-        -------
-        A raw response data
-        """
-        self.method = method
-        self.request_arguments = request_arguments
-        self.expected_code = expected_code
-        self.__validate_method()
-        self.__send_request(stream=True)
-        self.__validate_response()
-        return self.response
 
     def __validate_method(self):
         """Check if the input request method for the request is supported.
@@ -104,6 +91,7 @@ class RequestHandler:
             If the input request method is not supported
         """
         if self.method not in self.valid_methods:
+            self.__logger.error(f"Invalid HTTP method input {self.method}")
             raise InvalidRequestMethod(self.method)
 
     def __send_request(self, stream=False):
@@ -124,14 +112,16 @@ class RequestHandler:
             If the HTTP/HTTPS request fails
         """
         # Automatically checks if status code is between 200 and 400
-        if self.response:
+        if self.response.ok:
             if self.response.status_code not in self.expected_code:
+                self.__logger.error(f"The status code from z/OSMF was: {self.expected_code}\nExpected: {self.response.status_code}\nRequest output:{self.response.text}")
                 raise UnexpectedStatus(self.expected_code, self.response.status_code, self.response.text)
         else:
             output_str = str(self.response.request.url)
             output_str += "\n" + str(self.response.request.headers)
             output_str += "\n" + str(self.response.request.body)
             output_str += "\n" + str(self.response.text)
+            self.__logger.error(f"HTTP Request has failed with status code {self.response.status_code}. \n {output_str}")
             raise RequestFailed(self.response.status_code, output_str)
 
     def __normalize_response(self):
