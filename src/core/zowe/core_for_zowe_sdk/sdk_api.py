@@ -55,6 +55,12 @@ class SdkApi:
         else:
             raise UnsupportedAuthType(self.session.type)
 
+    def __enter__(self):
+        return self
+
+    def __exit__(self):
+        del self.request_handler
+
     def _create_custom_request_arguments(self):
         """Create a copy of the default request arguments dictionary.
 
