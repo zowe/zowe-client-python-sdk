@@ -2,7 +2,7 @@
 
 import unittest
 from unittest import mock
-from unit.files.constants import profile
+
 from zowe.zosmf_for_zowe_sdk import Zosmf
 
 
@@ -11,7 +11,13 @@ class TestZosmfClass(unittest.TestCase):
 
     def setUp(self):
         """Setup fixtures for Zosmf class."""
-        self.connection_dict = profile
+        self.connection_dict = {
+            "host": "mock-url.com",
+            "user": "Username",
+            "password": "Password",
+            "port": 443,
+            "rejectUnauthorized": True,
+        }
 
     def test_object_should_be_instance_of_class(self):
         """Created object should be instance of Zosmf class."""

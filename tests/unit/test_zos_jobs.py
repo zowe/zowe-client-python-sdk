@@ -1,7 +1,7 @@
 """Unit tests for the Zowe Python SDK z/OS Jobs package."""
 
 from unittest import TestCase, mock
-from unit.files.constants import profile
+
 from zowe.zos_jobs_for_zowe_sdk import Jobs
 
 
@@ -10,7 +10,13 @@ class TestJobsClass(TestCase):
 
     def setUp(self):
         """Setup fixtures for Jobs class."""
-        self.test_profile = profile
+        self.test_profile = {
+            "host": "mock-url.com",
+            "user": "Username",
+            "password": "Password",
+            "port": 443,
+            "rejectUnauthorized": True,
+        }
 
     def test_object_should_be_instance_of_class(self):
         """Created object should be instance of Jobs class."""

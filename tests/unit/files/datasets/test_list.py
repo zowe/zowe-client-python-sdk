@@ -1,6 +1,8 @@
+"""Unit tests for the Zowe Python SDK z/OS Files package."""
+import re
 from unittest import TestCase, mock
-from zowe.zos_files_for_zowe_sdk import Files
-from unit.files.constants import profile
+
+from zowe.zos_files_for_zowe_sdk import Files, exceptions, Datasets
 
 
 class TestFilesClass(TestCase):
@@ -8,7 +10,13 @@ class TestFilesClass(TestCase):
 
     def setUp(self):
         """Setup fixtures for File class."""
-        self.test_profile = profile
+        self.test_profile = {
+            "host": "mock-url.com",
+            "user": "Username",
+            "password": "Password",
+            "port": 443,
+            "rejectUnauthorized": True,
+        }
 
     @mock.patch("requests.Session.send")
     def test_list_dsn(self, mock_send_request):
