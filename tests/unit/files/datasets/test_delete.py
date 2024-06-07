@@ -1,7 +1,6 @@
-import re
 from unittest import TestCase, mock
-
-from zowe.zos_files_for_zowe_sdk import Files, exceptions, Datasets
+from zowe.zos_files_for_zowe_sdk import Files
+from unit.files.constants import profile
 
 
 class TestDeleteClass(TestCase):
@@ -9,13 +8,7 @@ class TestDeleteClass(TestCase):
 
     def setUp(self):
         """Setup fixtures for File class."""
-        self.test_profile = {
-            "host": "mock-url.com",
-            "user": "Username",
-            "password": "Password",
-            "port": 443,
-            "rejectUnauthorized": True,
-        }
+        self.test_profile = profile
 
     @mock.patch("requests.Session.send")
     def test_delete(self, mock_send_request):
@@ -26,7 +19,7 @@ class TestDeleteClass(TestCase):
         mock_send_request.assert_called_once()
 
     @mock.patch("requests.Session.send")
-    def test_delete_pram(self, mock_send_request):
+    def test_delete_param(self, mock_send_request):
         """Test list members sends request"""
         self.files_instance = Files(self.test_profile)
         mock_send_request.return_value = mock.Mock(headers={"Content-Type": "application/json"}, status_code=200)
