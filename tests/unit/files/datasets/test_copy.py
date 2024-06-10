@@ -4,7 +4,7 @@ from unittest import TestCase, mock
 from zowe.zos_files_for_zowe_sdk import Files, exceptions, Datasets
 
 
-class TestCreateClass(TestCase):
+class TestCopyClass(TestCase):
     """File class unit tests."""
 
     def setUp(self):
@@ -23,8 +23,7 @@ class TestCreateClass(TestCase):
 
         mock_send_request.return_value = mock.Mock(headers={"Content-Type": "application/json"}, status_code=200)
 
-        Files(self.test_profile).copy_uss_to_dataset("from_filename", "to_dataset_name", "to_member_name", replace=True)
-
+        result = Files(self.test_profile).copy_uss_to_dataset("from_filename", "to_dataset_name", "to_member_name", replace=True)
         mock_send_request.assert_called_once()
 
     def test_copy_dataset_or_member_raises_exception(self):

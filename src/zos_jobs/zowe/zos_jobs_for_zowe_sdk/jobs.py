@@ -402,7 +402,7 @@ class Jobs(SdkApi):
         os.makedirs(output_dir, exist_ok=True)
         output_file = os.path.join(output_dir, job_name, job_id, "jcl.txt")
         data_spool_file = self.get_jcl_text(job_correlator)
-        dataset_content = data_spool_file["response"]
+        dataset_content = data_spool_file
         with open(output_file, "w", encoding="utf-8") as out_file:
             out_file.write(dataset_content)
 
@@ -416,7 +416,7 @@ class Jobs(SdkApi):
 
             output_file = os.path.join(output_dir, job_name, job_id, stepname, ddname)
             data_spool_file = self.get_spool_file_contents(job_correlator, spoolfile_id)
-            dataset_content = data_spool_file["response"]
+            dataset_content = data_spool_file
             with open(output_file, "w", encoding="utf-8") as out_file:
                 out_file.write(dataset_content)
 

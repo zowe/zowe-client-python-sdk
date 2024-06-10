@@ -133,8 +133,10 @@ class RequestHandler:
         """
         if self.response.headers.get("Content-Type") == "application/octet-stream":
             return self.response.content
+        elif self.response.headers.get("Content-Type") == "application/octet-stream":
+            return self.response.content
         else:
             try:
                 return self.response.json()
             except:
-                return {"response": self.response.text}
+                return self.response.text
