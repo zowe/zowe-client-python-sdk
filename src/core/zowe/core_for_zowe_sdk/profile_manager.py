@@ -15,7 +15,7 @@ import os.path
 import warnings
 from copy import deepcopy
 from typing import Optional
-import logging
+from .logger import Log
 
 import jsonschema
 from deepmerge import always_merger
@@ -178,7 +178,7 @@ class ProfileManager:
             NamedTuple (data, name, secure_props_not_found)
         """
 
-        logger = logging.getLogger(__name__)
+        logger = Log.registerLogger(__name__)
 
         cfg_profile = Profile()
         try:
@@ -200,7 +200,7 @@ class ProfileManager:
             )
         except jsonschema.exceptions.UnknownType as exc:
             logger.error(f"Unknown type is found in schema_json, {exc}")
-            raise jsonschema.exceptions.UnknownType(f"Unknown type is found in schema_json, exc")
+            raise jsonschema.exceptions.UnknownType(f"Unknown type is found in schema_json, {exc}")
         except jsonschema.exceptions.FormatError as exc:
             logger.error(f"Validating a format config_json failed for schema_json, {exc}")
             raise jsonschema.exceptions.FormatError(f"Validating a format config_json failed for schema_json, {exc}")

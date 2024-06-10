@@ -16,7 +16,7 @@ from typing import Optional
 
 import commentjson
 
-import logging
+from .logger import Log
 
 from .constants import constants
 from .exceptions import SecureProfileLoadFailed
