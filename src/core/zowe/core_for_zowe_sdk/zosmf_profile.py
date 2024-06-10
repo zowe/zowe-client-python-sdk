@@ -15,8 +15,6 @@ import os.path
 
 import yaml
 
-from .logger import Log
-
 from .connection import ApiConnection
 from .constants import constants
 from .exceptions import SecureProfileLoadFailed
