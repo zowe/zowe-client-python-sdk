@@ -15,6 +15,7 @@ import urllib3
 from .logger import Log
 
 from .exceptions import InvalidRequestMethod, RequestFailed, UnexpectedStatus
+from .logger import Log
 
 
 class RequestHandler:

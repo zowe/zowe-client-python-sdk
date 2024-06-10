@@ -14,8 +14,8 @@ from dataclasses import dataclass
 from typing import Optional
 
 from . import session_constants
-
 from .logger import Log
+
 
 @dataclass
 class ISession:
