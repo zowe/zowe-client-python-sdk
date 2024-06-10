@@ -20,6 +20,7 @@ from .logger import Log
 
 from .constants import constants
 from .exceptions import SecureProfileLoadFailed
+from .logger import Log
 
 HAS_KEYRING = True
 try:

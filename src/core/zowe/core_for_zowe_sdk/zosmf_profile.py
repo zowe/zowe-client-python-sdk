@@ -20,6 +20,7 @@ from .logger import Log
 from .connection import ApiConnection
 from .constants import constants
 from .exceptions import SecureProfileLoadFailed
+from .logger import Log
 
 HAS_KEYRING = True
 try:
@@ -54,6 +55,7 @@ class ZosmfProfile:
             The name of the Zowe z/OSMF profile
         """
         self.profile_name = profile_name
+        self.__logger = Log.registerLogger(__name__)
         self.__logger = Log.registerLogger(__name__)
 
     @property

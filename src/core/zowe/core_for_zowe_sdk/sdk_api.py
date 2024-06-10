@@ -16,6 +16,7 @@ from .logger import Log
 from . import session_constants
 from .request_handler import RequestHandler
 from .session import ISession, Session
+from .logger import Log
 
 
 class SdkApi:
