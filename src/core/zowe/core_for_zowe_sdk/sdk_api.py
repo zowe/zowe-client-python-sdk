@@ -60,7 +60,7 @@ class SdkApi:
     def __enter__(self):
         return self
 
-    def __exit__(self):
+    def __exit__(self, exc_type, exception, traceback):
         del self.request_handler
 
     def _create_custom_request_arguments(self):
