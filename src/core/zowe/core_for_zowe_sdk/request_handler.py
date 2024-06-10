@@ -12,9 +12,9 @@ Copyright Contributors to the Zowe Project.
 
 import requests
 import urllib3
-from .logger import Log
 
 from .exceptions import InvalidRequestMethod, RequestFailed, UnexpectedStatus
+from .logger import Log
 
 
 class RequestHandler:
@@ -29,7 +29,7 @@ class RequestHandler:
         List of supported request methods
     """
 
-    def __init__(self, session_arguments, logger_name = __name__):
+    def __init__(self, session_arguments, logger_name=__name__):
         """
         Construct a RequestHandler object.
 
@@ -51,7 +51,7 @@ class RequestHandler:
         if not self.session_arguments["verify"]:
             urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-    def perform_request(self, method, request_arguments, expected_code=[200], stream = False):
+    def perform_request(self, method, request_arguments, expected_code=[200], stream=False):
         """Execute an HTTP/HTTPS requests from given arguments and return validated response (JSON).
 
         Parameters
@@ -73,9 +73,11 @@ class RequestHandler:
         self.method = method
         self.request_arguments = request_arguments
         self.expected_code = expected_code
-        self.__logger.debug(f"Request method: {self.method}, Request arguments: {self.request_arguments}, Expected code: {expected_code}")
+        self.__logger.debug(
+            f"Request method: {self.method}, Request arguments: {self.request_arguments}, Expected code: {expected_code}"
+        )
         self.__validate_method()
-        self.__send_request(stream = stream)
+        self.__send_request(stream=stream)
         self.__validate_response()
         if stream:
             return self.response
@@ -113,14 +115,18 @@ class RequestHandler:
         # Automatically checks if status code is between 200 and 400
         if self.response.ok:
             if self.response.status_code not in self.expected_code:
-                self.__logger.error(f"The status code from z/OSMF was: {self.expected_code}\nExpected: {self.response.status_code}\nRequest output:{self.response.text}")
+                self.__logger.error(
+                    f"The status code from z/OSMF was: {self.expected_code}\nExpected: {self.response.status_code}\nRequest output:{self.response.text}"
+                )
                 raise UnexpectedStatus(self.expected_code, self.response.status_code, self.response.text)
         else:
             output_str = str(self.response.request.url)
             output_str += "\n" + str(self.response.request.headers)
             output_str += "\n" + str(self.response.request.body)
             output_str += "\n" + str(self.response.text)
-            self.__logger.error(f"HTTP Request has failed with status code {self.response.status_code}. \n {output_str}")
+            self.__logger.error(
+                f"HTTP Request has failed with status code {self.response.status_code}. \n {output_str}"
+            )
             raise RequestFailed(self.response.status_code, output_str)
 
     def __normalize_response(self):
