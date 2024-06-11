@@ -1,7 +1,6 @@
-import re
 from unittest import TestCase, mock
 
-from zowe.zos_files_for_zowe_sdk import Files, exceptions, Datasets
+from zowe.zos_files_for_zowe_sdk import Files
 
 
 class TestGetClass(TestCase):
@@ -16,7 +15,7 @@ class TestGetClass(TestCase):
             "port": 443,
             "rejectUnauthorized": True,
         }
-    
+
     @mock.patch("requests.Session.send")
     def test_get(self, mock_send_request):
         """Test list members sends request"""
@@ -30,7 +29,9 @@ class TestGetClass(TestCase):
     @mock.patch("requests.Session.send")
     def test_binary_get(self, mock_send_request):
         """Test list members sends request"""
-        mock_send_request.return_value = mock.Mock(headers={"Content-Type": "application/json"}, status_code=200)
+        mock_send_request.return_value = mock.Mock(
+            headers={"Content-Type": "application/octet-stream"}, status_code=200
+        )
 
         Files(self.test_profile).get_dsn_binary_content(dataset_name="ds_name")
         mock_send_request.assert_called_once()
