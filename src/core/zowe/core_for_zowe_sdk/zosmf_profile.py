@@ -54,7 +54,6 @@ class ZosmfProfile:
         """
         self.profile_name = profile_name
         self.__logger = Log.registerLogger(__name__)
-        self.__logger = Log.registerLogger(__name__)
 
     @property
     def profiles_dir(self):
