@@ -11,10 +11,9 @@ Copyright Contributors to the Zowe Project.
 """
 
 import urllib
-import logging
+from .logger import Log
 
 from . import session_constants
-from .exceptions import UnsupportedAuthType
 from .request_handler import RequestHandler
 from .session import ISession, Session
 from .logger import Log

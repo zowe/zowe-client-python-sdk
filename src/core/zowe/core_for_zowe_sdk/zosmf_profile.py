@@ -12,7 +12,6 @@ Copyright Contributors to the Zowe Project.
 
 import base64
 import os.path
-import sys
 
 import yaml
 
