@@ -1,7 +1,7 @@
 import re
 from unittest import TestCase, mock
 
-from zowe.zos_files_for_zowe_sdk import Files, exceptions, Datasets
+from zowe.zos_files_for_zowe_sdk import DatasetOption, Files, exceptions
 
 
 class TestCreateClass(TestCase):
@@ -21,93 +21,33 @@ class TestCreateClass(TestCase):
     def test_create_data_set_accept_valid_recfm(self, mock_send_request):
         """Test if create dataset does accept all accepted record formats"""
         mock_send_request.return_value = mock.Mock(headers={"Content-Type": "application/json"}, status_code=201)
+        option = DatasetOption(alcunit="CYL", dsorg="PO", primary=1, dirblk=5, recfm="XX", blksize=6160, lrecl=80)
         for recfm in ["F", "FB", "V", "VB", "U", "FBA", "FBM", "VBA", "VBM"]:
-            Files(self.test_profile).create_data_set(
-                "DSNAME123",
-                options={
-                    "alcunit": "CYL",
-                    "dsorg": "PO",
-                    "primary": 1,
-                    "dirblk": 5,
-                    "recfm": recfm,
-                    "blksize": 6160,
-                    "lrecl": 80,
-                },
-            )
+            option.recfm = recfm
+            Files(self.test_profile).create_data_set("DSNAME123", options=option)
         mock_send_request.assert_called()
 
     def test_create_data_set_does_not_accept_invalid_recfm(self):
         """Test if create dataset raises an error for invalid record formats"""
+        option = DatasetOption(alcunit="CYL", dsorg="PO", primary=1, dirblk=5, recfm="XX", blksize=6160, lrecl=80)
         with self.assertRaises(KeyError):
-            Files(self.test_profile).create_data_set(
-                "DSNAME123",
-                options={
-                    "alcunit": "CYL",
-                    "dsorg": "PO",
-                    "primary": 1,
-                    "dirblk": 5,
-                    "recfm": "XX",
-                    "blksize": 6160,
-                    "lrecl": 80,
-                },
-            )
+            Files(self.test_profile).create_data_set("DSNAME123", options=option)
 
     def test_create_data_set_raises_error_without_required_arguments(self):
         """Test not providing required arguments raises an error"""
+        option = DatasetOption(alcunit="CYL", dsorg="PO", primary=1, dirblk=25, recfm="FB", blksize=6160)
         with self.assertRaises(ValueError) as e_info:
-            obj = Files(self.test_profile).create_data_set(
-                "DSNAME123", options={"alcunit": "CYL", "dsorg": "PO", "recfm": "FB", "blksize": 6160, "dirblk": 25}
-            )
+            obj = Files(self.test_profile).create_data_set("DSNAME123", options=option)
         self.assertEqual(str(e_info.exception), "If 'like' is not specified, you must specify 'primary' or 'lrecl'.")
 
     def test_create_data_set_raises_error_with_invalid_arguments_parameterized(self):
         """Test not providing valid arguments raises an error"""
         test_values = [
-            {
-                "alcunit": "invalid",
-                "dsorg": "PO",
-                "primary": 1,
-                "dirblk": 5,
-                "recfm": "FB",
-                "blksize": 6160,
-                "lrecl": 80,
-            },
-            {
-                "dsorg": "PO",
-                "alcunit": "CYL",
-                "primary": 1,
-                "recfm": "invalid",
-                "blksize": 32760,
-                "lrecl": 260,
-                "dirblk": 25,
-            },
-            {
-                "alcunit": "CYL",
-                "dsorg": "invalid",
-                "primary": 1,
-                "dirblk": 5,
-                "recfm": "FB",
-                "blksize": 6160,
-                "lrecl": 80,
-            },
-            {
-                "dsorg": "PO",
-                "alcunit": "CYL",
-                "primary": 10,
-                "recfm": "U",
-                "blksize": 27998,
-                "lrecl": 27998,
-                "dirblk": 0,
-            },
-            {
-                "alcunit": "CYL",
-                "dsorg": "PO",
-                "primary": 99777215,
-                "dirblk": 5,
-                "recfm": "FB",
-                "blksize": 6160,
-                "lrecl": 80,
-            },
+            DatasetOption(alcunit="invalid", dsorg="PO", primary=1, dirblk=5, recfm="FB", blksize=6160, lrecl=80),
+            DatasetOption(alcunit="CYL", dsorg="PO", primary=1, dirblk=25, recfm="invalid", blksize=32760, lrecl=260),
+            DatasetOption(alcunit="CYL", dsorg="invalid", primary=1, dirblk=5, recfm="FB", blksize=6160, lrecl=80),
+            DatasetOption(alcunit="CYL", dsorg="PO", primary=10, dirblk=0, recfm="U", blksize=27998, lrecl=27998),
+            DatasetOption(alcunit="CYL", dsorg="PO", primary=99777215, dirblk=5, recfm="FB", blksize=6160, lrecl=80),
         ]
 
         for test_case in test_values:

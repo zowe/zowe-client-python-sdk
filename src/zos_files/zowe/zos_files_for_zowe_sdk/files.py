@@ -10,12 +10,14 @@ SPDX-License-Identifier: EPL-2.0
 Copyright Contributors to the Zowe Project.
 """
 
+from typing import Optional
 
 from zowe.core_for_zowe_sdk import SdkApi
 from zowe.zos_files_for_zowe_sdk.constants import FileType, zos_file_constants
-from .datasets import Datasets
-from .uss import USSFiles
+
+from .datasets import DatasetOption, Datasets
 from .file_system import FileSystems
+from .uss import USSFiles
 
 _ZOWE_FILES_DEFAULT_ENCODING = zos_file_constants["ZoweFilesDefaultEncoding"]
 
@@ -31,6 +33,7 @@ class Files(SdkApi):
     connection
         connection object
     """
+
     ds: Datasets
     uss: USSFiles
     fs: FileSystems
@@ -60,7 +63,7 @@ class Files(SdkApi):
     def get_file_content_streamed(self, file_path, binary=False):
         """Deprecated function. Please use uss.get_content_streamed() instead"""
         return self.uss.get_content_streamed(file_path, binary)
-    
+
     def get_file_content(self, filepath_name):
         """Deprecated function. Please use uss.get_content() instead"""
         return self.uss.get_content(filepath_name)
@@ -77,7 +80,9 @@ class Files(SdkApi):
         """Deprecated function. Please use ds.list_members() instead"""
         return self.ds.list_members(dataset_name, member_pattern, member_start, limit, attributes)
 
-    def copy_uss_to_dataset(self, from_filename, to_dataset_name, to_member_name=None, type=FileType.TEXT, replace=False):
+    def copy_uss_to_dataset(
+        self, from_filename, to_dataset_name, to_member_name=None, type=FileType.TEXT, replace=False
+    ):
         """Deprecated function. Please use ds.copy_uss_to_dataset instead"""
         return self.ds.copy_uss_to_dataset(from_filename, to_dataset_name, to_member_name, type, replace)
 
@@ -93,13 +98,15 @@ class Files(SdkApi):
         replace=False,
     ):
         """Deprecated function. Please use ds.copy_dataset_or_member() instead"""
-        return self.ds.copy_dataset_or_member(from_dataset_name, to_dataset_name, from_member_name, volser, alias, to_member_name, enq, replace)
+        return self.ds.copy_dataset_or_member(
+            from_dataset_name, to_dataset_name, from_member_name, volser, alias, to_member_name, enq, replace
+        )
 
     def get_dsn_content(self, dataset_name):
         """Deprecated function. Please use ds.get_content() instead"""
         return self.ds.get_content(dataset_name)
 
-    def create_data_set(self, dataset_name, options={}):
+    def create_data_set(self, dataset_name, options: Optional[DatasetOption] = None):
         """Deprecated function. Please use ds.create() instead"""
         return self.ds.create(dataset_name, options)
 
@@ -135,7 +142,7 @@ class Files(SdkApi):
         """Deprecated function. Please use ds.download_binary() instead"""
         self.ds.download_binary(dataset_name, output_file, with_prefixes)
 
-    def upload_file_to_dsn(self, input_file, dataset_name, encoding=_ZOWE_FILES_DEFAULT_ENCODING, binary = False):
+    def upload_file_to_dsn(self, input_file, dataset_name, encoding=_ZOWE_FILES_DEFAULT_ENCODING, binary=False):
         """Deprecated function. Please use ds.upload_file() instead"""
         self.ds.upload_file(input_file, dataset_name, encoding, binary)
 
