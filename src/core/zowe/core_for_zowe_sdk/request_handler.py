@@ -139,7 +139,7 @@ class RequestHandler:
         contentType = self.response.headers.get("Content-Type")
         if contentType == "application/octet-stream":
             return self.response.content
-        elif contentType and contentType.startswith("application/json"):
+        elif contentType and contentType.startswith("application/json") and len(self.response.text):
             return self.response.json()
         else:
             return self.response.text
