@@ -187,7 +187,7 @@ class DatasetOption:
         self.__like = like
 
     def to_dict(self) -> dict:
-        return {key: value for key, value in self.__dict__.items() if value is not None}
+        return {key.replace("_DatasetOption__", ""): value for key, value in self.__dict__.items() if value is not None}
 
 
 class Datasets(SdkApi):
@@ -351,7 +351,7 @@ class Datasets(SdkApi):
                     self.logger.error(f"{options.alcunit} is not 'CYL' or 'TRK'.")
                     raise KeyError
 
-                if options.primary:
+                if options.primary is not None:
                     if options.primary > 16777215:
                         self.logger.error("Specified value exceeds limit.")
                         raise ValueError
@@ -362,7 +362,7 @@ class Datasets(SdkApi):
                             self.logger.error("Specified value exceeds limit.")
                             raise ValueError
 
-                if options.dirblk:
+                if options.dirblk is not None:
                     if options.dsorg == "PS":
                         if options.dirblk != 0:
                             self.logger.error("Can't allocate directory blocks for files.")
@@ -384,7 +384,8 @@ class Datasets(SdkApi):
 
         custom_args = self._create_custom_request_arguments()
         custom_args["url"] = "{}ds/{}".format(self.request_endpoint, self._encode_uri_component(dataset_name))
-        custom_args["json"] = options.to_dict()
+        custom_args["json"] = options.to_dict() if options else {}
+        print(custom_args["json"])
         response_json = self.request_handler.perform_request("POST", custom_args, expected_code=[201])
         return response_json
 

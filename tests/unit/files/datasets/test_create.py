@@ -57,67 +57,14 @@ class TestCreateClass(TestCase):
     def test_create_dataset_parameterized(self):
         """Test create dataset with different values"""
         test_values = [
+            (DatasetOption(alcunit="CYL", dsorg="PO", primary=1, dirblk=5, recfm="FB", blksize=6160, lrecl=80), True),
+            (DatasetOption(alcunit="CYL", dsorg="PO", primary=1, dirblk=25, recfm="FB", blksize=6160, lrecl=80), True),
             (
-                (
-                    "DSN",
-                    {
-                        "alcunit": "CYL",
-                        "dsorg": "PO",
-                        "primary": 1,
-                        "dirblk": 5,
-                        "recfm": "FB",
-                        "blksize": 6160,
-                        "lrecl": 80,
-                    },
-                ),
+                DatasetOption(alcunit="CYL", dsorg="PO", primary=1, dirblk=25, recfm="VB", blksize=32760, lrecl=260),
                 True,
             ),
-            (
-                (
-                    "DSN",
-                    {
-                        "alcunit": "CYL",
-                        "dsorg": "PO",
-                        "primary": 1,
-                        "recfm": "FB",
-                        "blksize": 6160,
-                        "lrecl": 80,
-                        "dirblk": 25,
-                    },
-                ),
-                True,
-            ),
-            (
-                (
-                    "DSN",
-                    {
-                        "dsorg": "PO",
-                        "alcunit": "CYL",
-                        "primary": 1,
-                        "recfm": "VB",
-                        "blksize": 32760,
-                        "lrecl": 260,
-                        "dirblk": 25,
-                    },
-                ),
-                True,
-            ),
-            (
-                ("DSN", {"alcunit": "CYL", "dsorg": "PS", "primary": 1, "recfm": "FB", "blksize": 6160, "lrecl": 80}),
-                True,
-            ),
-            (
-                (
-                    "DSN",
-                    {
-                        "alcunit": "CYL",
-                        "dsorg": "PS",
-                        "recfm": "FB",
-                        "blksize": 6160,
-                    },
-                ),
-                False,
-            ),
+            (DatasetOption(alcunit="CYL", dsorg="PS", primary=1, recfm="FB", blksize=6160, lrecl=80), True),
+            (DatasetOption(alcunit="CYL", dsorg="PS", recfm="FB", blksize=6160), False),
         ]
 
         files_test_profile = Files(self.test_profile)
@@ -126,16 +73,16 @@ class TestCreateClass(TestCase):
             files_test_profile.ds.request_handler.perform_request = mock.Mock()
 
             if test_case[1]:
-                files_test_profile.create_data_set(*test_case[0])
+                files_test_profile.create_data_set("DSN", test_case[0])
                 custom_args = files_test_profile._create_custom_request_arguments()
-                custom_args["json"] = test_case[0][1]
-                custom_args["url"] = "https://mock-url.com:443/zosmf/restfiles/ds/{}".format(test_case[0][0])
+                custom_args["json"] = test_case[0].to_dict()
+                custom_args["url"] = "https://mock-url.com:443/zosmf/restfiles/ds/{}".format("DSN")
                 files_test_profile.ds.request_handler.perform_request.assert_called_once_with(
                     "POST", custom_args, expected_code=[201]
                 )
             else:
                 with self.assertRaises(ValueError) as e_info:
-                    files_test_profile.create_data_set(*test_case[0])
+                    files_test_profile.create_data_set("DSN", test_case[0])
                 self.assertEqual(
                     str(e_info.exception), "If 'like' is not specified, you must specify 'primary' or 'lrecl'."
                 )
