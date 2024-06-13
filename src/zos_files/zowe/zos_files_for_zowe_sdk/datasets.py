@@ -24,6 +24,7 @@ class DatasetOption:
 
     def __init__(
         self,
+        like: str = None,
         volser: Optional[str] = None,
         unit: Optional[str] = None,
         dsorg: Optional[str] = None,
@@ -39,14 +40,14 @@ class DatasetOption:
         mgntclass: Optional[str] = None,
         dataclass: Optional[str] = None,
         dsntype: Optional[str] = None,
-        like: Optional[str] = None,
     ) -> None:
+        self.__like = like
         self.__volser = volser
         self.__unit = unit
         self.__dsorg = dsorg
-        self.__alcunit = alcunit
-        self.__primary = primary
-        self.__secondary = secondary
+        self.__alcunit = "TRK" if (like == None and alcunit == None) else alcunit
+        self.primary = primary
+        self.secondary = secondary
         self.__dirblk = dirblk
         self.__avgblk = avgblk
         self.__recfm = recfm
@@ -56,7 +57,6 @@ class DatasetOption:
         self.__mgntclass = mgntclass
         self.__dataclass = dataclass
         self.__dsntype = dsntype
-        self.__like = like
 
     @property
     def volser(self) -> Optional[str]:
@@ -80,6 +80,8 @@ class DatasetOption:
 
     @dsorg.setter
     def dsorg(self, dsorg: Optional[str]):
+        if dsorg not in ("PO", "PS"):
+            raise KeyError
         self.__dsorg = dsorg
 
     @property
@@ -88,6 +90,8 @@ class DatasetOption:
 
     @alcunit.setter
     def alcunit(self, alcunit: Optional[str]):
+        if alcunit not in ("CYL", "TRK"):
+            raise KeyError
         self.__alcunit = alcunit
 
     @property
@@ -96,6 +100,9 @@ class DatasetOption:
 
     @primary.setter
     def primary(self, primary: Optional[int]):
+        if primary is not None:
+            if primary > 16777215:
+                raise ValueError
         self.__primary = primary
 
     @property
@@ -104,7 +111,11 @@ class DatasetOption:
 
     @secondary.setter
     def secondary(self, secondary: Optional[int]):
-        self.__secondary = secondary
+        if self.primary is not None:
+            secondary = secondary if secondary is not None else int(self.primary / 10)
+            if secondary > 16777215:
+                raise ValueError
+            self.__secondary = secondary
 
     @property
     def dirblk(self) -> Optional[int]:
@@ -182,12 +193,17 @@ class DatasetOption:
     def like(self) -> Optional[str]:
         return self.__like
 
-    @like.setter
-    def like(self, like: Optional[str]):
-        self.__like = like
-
     def to_dict(self) -> dict:
         return {key.replace("_DatasetOption__", ""): value for key, value in self.__dict__.items() if value is not None}
+
+    def check_dirblock(self) -> bool:
+        if self.
+        if self.dsorg == "PS":
+            if self.dirblk != 0:
+                raise ValueError
+        elif self.dsorg == "PO":
+            if self.dirblk == 0:
+                raise ValueError
 
 
 class Datasets(SdkApi):
@@ -341,26 +357,26 @@ class Datasets(SdkApi):
                     self.logger.error("If 'like' is not specified, you must specify 'primary' or 'lrecl'.")
                     raise ValueError("If 'like' is not specified, you must specify 'primary' or 'lrecl'.")
 
-                if options.dsorg and options.dsorg not in ("PO", "PS"):
-                    self.logger.error(f"{options.dsorg} is not 'PO' or 'PS'.")
-                    raise KeyError
+                # if options.dsorg not in ("PO", "PS"):
+                #     self.logger.error(f"{options.dsorg} is not 'PO' or 'PS'.")
+                #     raise KeyError
 
-                if options.alcunit is None:
-                    options.alcunit = "TRK"
-                elif options.alcunit not in ("CYL", "TRK"):
-                    self.logger.error(f"{options.alcunit} is not 'CYL' or 'TRK'.")
-                    raise KeyError
+                # if options.alcunit is None:
+                #     options.alcunit = "TRK"
+                # elif options.alcunit not in ("CYL", "TRK"):
+                #     self.logger.error(f"{options.alcunit} is not 'CYL' or 'TRK'.")
+                #     raise KeyError
 
-                if options.primary is not None:
-                    if options.primary > 16777215:
-                        self.logger.error("Specified value exceeds limit.")
-                        raise ValueError
-                    else:
-                        if options.secondary is None:
-                            options.secondary = int(options.primary / 10)
-                        if options.secondary > 16777215:
-                            self.logger.error("Specified value exceeds limit.")
-                            raise ValueError
+                # if options.primary is not None:
+                #     if options.primary > 16777215:
+                #         self.logger.error("Specified value exceeds limit.")
+                #         raise ValueError
+                #     else:
+                #         if options.secondary is None:
+                #             options.secondary = int(options.primary / 10)
+                #         if options.secondary > 16777215:
+                #             self.logger.error("Specified value exceeds limit.")
+                #             raise ValueError
 
                 if options.dirblk is not None:
                     if options.dsorg == "PS":
