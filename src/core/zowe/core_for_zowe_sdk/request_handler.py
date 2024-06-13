@@ -143,9 +143,6 @@ class RequestHandler:
         if contentType == "application/octet-stream":
             return self.response.content
         elif contentType and contentType.startswith("application/json"):
-            try:
-                return self.response.json()
-            except requests.exceptions.JSONDecodeError:
-                return self.response.text
+            return "" if self.response.text == "" else self.response.json()
         else:
             return self.response.text
