@@ -134,12 +134,15 @@ class RequestHandler:
 
         Returns
         -------
-        A bytes object at the format based on Content-Type header
+        Response object at the format based on Content-Type header:
+          - `bytes` when the response is binary data
+          - object when the response is JSON text
+          - `str` when the response is plain text
         """
         contentType = self.response.headers.get("Content-Type")
         if contentType == "application/octet-stream":
             return self.response.content
         elif contentType and contentType.startswith("application/json"):
-            return self.response.json()
+            return "" if self.response.text == "" else self.response.json()
         else:
             return self.response.text
