@@ -44,14 +44,14 @@ class DatasetOption:
         self.__like = like
         self.__volser = volser
         self.__unit = unit
-        self.__dsorg = dsorg
-        self.__alcunit = "TRK" if (like == None and alcunit == None) else alcunit
+        self.dsorg = dsorg
+        self.alcunit = alcunit
         self.primary = primary
         self.secondary = secondary
         self.__dirblk = dirblk
         self.__avgblk = avgblk
-        self.__recfm = recfm
-        self.__blksize = blksize
+        self.recfm = recfm
+        self.blksize = blksize
         self.__lrecl = lrecl
         self.__storclass = storclass
         self.__mgntclass = mgntclass
@@ -81,7 +81,10 @@ class DatasetOption:
     @dsorg.setter
     def dsorg(self, dsorg: Optional[str]):
         if dsorg not in ("PO", "PS"):
-            raise KeyError
+            if self.like is not None and dsorg is None:
+                pass
+            else:
+                raise ValueError("")
         self.__dsorg = dsorg
 
     @property
@@ -90,9 +93,15 @@ class DatasetOption:
 
     @alcunit.setter
     def alcunit(self, alcunit: Optional[str]):
-        if alcunit not in ("CYL", "TRK"):
+        if alcunit is None:
+            if self.like is not None:
+                self.alcunit = None
+            else:
+                self.__alcunit = "TRK"
+        elif alcunit not in ("CYL", "TRK"):
             raise KeyError
-        self.__alcunit = alcunit
+        else:
+            self.__alcunit = alcunit
 
     @property
     def primary(self) -> Optional[int]:
@@ -139,7 +148,15 @@ class DatasetOption:
 
     @recfm.setter
     def recfm(self, recfm: Optional[str]):
-        self.__recfm = recfm
+        if recfm is None:
+            if self.like is not None:
+                self.__recfm = None
+            else:
+                self.__recfm = "F"
+        elif recfm not in ("F", "FB", "V", "VB", "U", "FBA", "FBM", "VBA", "VBM"):
+            raise KeyError
+        else:
+            self.__recfm = recfm
 
     @property
     def blksize(self) -> Optional[int]:
@@ -147,7 +164,14 @@ class DatasetOption:
 
     @blksize.setter
     def blksize(self, blksize: Optional[int]):
-        self.__blksize = blksize
+        if blksize is None:
+            if self.like is not None:
+                self.__blksize = None
+            else:
+                if self.lrecl is not None:
+                    self.__blksize = self.lrecl
+        else:
+            self.__blksize = blksize
 
     @property
     def lrecl(self) -> Optional[int]:
@@ -197,7 +221,7 @@ class DatasetOption:
         return {key.replace("_DatasetOption__", ""): value for key, value in self.__dict__.items() if value is not None}
 
     def check_dirblock(self) -> bool:
-        if self.
+
         if self.dsorg == "PS":
             if self.dirblk != 0:
                 raise ValueError
@@ -388,15 +412,15 @@ class Datasets(SdkApi):
                             self.logger.error("Can't allocate empty directory blocks.")
                             raise ValueError
 
-                if options.recfm is None:
-                    options.recfm = "F"
-                else:
-                    if options.recfm not in ("F", "FB", "V", "VB", "U", "FBA", "FBM", "VBA", "VBM"):
-                        self.logger.error("Invalid record format.")
-                        raise KeyError
+                # if options.recfm is None:
+                #     options.recfm = "F"
+                # else:
+                #     if options.recfm not in ("F", "FB", "V", "VB", "U", "FBA", "FBM", "VBA", "VBM"):
+                #         self.logger.error("Invalid record format.")
+                #         raise KeyError
 
-                if options.blksize is None and options.lrecl is not None:
-                    options.blksize = options.lrecl
+                # if options.blksize is None and options.lrecl is not None:
+                #     options.blksize = options.lrecl
 
         custom_args = self._create_custom_request_arguments()
         custom_args["url"] = "{}ds/{}".format(self.request_endpoint, self._encode_uri_component(dataset_name))

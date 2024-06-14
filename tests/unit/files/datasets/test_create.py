@@ -21,7 +21,7 @@ class TestCreateClass(TestCase):
     def test_create_data_set_accept_valid_recfm(self, mock_send_request):
         """Test if create dataset does accept all accepted record formats"""
         mock_send_request.return_value = mock.Mock(headers={"Content-Type": "application/json"}, status_code=201)
-        option = DatasetOption(alcunit="CYL", dsorg="PO", primary=1, dirblk=5, recfm="XX", blksize=6160, lrecl=80)
+        option = DatasetOption(alcunit="CYL", dsorg="PO", primary=1, dirblk=5, recfm="F", blksize=6160, lrecl=80)
         for recfm in ["F", "FB", "V", "VB", "U", "FBA", "FBM", "VBA", "VBM"]:
             option.recfm = recfm
             Files(self.test_profile).create_data_set("DSNAME123", options=option)
@@ -29,8 +29,8 @@ class TestCreateClass(TestCase):
 
     def test_create_data_set_does_not_accept_invalid_recfm(self):
         """Test if create dataset raises an error for invalid record formats"""
-        option = DatasetOption(alcunit="CYL", dsorg="PO", primary=1, dirblk=5, recfm="XX", blksize=6160, lrecl=80)
         with self.assertRaises(KeyError):
+            option = DatasetOption(alcunit="CYL", dsorg="PO", primary=1, dirblk=5, recfm="XX", blksize=6160, lrecl=80)
             Files(self.test_profile).create_data_set("DSNAME123", options=option)
 
     def test_create_data_set_raises_error_without_required_arguments(self):
@@ -43,16 +43,49 @@ class TestCreateClass(TestCase):
     def test_create_data_set_raises_error_with_invalid_arguments_parameterized(self):
         """Test not providing valid arguments raises an error"""
         test_values = [
-            DatasetOption(alcunit="invalid", dsorg="PO", primary=1, dirblk=5, recfm="FB", blksize=6160, lrecl=80),
-            DatasetOption(alcunit="CYL", dsorg="PO", primary=1, dirblk=25, recfm="invalid", blksize=32760, lrecl=260),
-            DatasetOption(alcunit="CYL", dsorg="invalid", primary=1, dirblk=5, recfm="FB", blksize=6160, lrecl=80),
-            DatasetOption(alcunit="CYL", dsorg="PO", primary=10, dirblk=0, recfm="U", blksize=27998, lrecl=27998),
-            DatasetOption(alcunit="CYL", dsorg="PO", primary=99777215, dirblk=5, recfm="FB", blksize=6160, lrecl=80),
+            {
+                "alcunit": "invalid",
+                "dsorg": "PO",
+                "primary": 1,
+                "dirblk": 5,
+                "recfm": "FB",
+                "blksize": 6160,
+                "lrecl": 80,
+            },
+            {
+                "alcunit": "CYL",
+                "dsorg": "PO",
+                "primary": 1,
+                "dirblk": 25,
+                "recfm": "invalid",
+                "blksize": 32760,
+                "lrecl": 260,
+            },
+            {"alcunit": "CYL", "dsorg": "PS", "primary": 1, "dirblk": 5, "recfm": "FB", "blksize": 6160, "lrecl": 80},
+            {
+                "alcunit": "CYL",
+                "dsorg": "invalid",
+                "primary": 10,
+                "dirblk": 0,
+                "recfm": "U",
+                "blksize": 27998,
+                "lrecl": 27998,
+            },
+            {
+                "alcunit": "CYL",
+                "dsorg": "PO",
+                "primary": 99777215,
+                "dirblk": 5,
+                "recfm": "FB",
+                "blksize": 6160,
+                "lrecl": 80,
+            },
         ]
 
         for test_case in test_values:
             with self.assertRaises((KeyError, ValueError)):
-                obj = Files(self.test_profile).create_data_set("MY.OLD.ds", options=test_case)
+                option = DatasetOption(**test_case)
+                obj = Files(self.test_profile).create_data_set("MY.OLD.ds", options=option)
 
     def test_create_dataset_parameterized(self):
         """Test create dataset with different values"""
