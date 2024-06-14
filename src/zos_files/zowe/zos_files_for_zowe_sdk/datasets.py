@@ -220,15 +220,6 @@ class DatasetOption:
     def to_dict(self) -> dict:
         return {key.replace("_DatasetOption__", ""): value for key, value in self.__dict__.items() if value is not None}
 
-    def check_dirblock(self) -> bool:
-
-        if self.dsorg == "PS":
-            if self.dirblk != 0:
-                raise ValueError
-        elif self.dsorg == "PO":
-            if self.dirblk == 0:
-                raise ValueError
-
 
 class Datasets(SdkApi):
     """
