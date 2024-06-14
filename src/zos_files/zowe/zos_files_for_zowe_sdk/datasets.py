@@ -380,28 +380,6 @@ class Datasets(SdkApi):
                 if options.primary is None or options.lrecl is None:
                     self.logger.error("If 'like' is not specified, you must specify 'primary' or 'lrecl'.")
                     raise ValueError("If 'like' is not specified, you must specify 'primary' or 'lrecl'.")
-
-                # if options.dsorg not in ("PO", "PS"):
-                #     self.logger.error(f"{options.dsorg} is not 'PO' or 'PS'.")
-                #     raise KeyError
-
-                # if options.alcunit is None:
-                #     options.alcunit = "TRK"
-                # elif options.alcunit not in ("CYL", "TRK"):
-                #     self.logger.error(f"{options.alcunit} is not 'CYL' or 'TRK'.")
-                #     raise KeyError
-
-                # if options.primary is not None:
-                #     if options.primary > 16777215:
-                #         self.logger.error("Specified value exceeds limit.")
-                #         raise ValueError
-                #     else:
-                #         if options.secondary is None:
-                #             options.secondary = int(options.primary / 10)
-                #         if options.secondary > 16777215:
-                #             self.logger.error("Specified value exceeds limit.")
-                #             raise ValueError
-
                 if options.dirblk is not None:
                     if options.dsorg == "PS":
                         if options.dirblk != 0:
@@ -412,20 +390,9 @@ class Datasets(SdkApi):
                             self.logger.error("Can't allocate empty directory blocks.")
                             raise ValueError
 
-                # if options.recfm is None:
-                #     options.recfm = "F"
-                # else:
-                #     if options.recfm not in ("F", "FB", "V", "VB", "U", "FBA", "FBM", "VBA", "VBM"):
-                #         self.logger.error("Invalid record format.")
-                #         raise KeyError
-
-                # if options.blksize is None and options.lrecl is not None:
-                #     options.blksize = options.lrecl
-
         custom_args = self._create_custom_request_arguments()
         custom_args["url"] = "{}ds/{}".format(self.request_endpoint, self._encode_uri_component(dataset_name))
         custom_args["json"] = options.to_dict() if options else {}
-        print(custom_args["json"])
         response_json = self.request_handler.perform_request("POST", custom_args, expected_code=[201])
         return response_json
 
