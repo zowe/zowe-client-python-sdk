@@ -8,14 +8,13 @@ All notable changes to the Zowe Client Python SDK will be documented in this fil
 
 - Added logger class to core SDK [#185](https://github.com/zowe/zowe-client-python-sdk/issues/185)
 - Added classes for handling `Datasets`, `USSFiles`, and `FileSystems` in favor of the single Files class. [#264](https://github.com/zowe/zowe-client-python-sdk/issues/264)
-- Refactored tests into proper folders and files [#265](https://github.com/zowe/zowe-client-python-sdk/issues/265)
-- Fixed the bug on `upload_file_to_dsn` [#104](https://github.com/zowe/zowe-client-python-sdk/issues/104)
-- **Breaking:** Standardized `response` output based on `Content-Type`. [#266](https://github.com/zowe/zowe-client-python-sdk/issues/266) 
-- Refactored function `Datasets.create` definition [#214](https://github.com/zowe/zowe-client-python-sdk/issues/214)
+- Refactored tests into proper folders and files and add more tests [#265](https://github.com/zowe/zowe-client-python-sdk/issues/265)
+- **Breaking:** Standardized `response` outputs based on `Content-Type`. [#266](https://github.com/zowe/zowe-client-python-sdk/issues/266) 
 
 ### Bug Fixes
 
 - Fixed truncated responses when issuing TSO commands [#260](https://github.com/zowe/zowe-client-python-sdk/issues/260)
+- Fixed a bug on `upload_file_to_dsn` where it would not properly convert line endings on Windows. [#104](https://github.com/zowe/zowe-client-python-sdk/issues/104)
 
 ## `1.0.0-dev15`
 
