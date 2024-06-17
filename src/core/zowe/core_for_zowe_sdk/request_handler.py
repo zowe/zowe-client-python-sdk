@@ -41,6 +41,7 @@ class RequestHandler:
         logger_name
             The logger name of the modules calling request handler
         """
+        self.session = requests.Session()
         self.session_arguments = session_arguments
         self.valid_methods = ["GET", "POST", "PUT", "DELETE"]
         self.__handle_ssl_warnings()
@@ -97,10 +98,14 @@ class RequestHandler:
 
     def __send_request(self, stream=False):
         """Build a custom session object, prepare it with a custom request and send it."""
-        session = requests.Session()
+        session = self.session
         request_object = requests.Request(method=self.method, **self.request_arguments)
         prepared = session.prepare_request(request_object)
         self.response = session.send(prepared, stream=stream, **self.session_arguments)
+
+    def __del__(self):
+        """Clean up the REST session object once it is no longer needed anymore"""
+        self.session.close()
 
     def __validate_response(self):
         """Validate if request response is acceptable based on expected code list.

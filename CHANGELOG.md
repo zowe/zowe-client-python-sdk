@@ -64,6 +64,7 @@ All notable changes to the Zowe Client Python SDK will be documented in this fil
 - Added method to load profile properties from environment variables [#136](https://github.com/zowe/zowe-client-python-sdk/issues/136)
 - Added validation of zowe.config.json file matching the schema [#192](https://github.com/zowe/zowe-client-python-sdk/issues/192)
 - Added Secrets SDK for storing client secrets in OS keyring [#208](https://github.com/zowe/zowe-client-python-sdk/issues/208)
+- Turned SDK APIs into context manager [#145](https://github.com/zowe/zowe-client-python-sdk/issues/145)
 
 ### Bug Fixes
 
