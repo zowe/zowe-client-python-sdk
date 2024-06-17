@@ -61,6 +61,9 @@ class Tso(SdkApi):
         session_key = self.start_tso_session()
         command_output = self.send_tso_message(session_key, command)
         tso_messages = self.retrieve_tso_messages(command_output)
+        while not any("TSO PROMPT" in message for message in command_output) or not tso_messages:
+            command_output = self.__get_tso_data(session_key)
+            tso_messages += self.retrieve_tso_messages(command_output)
         self.end_tso_session(session_key)
         return tso_messages
 
@@ -202,3 +205,9 @@ class Tso(SdkApi):
             A list containing the TSO response messages
         """
         return [message["TSO MESSAGE"]["DATA"] for message in response_json if "TSO MESSAGE" in message]
+
+    def __get_tso_data(self, session_key):
+        custom_args = self._create_custom_request_arguments()
+        custom_args["url"] = "{}/{}".format(self.request_endpoint, session_key)
+        command_output = self.request_handler.perform_request("GET", custom_args)["tsoData"]
+        return command_output

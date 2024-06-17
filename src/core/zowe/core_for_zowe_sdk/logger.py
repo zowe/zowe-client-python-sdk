@@ -1,6 +1,7 @@
 import logging
 import os
 
+
 class Log:
     """root logger setup and a function to customize logger level"""
 
@@ -16,6 +17,7 @@ class Log:
     )
 
     loggers = set()
+
     @staticmethod
     def registerLogger(name: str):
         logger = logging.getLogger(name)

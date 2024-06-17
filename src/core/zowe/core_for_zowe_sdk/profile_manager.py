@@ -15,13 +15,11 @@ import os.path
 import warnings
 from copy import deepcopy
 from typing import Optional
-from .logger import Log
 
 import jsonschema
 from deepmerge import always_merger
 
 from .config_file import ConfigFile, Profile
-from .logger import Log
 from .credential_manager import CredentialManager
 from .custom_warnings import (
     ConfigNotFoundWarning,
@@ -29,6 +27,7 @@ from .custom_warnings import (
     SecurePropsNotFoundWarning,
 )
 from .exceptions import ProfileNotFound, SecureProfileLoadFailed, SecureValuesNotFound
+from .logger import Log
 from .profile_constants import (
     BASE_PROFILE,
     GLOBAL_CONFIG_NAME,
@@ -219,7 +218,9 @@ class ProfileManager:
                     ProfileNotFoundWarning,
                 )
         except Exception as exc:
-            logger.warning(f"Could not load '{cfg.filename}' at '{cfg.filepath}'" f"because {type(exc).__name__}'{exc}'")
+            logger.warning(
+                f"Could not load '{cfg.filename}' at '{cfg.filepath}'" f"because {type(exc).__name__}'{exc}'"
+            )
             warnings.warn(
                 f"Could not load '{cfg.filename}' at '{cfg.filepath}'" f"because {type(exc).__name__}'{exc}'.",
                 ConfigNotFoundWarning,
@@ -253,7 +254,7 @@ class ProfileManager:
         If `profile_type` is not base, then we will load properties from both
         `profile_type` and base profiles and merge them together.
         """
-        
+
         if profile_name is None and profile_type is None:
             self.__logger.error(f"Failed to load profile as both profile_name and profile_type are not set")
             raise ProfileNotFound(
@@ -273,7 +274,7 @@ class ProfileManager:
         cfg_name = None
         cfg_schema = None
         cfg_schema_dir = None
-        
+
         for cfg_layer in (self.project_user_config, self.project_config, self.global_user_config, self.global_config):
             if cfg_layer.profiles is None:
                 try:
