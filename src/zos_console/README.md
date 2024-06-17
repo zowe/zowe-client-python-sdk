@@ -13,7 +13,7 @@ from zowe.core_for_zowe_sdk import ProfileManager
 from zowe.zos_console_for_zowe_sdk import Console
 
 profile = ProfileManager().load(profile_name="zosmf")
-console_info = Console(profile)
 
-print(console_info.issue_command(command="D IPLINFO", console="EMCS"))
+with Console(profile) as console_info:
+    print(console_info.issue_command(command="D IPLINFO", console="EMCS"))
 ```
