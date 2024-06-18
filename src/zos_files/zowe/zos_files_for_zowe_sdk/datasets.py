@@ -24,7 +24,7 @@ class DatasetOption:
 
     def __init__(
         self,
-        like: str = None,
+        like: Optional[str] = None,
         volser: Optional[str] = None,
         unit: Optional[str] = None,
         dsorg: Optional[str] = None,
@@ -42,21 +42,21 @@ class DatasetOption:
         dsntype: Optional[str] = None,
     ) -> None:
         self.__like = like
-        self.__volser = volser
-        self.__unit = unit
+        self.volser = volser
+        self.unit = unit
         self.dsorg = dsorg
         self.alcunit = alcunit
         self.primary = primary
         self.secondary = secondary
-        self.__dirblk = dirblk
-        self.__avgblk = avgblk
+        self.dirblk = dirblk
+        self.avgblk = avgblk
         self.recfm = recfm
         self.blksize = blksize
-        self.__lrecl = lrecl
-        self.__storclass = storclass
-        self.__mgntclass = mgntclass
-        self.__dataclass = dataclass
-        self.__dsntype = dsntype
+        self.lrecl = lrecl
+        self.storclass = storclass
+        self.mgntclass = mgntclass
+        self.dataclass = dataclass
+        self.dsntype = dsntype
 
     @property
     def volser(self) -> Optional[str]:
@@ -357,11 +357,14 @@ class Datasets(SdkApi):
         return response_json
 
     def create(self, dataset_name, options: Optional[DatasetOption] = None):
-        """{"unit":}
+        """
         Create a sequential or partitioned dataset.
         Parameters
         ----------
-            dataset_name
+        dataset_name: str
+            Name of the dataset to be created
+        options:
+            A DatasetOption class with property options of the dataset
         Returns
         -------
         json

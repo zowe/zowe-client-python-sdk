@@ -203,3 +203,12 @@ class TestCreateClass(TestCase):
                 with self.assertRaises(ValueError) as e_info:
                     files_test_profile.create_default_data_set(*test_case[0])
                 self.assertEqual(str(e_info.exception), "Invalid type for default data set.")
+
+    def test_secondary_setter(self):
+        """Test create dataset with different values"""
+        options = DatasetOption(alcunit="CYL", dsorg="PO", primary=10, dirblk=5, recfm="FB", blksize=6160, lrecl=80)
+        self.assertEqual(options.secondary, 1)
+        options.secondary = 100
+        self.assertEqual(options.secondary, 100)
+        with self.assertRaises(ValueError):
+            options.secondary = 16777216
