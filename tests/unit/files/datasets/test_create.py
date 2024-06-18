@@ -205,10 +205,16 @@ class TestCreateClass(TestCase):
                 self.assertEqual(str(e_info.exception), "Invalid type for default data set.")
 
     def test_secondary_setter(self):
-        """Test create dataset with different values"""
+        """Test create secondary with different values"""
         options = DatasetOption(alcunit="CYL", dsorg="PO", primary=10, dirblk=5, recfm="FB", blksize=6160, lrecl=80)
         self.assertEqual(options.secondary, 1)
         options.secondary = 100
         self.assertEqual(options.secondary, 100)
         with self.assertRaises(ValueError):
             options.secondary = 16777216
+
+    def test_create_data_set_without_options(self):
+        """Test if create dataset does accept all accepted record formats"""
+        with self.assertRaises(ValueError) as error:
+            Files(self.test_profile).create_data_set("DSNAME123")
+        self.assertTrue("dataset options" in str(error.exception))

@@ -80,11 +80,8 @@ class DatasetOption:
 
     @dsorg.setter
     def dsorg(self, dsorg: Optional[str]):
-        if dsorg not in ("PO", "PS"):
-            if self.like is not None and dsorg is None:
-                pass
-            else:
-                raise ValueError("")
+        if dsorg not in ("PO", "PS", None):
+            raise ValueError("")
         self.__dsorg = dsorg
 
     @property
@@ -369,20 +366,23 @@ class Datasets(SdkApi):
         -------
         json
         """
-        if options:
-            if options.like is None:
-                if options.primary is None or options.lrecl is None:
-                    self.logger.error("If 'like' is not specified, you must specify 'primary' or 'lrecl'.")
-                    raise ValueError("If 'like' is not specified, you must specify 'primary' or 'lrecl'.")
-                if options.dirblk is not None:
-                    if options.dsorg == "PS":
-                        if options.dirblk != 0:
-                            self.logger.error("Can't allocate directory blocks for files.")
-                            raise ValueError
-                    elif options.dsorg == "PO":
-                        if options.dirblk == 0:
-                            self.logger.error("Can't allocate empty directory blocks.")
-                            raise ValueError
+        if not options:
+            self.logger.error("You must specify dataset options when creating one.")
+            raise ValueError("You must specify dataset options when creating one.")
+
+        if options.like is None:
+            if options.primary is None or options.lrecl is None:
+                self.logger.error("If 'like' is not specified, you must specify 'primary' or 'lrecl'.")
+                raise ValueError("If 'like' is not specified, you must specify 'primary' or 'lrecl'.")
+            if options.dirblk is not None:
+                if options.dsorg == "PS":
+                    if options.dirblk != 0:
+                        self.logger.error("Can't allocate directory blocks for files.")
+                        raise ValueError
+                elif options.dsorg == "PO":
+                    if options.dirblk == 0:
+                        self.logger.error("Can't allocate empty directory blocks.")
+                        raise ValueError
 
         custom_args = self._create_custom_request_arguments()
         custom_args["url"] = "{}ds/{}".format(self.request_endpoint, self._encode_uri_component(dataset_name))
