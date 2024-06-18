@@ -81,7 +81,7 @@ class DatasetOption:
     @dsorg.setter
     def dsorg(self, dsorg: Optional[str]):
         if dsorg not in ("PO", "PS", None):
-            raise ValueError("")
+            raise ValueError("'dsorg' must be 'PO', 'PS', or None")
         self.__dsorg = dsorg
 
     @property
@@ -96,7 +96,7 @@ class DatasetOption:
             else:
                 self.__alcunit = "TRK"
         elif alcunit not in ("CYL", "TRK"):
-            raise KeyError
+            raise KeyError("'alcunit' must be 'CYL' or 'TRK'")
         else:
             self.__alcunit = alcunit
 
@@ -108,7 +108,7 @@ class DatasetOption:
     def primary(self, primary: Optional[int]):
         if primary is not None:
             if primary > 16777215:
-                raise ValueError
+                raise ValueError("Given primary space allocation exceeds track limit of 16,777,215")
         self.__primary = primary
 
     @property
@@ -120,7 +120,7 @@ class DatasetOption:
         if self.primary is not None:
             secondary = secondary if secondary is not None else int(self.primary / 10)
             if secondary > 16777215:
-                raise ValueError
+                raise ValueError("Given secondary space allocation exceeds track limit of 16,777,215")
             self.__secondary = secondary
 
     @property
@@ -151,7 +151,9 @@ class DatasetOption:
             else:
                 self.__recfm = "F"
         elif recfm not in ("F", "FB", "V", "VB", "U", "FBA", "FBM", "VBA", "VBM"):
-            raise KeyError
+            raise KeyError(
+                "'recfm' must be one of the following: 'F', 'FB', 'V', 'VB', 'U', 'FBA', 'FBM', 'VBA', 'VBM'"
+            )
         else:
             self.__recfm = recfm
 
