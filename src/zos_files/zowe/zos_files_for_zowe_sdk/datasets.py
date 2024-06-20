@@ -51,8 +51,8 @@ class DatasetOption:
         self.dirblk = dirblk
         self.avgblk = avgblk
         self.recfm = recfm
-        self.blksize = blksize
         self.lrecl = lrecl
+        self.blksize = blksize
         self.storclass = storclass
         self.mgntclass = mgntclass
         self.dataclass = dataclass
@@ -92,7 +92,7 @@ class DatasetOption:
     def alcunit(self, alcunit: Optional[str]):
         if alcunit is None:
             if self.like is not None:
-                self.alcunit = None
+                self.__alcunit = None
             else:
                 self.__alcunit = "TRK"
         elif alcunit not in ("CYL", "TRK"):

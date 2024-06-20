@@ -218,3 +218,12 @@ class TestCreateClass(TestCase):
         with self.assertRaises(ValueError) as error:
             Files(self.test_profile).create_data_set("DSNAME123")
         self.assertTrue("dataset options" in str(error.exception))
+
+    def test_DatasetOption_alcunit_setter(self):
+        options = DatasetOption(like="test")
+        self.assertEqual(options.alcunit, None)
+        options = DatasetOption()
+        self.assertEqual(options.alcunit, "TRK")
+        with self.assertRaises(KeyError) as error:
+            options.alcunit = "test"
+        self.assertTrue("'alcunit' must be 'CYL' or 'TRK'" in str(error.exception))
