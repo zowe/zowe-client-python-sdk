@@ -7,6 +7,14 @@ All notable changes to the Zowe Client Python SDK will be documented in this fil
 ### Enhancements
 
 - Added logger class to core SDK [#185](https://github.com/zowe/zowe-client-python-sdk/issues/185)
+- Added classes for handling `Datasets`, `USSFiles`, and `FileSystems` in favor of the single Files class. [#264](https://github.com/zowe/zowe-client-python-sdk/issues/264)
+- Refactored tests into proper folders and files and add more tests [#265](https://github.com/zowe/zowe-client-python-sdk/issues/265)
+- **Breaking:** Standardized `response` outputs based on `Content-Type`. [#266](https://github.com/zowe/zowe-client-python-sdk/issues/266) 
+
+### Bug Fixes
+
+- Fixed truncated responses when issuing TSO commands [#260](https://github.com/zowe/zowe-client-python-sdk/issues/260)
+- Fixed a bug on `upload_file_to_dsn` where it would not properly convert line endings on Windows. [#104](https://github.com/zowe/zowe-client-python-sdk/issues/104)
 
 ## `1.0.0-dev15`
 
@@ -57,6 +65,7 @@ All notable changes to the Zowe Client Python SDK will be documented in this fil
 - Added method to load profile properties from environment variables [#136](https://github.com/zowe/zowe-client-python-sdk/issues/136)
 - Added validation of zowe.config.json file matching the schema [#192](https://github.com/zowe/zowe-client-python-sdk/issues/192)
 - Added Secrets SDK for storing client secrets in OS keyring [#208](https://github.com/zowe/zowe-client-python-sdk/issues/208)
+- Turned SDK APIs into context manager [#145](https://github.com/zowe/zowe-client-python-sdk/issues/145)
 
 ### Bug Fixes
 

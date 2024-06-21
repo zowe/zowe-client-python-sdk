@@ -29,4 +29,4 @@ for file in files:
 # -----------------------------------------------------
 print("...content of a file\n")
 my_file_content = my_files.get_file_content("/z/tm891807/file.txt")
-print(my_file_content["response"])
+print(my_file_content)

@@ -21,8 +21,7 @@ from typing import NamedTuple, Optional
 import commentjson
 import requests
 
-import logging
-
+from .logger import Log
 from .credential_manager import CredentialManager
 from .custom_warnings import ProfileNotFoundWarning, ProfileParsingWarning
 from .exceptions import ProfileNotFound

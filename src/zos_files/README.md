@@ -30,7 +30,7 @@ from zowe.core_for_zowe_sdk import ProfileManager
 from zowe.zos_files_for_zowe_sdk import Files
 
 profile = ProfileManager().load(profile_name="zosmf")
-files_info = Files(profile)
 
-print(files_info.delete_data_set(dataset_name="ZOWEUSER.PUBLIC.MY.DATASET.JCL", member_name="MEMBER"))
+with Files(profile) as files_info:
+    print(files_info.delete_data_set(dataset_name="ZOWEUSER.PUBLIC.MY.DATASET.JCL", member_name="MEMBER"))
 ```

@@ -1,6 +1,7 @@
 import logging
 import os
 
+
 class Log:
     """root logger setup and a function to customize logger level"""
 
@@ -15,12 +16,12 @@ class Log:
         datefmt="%m/%d/%Y %I:%M:%S %p",
     )
 
-    loggers = []
+    loggers = set()
+
     @staticmethod
     def registerLogger(name: str):
-        """A function to get Logger and registered for level setting"""
         logger = logging.getLogger(name)
-        Log.loggers.append(logger)
+        Log.loggers.add(logger)
         return logger
 
     @staticmethod

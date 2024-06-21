@@ -26,10 +26,24 @@ class TestTsoClass(TestCase):
     @mock.patch("requests.Session.send")
     def test_issue_command(self, mock_send_request):
         """Test issuing a command sends a request"""
-        fake_response = {"servletKey": None, "tsoData": "READY"}
-        mock_send_request.return_value = mock.Mock(
-            headers={"Content-Type": "application/json"}, status_code=200, json=lambda: fake_response
-        )
+        expected = ['READY', 'GO']
+        message = {"TSO MESSAGE": {
+                "DATA": expected[0]
+            }
+        }
+        message2 = {"TSO MESSAGE": {
+                "DATA": expected[1]
+            }
+        }
+        fake_responses = [
+            mock.Mock(headers={"Content-Type": "application/json"}, status_code=200, json=lambda: {"servletKey": None, "tsoData": [ message]}),
+            mock.Mock(headers={"Content-Type": "application/json"}, status_code=200, json=lambda: {"servletKey": None, "tsoData": [ message]}),
+            mock.Mock(headers={"Content-Type": "application/json"}, status_code=200, json=lambda: {"servletKey": None, "tsoData": ["TSO PROMPT", message2]}),
+            mock.Mock(headers={"Content-Type": "application/json"}, status_code=200, json=lambda: {"servletKey": None, "tsoData": [ message]}),
+        ]
+    
+        mock_send_request.side_effect = fake_responses
 
-        Tso(self.test_profile).issue_command("TIME")
-        self.assertEqual(mock_send_request.call_count, 3)
+        result = Tso(self.test_profile).issue_command("TIME")
+        self.assertEqual(result, expected)
+        self.assertEqual(mock_send_request.call_count, 4)

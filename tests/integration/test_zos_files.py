@@ -1,4 +1,5 @@
 """Integration tests for the Zowe Python SDK z/OS Files package."""
+
 import json
 import os
 import unittest
@@ -66,7 +67,7 @@ class TestFilesIntegration(unittest.TestCase):
     def test_get_dsn_content_should_return_content_from_dataset(self):
         """Executing get_dsn_content should return content from dataset."""
         command_output = self.files.get_dsn_content(self.test_member_jcl)
-        self.assertIsInstance(command_output["response"], str)
+        self.assertIsInstance(command_output, str)
 
     def test_get_dsn_content_streamed_should_return_response_content(self):
         """Executing get_dsn_content_streamed should return response object from the server."""
@@ -86,14 +87,14 @@ class TestFilesIntegration(unittest.TestCase):
     def test_write_to_dsn_should_be_possible(self):
         """Executing write_to_dsn should be possible."""
         command_output = self.files.write_to_dsn(self.test_member_generic, "HELLO WORLD")
-        self.assertTrue(command_output["response"] == "")
+        self.assertTrue(command_output == "")
 
     def test_copy_uss_to_dataset_should_be_possible(self):
         """Executing copy_uss_to_dataset should be possible."""
         command_output = self.files.copy_uss_to_dataset(
             self.files_fixtures["TEST_USS"], self.files_fixtures["TEST_PDS"] + "(TEST2)", replace=True
         )
-        self.assertTrue(command_output["response"] == "")
+        self.assertTrue(command_output == "")
 
     def test_copy_dataset_or_member_should_be_possible(self):
         """Executing copy_dataset_or_member should be possible."""
@@ -105,7 +106,7 @@ class TestFilesIntegration(unittest.TestCase):
             "replace": True,
         }
         command_output = self.files.copy_dataset_or_member(**test_case)
-        self.assertTrue(command_output["response"] == "")
+        self.assertTrue(command_output == "")
 
     def test_mount_unmount_zfs_file_system(self):
         """Mounting a zfs filesystem should be possible"""
@@ -119,7 +120,7 @@ class TestFilesIntegration(unittest.TestCase):
         command_output = self.files.mount_file_system(
             self.test2_zfs_file_system, mount_point, self.mount_zfs_file_system_options
         )
-        self.assertTrue(command_output["response"] == "")
+        self.assertTrue(command_output == "")
 
         # List a zfs file system
         command_output = self.files.list_unix_file_systems(file_system_name=self.test2_zfs_file_system.upper())
@@ -127,11 +128,11 @@ class TestFilesIntegration(unittest.TestCase):
 
         # Unmount file system
         command_output = self.files.unmount_file_system(self.test2_zfs_file_system)
-        self.assertTrue(command_output["response"] == "")
+        self.assertTrue(command_output == "")
 
         # Delete file system
         command_output = self.files.delete_zFS_file_system(self.test2_zfs_file_system)
-        self.assertTrue(command_output["response"] == "")
+        self.assertTrue(command_output == "")
 
     def test_upload_download_delete_dataset(self):
         self.files.upload_file_to_dsn(SAMPLE_JCL_FIXTURE_PATH, self.test_ds_upload)
@@ -149,7 +150,6 @@ class TestFilesIntegration(unittest.TestCase):
     def test_upload_download_delete_uss(self):
         self.files.upload_file_to_uss(SAMPLE_JCL_FIXTURE_PATH, self.test_uss_upload)
         self.files.download_uss(self.test_uss_upload, SAMPLE_JCL_FIXTURE_PATH + ".tmp")
-
         with open(SAMPLE_JCL_FIXTURE_PATH, "r") as in_file:
             old_file_content = in_file.read()
         with open(SAMPLE_JCL_FIXTURE_PATH + ".tmp", "r") as in_file:

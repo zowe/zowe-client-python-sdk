@@ -10,14 +10,14 @@ SPDX-License-Identifier: EPL-2.0
 Copyright Contributors to the Zowe Project.
 """
 
-import os
 
 from zowe.core_for_zowe_sdk import SdkApi
-from zowe.core_for_zowe_sdk.exceptions import FileNotFound
-from zowe.zos_files_for_zowe_sdk import constants, exceptions
 from zowe.zos_files_for_zowe_sdk.constants import FileType, zos_file_constants
+from .datasets import Datasets
+from .uss import USSFiles
+from .file_system import FileSystems
 
-_ZOWE_FILES_DEFAULT_ENCODING = "utf-8"
+_ZOWE_FILES_DEFAULT_ENCODING = zos_file_constants["ZoweFilesDefaultEncoding"]
 
 
 class Files(SdkApi):
@@ -31,10 +31,14 @@ class Files(SdkApi):
     connection
         connection object
     """
+    ds: Datasets
+    uss: USSFiles
+    fs: FileSystems
 
     def __init__(self, connection):
         """
-        Construct a Files object.
+        Construct a Files object, a composition of a Datasets object,
+        a USSFiles object, and a FileSystems object
 
         Parameters
         ----------
@@ -45,143 +49,37 @@ class Files(SdkApi):
         """
         super().__init__(connection, "/zosmf/restfiles/", logger_name=__name__)
         self.default_headers["Accept-Encoding"] = "gzip"
+        self.ds = Datasets(connection)
+        self.uss = USSFiles(connection)
+        self.fs = FileSystems(connection)
 
     def list_files(self, path):
-        """Retrieve a list of USS files based on a given pattern.
+        """Deprecated function. Please use uss.list() instead"""
+        return self.uss.list(path)
 
-        Returns
-        -------
-        json
-            A JSON with a list of dataset names matching the given pattern
-        """
-        custom_args = self._create_custom_request_arguments()
-        custom_args["params"] = {"path": path}
-        custom_args["url"] = "{}fs".format(self.request_endpoint)
-        response_json = self.request_handler.perform_request("GET", custom_args)
-        return response_json
-
+    def get_file_content_streamed(self, file_path, binary=False):
+        """Deprecated function. Please use uss.get_content_streamed() instead"""
+        return self.uss.get_content_streamed(file_path, binary)
+    
     def get_file_content(self, filepath_name):
-        """Retrieve the content of a filename. The complete path must be specified.
-
-        Returns
-        -------
-        json
-            A JSON with the contents of the specified USS file
-        """
-        custom_args = self._create_custom_request_arguments()
-        # custom_args["params"] = {"filepath-name": filepath_name}
-        custom_args["url"] = "{}fs{}".format(self.request_endpoint, filepath_name)
-        response_json = self.request_handler.perform_request("GET", custom_args)
-        return response_json
+        """Deprecated function. Please use uss.get_content() instead"""
+        return self.uss.get_content(filepath_name)
 
     def delete_uss(self, filepath_name, recursive=False):
-        """
-        Delete a file or directory
-
-        Parameters
-        ----------
-        filepath of the file to be deleted
-
-        recursive
-            If specified as True, all the files and sub-directories will be deleted.
-
-        Returns
-        -------
-        204
-            HTTP Response for No Content
-        """
-        custom_args = self._create_custom_request_arguments()
-        custom_args["url"] = "{}fs/{}".format(self.request_endpoint, filepath_name.lstrip("/"))
-        if recursive:
-            custom_args["headers"]["X-IBM-Option"] = "recursive"
-
-        response_json = self.request_handler.perform_request("DELETE", custom_args, expected_code=[204])
-        return response_json
+        """Deprecated function. Please use uss.delete() instead"""
+        return self.uss.delete(filepath_name, recursive)
 
     def list_dsn(self, name_pattern, return_attributes=False):
-        """Retrieve a list of datasets based on a given pattern.
-
-        Parameters
-        ----------
-        name_pattern : str
-            The pattern to match dataset names.
-        return_attributes : bool, optional
-            Whether to return dataset attributes along with the names. Defaults to False.
-
-        Returns
-        -------
-            list of dict
-
-            A JSON with a list of dataset names (and attributes if specified) matching the given pattern.
-        """
-        custom_args = self._create_custom_request_arguments()
-        custom_args["params"] = {"dslevel": self._encode_uri_component(name_pattern)}
-        custom_args["url"] = "{}ds".format(self.request_endpoint)
-
-        if return_attributes:
-            custom_args["headers"]["X-IBM-Attributes"] = "base"
-
-        response_json = self.request_handler.perform_request("GET", custom_args)
-        return response_json
+        """Deprecated function. Please use ds.list() instead"""
+        return self.ds.list(name_pattern, return_attributes)
 
     def list_dsn_members(self, dataset_name, member_pattern=None, member_start=None, limit=1000, attributes="member"):
-        """Retrieve the list of members on a given PDS/PDSE.
+        """Deprecated function. Please use ds.list_members() instead"""
+        return self.ds.list_members(dataset_name, member_pattern, member_start, limit, attributes)
 
-        Returns
-        -------
-        json
-            A JSON with a list of members from a given PDS/PDSE
-        """
-        custom_args = self._create_custom_request_arguments()
-        additional_parms = {}
-        if member_start is not None:
-            additional_parms["start"] = member_start
-        if member_pattern is not None:
-            additional_parms["pattern"] = member_pattern
-        custom_args["params"] = additional_parms
-        custom_args["url"] = "{}ds/{}/member".format(self.request_endpoint, self._encode_uri_component(dataset_name))
-        custom_args["headers"]["X-IBM-Max-Items"] = "{}".format(limit)
-        custom_args["headers"]["X-IBM-Attributes"] = attributes
-        response_json = self.request_handler.perform_request("GET", custom_args)
-        return response_json["items"]  # type: ignore
-
-    def copy_uss_to_dataset(
-        self, from_filename, to_dataset_name, to_member_name=None, type=FileType.TEXT, replace=False
-    ):
-        """
-        Copy a USS file to dataset.
-
-        Parameters
-        ----------
-        from_filename: str
-            Name of the file to copy from.
-        to_dataset_name: str
-            Name of the dataset to copy to.
-        to_member_name: str
-            Name of the member to copy to.
-        type: FileType, optional
-            Type of the file to copy from. Default is FileType.TEXT.
-        replace: bool, optional
-            If true, members in the target dataset are replaced.
-
-        Returns
-        -------
-        json
-            A JSON containing the result of the operation.
-        """
-
-        data = {
-            "request": "copy",
-            "from-file": {"filename": from_filename.strip(), "type": type.value},
-            "replace": replace,
-        }
-
-        path_to_member = f"{to_dataset_name}({to_member_name})" if to_member_name else to_dataset_name
-        custom_args = self._create_custom_request_arguments()
-        custom_args["json"] = data
-        custom_args["url"] = "{}ds/{}".format(self.request_endpoint, self._encode_uri_component(path_to_member))
-        response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[200])
-        return response_json
+    def copy_uss_to_dataset(self, from_filename, to_dataset_name, to_member_name=None, type=FileType.TEXT, replace=False):
+        """Deprecated function. Please use ds.copy_uss_to_dataset instead"""
+        return self.ds.copy_uss_to_dataset(from_filename, to_dataset_name, to_member_name, type, replace)
 
     def copy_dataset_or_member(
         self,
@@ -194,674 +92,105 @@ class Files(SdkApi):
         enq=None,
         replace=False,
     ):
-        """
-        Copy a dataset or member to another dataset or member.
-        Parameters
-        ----------
-        from_dataset_name: str
-            Name of the dataset to copy from
-        to_dataset_name: str
-            Name of the dataset to copy to
-        from_member_name: str
-            Name of the member to copy from
-        volser: str
-            Volume serial number of the dataset to copy from
-        alias: bool
-            Alias of the dataset to copy from
-        to_member_name: str
-            Name of the member to copy to
-        enq: str
-            Enqueue type for the dataset to copy from
-        replace: bool
-            If true, members in the target data set are replaced.
-        Returns
-        -------
-        json
-            A JSON containing the result of the operation
-        """
-
-        data = {
-            "request": "copy",
-            "from-dataset": {"dsn": from_dataset_name.strip(), "member": from_member_name},
-            "replace": replace,
-        }
-
-        path_to_member = f"{to_dataset_name}({to_member_name})" if to_member_name else to_dataset_name
-        if enq:
-            if enq in ("SHR", "SHRW", "EXCLU"):
-                data["enq"] = enq
-            else:
-                self.logger.error("Invalid value for enq.")
-                raise ValueError("Invalid value for enq.")
-        if volser:
-            data["from-dataset"]["volser"] = volser
-        if alias is not None:  # because it can be false so
-            data["from-dataset"]["alias"] = alias
-
-        custom_args = self._create_custom_request_arguments()
-        custom_args["json"] = data
-        custom_args["url"] = "{}ds/{}".format(self.request_endpoint, self._encode_uri_component(path_to_member))
-        response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[200])
-        return response_json
+        """Deprecated function. Please use ds.copy_dataset_or_member() instead"""
+        return self.ds.copy_dataset_or_member(from_dataset_name, to_dataset_name, from_member_name, volser, alias, to_member_name, enq, replace)
 
     def get_dsn_content(self, dataset_name):
-        """Retrieve the contents of a given dataset.
-
-        Returns
-        -------
-        json
-            A JSON with the contents of a given dataset
-        """
-        custom_args = self._create_custom_request_arguments()
-        custom_args["url"] = "{}ds/{}".format(self.request_endpoint, self._encode_uri_component(dataset_name))
-        response_json = self.request_handler.perform_request("GET", custom_args)
-        return response_json
+        """Deprecated function. Please use ds.get_content() instead"""
+        return self.ds.get_content(dataset_name)
 
     def create_data_set(self, dataset_name, options={}):
-        """
-        Create a sequential or partitioned dataset.
-        Parameters
-        ----------
-            dataset_name
-        Returns
-        -------
-        json
-        """
-
-        if options.get("like") is None:
-            if options.get("primary") is None or options.get("lrecl") is None:
-                self.logger.error("If 'like' is not specified, you must specify 'primary' or 'lrecl'.")
-                raise ValueError("If 'like' is not specified, you must specify 'primary' or 'lrecl'.")
-
-            for opt in (
-                "volser",
-                "unit",
-                "dsorg",
-                "alcunit",
-                "primary",
-                "secondary",
-                "dirblk",
-                "avgblk",
-                "recfm",
-                "blksize",
-                "lrecl",
-                "storclass",
-                "mgntclass",
-                "dataclass",
-                "dsntype",
-                "like",
-            ):
-                if opt == "dsorg":
-                    if options.get(opt) is not None and options[opt] not in ("PO", "PS"):
-                        self.logger.error(f"{opt} is not 'PO' or 'PS'.")
-                        raise KeyError
-
-                elif opt == "alcunit":
-                    if options.get(opt) is None:
-                        options[opt] = "TRK"
-                    else:
-                        if options[opt] not in ("CYL", "TRK"):
-                            self.logger.error(f"{opt} is not 'CYL' or 'TRK'.")
-                            raise KeyError
-
-                elif opt == "primary":
-                    if options.get(opt) is not None:
-                        if options["primary"] > 16777215:
-                            self.logger.error("Specified value exceeds limit.")
-                            raise ValueError
-
-                elif opt == "secondary":
-                    if options.get("primary") is not None:
-                        if options.get(opt) is None:
-                            options["secondary"] = int(options["primary"] / 10)
-                        if options["secondary"] > 16777215:
-                            self.logger.error("Specified value exceeds limit.")
-                            raise ValueError
-
-                elif opt == "dirblk":
-                    if options.get(opt) is not None:
-                        if options.get("dsorg") == "PS":
-                            if options["dirblk"] != 0:
-                                self.logger.error("Can't allocate directory blocks for files.")
-                                raise ValueError
-                        elif options.get("dsorg") == "PO":
-                            if options["dirblk"] == 0:
-                                self.logger.error("Can't allocate empty directory blocks.")
-                                raise ValueError
-
-                elif opt == "recfm":
-                    if options.get(opt) is None:
-                        options[opt] = "F"
-                    else:
-                        if options[opt] not in ("F", "FB", "V", "VB", "U", "FBA", "FBM", "VBA", "VBM"):
-                            self.logger.error("Invalid record format.")
-                            raise KeyError
-
-                elif opt == "blksize":
-                    if options.get(opt) is None and options.get("lrecl") is not None:
-                        options[opt] = options["lrecl"]
-
-        custom_args = self._create_custom_request_arguments()
-        custom_args["url"] = "{}ds/{}".format(self.request_endpoint, self._encode_uri_component(dataset_name))
-        custom_args["json"] = options
-        response_json = self.request_handler.perform_request("POST", custom_args, expected_code=[201])
-        return response_json
+        """Deprecated function. Please use ds.create() instead"""
+        return self.ds.create(dataset_name, options)
 
     def create_default_data_set(self, dataset_name: str, default_type: str):
-        """
-        Create a dataset with default options set.
-        Default options depend on the requested type.
-
-        Parameters
-        ----------
-            dataset_name: str
-            default_type: str
-                "partitioned", "sequential", "classic", "c" or "binary"
-
-        Returns
-        -------
-        json - A JSON containing the result of the operation
-        """
-
-        if default_type not in ("partitioned", "sequential", "classic", "c", "binary"):
-            self.logger.error("Invalid type for default data set.")
-            raise ValueError("Invalid type for default data set.")
-
-        custom_args = self._create_custom_request_arguments()
-
-        if default_type == "partitioned":
-            custom_args["json"] = {
-                "alcunit": "CYL",
-                "dsorg": "PO",
-                "primary": 1,
-                "dirblk": 5,
-                "recfm": "FB",
-                "blksize": 6160,
-                "lrecl": 80,
-            }
-        elif default_type == "sequential":
-            custom_args["json"] = {
-                "alcunit": "CYL",
-                "dsorg": "PS",
-                "primary": 1,
-                "recfm": "FB",
-                "blksize": 6160,
-                "lrecl": 80,
-            }
-        elif default_type == "classic":
-            custom_args["json"] = {
-                "alcunit": "CYL",
-                "dsorg": "PO",
-                "primary": 1,
-                "recfm": "FB",
-                "blksize": 6160,
-                "lrecl": 80,
-                "dirblk": 25,
-            }
-        elif default_type == "c":
-            custom_args["json"] = {
-                "dsorg": "PO",
-                "alcunit": "CYL",
-                "primary": 1,
-                "recfm": "VB",
-                "blksize": 32760,
-                "lrecl": 260,
-                "dirblk": 25,
-            }
-        elif default_type == "binary":
-            custom_args["json"] = {
-                "dsorg": "PO",
-                "alcunit": "CYL",
-                "primary": 10,
-                "recfm": "U",
-                "blksize": 27998,
-                "lrecl": 27998,
-                "dirblk": 25,
-            }
-
-        custom_args["url"] = "{}ds/{}".format(self.request_endpoint, self._encode_uri_component(dataset_name))
-        response_json = self.request_handler.perform_request("POST", custom_args, expected_code=[201])
-        return response_json
+        """Deprecated function. Please use ds.create_default() instead"""
+        return self.ds.create_default(dataset_name, default_type)
 
     def create_uss(self, file_path, type, mode=None):
-        """
-        Add a file or directory
-        Parameters
-        ----------
-        file_path of the file to add
-        type = "file" or "dir"
-        mode Ex:- rwxr-xr-x
-
-        """
-
-        data = {"type": type, "mode": mode}
-
-        custom_args = self._create_custom_request_arguments()
-        custom_args["json"] = data
-        custom_args["url"] = "{}fs/{}".format(self.request_endpoint, file_path.lstrip("/"))
-        response_json = self.request_handler.perform_request("POST", custom_args, expected_code=[201])
-        return response_json
+        """Deprecated function. Please use uss.create() instead"""
+        return self.uss.create(file_path, type, mode)
 
     def get_dsn_content_streamed(self, dataset_name):
-        """Retrieve the contents of a given dataset streamed.
-
-        Returns
-        -------
-        response
-            A response object from the requests library
-        """
-        custom_args = self._create_custom_request_arguments()
-        custom_args["url"] = "{}ds/{}".format(self.request_endpoint, self._encode_uri_component(dataset_name))
-        response = self.request_handler.perform_request("GET", custom_args, stream = True)
-        return response
+        """Deprecated function. Please use ds.get_content() instead"""
+        return self.ds.get_content(dataset_name, stream=True)
 
     def get_dsn_binary_content(self, dataset_name, with_prefixes=False):
-        """
-        Retrieve the contents of a given dataset as a binary bytes object.
-
-        Parameters
-        ----------
-        dataset_name: str - Name of the dataset to retrieve
-        with_prefixes: boolean - if True include a 4 byte big endian record len prefix
-                                 default: False
-        Returns
-        -------
-        response
-            A response object from the requests library
-        """
-        custom_args = self._create_custom_request_arguments()
-        custom_args["url"] = "{}ds/{}".format(self.request_endpoint, self._encode_uri_component(dataset_name))
-        custom_args["headers"]["Accept"] = "application/octet-stream"
-        if with_prefixes:
-            custom_args["headers"]["X-IBM-Data-Type"] = "record"
-        else:
-            custom_args["headers"]["X-IBM-Data-Type"] = "binary"
-        response = self.request_handler.perform_request("GET", custom_args)
-        return response
+        """Deprecated function. Please use ds.get_binary_content() instead"""
+        return self.ds.get_binary_content(dataset_name, with_prefixes)
 
     def get_dsn_binary_content_streamed(self, dataset_name, with_prefixes=False):
-        """
-        Retrieve the contents of a given dataset as a binary bytes object streamed.
-
-        Parameters
-        ----------
-        dataset_name: str - Name of the dataset to retrieve
-        with_prefixes: boolean - if True include a 4 byte big endian record len prefix
-                                 default: False
-        Returns
-        -------
-        response
-            A response object from the requests library
-        """
-        custom_args = self._create_custom_request_arguments()
-        custom_args["url"] = "{}ds/{}".format(self.request_endpoint, self._encode_uri_component(dataset_name))
-        custom_args["headers"]["Accept"] = "application/octet-stream"
-        if with_prefixes:
-            custom_args["headers"]["X-IBM-Data-Type"] = "record"
-        else:
-            custom_args["headers"]["X-IBM-Data-Type"] = "binary"
-        response = self.request_handler.perform_request("GET", custom_args, stream = True)
-        return response
+        """Deprecated function. Please use ds.get_binary_content() instead"""
+        return self.ds.get_binary_content(dataset_name, stream=True, with_prefixes=with_prefixes)
 
     def write_to_dsn(self, dataset_name, data, encoding=_ZOWE_FILES_DEFAULT_ENCODING):
-        """Write content to an existing dataset.
-
-        Returns
-        -------
-        json
-            A JSON containing the result of the operation
-        """
-        custom_args = self._create_custom_request_arguments()
-        custom_args["url"] = "{}ds/{}".format(self.request_endpoint, self._encode_uri_component(dataset_name))
-        custom_args["data"] = data
-        custom_args["headers"]["Content-Type"] = "text/plain; charset={}".format(encoding)
-        response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[204, 201])
-        return response_json
+        """Deprecated function. Please use ds.write() instead"""
+        return self.ds.write(dataset_name, data, encoding)
 
     def download_dsn(self, dataset_name, output_file):
-        """Retrieve the contents of a dataset and saves it to a given file."""
-        response = self.get_dsn_content_streamed(dataset_name)
-        with open(output_file, "w", encoding="utf-8") as f:
-            for chunk in response.iter_content(chunk_size=4096, decode_unicode=True):
-                f.write(chunk)
+        """Deprecated function. Please use ds.download() instead"""
+        self.ds.download(dataset_name, output_file)
 
     def download_binary_dsn(self, dataset_name, output_file, with_prefixes=False):
-        """Retrieve the contents of a binary dataset and saves it to a given file.
+        """Deprecated function. Please use ds.download_binary() instead"""
+        self.ds.download_binary(dataset_name, output_file, with_prefixes)
 
-        Parameters
-        ----------
-        dataset_name:str - Name of the dataset to download
-        output_file:str - Name of the local file to create
-        with_prefixes:boolean - If true, include a four big endian bytes record length prefix.
-                                The default is False
-        """
-        response = self.get_dsn_binary_content_streamed(dataset_name, with_prefixes=with_prefixes)
-        with open(output_file, "wb") as f:
-            for chunk in response.iter_content(chunk_size=4096):
-                f.write(chunk)
-
-    def upload_file_to_dsn(self, input_file, dataset_name, encoding=_ZOWE_FILES_DEFAULT_ENCODING):
-        """Upload contents of a given file and uploads it to a dataset."""
-        if os.path.isfile(input_file):
-            with open(input_file, "rb") as in_file:
-                response_json = self.write_to_dsn(dataset_name, in_file)
-        else:
-            self.logger.error(f"File {input_file} not found.")
-            raise FileNotFound(input_file)
+    def upload_file_to_dsn(self, input_file, dataset_name, encoding=_ZOWE_FILES_DEFAULT_ENCODING, binary = False):
+        """Deprecated function. Please use ds.upload_file() instead"""
+        self.ds.upload_file(input_file, dataset_name, encoding, binary)
 
     def write_to_uss(self, filepath_name, data, encoding=_ZOWE_FILES_DEFAULT_ENCODING):
-        """Write content to an existing UNIX file.
-        Returns
-        -------
-        json
-            A JSON containing the result of the operation
-        """
-        custom_args = self._create_custom_request_arguments()
-        custom_args["url"] = "{}fs/{}".format(self.request_endpoint, filepath_name.lstrip("/"))
-        custom_args["data"] = data
-        custom_args["headers"]["Content-Type"] = "text/plain; charset={}".format(encoding)
-        response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[204, 201])
-        return response_json
+        """Deprecated function. Please use uss.write() instead"""
+        return self.uss.write(filepath_name, data, encoding)
 
     def upload_file_to_uss(self, input_file, filepath_name, encoding=_ZOWE_FILES_DEFAULT_ENCODING):
-        """Upload contents of a given file and uploads it to UNIX file"""
-        if os.path.isfile(input_file):
-            with open(input_file, "r", encoding="utf-8") as in_file:
-                response_json = self.write_to_uss(filepath_name, in_file)
-        else:
-            self.logger.error(f"File {input_file} not found.")
-            raise FileNotFound(input_file)
-
-    def get_file_content_streamed(self, file_path, binary=False):
-        """Retrieve the contents of a given USS file streamed.
-
-        Returns
-        -------
-        response
-            A response object from the requests library
-        """
-        custom_args = self._create_custom_request_arguments()
-        custom_args["url"] = "{}fs/{}".format(self.request_endpoint, self._encode_uri_component(file_path.lstrip("/")))
-        if binary:
-            custom_args["headers"]["X-IBM-Data-Type"] = "binary"
-        response = self.request_handler.perform_request("GET", custom_args, stream=True)
-        return response
+        """Deprecated function. Please use uss.upload() instead"""
+        self.uss.upload(input_file, filepath_name, encoding)
 
     def download_uss(self, file_path, output_file, binary=False):
-        """Retrieve the contents of a USS file and saves it to a local file."""
-        response = self.get_file_content_streamed(file_path, binary)
-        with open(output_file, "wb" if binary else "w", encoding="utf-8") as f:
-            for chunk in response.iter_content(chunk_size=4096, decode_unicode=not binary):
-                f.write(chunk)
+        """Deprecated function. Please use uss.download() instead"""
+        self.uss.download(file_path, output_file, binary)
 
     def delete_data_set(self, dataset_name, volume=None, member_name=None):
-        """Deletes a sequential or partitioned data."""
-        custom_args = self._create_custom_request_arguments()
-        if member_name is not None:
-            dataset_name = f"{dataset_name}({member_name})"
-        url = "{}ds/{}".format(self.request_endpoint, self._encode_uri_component(dataset_name))
-        if volume is not None:
-            url = "{}ds/-{}/{}".format(self.request_endpoint, volume, self._encode_uri_component(dataset_name))
-        custom_args["url"] = url
-        response_json = self.request_handler.perform_request("DELETE", custom_args, expected_code=[200, 202, 204])
-        return response_json
+        """Deprecated function. Please use ds.delete() instead"""
+        return self.ds.delete(dataset_name, volume, member_name)
 
     def create_zFS_file_system(self, file_system_name, options={}):
-        """
-        Create a z/OS UNIX zFS Filesystem.
-
-        Parameter
-        ---------
-        file_system_name: str - the name for the file system
-
-        Returns
-        -------
-        json - A JSON containing the result of the operation
-        """
-        for key, value in options.items():
-            if key == "perms":
-                if value < 0 or value > 777:
-                    self.logger.error("Invalid Permissions Option.")
-                    raise exceptions.InvalidPermsOption(value)
-
-            if key == "cylsPri" or key == "cylsSec":
-                if value > constants.zos_file_constants["MaxAllocationQuantity"]:
-                    self.logger.error("Maximum allocation quantity exceeded.")
-                    raise exceptions.MaxAllocationQuantityExceeded
-
-        custom_args = self._create_custom_request_arguments()
-        custom_args["url"] = "{}mfs/zfs/{}".format(self.request_endpoint, file_system_name)
-        custom_args["json"] = options
-        response_json = self.request_handler.perform_request("POST", custom_args, expected_code=[201])
-        return response_json
+        """Deprecated function. Please use fs.create() instead"""
+        return self.fs.create(file_system_name, options)
 
     def delete_zFS_file_system(self, file_system_name):
-        """
-        Deletes a zFS Filesystem
-        """
-        custom_args = self._create_custom_request_arguments()
-        custom_args["url"] = "{}mfs/zfs/{}".format(self.request_endpoint, file_system_name)
-        response_json = self.request_handler.perform_request("DELETE", custom_args, expected_code=[204])
-        return response_json
+        """Deprecated function. Please use fs.delete() instead"""
+        return self.fs.delete(file_system_name)
 
     def mount_file_system(self, file_system_name, mount_point, options={}, encoding=_ZOWE_FILES_DEFAULT_ENCODING):
-        """Mounts a z/OS UNIX file system on a specified directory.
-        Parameter
-        ---------
-        file_system_name: str - the name for the file system
-        mount_point: str - mount point to be used for mounting the UNIX file system
-        options: dict - A JSON of request body options
-
-        Returns
-        -------
-        json - A JSON containing the result of the operation
-        """
-        options["action"] = "mount"
-        options["mount-point"] = mount_point
-        custom_args = self._create_custom_request_arguments()
-        custom_args["url"] = "{}mfs/{}".format(self.request_endpoint, file_system_name)
-        custom_args["json"] = options
-        custom_args["headers"]["Content-Type"] = "text/plain; charset={}".format(encoding)
-        response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[204])
-        return response_json
+        """Deprecated function. Please use fs.mount() instead"""
+        return self.fs.mount(file_system_name, mount_point, options, encoding)
 
     def unmount_file_system(self, file_system_name, options={}, encoding=_ZOWE_FILES_DEFAULT_ENCODING):
-        """Unmounts a z/OS UNIX file system on a specified directory.
-
-        Parameter
-        ---------
-        file_system_name: str - the name for the file system
-        options: dict - A JSON of request body options
-
-        Returns
-        -------
-        json - A JSON containing the result of the operation
-        """
-        options["action"] = "unmount"
-        custom_args = self._create_custom_request_arguments()
-        custom_args["url"] = "{}mfs/{}".format(self.request_endpoint, file_system_name)
-        custom_args["json"] = options
-        custom_args["headers"]["Content-Type"] = "text/plain; charset={}".format(encoding)
-        response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[204])
-        return response_json
+        """Deprecated function. Please use fs.unmount() instead"""
+        return self.fs.unmount(file_system_name, options, encoding)
 
     def list_unix_file_systems(self, file_path_name=None, file_system_name=None):
-        """
-        list all mounted filesystems, or the specific filesystem mounted at a given path, or the
-        filesystem with a given Filesystem name.
-
-        Parameter
-        ---------
-        file_path: str - the UNIX directory that contains the files and directories to be listed.
-        file_system_name: str - the name for the file system to be listed
-
-        Returns
-        -------
-        json - A JSON containing the result of the operation
-        """
-        custom_args = self._create_custom_request_arguments()
-
-        custom_args["params"] = {"path": file_path_name, "fsname": file_system_name}
-        custom_args["url"] = "{}mfs".format(self.request_endpoint)
-        response_json = self.request_handler.perform_request("GET", custom_args, expected_code=[200])
-        return response_json
+        """Deprecated function. Please use fs.list() instead"""
+        return self.fs.list(file_path_name, file_system_name)
 
     def recall_migrated_dataset(self, dataset_name: str, wait=False):
-        """
-        Recalls a migrated data set.
-
-        Parameters
-        ----------
-        dataset_name: str
-            Name of the data set
-
-        wait: bool
-            If true, the function waits for completion of the request, otherwise the request is queued
-
-        Returns
-        -------
-        json - A JSON containing the result of the operation
-        """
-
-        data = {"request": "hrecall", "wait": wait}
-
-        custom_args = self._create_custom_request_arguments()
-        custom_args["json"] = data
-        custom_args["url"] = "{}ds/{}".format(self.request_endpoint, self._encode_uri_component(dataset_name))
-
-        response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[200])
-        return response_json
+        """Deprecated function. Please use ds.recall_migrated() instead"""
+        return self.ds.recall_migrated(dataset_name, wait)
 
     def delete_migrated_data_set(self, dataset_name: str, purge=False, wait=False):
-        """
-        Deletes migrated data set.
-
-        Parameters
-        ----------
-        dataset_name: str
-            Name of the data set
-
-        purge: bool
-            If true, the function uses the PURGE=YES on ARCHDEL request, otherwise it uses the PURGE=NO.
-
-        wait: bool
-            If true, the function waits for completion of the request, otherwise the request is queued.
-
-        Returns
-        -------
-        json - A JSON containing the result of the operation
-        """
-
-        data = {
-            "request": "hdelete",
-            "purge": purge,
-            "wait": wait,
-        }
-
-        custom_args = self._create_custom_request_arguments()
-        custom_args["json"] = data
-        custom_args["url"] = "{}ds/{}".format(self.request_endpoint, self._encode_uri_component(dataset_name))
-
-        response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[200])
-        return response_json
+        """Deprecated function. Please use ds.delete_migrated() instead"""
+        return self.ds.delete_migrated(dataset_name, purge, wait)
 
     def migrate_data_set(self, dataset_name: str, wait=False):
-        """
-        Migrates the data set.
-
-        Parameters
-        ----------
-        dataset_name: str
-            Name of the data set
-
-        wait: bool
-            If true, the function waits for completion of the request, otherwise the request is queued.
-
-        Returns
-        -------
-        json - A JSON containing the result of the operation
-        """
-
-        data = {"request": "hmigrate", "wait": wait}
-
-        custom_args = self._create_custom_request_arguments()
-        custom_args["json"] = data
-        custom_args["url"] = "{}ds/{}".format(self.request_endpoint, self._encode_uri_component(dataset_name))
-
-        response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[200])
-        return response_json
+        """Deprecated function. Please use ds.migrate() instead"""
+        return self.ds.migrate(dataset_name, wait)
 
     def rename_dataset(self, before_dataset_name: str, after_dataset_name: str):
-        """
-        Renames the data set.
-
-        Parameters
-        ----------
-        before_dataset_name: str
-            The source data set name.
-
-        after_dataset_name: str
-            New name for the source data set.
-
-        Returns
-        -------
-        json - A JSON containing the result of the operation
-        """
-
-        data = {"request": "rename", "from-dataset": {"dsn": before_dataset_name.strip()}}
-
-        custom_args = self._create_custom_request_arguments()
-        custom_args["json"] = data
-        custom_args["url"] = "{}ds/{}".format(
-            self.request_endpoint, self._encode_uri_component(after_dataset_name).strip()
-        )
-
-        response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[200])
-        return response_json
+        """Deprecated function. Please use ds.rename() instead"""
+        return self.ds.rename(before_dataset_name, after_dataset_name)
 
     def rename_dataset_member(self, dataset_name: str, before_member_name: str, after_member_name: str, enq=""):
-        """
-        Renames the data set member.
-
-        Parameters
-        ----------
-        dataset_name: str
-            Name of the data set.
-
-        before_member_name: str
-            The source member name.
-
-        after_member_name: str
-            New name for the source member.
-
-        enq: str
-            Values can be SHRW or EXCLU. SHRW is the default for PDS members, EXCLU otherwise.
-
-        Returns
-        -------
-        json - A JSON containing the result of the operation
-        """
-
-        data = {
-            "request": "rename",
-            "from-dataset": {
-                "dsn": dataset_name.strip(),
-                "member": before_member_name.strip(),
-            },
-        }
-
-        path_to_member = dataset_name.strip() + "(" + after_member_name.strip() + ")"
-
-        if enq:
-            if enq in ("SHRW", "EXCLU"):
-                data["enq"] = enq.strip()
-            else:
-                self.logger.error("Invalid value for enq.")
-                raise ValueError("Invalid value for enq.")
-
-        custom_args = self._create_custom_request_arguments()
-        custom_args["json"] = data
-        custom_args["url"] = "{}ds/{}".format(self.request_endpoint, self._encode_uri_component(path_to_member))
-
-        response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[200])
-        return response_json
+        """Deprecated function. Please use ds.rename_member() instead"""
+        return self.ds.rename_member(dataset_name, before_member_name, after_member_name, enq)

@@ -11,10 +11,9 @@ Copyright Contributors to the Zowe Project.
 """
 
 import urllib
-import logging
+from .logger import Log
 
 from . import session_constants
-from .exceptions import UnsupportedAuthType
 from .request_handler import RequestHandler
 from .session import ISession, Session
 from .logger import Log
@@ -56,6 +55,12 @@ class SdkApi:
             self.default_headers["Authorization"] = f"Bearer {self.session.tokenValue}"
         elif self.session.type == session_constants.AUTH_TYPE_TOKEN:
             self.default_headers["Cookie"] = f"{self.session.tokenType}={self.session.tokenValue}"
+    
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exception, traceback):
+        del self.request_handler
 
     def _create_custom_request_arguments(self):
         """Create a copy of the default request arguments dictionary.
