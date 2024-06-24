@@ -19,7 +19,8 @@ class TestJobsIntegration(unittest.TestCase):
         test_profile = ProfileManager(show_warnings=False).load(profile_type="zosmf")
         with open(JOBS_FIXTURES_JSON_JSON_PATH, "r") as fixtures_json:
             self.jobs_fixtures_json = json.load(fixtures_json)
-        self.jobs = Jobs(test_profile)
+        with Jobs(test_profile) as jobs:
+            self.jobs = jobs
 
     def test_get_job_status_should_return_the_status_of_a_job(self):
         """Executing the get_job_status method should return the status of a given job"""
