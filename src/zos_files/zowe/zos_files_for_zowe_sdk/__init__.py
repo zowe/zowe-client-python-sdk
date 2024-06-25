@@ -3,7 +3,7 @@ Zowe Python SDK - z/OS Files package
 """
 
 from . import constants, exceptions
-from .files import Files
-from .datasets import Datasets
-from .uss import USSFiles
+from .datasets import DatasetOption, Datasets
 from .file_system import FileSystems
+from .files import Files
+from .uss import USSFiles
