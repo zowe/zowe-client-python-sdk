@@ -294,7 +294,7 @@ class Datasets(SdkApi):
         response_json = self.request_handler.perform_request("GET", custom_args)
         return response_json["items"]  # type: ignore
 
-    def copy_dataset_or_member(
+    def copy_data_set_or_member(
         self,
         from_dataset_name,
         to_dataset_name,
@@ -727,7 +727,7 @@ class Datasets(SdkApi):
         response_json = self.request_handler.perform_request("DELETE", custom_args, expected_code=[200, 202, 204])
         return response_json
 
-    def copy_uss_to_dataset(
+    def copy_uss_to_data_set(
         self, from_filename, to_dataset_name, to_member_name=None, type=FileType.TEXT, replace=False
     ):
         """
