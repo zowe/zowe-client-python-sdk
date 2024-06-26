@@ -15,7 +15,7 @@ To install all Zowe SDK packages using pip:
 
 .. code-block::
 
-    pip install -U --pre zowe
+    pip install -U --pre zowe-python-sdk-bundle
 
 To install only a subpackage using pip:
 
