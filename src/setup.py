@@ -21,7 +21,7 @@ def resolve_sdk_dep(sdk_name, version_spec):
 
 if __name__ == "__main__":
     setup(
-        name="zowe",
+        name="zowe-python-sdk-bundle",
         version=__version__,
         description="Zowe Python SDK",
         long_description=open("../README.md", "r").read(),
