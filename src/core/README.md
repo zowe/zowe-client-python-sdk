@@ -1,7 +1,7 @@
 Core Package
 ============
 
-The Zowe Client Pyton SDK Core package contains functionality that is shared across all other SDK packages, such as `@zowe/zos-files-for-zowe-sdk`.  
+The Zowe Client Python SDK Core package contains functionality that is shared across all other SDK packages, such as `zowe.zos-files-for-zowe-sdk`.  
 
 <strong>Important!</strong> You must install the Core package to satisfy the peer dependency requirement for all other SDK packages.
 
