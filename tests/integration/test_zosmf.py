@@ -11,8 +11,8 @@ class TestZosmfIntegration(unittest.TestCase):
     def setUp(self):
         """Setup fixtures for Zosmf class."""
         test_profile = ProfileManager(show_warnings=False).load(profile_type="zosmf")
-        with Zosmf(test_profile) as zosmf:
-            self.zosmf = zosmf
+        self.zosmf = Zosmf(test_profile)
+        self.addCleanup(lambda: self.zosmf.__exit__(None, None, None))
 
     def test_get_info_should_return_valid_response(self):
         """Executing the get_info method should return a valid response."""
