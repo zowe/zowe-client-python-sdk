@@ -10,7 +10,6 @@ SPDX-License-Identifier: EPL-2.0
 Copyright Contributors to the Zowe Project.
 """
 
-
 from zowe.core_for_zowe_sdk import SdkApi
 from zowe.zos_files_for_zowe_sdk import constants, exceptions
 
@@ -42,7 +41,7 @@ class FileSystems(SdkApi):
         Also update header to accept gzip encoded responses
         """
         super().__init__(connection, "/zosmf/restfiles/", logger_name=__name__)
-        self.default_headers["Accept-Encoding"] = "gzip"    
+        self._default_headers["Accept-Encoding"] = "gzip"
 
     def create(self, file_system_name, options={}):
         """
@@ -68,7 +67,7 @@ class FileSystems(SdkApi):
                     raise exceptions.MaxAllocationQuantityExceeded
 
         custom_args = self._create_custom_request_arguments()
-        custom_args["url"] = "{}mfs/zfs/{}".format(self.request_endpoint, file_system_name)
+        custom_args["url"] = "{}mfs/zfs/{}".format(self._request_endpoint, file_system_name)
         custom_args["json"] = options
         response_json = self.request_handler.perform_request("POST", custom_args, expected_code=[201])
         return response_json
@@ -78,7 +77,7 @@ class FileSystems(SdkApi):
         Deletes a zFS Filesystem
         """
         custom_args = self._create_custom_request_arguments()
-        custom_args["url"] = "{}mfs/zfs/{}".format(self.request_endpoint, file_system_name)
+        custom_args["url"] = "{}mfs/zfs/{}".format(self._request_endpoint, file_system_name)
         response_json = self.request_handler.perform_request("DELETE", custom_args, expected_code=[204])
         return response_json
 
@@ -97,7 +96,7 @@ class FileSystems(SdkApi):
         options["action"] = "mount"
         options["mount-point"] = mount_point
         custom_args = self._create_custom_request_arguments()
-        custom_args["url"] = "{}mfs/{}".format(self.request_endpoint, file_system_name)
+        custom_args["url"] = "{}mfs/{}".format(self._request_endpoint, file_system_name)
         custom_args["json"] = options
         custom_args["headers"]["Content-Type"] = "text/plain; charset={}".format(encoding)
         response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[204])
@@ -117,7 +116,7 @@ class FileSystems(SdkApi):
         """
         options["action"] = "unmount"
         custom_args = self._create_custom_request_arguments()
-        custom_args["url"] = "{}mfs/{}".format(self.request_endpoint, file_system_name)
+        custom_args["url"] = "{}mfs/{}".format(self._request_endpoint, file_system_name)
         custom_args["json"] = options
         custom_args["headers"]["Content-Type"] = "text/plain; charset={}".format(encoding)
         response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[204])
@@ -140,8 +139,6 @@ class FileSystems(SdkApi):
         custom_args = self._create_custom_request_arguments()
 
         custom_args["params"] = {"path": file_path_name, "fsname": file_system_name}
-        custom_args["url"] = "{}mfs".format(self.request_endpoint)
+        custom_args["url"] = "{}mfs".format(self._request_endpoint)
         response_json = self.request_handler.perform_request("GET", custom_args, expected_code=[200])
         return response_json
-
-    

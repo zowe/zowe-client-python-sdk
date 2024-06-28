@@ -18,6 +18,7 @@ from zowe.zos_files_for_zowe_sdk.constants import zos_file_constants
 
 _ZOWE_FILES_DEFAULT_ENCODING = zos_file_constants["ZoweFilesDefaultEncoding"]
 
+
 class USSFiles(SdkApi):
     """
     Class used to represent the base z/OSMF USSFiles API
@@ -43,8 +44,8 @@ class USSFiles(SdkApi):
         Also update header to accept gzip encoded responses
         """
         super().__init__(connection, "/zosmf/restfiles/", logger_name=__name__)
-        self.default_headers["Accept-Encoding"] = "gzip"
-    
+        self._default_headers["Accept-Encoding"] = "gzip"
+
     def list(self, path):
         """Retrieve a list of USS files based on a given pattern.
 
@@ -55,7 +56,7 @@ class USSFiles(SdkApi):
         """
         custom_args = self._create_custom_request_arguments()
         custom_args["params"] = {"path": path}
-        custom_args["url"] = "{}fs".format(self.request_endpoint)
+        custom_args["url"] = "{}fs".format(self._request_endpoint)
         response_json = self.request_handler.perform_request("GET", custom_args)
         return response_json
 
@@ -76,13 +77,13 @@ class USSFiles(SdkApi):
             HTTP Response for No Content
         """
         custom_args = self._create_custom_request_arguments()
-        custom_args["url"] = "{}fs/{}".format(self.request_endpoint, filepath_name.lstrip("/"))
+        custom_args["url"] = "{}fs/{}".format(self._request_endpoint, filepath_name.lstrip("/"))
         if recursive:
             custom_args["headers"]["X-IBM-Option"] = "recursive"
 
         response_json = self.request_handler.perform_request("DELETE", custom_args, expected_code=[204])
         return response_json
-    
+
     def create(self, file_path, type, mode=None):
         """
         Add a file or directory
@@ -98,7 +99,7 @@ class USSFiles(SdkApi):
 
         custom_args = self._create_custom_request_arguments()
         custom_args["json"] = data
-        custom_args["url"] = "{}fs/{}".format(self.request_endpoint, file_path.lstrip("/"))
+        custom_args["url"] = "{}fs/{}".format(self._request_endpoint, file_path.lstrip("/"))
         response_json = self.request_handler.perform_request("POST", custom_args, expected_code=[201])
         return response_json
 
@@ -110,12 +111,12 @@ class USSFiles(SdkApi):
             A JSON containing the result of the operation
         """
         custom_args = self._create_custom_request_arguments()
-        custom_args["url"] = "{}fs/{}".format(self.request_endpoint, filepath_name.lstrip("/"))
+        custom_args["url"] = "{}fs/{}".format(self._request_endpoint, filepath_name.lstrip("/"))
         custom_args["data"] = data
         custom_args["headers"]["Content-Type"] = "text/plain; charset={}".format(encoding)
         response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[204, 201])
         return response_json
-    
+
     def get_content(self, filepath_name):
         """Retrieve the content of a filename. The complete path must be specified.
 
@@ -125,10 +126,10 @@ class USSFiles(SdkApi):
             A JSON with the contents of the specified USS file
         """
         custom_args = self._create_custom_request_arguments()
-        custom_args["url"] = "{}fs{}".format(self.request_endpoint, filepath_name)
+        custom_args["url"] = "{}fs{}".format(self._request_endpoint, filepath_name)
         response_json = self.request_handler.perform_request("GET", custom_args)
         return response_json
-    
+
     def get_content_streamed(self, file_path, binary=False):
         """Retrieve the contents of a given USS file streamed.
 
@@ -138,7 +139,7 @@ class USSFiles(SdkApi):
             A response object from the requests library
         """
         custom_args = self._create_custom_request_arguments()
-        custom_args["url"] = "{}fs/{}".format(self.request_endpoint, self._encode_uri_component(file_path.lstrip("/")))
+        custom_args["url"] = "{}fs/{}".format(self._request_endpoint, self._encode_uri_component(file_path.lstrip("/")))
         if binary:
             custom_args["headers"]["X-IBM-Data-Type"] = "binary"
         response = self.request_handler.perform_request("GET", custom_args, stream=True)

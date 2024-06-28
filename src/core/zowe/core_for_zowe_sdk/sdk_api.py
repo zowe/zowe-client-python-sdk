@@ -11,12 +11,11 @@ Copyright Contributors to the Zowe Project.
 """
 
 import urllib
-from .logger import Log
 
 from . import session_constants
+from .logger import Log
 from .request_handler import RequestHandler
 from .session import ISession, Session
-from .logger import Log
 
 
 class SdkApi:
@@ -24,38 +23,37 @@ class SdkApi:
     Abstract class used to represent the base SDK API.
     """
 
-    def __init__(self, profile, default_url, logger_name = __name__):
-        self.profile = profile
+    def __init__(self, profile, default_url, logger_name=__name__):
         session = Session(profile)
         self.session: ISession = session.load()
 
         self.logger = Log.registerLogger(logger_name)
 
-        self.default_service_url = default_url
-        self.default_headers = {
+        self._default_service_url = default_url
+        self._default_headers = {
             "Content-Type": "application/json",
             "X-CSRF-ZOSMF-HEADER": "",
         }
 
-        self.request_endpoint = session.host_url + self.default_service_url
+        self._request_endpoint = session.host_url + self._default_service_url
 
-        self.request_arguments = {
-            "url": self.request_endpoint,
-            "headers": self.default_headers,
+        self._request_arguments = {
+            "url": self._request_endpoint,
+            "headers": self._default_headers,
         }
-        self.session_arguments = {
+        self.__session_arguments = {
             "verify": self.session.rejectUnauthorized,
             "timeout": 30,
         }
-        self.request_handler = RequestHandler(self.session_arguments, logger_name = logger_name)
+        self.request_handler = RequestHandler(self.__session_arguments, logger_name=logger_name)
 
         if self.session.type == session_constants.AUTH_TYPE_BASIC:
-            self.request_arguments["auth"] = (self.session.user, self.session.password)
+            self._request_arguments["auth"] = (self.session.user, self.session.password)
         elif self.session.type == session_constants.AUTH_TYPE_BEARER:
-            self.default_headers["Authorization"] = f"Bearer {self.session.tokenValue}"
+            self._default_headers["Authorization"] = f"Bearer {self.session.tokenValue}"
         elif self.session.type == session_constants.AUTH_TYPE_TOKEN:
-            self.default_headers["Cookie"] = f"{self.session.tokenType}={self.session.tokenValue}"
-    
+            self._default_headers["Cookie"] = f"{self.session.tokenType}={self.session.tokenValue}"
+
     def __enter__(self):
         return self
 
@@ -68,7 +66,7 @@ class SdkApi:
         This method is required because the way that Python handles
         dictionary creation
         """
-        return self.request_arguments.copy()
+        return self._request_arguments.copy()
 
     def _encode_uri_component(self, str_to_adjust):
         """Adjust string to be correct in a URL

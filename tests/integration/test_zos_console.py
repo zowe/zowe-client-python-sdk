@@ -1,4 +1,5 @@
 """Integration tests for the Zowe Python SDK z/OS Console package."""
+
 import unittest
 
 from zowe.core_for_zowe_sdk import ProfileManager

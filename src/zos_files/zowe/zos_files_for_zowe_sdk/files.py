@@ -51,7 +51,7 @@ class Files(SdkApi):
         Also update header to accept gzip encoded responses
         """
         super().__init__(connection, "/zosmf/restfiles/", logger_name=__name__)
-        self.default_headers["Accept-Encoding"] = "gzip"
+        self._default_headers["Accept-Encoding"] = "gzip"
         self.ds = Datasets(connection)
         self.uss = USSFiles(connection)
         self.fs = FileSystems(connection)
