@@ -11,12 +11,214 @@ Copyright Contributors to the Zowe Project.
 """
 
 import os
+from typing import Optional
 
 from zowe.core_for_zowe_sdk import SdkApi
 from zowe.core_for_zowe_sdk.exceptions import FileNotFound
 from zowe.zos_files_for_zowe_sdk.constants import FileType, zos_file_constants
 
 _ZOWE_FILES_DEFAULT_ENCODING = zos_file_constants["ZoweFilesDefaultEncoding"]
+
+
+class DatasetOption:
+
+    def __init__(
+        self,
+        like: Optional[str] = None,
+        volser: Optional[str] = None,
+        unit: Optional[str] = None,
+        dsorg: Optional[str] = None,
+        alcunit: Optional[str] = None,
+        primary: Optional[int] = None,
+        secondary: Optional[int] = None,
+        dirblk: Optional[int] = None,
+        avgblk: Optional[int] = None,
+        recfm: Optional[str] = None,
+        blksize: Optional[int] = None,
+        lrecl: Optional[int] = None,
+        storclass: Optional[str] = None,
+        mgntclass: Optional[str] = None,
+        dataclass: Optional[str] = None,
+        dsntype: Optional[str] = None,
+    ) -> None:
+        self.__like = like
+        self.volser = volser
+        self.unit = unit
+        self.dsorg = dsorg
+        self.alcunit = alcunit
+        self.primary = primary
+        self.secondary = secondary
+        self.dirblk = dirblk
+        self.avgblk = avgblk
+        self.recfm = recfm
+        self.lrecl = lrecl
+        self.blksize = blksize
+        self.storclass = storclass
+        self.mgntclass = mgntclass
+        self.dataclass = dataclass
+        self.dsntype = dsntype
+
+    @property
+    def volser(self) -> Optional[str]:
+        return self.__volser
+
+    @volser.setter
+    def volser(self, volser: Optional[str]):
+        self.__volser = volser
+
+    @property
+    def unit(self) -> Optional[str]:
+        return self.__unit
+
+    @unit.setter
+    def unit(self, unit: Optional[str]):
+        self.__unit = unit
+
+    @property
+    def dsorg(self) -> Optional[str]:
+        return self.__dsorg
+
+    @dsorg.setter
+    def dsorg(self, dsorg: Optional[str]):
+        if dsorg not in ("PO", "PS", None):
+            raise ValueError("'dsorg' must be 'PO', 'PS', or None")
+        self.__dsorg = dsorg
+
+    @property
+    def alcunit(self) -> Optional[str]:
+        return self.__alcunit
+
+    @alcunit.setter
+    def alcunit(self, alcunit: Optional[str]):
+        if alcunit is None:
+            if self.like is not None:
+                self.__alcunit = None
+            else:
+                self.__alcunit = "TRK"
+        elif alcunit not in ("CYL", "TRK"):
+            raise KeyError("'alcunit' must be 'CYL' or 'TRK'")
+        else:
+            self.__alcunit = alcunit
+
+    @property
+    def primary(self) -> Optional[int]:
+        return self.__primary
+
+    @primary.setter
+    def primary(self, primary: Optional[int]):
+        if primary is not None:
+            if primary > 16777215:
+                raise ValueError("Given primary space allocation exceeds track limit of 16,777,215")
+        self.__primary = primary
+
+    @property
+    def secondary(self) -> Optional[int]:
+        return self.__secondary
+
+    @secondary.setter
+    def secondary(self, secondary: Optional[int]):
+        if self.primary is not None:
+            secondary = secondary if secondary is not None else int(self.primary / 10)
+            if secondary > 16777215:
+                raise ValueError("Given secondary space allocation exceeds track limit of 16,777,215")
+            self.__secondary = secondary
+
+    @property
+    def dirblk(self) -> Optional[int]:
+        return self.__dirblk
+
+    @dirblk.setter
+    def dirblk(self, dirblk: Optional[int]):
+        self.__dirblk = dirblk
+
+    @property
+    def avgblk(self) -> Optional[int]:
+        return self.__avgblk
+
+    @avgblk.setter
+    def avgblk(self, avgblk: Optional[int]):
+        self.__avgblk = avgblk
+
+    @property
+    def recfm(self) -> Optional[str]:
+        return self.__recfm
+
+    @recfm.setter
+    def recfm(self, recfm: Optional[str]):
+        if recfm is None:
+            if self.like is not None:
+                self.__recfm = None
+            else:
+                self.__recfm = "F"
+        elif recfm not in ("F", "FB", "V", "VB", "U", "FBA", "FBM", "VBA", "VBM"):
+            raise KeyError(
+                "'recfm' must be one of the following: 'F', 'FB', 'V', 'VB', 'U', 'FBA', 'FBM', 'VBA', 'VBM'"
+            )
+        else:
+            self.__recfm = recfm
+
+    @property
+    def blksize(self) -> Optional[int]:
+        return self.__blksize
+
+    @blksize.setter
+    def blksize(self, blksize: Optional[int]):
+        if blksize is None:
+            if self.like is not None:
+                self.__blksize = None
+            else:
+                if self.lrecl is not None:
+                    self.__blksize = self.lrecl
+        else:
+            self.__blksize = blksize
+
+    @property
+    def lrecl(self) -> Optional[int]:
+        return self.__lrecl
+
+    @lrecl.setter
+    def lrecl(self, lrecl: Optional[int]):
+        self.__lrecl = lrecl
+
+    @property
+    def storclass(self) -> Optional[str]:
+        return self.__storclass
+
+    @storclass.setter
+    def storclass(self, storclass: Optional[str]):
+        self.__storclass = storclass
+
+    @property
+    def mgntclass(self) -> Optional[str]:
+        return self.__mgntclass
+
+    @mgntclass.setter
+    def mgntclass(self, mgntclass: Optional[str]):
+        self.__mgntclass = mgntclass
+
+    @property
+    def dataclass(self) -> Optional[str]:
+        return self.__dataclass
+
+    @dataclass.setter
+    def dataclass(self, dataclass: Optional[str]):
+        self.__dataclass = dataclass
+
+    @property
+    def dsntype(self) -> Optional[str]:
+        return self.__dsntype
+
+    @dsntype.setter
+    def dsntype(self, dsntype: Optional[str]):
+        self.__dsntype = dsntype
+
+    @property
+    def like(self) -> Optional[str]:
+        return self.__like
+
+    def to_dict(self) -> dict:
+        return {key.replace("_DatasetOption__", ""): value for key, value in self.__dict__.items() if value is not None}
+
 
 class Datasets(SdkApi):
     """
@@ -70,7 +272,7 @@ class Datasets(SdkApi):
 
         response_json = self.request_handler.perform_request("GET", custom_args)
         return response_json
-    
+
     def list_members(self, dataset_name, member_pattern=None, member_start=None, limit=1000, attributes="member"):
         """Retrieve the list of members on a given PDS/PDSE.
 
@@ -91,7 +293,7 @@ class Datasets(SdkApi):
         custom_args["headers"]["X-IBM-Attributes"] = attributes
         response_json = self.request_handler.perform_request("GET", custom_args)
         return response_json["items"]  # type: ignore
-    
+
     def copy_dataset_or_member(
         self,
         from_dataset_name,
@@ -152,94 +354,41 @@ class Datasets(SdkApi):
         custom_args["url"] = "{}ds/{}".format(self.request_endpoint, self._encode_uri_component(path_to_member))
         response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[200])
         return response_json
-    
-    def create(self, dataset_name, options={}):
+
+    def create(self, dataset_name, options: Optional[DatasetOption] = None):
         """
         Create a sequential or partitioned dataset.
         Parameters
         ----------
-            dataset_name
+        dataset_name: str
+            Name of the dataset to be created
+        options:
+            A DatasetOption class with property options of the dataset
         Returns
         -------
         json
         """
+        if not options:
+            self.logger.error("You must specify dataset options when creating one.")
+            raise ValueError("You must specify dataset options when creating one.")
 
-        if options.get("like") is None:
-            if options.get("primary") is None or options.get("lrecl") is None:
+        if options.like is None:
+            if options.primary is None or options.lrecl is None:
                 self.logger.error("If 'like' is not specified, you must specify 'primary' or 'lrecl'.")
                 raise ValueError("If 'like' is not specified, you must specify 'primary' or 'lrecl'.")
-
-            for opt in (
-                "volser",
-                "unit",
-                "dsorg",
-                "alcunit",
-                "primary",
-                "secondary",
-                "dirblk",
-                "avgblk",
-                "recfm",
-                "blksize",
-                "lrecl",
-                "storclass",
-                "mgntclass",
-                "dataclass",
-                "dsntype",
-                "like",
-            ):
-                if opt == "dsorg":
-                    if options.get(opt) is not None and options[opt] not in ("PO", "PS"):
-                        self.logger.error(f"{opt} is not 'PO' or 'PS'.")
-                        raise KeyError
-
-                elif opt == "alcunit":
-                    if options.get(opt) is None:
-                        options[opt] = "TRK"
-                    else:
-                        if options[opt] not in ("CYL", "TRK"):
-                            self.logger.error(f"{opt} is not 'CYL' or 'TRK'.")
-                            raise KeyError
-
-                elif opt == "primary":
-                    if options.get(opt) is not None:
-                        if options["primary"] > 16777215:
-                            self.logger.error("Specified value exceeds limit.")
-                            raise ValueError
-
-                elif opt == "secondary":
-                    if options.get("primary") is not None:
-                        if options.get(opt) is None:
-                            options["secondary"] = int(options["primary"] / 10)
-                        if options["secondary"] > 16777215:
-                            self.logger.error("Specified value exceeds limit.")
-                            raise ValueError
-
-                elif opt == "dirblk":
-                    if options.get(opt) is not None:
-                        if options.get("dsorg") == "PS":
-                            if options["dirblk"] != 0:
-                                self.logger.error("Can't allocate directory blocks for files.")
-                                raise ValueError
-                        elif options.get("dsorg") == "PO":
-                            if options["dirblk"] == 0:
-                                self.logger.error("Can't allocate empty directory blocks.")
-                                raise ValueError
-
-                elif opt == "recfm":
-                    if options.get(opt) is None:
-                        options[opt] = "F"
-                    else:
-                        if options[opt] not in ("F", "FB", "V", "VB", "U", "FBA", "FBM", "VBA", "VBM"):
-                            self.logger.error("Invalid record format.")
-                            raise KeyError
-
-                elif opt == "blksize":
-                    if options.get(opt) is None and options.get("lrecl") is not None:
-                        options[opt] = options["lrecl"]
+            if options.dirblk is not None:
+                if options.dsorg == "PS":
+                    if options.dirblk != 0:
+                        self.logger.error("Can't allocate directory blocks for files.")
+                        raise ValueError
+                elif options.dsorg == "PO":
+                    if options.dirblk == 0:
+                        self.logger.error("Can't allocate empty directory blocks.")
+                        raise ValueError
 
         custom_args = self._create_custom_request_arguments()
         custom_args["url"] = "{}ds/{}".format(self.request_endpoint, self._encode_uri_component(dataset_name))
-        custom_args["json"] = options
+        custom_args["json"] = options.to_dict() if options else {}
         response_json = self.request_handler.perform_request("POST", custom_args, expected_code=[201])
         return response_json
 
@@ -332,7 +481,7 @@ class Datasets(SdkApi):
         response_json = self.request_handler.perform_request("GET", custom_args, stream=stream)
         return response_json
 
-    def get_binary_content(self, dataset_name, stream = False, with_prefixes=False):
+    def get_binary_content(self, dataset_name, stream=False, with_prefixes=False):
         """
         Retrieve the contents of a given dataset as a binary bytes object.
 
@@ -373,7 +522,7 @@ class Datasets(SdkApi):
 
     def download(self, dataset_name, output_file):
         """Retrieve the contents of a dataset and saves it to a given file."""
-        response = self.get_content(dataset_name, stream = True)
+        response = self.get_content(dataset_name, stream=True)
         with open(output_file, "w", encoding="utf-8") as f:
             for chunk in response.iter_content(chunk_size=4096, decode_unicode=True):
                 f.write(chunk)
@@ -393,7 +542,7 @@ class Datasets(SdkApi):
             for chunk in response.iter_content(chunk_size=4096):
                 f.write(chunk)
 
-    def upload_file(self, input_file, dataset_name, encoding=_ZOWE_FILES_DEFAULT_ENCODING, binary = False):
+    def upload_file(self, input_file, dataset_name, encoding=_ZOWE_FILES_DEFAULT_ENCODING, binary=False):
         """Upload contents of a given file and uploads it to a dataset."""
         if os.path.isfile(input_file):
             if binary:
@@ -405,7 +554,7 @@ class Datasets(SdkApi):
         else:
             self.logger.error(f"File {input_file} not found.")
             raise FileNotFound(input_file)
-        
+
     def recall_migrated(self, dataset_name: str, wait=False):
         """
         Recalls a migrated data set.
@@ -565,7 +714,7 @@ class Datasets(SdkApi):
 
         response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[200])
         return response_json
-    
+
     def delete(self, dataset_name, volume=None, member_name=None):
         """Deletes a sequential or partitioned data."""
         custom_args = self._create_custom_request_arguments()
@@ -577,7 +726,7 @@ class Datasets(SdkApi):
         custom_args["url"] = url
         response_json = self.request_handler.perform_request("DELETE", custom_args, expected_code=[200, 202, 204])
         return response_json
-    
+
     def copy_uss_to_dataset(
         self, from_filename, to_dataset_name, to_member_name=None, type=FileType.TEXT, replace=False
     ):
