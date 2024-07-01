@@ -89,15 +89,15 @@ class TestFilesIntegration(unittest.TestCase):
         command_output = self.files.write_to_dsn(self.test_member_generic, "HELLO WORLD")
         self.assertTrue(command_output == "")
 
-    def test_copy_uss_to_dataset_should_be_possible(self):
-        """Executing copy_uss_to_dataset should be possible."""
-        command_output = self.files.copy_uss_to_dataset(
+    def test_copy_uss_to_data_set_should_be_possible(self):
+        """Executing copy_uss_to_data_set should be possible."""
+        command_output = self.files.copy_uss_to_data_set(
             self.files_fixtures["TEST_USS"], self.files_fixtures["TEST_PDS"] + "(TEST2)", replace=True
         )
         self.assertTrue(command_output == "")
 
-    def test_copy_dataset_or_member_should_be_possible(self):
-        """Executing copy_dataset_or_member should be possible."""
+    def test_copy_data_set_or_member_should_be_possible(self):
+        """Executing copy_data_set_or_member should be possible."""
         test_case = {
             "from_dataset_name": self.files_fixtures["TEST_PDS"],
             "to_dataset_name": self.files_fixtures["TEST_PDS"],
@@ -105,7 +105,7 @@ class TestFilesIntegration(unittest.TestCase):
             "to_member_name": "TEST",
             "replace": True,
         }
-        command_output = self.files.copy_dataset_or_member(**test_case)
+        command_output = self.files.copy_data_set_or_member(**test_case)
         self.assertTrue(command_output == "")
 
     def test_mount_unmount_zfs_file_system(self):

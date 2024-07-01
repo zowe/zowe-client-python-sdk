@@ -87,7 +87,7 @@ class TestCreateClass(TestCase):
                 option = DatasetOption(**test_case)
                 obj = Files(self.test_profile).create_data_set("MY.OLD.ds", options=option)
 
-    def test_create_dataset_parameterized(self):
+    def test_create_data_set_parameterized(self):
         """Test create dataset with different values"""
         test_values = [
             (DatasetOption(alcunit="CYL", dsorg="PO", primary=1, dirblk=5, recfm="FB", blksize=6160, lrecl=80), True),
@@ -121,14 +121,14 @@ class TestCreateClass(TestCase):
                 )
 
     @mock.patch("requests.Session.send")
-    def test_create_default_dataset(self, mock_send_request):
+    def test_create_default_data_set(self, mock_send_request):
         """Test creating a default data set sends a request"""
         mock_send_request.return_value = mock.Mock(headers={"Content-Type": "application/json"}, status_code=201)
 
         Files(self.test_profile).create_default_data_set("dataset_name", "partitioned")
         mock_send_request.assert_called_once()
 
-    def test_create_default_dataset_parameterized(self):
+    def test_create_default_data_set_parameterized(self):
         """Test create default dataset with different values"""
         test_values = [
             (("DSN", "partitioned"), True),

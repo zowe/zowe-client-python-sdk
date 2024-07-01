@@ -51,7 +51,7 @@ class Files(SdkApi):
         Also update header to accept gzip encoded responses
         """
         super().__init__(connection, "/zosmf/restfiles/", logger_name=__name__)
-        self.default_headers["Accept-Encoding"] = "gzip"
+        self._default_headers["Accept-Encoding"] = "gzip"
         self.ds = Datasets(connection)
         self.uss = USSFiles(connection)
         self.fs = FileSystems(connection)
@@ -80,13 +80,13 @@ class Files(SdkApi):
         """Deprecated function. Please use ds.list_members() instead"""
         return self.ds.list_members(dataset_name, member_pattern, member_start, limit, attributes)
 
-    def copy_uss_to_dataset(
+    def copy_uss_to_data_set(
         self, from_filename, to_dataset_name, to_member_name=None, type=FileType.TEXT, replace=False
     ):
-        """Deprecated function. Please use ds.copy_uss_to_dataset instead"""
-        return self.ds.copy_uss_to_dataset(from_filename, to_dataset_name, to_member_name, type, replace)
+        """Deprecated function. Please use ds.copy_uss_to_data_set instead"""
+        return self.ds.copy_uss_to_data_set(from_filename, to_dataset_name, to_member_name, type, replace)
 
-    def copy_dataset_or_member(
+    def copy_data_set_or_member(
         self,
         from_dataset_name,
         to_dataset_name,
@@ -97,8 +97,8 @@ class Files(SdkApi):
         enq=None,
         replace=False,
     ):
-        """Deprecated function. Please use ds.copy_dataset_or_member() instead"""
-        return self.ds.copy_dataset_or_member(
+        """Deprecated function. Please use ds.copy_data_set_or_member() instead"""
+        return self.ds.copy_data_set_or_member(
             from_dataset_name, to_dataset_name, from_member_name, volser, alias, to_member_name, enq, replace
         )
 
@@ -182,7 +182,7 @@ class Files(SdkApi):
         """Deprecated function. Please use fs.list() instead"""
         return self.fs.list(file_path_name, file_system_name)
 
-    def recall_migrated_dataset(self, dataset_name: str, wait=False):
+    def recall_migrated_data_set(self, dataset_name: str, wait=False):
         """Deprecated function. Please use ds.recall_migrated() instead"""
         return self.ds.recall_migrated(dataset_name, wait)
 
@@ -194,10 +194,10 @@ class Files(SdkApi):
         """Deprecated function. Please use ds.migrate() instead"""
         return self.ds.migrate(dataset_name, wait)
 
-    def rename_dataset(self, before_dataset_name: str, after_dataset_name: str):
+    def rename_data_set(self, before_dataset_name: str, after_dataset_name: str):
         """Deprecated function. Please use ds.rename() instead"""
         return self.ds.rename(before_dataset_name, after_dataset_name)
 
-    def rename_dataset_member(self, dataset_name: str, before_member_name: str, after_member_name: str, enq=""):
+    def rename_data_set_member(self, dataset_name: str, before_member_name: str, after_member_name: str, enq=""):
         """Deprecated function. Please use ds.rename_member() instead"""
         return self.ds.rename_member(dataset_name, before_member_name, after_member_name, enq)

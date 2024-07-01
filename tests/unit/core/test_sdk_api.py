@@ -5,10 +5,8 @@ import os
 from unittest import mock
 
 from pyfakefs.fake_filesystem_unittest import TestCase
-from zowe.core_for_zowe_sdk import (
-    SdkApi,
-    session_constants
-)
+from zowe.core_for_zowe_sdk import SdkApi, session_constants
+
 
 class TestSdkApiClass(TestCase):
     """SdkApi class unit tests."""
@@ -53,7 +51,7 @@ class TestSdkApiClass(TestCase):
         sdk_api = SdkApi(self.basic_props, self.default_url)
         self.assertEqual(sdk_api.session.type, session_constants.AUTH_TYPE_BASIC)
         self.assertEqual(
-            sdk_api.request_arguments["auth"],
+            sdk_api._request_arguments["auth"],
             (self.basic_props["user"], self.basic_props["password"]),
         )
 
@@ -62,7 +60,7 @@ class TestSdkApiClass(TestCase):
         sdk_api = SdkApi(self.bearer_props, self.default_url)
         self.assertEqual(sdk_api.session.type, session_constants.AUTH_TYPE_BEARER)
         self.assertEqual(
-            sdk_api.default_headers["Authorization"],
+            sdk_api._default_headers["Authorization"],
             "Bearer " + self.bearer_props["tokenValue"],
         )
 
@@ -71,7 +69,7 @@ class TestSdkApiClass(TestCase):
         sdk_api = SdkApi(self.token_props, self.default_url)
         self.assertEqual(sdk_api.session.type, session_constants.AUTH_TYPE_TOKEN)
         self.assertEqual(
-            sdk_api.default_headers["Cookie"],
+            sdk_api._default_headers["Cookie"],
             self.token_props["tokenType"] + "=" + self.token_props["tokenValue"],
         )
 

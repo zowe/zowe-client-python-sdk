@@ -52,17 +52,17 @@ class ProfileManager:
     """
 
     def __init__(self, appname: str = "zowe", show_warnings: bool = True):
-        self._appname = appname
-        self._show_warnings = show_warnings
+        self.__appname = appname
+        self.__show_warnings = show_warnings
 
-        self.project_config = ConfigFile(type=TEAM_CONFIG, name=appname)
-        self.project_user_config = ConfigFile(type=USER_CONFIG, name=appname)
+        self.__project_config = ConfigFile(type=TEAM_CONFIG, name=appname)
+        self.__project_user_config = ConfigFile(type=USER_CONFIG, name=appname)
 
         self.__logger = Log.registerLogger(__name__)
 
-        self.global_config = ConfigFile(type=TEAM_CONFIG, name=GLOBAL_CONFIG_NAME)
+        self.__global_config = ConfigFile(type=TEAM_CONFIG, name=GLOBAL_CONFIG_NAME)
         try:
-            self.global_config.location = GLOBAL_CONFIG_LOCATION
+            self.__global_config.location = GLOBAL_CONFIG_LOCATION
         except Exception:
             self.__logger.warning("Could not find Global Config Directory")
             warnings.warn(
@@ -70,9 +70,9 @@ class ProfileManager:
                 ConfigNotFoundWarning,
             )
 
-        self.global_user_config = ConfigFile(type=USER_CONFIG, name=GLOBAL_CONFIG_NAME)
+        self.__global_user_config = ConfigFile(type=USER_CONFIG, name=GLOBAL_CONFIG_NAME)
         try:
-            self.global_user_config.location = GLOBAL_CONFIG_LOCATION
+            self.__global_user_config.location = GLOBAL_CONFIG_LOCATION
         except Exception:
             self.__logger.warning("Could not find Global User Config Directory")
             warnings.warn(
@@ -83,40 +83,40 @@ class ProfileManager:
     @property
     def config_appname(self) -> str:
         """Returns the app name"""
-        return self._appname
+        return self.__appname
 
     @property
     def config_dir(self) -> Optional[str]:
         """Returns the folder path to where the Zowe z/OSMF Team Project Config files are located."""
-        return self.project_config.location
+        return self.__project_config.location
 
     @config_dir.setter
     def config_dir(self, dirname: str) -> None:
         """
         Set directory/folder path to where Zowe z/OSMF Team Project Config files are located
         """
-        self.project_config.location = dirname
-        self.project_user_config.location = dirname
+        self.__project_config.location = dirname
+        self.__project_user_config.location = dirname
 
     @property
     def user_config_dir(self) -> Optional[str]:
         """Returns the folder path to where the Zowe z/OSMF User Project Config files are located."""
-        return self.project_user_config.location
+        return self.__project_user_config.location
 
     @user_config_dir.setter
     def user_config_dir(self, dirname: str) -> None:
         """Set directory/folder path to where Zowe z/OSMF User Project Config files are located"""
-        self.project_user_config.location = dirname
+        self.__project_user_config.location = dirname
 
     @property
     def config_filename(self) -> str:
         """Return the filename for Zowe z/OSMF Team Project Config"""
-        return self.project_config.filename
+        return self.__project_config.filename
 
     @property
     def config_filepath(self) -> Optional[str]:
         """Get the full Zowe z/OSMF Team Project Config filepath"""
-        return self.project_config.filepath
+        return self.__project_config.filepath
 
     @staticmethod
     def get_env(cfg: ConfigFile, cwd=None) -> dict:
@@ -262,7 +262,7 @@ class ProfileManager:
                 error_msg="Could not find profile as both profile_name and profile_type is not set.",
             )
 
-        if not self._show_warnings:
+        if not self.__show_warnings:
             warnings.simplefilter("ignore")
 
         profile_props: dict = {}
@@ -275,7 +275,12 @@ class ProfileManager:
         cfg_schema = None
         cfg_schema_dir = None
 
-        for cfg_layer in (self.project_user_config, self.project_config, self.global_user_config, self.global_config):
+        for cfg_layer in (
+            self.__project_user_config,
+            self.__project_config,
+            self.__global_user_config,
+            self.__global_config,
+        ):
             if cfg_layer.profiles is None:
                 try:
                     cfg_layer.init_from_file(validate_schema, suppress_config_file_warnings)
@@ -294,12 +299,12 @@ class ProfileManager:
                 cfg_schema = cfg_layer.schema_property
                 cfg_schema_dir = cfg_layer._location
 
-        usrProject = self.project_user_config.profiles or {}
-        project = self.project_config.profiles or {}
+        usrProject = self.__project_user_config.profiles or {}
+        project = self.__project_config.profiles or {}
         project_temp = always_merger.merge(deepcopy(project), usrProject)
 
-        usrGlobal = self.global_user_config.profiles or {}
-        global_ = self.global_config.profiles or {}
+        usrGlobal = self.__global_user_config.profiles or {}
+        global_ = self.__global_config.profiles or {}
         global_temp = always_merger.merge(deepcopy(global_), usrGlobal)
 
         profiles_merged = project_temp
@@ -359,7 +364,7 @@ class ProfileManager:
         """
         highest_layer = None
         longest_match = ""
-        layers = [self.project_user_config, self.project_config, self.global_user_config, self.global_config]
+        layers = [self.__project_user_config, self.__project_config, self.__global_user_config, self.__global_config]
 
         original_name = layers[0].get_profile_name_from_path(json_path)
 
@@ -426,7 +431,7 @@ class ProfileManager:
         """
         Save the layers (configuration files) to disk.
         """
-        layers = [self.project_user_config, self.project_config, self.global_user_config, self.global_config]
+        layers = [self.__project_user_config, self.__project_config, self.__global_user_config, self.__global_config]
 
         for layer in layers:
             layer.save(False)
