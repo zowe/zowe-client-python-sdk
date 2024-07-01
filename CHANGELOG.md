@@ -15,7 +15,6 @@ All notable changes to the Zowe Client Python SDK will be documented in this fil
 
 ### Bug Fixes
 
-- Fixed a bug on `_create_custom_request_arguments` where modifications on `custom_arguments` will affect the variable after the function returns. [#299](https://github.com/zowe/zowe-client-python-sdk/issues/299)
 - Fixed truncated responses when issuing TSO commands [#260](https://github.com/zowe/zowe-client-python-sdk/issues/260)
 - Fixed a bug on `upload_file_to_dsn` where it would not properly convert line endings on Windows. [#104](https://github.com/zowe/zowe-client-python-sdk/issues/104)
 
