@@ -13,6 +13,7 @@ class TestConsoleIntegration(unittest.TestCase):
         """Setup fixtures for Console class."""
         test_profile = ProfileManager(show_warnings=False).load(profile_type="zosmf")
         self.console = Console(test_profile)
+        self.addCleanup(lambda: self.console.__exit__(None, None, None))
 
     def test_console_command_time_should_return_time(self):
         """Test the execution of the time command should return the current time"""
