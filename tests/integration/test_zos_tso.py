@@ -13,6 +13,7 @@ class TestTsoIntegration(unittest.TestCase):
         """Setup fixtures for Tso class."""
         test_profile = ProfileManager(show_warnings=False).load(profile_type="zosmf")
         self.tso = Tso(test_profile, {"account": "IZUACCT"})
+        self.addCleanup(lambda: self.tso.__exit__(None, None, None))
 
     def test_issue_command_should_return_valid_response(self):
         """Executing the issue_command method should return a valid response from TSO"""

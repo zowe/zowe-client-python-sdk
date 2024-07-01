@@ -23,6 +23,7 @@ class TestFilesIntegration(unittest.TestCase):
         with open(FILES_FIXTURES_PATH, "r") as fixtures_json:
             self.files_fixtures = json.load(fixtures_json)
         self.files = Files(test_profile)
+        self.addCleanup(lambda: self.files.__exit__(None, None, None))
         self.test_member_jcl = f'{self.files_fixtures["TEST_PDS"]}({self.files_fixtures["TEST_MEMBER"]})'
         self.test_member_generic = f'{self.files_fixtures["TEST_PDS"]}(TEST)'
         self.test_ds_upload = f'{self.files_fixtures["TEST_PDS"]}({self.files_fixtures["TEST_MEMBER_NEW"]})'

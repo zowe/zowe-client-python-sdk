@@ -27,6 +27,15 @@ class TestSdkApiClass(TestCase):
         """Created object should be instance of SdkApi class."""
         sdk_api = SdkApi(self.basic_props, self.default_url)
         self.assertIsInstance(sdk_api, SdkApi)
+    
+    @mock.patch('requests.Session.close') 
+    def test_context_manager_closes_session(self, mock_close_request):
+    
+        mock_close_request.return_value = mock.Mock(headers={"Content-Type": "application/json"}, status_code=200)
+        with SdkApi(self.basic_props, self.default_url) as api:
+            pass
+
+        mock_close_request.assert_called_once()
 
     @mock.patch("logging.Logger.error")
     def test_session_no_host_logger(self, mock_logger_error: mock.MagicMock):
