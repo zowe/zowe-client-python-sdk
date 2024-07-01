@@ -10,6 +10,7 @@ SPDX-License-Identifier: EPL-2.0
 Copyright Contributors to the Zowe Project.
 """
 
+import copy
 import urllib
 
 from . import session_constants
@@ -66,7 +67,7 @@ class SdkApi:
         This method is required because the way that Python handles
         dictionary creation
         """
-        return self._request_arguments.copy()
+        return copy.deepcopy(self._request_arguments)
 
     def _encode_uri_component(self, str_to_adjust):
         """Adjust string to be correct in a URL
