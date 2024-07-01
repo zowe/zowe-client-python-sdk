@@ -52,7 +52,7 @@ class ZosmfProfile:
         profile_name
             The name of the Zowe z/OSMF profile
         """
-        self.profile_name = profile_name
+        self.__profile_name = profile_name
         self.__logger = Log.registerLogger(__name__)
 
     @property
@@ -69,7 +69,7 @@ class ZosmfProfile:
         zosmf_connection
             z/OSMF connection object
         """
-        profile_file = os.path.join(self.profiles_dir, "{}.yaml".format(self.profile_name))
+        profile_file = os.path.join(self.profiles_dir, "{}.yaml".format(self.__profile_name))
 
         with open(profile_file, "r") as fileobj:
             profile_yaml = yaml.safe_load(fileobj)
@@ -93,7 +93,7 @@ class ZosmfProfile:
 
     def __get_secure_value(self, name):
         service_name = constants["ZoweCredentialKey"]
-        account_name = "zosmf_{}_{}".format(self.profile_name, name)
+        account_name = "zosmf_{}_{}".format(self.__profile_name, name)
 
         secret_value = keyring.get_password(service_name, account_name)
 
@@ -108,14 +108,14 @@ class ZosmfProfile:
     def __load_secure_credentials(self):
         """Load secure credentials for a z/OSMF profile."""
         if not HAS_KEYRING:
-            self.__logger.error(f"{self.profile_name} keyring module not installed")
-            raise SecureProfileLoadFailed(self.profile_name, "Keyring module not installed")
+            self.__logger.error(f"{self.__profile_name} keyring module not installed")
+            raise SecureProfileLoadFailed(self.__profile_name, "Keyring module not installed")
 
         try:
             zosmf_user = self.__get_secure_value("user")
             zosmf_password = self.__get_secure_value("password")
         except Exception as e:
-            self.__logger.error(f"Failed to load secure profile '{self.profile_name}' because '{e}'")
-            raise SecureProfileLoadFailed(self.profile_name, e)
+            self.__logger.error(f"Failed to load secure profile '{self.__profile_name}' because '{e}'")
+            raise SecureProfileLoadFailed(self.__profile_name, e)
         else:
             return (zosmf_user, zosmf_password)

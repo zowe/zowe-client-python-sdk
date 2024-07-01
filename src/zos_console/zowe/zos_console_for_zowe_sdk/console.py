@@ -40,7 +40,7 @@ class Console(SdkApi):
             A JSON containing the response from the console command
         """
         custom_args = self._create_custom_request_arguments()
-        custom_args["url"] = self.request_endpoint.replace("defcn", console or "defcn")
+        custom_args["url"] = self._request_endpoint.replace("defcn", console or "defcn")
         request_body = {"cmd": command}
         custom_args["json"] = request_body
         response_json = self.request_handler.perform_request("PUT", custom_args)
@@ -63,6 +63,6 @@ class Console(SdkApi):
         """
         custom_args = self._create_custom_request_arguments()
         request_url = "{}/solmsgs/{}".format(console or "defcn", response_key)
-        custom_args["url"] = self.request_endpoint.replace("defcn", request_url)
+        custom_args["url"] = self._request_endpoint.replace("defcn", request_url)
         response_json = self.request_handler.perform_request("GET", custom_args)
         return response_json

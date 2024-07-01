@@ -2,7 +2,7 @@
 
 All notable changes to the Zowe Client Python SDK will be documented in this file.
 
-## Recent Changes
+## `1.0.0-dev16`
 
 ### Enhancements
 
@@ -46,6 +46,11 @@ All notable changes to the Zowe Client Python SDK will be documented in this fil
 
 ### Bug Fixes
 
+- *Breaking*: Replaced `datasets` in function names with `data_sets` as a standard. [#83] (https://github.com/zowe/zowe-client-python-sdk/issues/83)
+- *Breaking*: Made unnecessary public variables to private [#83] (https://github.com/zowe/zowe-client-python-sdk/issues/83)
+  - `profile_manager._appname -> profile_manager.__appname`
+  - `profile_manager._show_warnings -> profile_manager.__show_warnings`
+  - `... and others ...`
 - Fixed `Files.create_data_set` to accept "FBA", "FBM", "VBA", "VBM" as valid recfm [#240](https://github.com/zowe/zowe-client-python-sdk/issues/240)
 - Fixed an issue with `Jobs.list_jobs` user correlator parameter [#242](https://github.com/zowe/zowe-client-python-sdk/issues/242)
 - Fixed default encoding for I/O operations to be UTF-8 on Windows [#243](https://github.com/zowe/zowe-client-python-sdk/issues/243)

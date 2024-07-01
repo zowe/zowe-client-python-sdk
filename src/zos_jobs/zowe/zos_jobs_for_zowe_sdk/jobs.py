@@ -53,7 +53,7 @@ class Jobs(SdkApi):
         """
         custom_args = self._create_custom_request_arguments()
         job_url = "{}/{}".format(jobname, jobid)
-        request_url = "{}{}".format(self.request_endpoint, self._encode_uri_component(job_url))
+        request_url = "{}{}".format(self._request_endpoint, self._encode_uri_component(job_url))
         custom_args["url"] = request_url
         response_json = self.request_handler.perform_request("GET", custom_args)
         return response_json
@@ -81,7 +81,7 @@ class Jobs(SdkApi):
 
         custom_args = self._create_custom_request_arguments()
         job_url = "{}/{}".format(jobname, jobid)
-        request_url = "{}{}".format(self.request_endpoint, self._encode_uri_component(job_url))
+        request_url = "{}{}".format(self._request_endpoint, self._encode_uri_component(job_url))
         custom_args["url"] = request_url
         custom_args["json"] = {"request": "cancel", "version": modify_version}
 
@@ -111,7 +111,7 @@ class Jobs(SdkApi):
 
         custom_args = self._create_custom_request_arguments()
         job_url = "{}/{}".format(jobname, jobid)
-        request_url = "{}{}".format(self.request_endpoint, self._encode_uri_component(job_url))
+        request_url = "{}{}".format(self._request_endpoint, self._encode_uri_component(job_url))
         custom_args["url"] = request_url
         custom_args["headers"]["X-IBM-Job-Modify-Version"] = modify_version
 
@@ -121,7 +121,7 @@ class Jobs(SdkApi):
     def _issue_job_request(self, req: dict, jobname: str, jobid: str, modify_version):
         custom_args = self._create_custom_request_arguments()
         job_url = "{}/{}".format(jobname, jobid)
-        request_url = "{}{}".format(self.request_endpoint, self._encode_uri_component(job_url))
+        request_url = "{}{}".format(self._request_endpoint, self._encode_uri_component(job_url))
         custom_args["url"] = request_url
         custom_args["json"] = {**req, "version": modify_version}
 
@@ -314,7 +314,7 @@ class Jobs(SdkApi):
         """
         custom_args = self._create_custom_request_arguments()
         job_url = "{}/files".format(correlator)
-        request_url = "{}{}".format(self.request_endpoint, self._encode_uri_component(job_url))
+        request_url = "{}{}".format(self._request_endpoint, self._encode_uri_component(job_url))
         custom_args["url"] = request_url
         response_json = self.request_handler.perform_request("GET", custom_args)
         return response_json
@@ -333,7 +333,7 @@ class Jobs(SdkApi):
         """
         custom_args = self._create_custom_request_arguments()
         job_url = "{}/files/JCL/records".format(correlator)
-        request_url = "{}{}".format(self.request_endpoint, self._encode_uri_component(job_url))
+        request_url = "{}{}".format(self._request_endpoint, self._encode_uri_component(job_url))
         custom_args["url"] = request_url
         response_json = self.request_handler.perform_request("GET", custom_args)
         return response_json
@@ -357,7 +357,7 @@ class Jobs(SdkApi):
         """
         custom_args = self._create_custom_request_arguments()
         job_url = "{}/files/{}/records".format(correlator, id)
-        request_url = "{}{}".format(self.request_endpoint, self._encode_uri_component(job_url))
+        request_url = "{}{}".format(self._request_endpoint, self._encode_uri_component(job_url))
         custom_args["url"] = request_url
         response_json = self.request_handler.perform_request("GET", custom_args)
         return response_json

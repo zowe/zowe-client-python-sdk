@@ -43,7 +43,7 @@ class RequestHandler:
         """
         self.session = requests.Session()
         self.session_arguments = session_arguments
-        self.valid_methods = ["GET", "POST", "PUT", "DELETE"]
+        self.__valid_methods = ["GET", "POST", "PUT", "DELETE"]
         self.__handle_ssl_warnings()
         self.__logger = Log.registerLogger(logger_name)
 
@@ -71,17 +71,17 @@ class RequestHandler:
         normalized_response: json
             normalized request response in json (dictionary)
         """
-        self.method = method
-        self.request_arguments = request_arguments
-        self.expected_code = expected_code
+        self.__method = method
+        self.__request_arguments = request_arguments
+        self.__expected_code = expected_code
         self.__logger.debug(
-            f"Request method: {self.method}, Request arguments: {self.request_arguments}, Expected code: {expected_code}"
+            f"Request method: {self.__method}, Request arguments: {self.__request_arguments}, Expected code: {expected_code}"
         )
         self.__validate_method()
         self.__send_request(stream=stream)
         self.__validate_response()
         if stream:
-            return self.response
+            return self.__response
         return self.__normalize_response()
 
     def __validate_method(self):
@@ -92,16 +92,16 @@ class RequestHandler:
         InvalidRequestMethod
             If the input request method is not supported
         """
-        if self.method not in self.valid_methods:
-            self.__logger.error(f"Invalid HTTP method input {self.method}")
-            raise InvalidRequestMethod(self.method)
+        if self.__method not in self.__valid_methods:
+            self.__logger.error(f"Invalid HTTP method input {self.__method}")
+            raise InvalidRequestMethod(self.__method)
 
     def __send_request(self, stream=False):
         """Build a custom session object, prepare it with a custom request and send it."""
         session = self.session
-        request_object = requests.Request(method=self.method, **self.request_arguments)
+        request_object = requests.Request(method=self.__method, **self.__request_arguments)
         prepared = session.prepare_request(request_object)
-        self.response = session.send(prepared, stream=stream, **self.session_arguments)
+        self.__response = session.send(prepared, stream=stream, **self.session_arguments)
 
     def __del__(self):
         """Clean up the REST session object once it is no longer needed anymore"""
@@ -118,21 +118,21 @@ class RequestHandler:
             If the HTTP/HTTPS request fails
         """
         # Automatically checks if status code is between 200 and 400
-        if self.response.ok:
-            if self.response.status_code not in self.expected_code:
+        if self.__response.ok:
+            if self.__response.status_code not in self.__expected_code:
                 self.__logger.error(
-                    f"The status code from z/OSMF was: {self.expected_code}\nExpected: {self.response.status_code}\nRequest output:{self.response.text}"
+                    f"The status code from z/OSMF was: {self.__expected_code}\nExpected: {self.__response.status_code}\nRequest output:{self.__response.text}"
                 )
-                raise UnexpectedStatus(self.expected_code, self.response.status_code, self.response.text)
+                raise UnexpectedStatus(self.__expected_code, self.__response.status_code, self.__response.text)
         else:
-            output_str = str(self.response.request.url)
-            output_str += "\n" + str(self.response.request.headers)
-            output_str += "\n" + str(self.response.request.body)
-            output_str += "\n" + str(self.response.text)
+            output_str = str(self.__response.request.url)
+            output_str += "\n" + str(self.__response.request.headers)
+            output_str += "\n" + str(self.__response.request.body)
+            output_str += "\n" + str(self.__response.text)
             self.__logger.error(
-                f"HTTP Request has failed with status code {self.response.status_code}. \n {output_str}"
+                f"HTTP Request has failed with status code {self.__response.status_code}. \n {output_str}"
             )
-            raise RequestFailed(self.response.status_code, output_str)
+            raise RequestFailed(self.__response.status_code, output_str)
 
     def __normalize_response(self):
         """Normalize the response object to a JSON format.
@@ -144,10 +144,10 @@ class RequestHandler:
           - object when the response is JSON text
           - `str` when the response is plain text
         """
-        contentType = self.response.headers.get("Content-Type")
+        contentType = self.__response.headers.get("Content-Type")
         if contentType == "application/octet-stream":
-            return self.response.content
+            return self.__response.content
         elif contentType and contentType.startswith("application/json"):
-            return "" if self.response.text == "" else self.response.json()
+            return "" if self.__response.text == "" else self.__response.json()
         else:
-            return self.response.text
+            return self.__response.text

@@ -9,6 +9,7 @@ SPDX-License-Identifier: EPL-2.0
 
 Copyright Contributors to the Zowe project.
 """
+
 from zowe.core_for_zowe_sdk import SdkApi
 
 
@@ -41,7 +42,7 @@ class Zosmf(SdkApi):
         json
             A JSON containing the z/OSMF Info REST API data
         """
-        response_json = self.request_handler.perform_request("GET", self.request_arguments)
+        response_json = self.request_handler.perform_request("GET", self._request_arguments)
         return response_json
 
     def list_systems(self):
@@ -53,6 +54,6 @@ class Zosmf(SdkApi):
         """
 
         custom_args = self._create_custom_request_arguments()
-        custom_args["url"] = "{}/systems".format(self.request_endpoint)
+        custom_args["url"] = "{}/systems".format(self._request_endpoint)
         response_json = self.request_handler.perform_request("GET", custom_args, expected_code=[200])
         return response_json

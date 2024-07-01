@@ -130,7 +130,7 @@ class Tso(SdkApi):
             A non-normalized list from TSO containing the result from the command
         """
         custom_args = self._create_custom_request_arguments()
-        custom_args["url"] = "{}/{}".format(self.request_endpoint, str(session_key))
+        custom_args["url"] = "{}/{}".format(self._request_endpoint, str(session_key))
         # z/OSMF TSO API requires json to be formatted in specific way without spaces
         request_json = {"TSO RESPONSE": {"VERSION": "0100", "DATA": str(message)}}
         custom_args["data"] = json.dumps(request_json, separators=(",", ":"))
@@ -152,7 +152,7 @@ class Tso(SdkApi):
             Where the options are: 'Ping successful' or 'Ping failed'
         """
         custom_args = self._create_custom_request_arguments()
-        custom_args["url"] = "{}/{}/{}".format(self.request_endpoint, "ping", str(session_key))
+        custom_args["url"] = "{}/{}/{}".format(self._request_endpoint, "ping", str(session_key))
         response_json = self.request_handler.perform_request("PUT", custom_args)
         message_id_list = self.parse_message_ids(response_json)
         return "Ping successful" if self.session_not_found not in message_id_list else "Ping failed"
@@ -171,7 +171,7 @@ class Tso(SdkApi):
             A string informing if the session was terminated successfully or not
         """
         custom_args = self._create_custom_request_arguments()
-        custom_args["url"] = "{}/{}".format(self.request_endpoint, session_key)
+        custom_args["url"] = "{}/{}".format(self._request_endpoint, session_key)
         response_json = self.request_handler.perform_request("DELETE", custom_args)
         message_id_list = self.parse_message_ids(response_json)
         return "Session ended" if self.session_not_found not in message_id_list else "Session already ended"
@@ -208,6 +208,6 @@ class Tso(SdkApi):
 
     def __get_tso_data(self, session_key):
         custom_args = self._create_custom_request_arguments()
-        custom_args["url"] = "{}/{}".format(self.request_endpoint, session_key)
+        custom_args["url"] = "{}/{}".format(self._request_endpoint, session_key)
         command_output = self.request_handler.perform_request("GET", custom_args)["tsoData"]
         return command_output
