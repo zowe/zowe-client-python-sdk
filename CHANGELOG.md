@@ -8,7 +8,7 @@ All notable changes to the Zowe Client Python SDK will be documented in this fil
 
 ### Bug Fixes
 
-- Fixed a logic error on `create` in `datasets.py`
+- Fixed an error in error message in `create` in `datasets.py`
 - Fixed a bug on `_create_custom_request_arguments` where changes on `custom_args` will stay after the function returns [#299](https://github.com/zowe/zowe-client-python-sdk/issues/299)
 
 ## `1.0.0-dev16`
