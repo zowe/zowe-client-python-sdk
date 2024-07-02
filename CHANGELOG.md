@@ -6,8 +6,6 @@ All notable changes to the Zowe Client Python SDK will be documented in this fil
 
 ### Enhancements
 
-- 
-
 ### Bug Fixes
 
 - Fixed a bug on `_create_custom_request_arguments` where changes on `custom_args` will stay after the function returns [#299](https://github.com/zowe/zowe-client-python-sdk/issues/299)
