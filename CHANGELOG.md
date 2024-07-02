@@ -2,13 +2,20 @@
 
 All notable changes to the Zowe Client Python SDK will be documented in this file.
 
-## `1.0.0-dev17`
+## Recent Changes
 
 ### Enhancements
 
 ### Bug Fixes
 
 - Fixed a bug on `create` in `Datasets` where the target dataset gets created with a different block size when `like` is specified [#295] (https://github.com/zowe/zowe-client-python-sdk/issues/295)
+
+## `1.0.0-dev17`
+
+### Enhancements
+
+### Bug Fixes
+
 - Fixed a bug on `_create_custom_request_arguments` where changes on `custom_args` will stay after the function returns [#299](https://github.com/zowe/zowe-client-python-sdk/issues/299)
 
 ## `1.0.0-dev16`
