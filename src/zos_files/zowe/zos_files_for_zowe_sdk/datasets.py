@@ -373,7 +373,7 @@ class Datasets(SdkApi):
             raise ValueError("You must specify dataset options when creating one.")
 
         if options.like is None:
-            if options.primary is None or options.lrecl is None:
+            if options.primary is None and options.lrecl is None:
                 self.logger.error("If 'like' is not specified, you must specify 'primary' or 'lrecl'.")
                 raise ValueError("If 'like' is not specified, you must specify 'primary' or 'lrecl'.")
             if options.dirblk is not None:
