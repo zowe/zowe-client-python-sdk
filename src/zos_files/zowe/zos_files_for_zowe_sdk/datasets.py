@@ -385,6 +385,11 @@ class Datasets(SdkApi):
                     if options.dirblk == 0:
                         self.logger.error("Can't allocate empty directory blocks.")
                         raise ValueError
+        else:
+            dsn_attr = self.list(options.like, return_attributes=True)["items"]
+            for dsn in dsn_attr:
+                if dsn["dsname"] == options.like.upper():
+                    options.blksize = int(dsn["blksz"])
 
         custom_args = self._create_custom_request_arguments()
         custom_args["url"] = "{}ds/{}".format(self._request_endpoint, self._encode_uri_component(dataset_name))
