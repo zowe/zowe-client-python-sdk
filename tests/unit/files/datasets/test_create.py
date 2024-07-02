@@ -27,6 +27,22 @@ class TestCreateClass(TestCase):
             Files(self.test_profile).create_data_set("DSNAME123", options=option)
         mock_send_request.assert_called()
 
+    @mock.patch("requests.Session.send")
+    def test_create_data_set_with_like(self, mock_send_request: mock.Mock):
+        """Test if create dataset does accept all accepted record formats"""
+
+        option = DatasetOption(like="test")
+
+        response1 = mock.Mock(
+            headers={"Content-Type": "application/octet-stream"},
+            status_code=200,
+            content={"items": [{"dsname": "test", "blksz": 123}]},
+        )
+        response2 = mock.Mock(headers={"Content-Type": "application/json"}, status_code=201)
+        mock_send_request.side_effect = [response1, response2]
+        Files(self.test_profile).create_data_set("DSNAME123", options=option)
+        self.assertEqual(mock_send_request.call_count, 2)
+
     def test_create_data_set_does_not_accept_invalid_recfm(self):
         """Test if create dataset raises an error for invalid record formats"""
         with self.assertRaises(KeyError):
@@ -38,7 +54,7 @@ class TestCreateClass(TestCase):
         option = DatasetOption(alcunit="CYL", dsorg="PO", primary=1, dirblk=25, recfm="FB", blksize=6160)
         with self.assertRaises(ValueError) as e_info:
             obj = Files(self.test_profile).create_data_set("DSNAME123", options=option)
-        self.assertEqual(str(e_info.exception), "If 'like' is not specified, you must specify 'primary' or 'lrecl'.")
+        self.assertEqual(str(e_info.exception), "If 'like' is not specified, you must specify 'primary' and 'lrecl'.")
 
     def test_create_data_set_raises_error_with_invalid_arguments_parameterized(self):
         """Test not providing valid arguments raises an error"""
@@ -117,7 +133,7 @@ class TestCreateClass(TestCase):
                 with self.assertRaises(ValueError) as e_info:
                     files_test_profile.create_data_set("DSN", test_case[0])
                 self.assertEqual(
-                    str(e_info.exception), "If 'like' is not specified, you must specify 'primary' or 'lrecl'."
+                    str(e_info.exception), "If 'like' is not specified, you must specify 'primary' and 'lrecl'."
                 )
 
     @mock.patch("requests.Session.send")
