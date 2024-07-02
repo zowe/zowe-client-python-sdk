@@ -2,11 +2,19 @@
 
 All notable changes to the Zowe Client Python SDK will be documented in this file.
 
+## Recent Changes
+
+### Enhancements
+
+### Bug Fixes
+
+- Fixed a bug on `_create_custom_request_arguments` where changes on `custom_args` will stay after the function returns [#299](https://github.com/zowe/zowe-client-python-sdk/issues/299)
+
 ## `1.0.0-dev16`
 
 ### Enhancements
 
-- Rename Python SDK bundle [#286](https://github.com/zowe/zowe-client-python-sdk/issues/286)
+- Renamed Python SDK bundle [#286](https://github.com/zowe/zowe-client-python-sdk/issues/286)
 - Added logger class to core SDK [#185](https://github.com/zowe/zowe-client-python-sdk/issues/185)
 - Added classes for handling `Datasets`, `USSFiles`, and `FileSystems` in favor of the single Files class. [#264](https://github.com/zowe/zowe-client-python-sdk/issues/264)
 - Refactored tests into proper folders and files and add more tests [#265](https://github.com/zowe/zowe-client-python-sdk/issues/265)
