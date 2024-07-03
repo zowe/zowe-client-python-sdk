@@ -65,8 +65,9 @@ class Session:
             self.session.tokenValue = props.get("tokenValue")
             self.session.type = session_constants.AUTH_TYPE_BEARER
         else:
-            self.__logger.error("Authentication method not supplied")
-            raise Exception("An authentication method must be supplied")
+            self.session.type = session_constants.AUTH_TYPE_NONE
+            self.__logger.info("Authentication method not supplied")
+            # raise Exception("An authentication method must be supplied")
 
         # set additional parameters
         self.session.basePath = props.get("basePath")
