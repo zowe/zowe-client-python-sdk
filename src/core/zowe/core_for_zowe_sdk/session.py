@@ -33,6 +33,8 @@ class ISession:
     type: Optional[str] = None
     tokenType: Optional[str] = None
     tokenValue: Optional[str] = None
+    cert: Optional[str] = None
+    certKey: Optional[str] = None
 
 
 class Session:
@@ -64,6 +66,10 @@ class Session:
         elif props.get("tokenValue") is not None:
             self.session.tokenValue = props.get("tokenValue")
             self.session.type = session_constants.AUTH_TYPE_BEARER
+        elif props.get("cert") is not None and props.get("certKey") is not None:
+            self.session.cert = props.get("cert")
+            self.session.certKey = props.get("certKey")
+            self.session.type = session_constants.AUTH_TYPE_CERT_PEM
         else:
             self.session.type = session_constants.AUTH_TYPE_NONE
             self.__logger.info("Authentication method not supplied")
