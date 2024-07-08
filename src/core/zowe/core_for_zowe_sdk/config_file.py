@@ -49,17 +49,18 @@ class ConfigFile:
     Class used to represent a single config file.
 
     Mainly it will have the following details :
-    1. Type ("User Config" or "Team Config")
-        User Configs override Team Configs.
-        User Configs are used to have personalised config details
-        that the user don't want to have in the Team Config.
-    2. Directory in which the file is located.
-    3. Name (excluding .config.json or .config.user.json)
-    4. Contents of the file.
-    4.1 Profiles
-    4.2 Defaults
-    4.3 Schema Property
-    5. Secure Properties associated with the file.
+        1. Type ("User Config" or "Team Config")
+            -------
+            User Configs override Team Configs.
+            User Configs are used to have personalised config details
+            that the user don't want to have in the Team Config.
+        2. Directory in which the file is located.
+        3. Name (excluding .config.json or .config.user.json)
+        4. Contents of the file.
+            4.1 Profiles
+            4.2 Defaults
+            4.3 Schema Property
+        5. Secure Properties associated with the file.
     """
 
     type: str
@@ -111,6 +112,13 @@ class ConfigFile:
         """
         Initializes the class variable after
         setting filepath (or if not set, autodiscover the file)
+
+        Parameters
+        -------
+        validate_schema: bool
+            True if validation is preferred, false otherwise
+        suppress_config_file_warnings: bool
+            True if the property should be stored securely, False otherwise.
         """
         if self.filepath is None:
             try:
@@ -160,7 +168,6 @@ class ConfigFile:
         Returns
         -------
         Dictionary
-
             Returns the profile properties from schema (prop: value)
         """
 
@@ -202,6 +209,16 @@ class ConfigFile:
     ) -> Profile:
         """
         Load given profile including secure properties and excluding values from base profile
+
+        Parameters
+        -------
+        profile_name: str
+            Name of the profile
+        profile_type: str
+            Type of the profile
+        validate_shcema: bool
+            True if validation is preferred
+
         Returns
         -------
         Profile
@@ -227,6 +244,7 @@ class ConfigFile:
         """
         Autodiscover Zowe z/OSMF Team Config files by going up the path from
         current working directory
+
         Returns
         -------
         None
@@ -254,11 +272,17 @@ class ConfigFile:
     def get_profilename_from_profiletype(self, profile_type: str) -> str:
         """
         Returns profilename from given profiletype as defined in the team config profile
+
+        Parameters
+        -------
+        profile_type: str
+            Type of the profile
+
         Returns
         -------
         str
+            The exact profilename of the profile to load from the mentioned type.
 
-        Return the exact profilename of the profile to load from the mentioned type.
         First tries to look into the defaults, if not found,
         then it tries to iterate through the profiles
         """
@@ -297,10 +321,17 @@ class ConfigFile:
     def find_profile(self, path: str, profiles: dict):
         """
         Find a profile at a specified location from within a set of nested profiles
+
+        Parameters
+        -------
+        path: str
+            The location to look for the profile
+        profiles: dict
+            A dict of nested profiles
+
         Returns
         -------
         dictionary
-
             The profile object that was found, or None if not found
         """
         segments = path.split(".")
@@ -315,10 +346,15 @@ class ConfigFile:
     def load_profile_properties(self, profile_name: str) -> dict:
         """
         Load profile properties given profile_name including secure properties
+
+        Parameters
+        -------
+        profile_name: str
+            Name of the profile
+
         Returns
         -------
         dictionary
-
             Object containing profile properties
 
         Load exact profile properties (without prepopulated fields from base profile)
@@ -406,11 +442,16 @@ class ConfigFile:
         """
         Set a property in the profile, storing it securely if necessary.
 
-        Parameters:
-            json_path (str): The JSON path of the property to set.
-            value (str): The value to be set for the property.
-            profile_name (str): The name of the profile to set the property in.
-            secure (bool): If True, the property will be stored securely. Default is None.
+        Parameters
+        -------
+        json_path: str
+            The JSON path of the property to set.
+        value: str
+            The value to be set for the property.
+        profile_name: str
+            The name of the profile to set the property in.
+        secure: bool
+            If True, the property will be stored securely. Default is None.
         """
         if self.profiles is None:
             self.init_from_file()
@@ -439,9 +480,12 @@ class ConfigFile:
         """
         Set a profile in the config file.
 
-        Parameters:
-            profile_path (str): The path of the profile to be set. eg: profiles.zosmf
-            profile_data (dict): The data to be set for the profile.
+        Parameters
+        -------
+        profile_path: str
+            The path of the profile to be set. eg: profiles.zosmf
+        profile_data: dict
+            The data to be set for the profile.
         """
         if self.profiles is None:
             self.init_from_file()
@@ -465,10 +509,14 @@ class ConfigFile:
     def save(self, update_secure_props=True):
         """
         Save the config file to disk. and secure props to vault
-        parameters:
-            secure_props (bool): If True, the secure properties will be stored in the vault. Default is True.
-        Returns:
-            None
+        parameters
+        -------
+        secure_props: bool
+            If True, the secure properties will be stored in the vault. Default is True.
+
+        Returns
+        -------
+        None
         """
         # Updating the config file with any changes
         if not any(self.profiles.values()):
@@ -486,6 +534,16 @@ class ConfigFile:
     def get_profile_name_from_path(self, path: str) -> str:
         """
         Get the name of the profile from the given path.
+
+        Parameters
+        -------
+        path: str
+            The location to look for the profile
+
+        Returns
+        -------
+        str
+            Returns the profile name
         """
         segments = path.split(".")
         profile_name = ".".join(segments[i] for i in range(1, len(segments), 2) if segments[i - 1] != "properties")
@@ -494,5 +552,15 @@ class ConfigFile:
     def get_profile_path_from_name(self, short_path: str) -> str:
         """
         Get the path of the profile from the given name.
+
+        Parameters
+        -------
+        short_path: str
+            Partial path of profile
+
+        Returns
+        -------
+        str
+            Returns the full profile path
         """
         return re.sub(r"(^|\.)", r"\1profiles.", short_path)

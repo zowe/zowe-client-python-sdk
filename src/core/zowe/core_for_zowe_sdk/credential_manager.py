@@ -16,8 +16,6 @@ from typing import Optional
 
 import commentjson
 
-from .logger import Log
-
 from .constants import constants
 from .exceptions import SecureProfileLoadFailed
 from .logger import Log
@@ -37,6 +35,7 @@ class CredentialManager:
     def load_secure_props() -> None:
         """
         load secure_props stored for the given config file
+
         Returns
         -------
         None
@@ -67,6 +66,7 @@ class CredentialManager:
     def save_secure_props() -> None:
         """
         Set secure_props for the given config file
+
         Returns
         -------
         None
@@ -90,10 +90,12 @@ class CredentialManager:
         """
         Retrieve the credential from the keyring or storage.
         If the credential exceeds the maximum length, retrieve it in parts.
+
         Parameters
         ----------
         service_name: str
             The service name for the credential retrieval
+
         Returns
         -------
         str
@@ -139,12 +141,14 @@ class CredentialManager:
         """
         Delete the credential from the keyring or storage.
         If the keyring.delete_password function is not available, iterate through and delete credentials.
+
         Parameters
         ----------
         service_name: str
             The service name for the credential deletion
         account_name: str
             The account name for the credential deletion
+
         Returns
         -------
         None

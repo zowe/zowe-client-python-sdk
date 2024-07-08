@@ -26,8 +26,6 @@ class Files(SdkApi):
     """
     Class used to represent the base z/OSMF Files API.
 
-    ...
-
     Attributes
     ----------
     connection

@@ -11,6 +11,7 @@ Copyright Contributors to the Zowe Project.
 """
 
 import os
+from dataclasses import dataclass
 from typing import Optional
 
 from zowe.core_for_zowe_sdk import SdkApi
@@ -20,7 +21,45 @@ from zowe.zos_files_for_zowe_sdk.constants import FileType, zos_file_constants
 _ZOWE_FILES_DEFAULT_ENCODING = zos_file_constants["ZoweFilesDefaultEncoding"]
 
 
+@dataclass
 class DatasetOption:
+    """A dataclass that represents options for creating a dataset
+
+    Attributes
+    ----------
+    like: str
+        The dataset name to copy attributes from
+    volser: str
+        The volume serial number that identifies where the dataset resides or should be allocated
+    unit: str
+        Specifies the type of device on which the dataset is to be stored
+    dsorg: str
+        Defines the organization of the dataset (PS for sequential, PO for partitioned, DA for direct access)
+    alcunit: str
+        Specifies the unit of space allocation for the dataset (CYL for cylinders, TRK for tracks, BLK for blocks)
+    primary: int
+        The amount of primary space to allocate for the dataset
+    secondary: int
+        The amount of secondary space to allocate if the primary space is exhausted
+    dirblk: int
+        The number of directory blocks to allocate for a partitioned dataset
+    avgblk: int
+        The average block size for the dataset
+    recfm: str
+        The format of the records in the dataset
+    blksize: int
+        The physical block size used for the dataset
+    lrecl: int
+        The length of the logical records in the dataset
+    storclass: str
+        Specifies the storage class to be used for the dataset
+    mgnclass: str
+        Specifies the management class for the dataset
+    dataclass: str
+        Specifies the data class for the dataset
+    dsntype: str
+        Specifies the type of dataset
+    """
 
     def __init__(
         self,
@@ -217,6 +256,12 @@ class DatasetOption:
         return self.__like
 
     def to_dict(self) -> dict:
+        """Return the DatasetOption as a dict
+
+        Returns
+        -------
+        dict
+        """
         return {key.replace("_DatasetOption__", ""): value for key, value in self.__dict__.items() if value is not None}
 
 
@@ -224,8 +269,6 @@ class Datasets(SdkApi):
     """
     Class used to represent the base z/OSMF Datasets API
     which includes all operations related to datasets.
-
-    ...
 
     Attributes
     ----------
@@ -259,8 +302,7 @@ class Datasets(SdkApi):
 
         Returns
         -------
-            list of dict
-
+        list of dict
             A JSON with a list of dataset names (and attributes if specified) matching the given pattern.
         """
         custom_args = self._create_custom_request_arguments()
@@ -275,6 +317,19 @@ class Datasets(SdkApi):
 
     def list_members(self, dataset_name, member_pattern=None, member_start=None, limit=1000, attributes="member"):
         """Retrieve the list of members on a given PDS/PDSE.
+
+        Parameters
+        -------
+        dataset_name: str
+            The name of the dataset
+        member_pattern: str
+            Filters members by name pattern.
+        member_start: str
+            The starting point for listing members.
+        limit: int
+            The maximum number of members returned.
+        attributes: str
+            The member attributes to retrieve.
 
         Returns
         -------
@@ -307,8 +362,9 @@ class Datasets(SdkApi):
     ):
         """
         Copy a dataset or member to another dataset or member.
+
         Parameters
-        ----------
+        -------
         from_dataset_name: str
             Name of the dataset to copy from
         to_dataset_name: str
@@ -325,6 +381,7 @@ class Datasets(SdkApi):
             Enqueue type for the dataset to copy from
         replace: bool
             If true, members in the target data set are replaced.
+
         Returns
         -------
         json
@@ -358,15 +415,18 @@ class Datasets(SdkApi):
     def create(self, dataset_name, options: Optional[DatasetOption] = None):
         """
         Create a sequential or partitioned dataset.
+
         Parameters
         ----------
         dataset_name: str
             Name of the dataset to be created
-        options:
+        options: DatasetOption
             A DatasetOption class with property options of the dataset
+
         Returns
         -------
         json
+            A JSON containing the result of the operation
         """
         if not options:
             self.logger.error("You must specify dataset options when creating one.")
@@ -405,13 +465,15 @@ class Datasets(SdkApi):
 
         Parameters
         ----------
-            dataset_name: str
-            default_type: str
-                "partitioned", "sequential", "classic", "c" or "binary"
+        dataset_name: str
+            The name of the dataset
+        default_type: str
+            The type of the dataset: "partitioned", "sequential", "classic", "c" or "binary"
 
         Returns
         -------
-        json - A JSON containing the result of the operation
+        json
+            A JSON containing the result of the operation
         """
 
         if default_type not in ("partitioned", "sequential", "classic", "c", "binary"):
@@ -477,6 +539,13 @@ class Datasets(SdkApi):
     def get_content(self, dataset_name, stream=False):
         """Retrieve the contents of a given dataset.
 
+        Parameters
+        -------
+        dataset_name: str
+            The name of the dataset
+        stream: bool
+            Specifies
+
         Returns
         -------
         json
@@ -493,9 +562,11 @@ class Datasets(SdkApi):
 
         Parameters
         ----------
-        dataset_name: str - Name of the dataset to retrieve
-        with_prefixes: boolean - if True include a 4 byte big endian record len prefix
-                                 default: False
+        dataset_name: str
+            Name of the dataset to retrieve
+        with_prefixes: boolean
+            If True include a 4 byte big endian record len prefix. Default: False
+
         Returns
         -------
         response
@@ -514,6 +585,15 @@ class Datasets(SdkApi):
     def write(self, dataset_name, data, encoding=_ZOWE_FILES_DEFAULT_ENCODING):
         """Write content to an existing dataset.
 
+        Parameters
+        ----------
+        dataset_name: str
+            Name of the dataset to retrieve
+        data: str
+            Content to be written
+        encoding:
+            Specifies encoding schema
+
         Returns
         -------
         json
@@ -527,7 +607,15 @@ class Datasets(SdkApi):
         return response_json
 
     def download(self, dataset_name, output_file):
-        """Retrieve the contents of a dataset and saves it to a given file."""
+        """Retrieve the contents of a dataset and saves it to a given file.
+
+        Parameters
+        -------
+        dataset_name: str
+            Name of the dataset to be downloaded
+        output_file: str
+            Name of the file to be saved locally
+        """
         response = self.get_content(dataset_name, stream=True)
         with open(output_file, "w", encoding="utf-8") as f:
             for chunk in response.iter_content(chunk_size=4096, decode_unicode=True):
@@ -538,10 +626,12 @@ class Datasets(SdkApi):
 
         Parameters
         ----------
-        dataset_name:str - Name of the dataset to download
-        output_file:str - Name of the local file to create
-        with_prefixes:boolean - If true, include a four big endian bytes record length prefix.
-                                The default is False
+        dataset_name:str
+            Name of the dataset to download
+        output_file:str
+            Name of the local file to create
+        with_prefixes:boolean
+            If true, include a four big endian bytes record length prefix. The default is False
         """
         response = self.get_binary_content(dataset_name, with_prefixes=with_prefixes, stream=True)
         with open(output_file, "wb") as f:
@@ -549,7 +639,19 @@ class Datasets(SdkApi):
                 f.write(chunk)
 
     def upload_file(self, input_file, dataset_name, encoding=_ZOWE_FILES_DEFAULT_ENCODING, binary=False):
-        """Upload contents of a given file and uploads it to a dataset."""
+        """Upload contents of a given file and uploads it to a dataset.
+
+        Parameters
+        -------
+        input_file: str
+            Name of the file to be uploaded
+        dataset_name: str
+            Name of the dataset to be created
+        encoding: str
+            Specifies the encoding schema
+        binary: bool
+            specifies whether the file is binary
+        """
         if os.path.isfile(input_file):
             if binary:
                 with open(input_file, "rb") as in_file:
@@ -575,7 +677,8 @@ class Datasets(SdkApi):
 
         Returns
         -------
-        json - A JSON containing the result of the operation
+        json
+            A JSON containing the result of the operation
         """
 
         data = {"request": "hrecall", "wait": wait}
@@ -604,7 +707,8 @@ class Datasets(SdkApi):
 
         Returns
         -------
-        json - A JSON containing the result of the operation
+        json
+            A JSON containing the result of the operation
         """
 
         data = {
@@ -634,7 +738,8 @@ class Datasets(SdkApi):
 
         Returns
         -------
-        json - A JSON containing the result of the operation
+        json
+            A JSON containing the result of the operation
         """
 
         data = {"request": "hmigrate", "wait": wait}
@@ -660,7 +765,8 @@ class Datasets(SdkApi):
 
         Returns
         -------
-        json - A JSON containing the result of the operation
+        json
+            A JSON containing the result of the operation
         """
 
         data = {"request": "rename", "from-dataset": {"dsn": before_dataset_name.strip()}}
@@ -694,7 +800,8 @@ class Datasets(SdkApi):
 
         Returns
         -------
-        json - A JSON containing the result of the operation
+        json
+            A JSON containing the result of the operation
         """
 
         data = {
@@ -722,7 +829,22 @@ class Datasets(SdkApi):
         return response_json
 
     def delete(self, dataset_name, volume=None, member_name=None):
-        """Deletes a sequential or partitioned data."""
+        """Deletes a sequential or partitioned data.
+
+        Parameters
+        ----------
+        dataset_name: str
+            The name of the dataset
+        volume: str
+            The optional volume serial number
+        member_name: str
+            The name of the member to be deleted
+
+        Returns
+        -------
+        json
+            A JSON containing the result of the operation
+        """
         custom_args = self._create_custom_request_arguments()
         if member_name is not None:
             dataset_name = f"{dataset_name}({member_name})"

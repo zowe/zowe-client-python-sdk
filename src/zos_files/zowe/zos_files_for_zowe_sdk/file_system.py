@@ -21,8 +21,6 @@ class FileSystems(SdkApi):
     Class used to represent the base z/OSMF FileSystems API
     which includes all operations related to file systems.
 
-    ...
-
     Attributes
     ----------
     connection
@@ -47,13 +45,17 @@ class FileSystems(SdkApi):
         """
         Create a z/OS UNIX zFS Filesystem.
 
-        Parameter
+        Parameters
         ---------
-        file_system_name: str - the name for the file system
+        file_system_name: str
+            the name for the file system
+        options: dict
+            specifies file system attributes
 
         Returns
         -------
-        json - A JSON containing the result of the operation
+        json
+            A JSON containing the result of the operation
         """
         for key, value in options.items():
             if key == "perms":
@@ -75,6 +77,16 @@ class FileSystems(SdkApi):
     def delete(self, file_system_name):
         """
         Deletes a zFS Filesystem
+
+        Parameters
+        -------
+        file_system_name: str
+            Name of the file system
+
+        Returns
+        -------
+        json
+            A JSON containing the result of the operation
         """
         custom_args = self._create_custom_request_arguments()
         custom_args["url"] = "{}mfs/zfs/{}".format(self._request_endpoint, file_system_name)
@@ -83,15 +95,22 @@ class FileSystems(SdkApi):
 
     def mount(self, file_system_name, mount_point, options={}, encoding=_ZOWE_FILES_DEFAULT_ENCODING):
         """Mounts a z/OS UNIX file system on a specified directory.
-        Parameter
+
+        Parameters
         ---------
-        file_system_name: str - the name for the file system
-        mount_point: str - mount point to be used for mounting the UNIX file system
-        options: dict - A JSON of request body options
+        file_system_name: str
+            Name for the file system
+        mount_point: str
+            Mount point to be used for mounting the UNIX file system
+        options: dict
+            A JSON of request body options
+        encoding: str
+            Specifies optional encoding schema
 
         Returns
         -------
-        json - A JSON containing the result of the operation
+        json
+            A JSON containing the result of the operation
         """
         options["action"] = "mount"
         options["mount-point"] = mount_point
@@ -105,14 +124,19 @@ class FileSystems(SdkApi):
     def unmount(self, file_system_name, options={}, encoding=_ZOWE_FILES_DEFAULT_ENCODING):
         """Unmounts a z/OS UNIX file system on a specified directory.
 
-        Parameter
+        Parameters
         ---------
-        file_system_name: str - the name for the file system
-        options: dict - A JSON of request body options
+        file_system_name: str
+            Name for the file system
+        options: dict
+            A JSON of request body options
+        encoding: str
+            Specifies optional encoding schema
 
         Returns
         -------
-        json - A JSON containing the result of the operation
+        json
+            A JSON containing the result of the operation
         """
         options["action"] = "unmount"
         custom_args = self._create_custom_request_arguments()
@@ -127,14 +151,17 @@ class FileSystems(SdkApi):
         list all mounted filesystems, or the specific filesystem mounted at a given path, or the
         filesystem with a given Filesystem name.
 
-        Parameter
+        Parameters
         ---------
-        file_path: str - the UNIX directory that contains the files and directories to be listed.
-        file_system_name: str - the name for the file system to be listed
+        file_path: str
+            the UNIX directory that contains the files and directories to be listed.
+        file_system_name: str
+            the name for the file system to be listed
 
         Returns
         -------
-        json - A JSON containing the result of the operation
+        json
+            A JSON containing the result of the operation
         """
         custom_args = self._create_custom_request_arguments()
 

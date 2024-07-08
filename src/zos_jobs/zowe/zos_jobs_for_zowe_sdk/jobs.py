@@ -321,6 +321,7 @@ class Jobs(SdkApi):
 
     def get_jcl_text(self, correlator):
         """Retrieve the input JCL text for job with specified correlator
+
         Parameters
         ----------
         correlator: str
@@ -340,7 +341,6 @@ class Jobs(SdkApi):
 
     def get_spool_file_contents(self, correlator, id):
         """Retrieve the contents of a single spool file from a job
-
 
         Parameters
         ----------
