@@ -52,10 +52,6 @@ class TestSdkApiClass(TestCase):
             mock_logger_error.assert_called()
             self.assertIn("cert key", mock_logger_error.call_args[0][0])
 
-    def test_session_cert(self):
-        sdk_api = SdkApi(self.cert_props, self.default_url)
-        self.assertEqual((self.cert_props.get("certFile"), self.cert_props.get("certKeyFile")), sdk_api.session.cert)
-
     def test_should_handle_none_auth(self):
         props = {"host": "test"}
         sdk_api = SdkApi(props, self.default_url)
@@ -64,8 +60,7 @@ class TestSdkApiClass(TestCase):
     def test_should_handle_cert_auth(self):
         props = self.cert_props
         sdk_api = SdkApi(props, self.default_url)
-        self.assertEqual(sdk_api.session.cert, self.cert_props["cert"])
-        self.assertEqual(sdk_api.session.certKey, self.cert_props["certKey"])
+        self.assertEqual(sdk_api.session.cert, (self.cert_props["certFile"], self.cert_props["certKeyFile"]))
 
     def test_should_handle_basic_auth(self):
         """Created object should handle basic authentication."""
