@@ -82,7 +82,7 @@ class Session:
         self.session.basePath = props.get("basePath")
         self.session.port = props.get("port", self.session.port)
         self.session.protocol = props.get("protocol", self.session.protocol)
-        self.session.rejectUnauthorized = False if props.get("rejectUnauthorized") is "False" else True
+        self.session.rejectUnauthorized = False if props.get("rejectUnauthorized") == "False" else True
 
     def load(self) -> ISession:
         return self.session
