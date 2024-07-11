@@ -44,7 +44,7 @@ class Log:
         return logger
 
     @staticmethod
-    def setLoggerLevel(level: int):
+    def setAllLoggerLevel(level: int):
         """
         Set display level for all loggers
 
@@ -55,3 +55,43 @@ class Log:
         """
         for logger in Log.loggers:
             logger.setLevel(level)
+
+    @staticmethod
+    def close(logger):
+        """
+        Disable a logger
+
+        Parameters
+        ----------
+        logger: Logger
+            The logger to be turned off
+        """
+        logger.disabled = True
+
+    @staticmethod
+    def open(logger):
+        """
+        Enable a logger
+
+        Parameters
+        ----------
+        logger: Logger
+            The logger to be turned on
+        """
+        logger.disabled = False
+
+    @staticmethod
+    def closeAll():
+        """
+        Disable all loggers
+        """
+        for logger in Log.loggers:
+            logger.disabled = True
+
+    @staticmethod
+    def openAll():
+        """
+        Enable all loggers
+        """
+        for logger in Log.loggers:
+            logger.disabled = False

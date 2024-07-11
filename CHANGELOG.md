@@ -10,6 +10,8 @@ All notable changes to the Zowe Client Python SDK will be documented in this fil
 
 - Updated all functions descriptions to be consitent [#279] (https://github.com/zowe/zowe-client-python-sdk/issues/279)
 
+- Support for turning off loggers [#278] (https://github.com/zowe/zowe-client-python-sdk/issues/278)
+
 ### Bug Fixes
 
 - Fixed a bug on `create` in `Datasets` where the target dataset gets created with a different block size when `like` is specified [#295] (https://github.com/zowe/zowe-client-python-sdk/issues/295)
