@@ -34,7 +34,6 @@ class ISession:
     tokenType: Optional[str] = None
     tokenValue: Optional[str] = None
     cert: Optional[str] = None
-    certKey: Optional[str] = None
 
 
 class Session:
@@ -66,9 +65,13 @@ class Session:
         elif props.get("tokenValue") is not None:
             self.session.tokenValue = props.get("tokenValue")
             self.session.type = session_constants.AUTH_TYPE_BEARER
-        elif props.get("cert") is not None and props.get("certKey") is not None:
-            self.session.cert = props.get("cert")
-            self.session.certKey = props.get("certKey")
+        elif props.get("certFile") is not None:
+            if props.get("certKeyFile"):
+                self.session.cert = (props.get("certFile"), props.get("certKeyFile"))
+            else:
+                self.__logger.error("A cert key must be provided")
+                raise Exception("A cert key must be provided")
+            self.session.rejectUnauthorized = props.get("rejectUnauthorized")
             self.session.type = session_constants.AUTH_TYPE_CERT_PEM
         else:
             self.session.type = session_constants.AUTH_TYPE_NONE
@@ -79,7 +82,7 @@ class Session:
         self.session.basePath = props.get("basePath")
         self.session.port = props.get("port", self.session.port)
         self.session.protocol = props.get("protocol", self.session.protocol)
-        self.session.rejectUnauthorized = props.get("rejectUnauthorized", self.session.rejectUnauthorized)
+        self.session.rejectUnauthorized = False if props.get("rejectUnauthorized") == "False" else True
 
     def load(self) -> ISession:
         return self.session
