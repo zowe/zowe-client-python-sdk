@@ -69,8 +69,8 @@ class Session:
             if props.get("certKeyFile"):
                 self.session.cert = (props.get("certFile"), props.get("certKeyFile"))
             else:
-                self.__logger.error("A cert key must be provided")
-                raise Exception("A cert key must be provided")
+                self.__logger.error("A certificate key file must be provided when certFile is specified")
+                raise Exception("A certificate key file must be provided when certFile is specified")
             self.session.rejectUnauthorized = props.get("rejectUnauthorized")
             self.session.type = session_constants.AUTH_TYPE_CERT_PEM
         else:
