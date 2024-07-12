@@ -1,43 +1,51 @@
+"""
+Logger module for handling application logging.
+
+This module provides the `Log` class which allows for registering,
+setting levels, opening, and closing loggers.
+"""
+
 import logging
 import os
 
+dirname = os.path.join(os.path.expanduser("~"), ".zowe/logs")
+
+os.makedirs(dirname, exist_ok=True)
+
+logging.basicConfig(
+    filename=os.path.join(dirname, "python_sdk_logs.log"),
+    level=logging.INFO,
+    format="[%(asctime)s] [%(levelname)s] [%(name)s] - %(message)s",
+    datefmt="%m/%d/%Y %I:%M:%S %p",
+)
+
 
 class Log:
-    """Class used to represent a logger
+    """
+    Class used to represent a logger.
 
     Attributes
-    -------
+    ----------
     loggers: set
         The set of all loggers
     """
 
-    dirname = os.path.join(os.path.expanduser("~"), ".zowe/logs")
-
-    os.makedirs(dirname, exist_ok=True)
-
-    logging.basicConfig(
-        filename=os.path.join(dirname, "python_sdk_logs.log"),
-        level=logging.INFO,
-        format="[%(asctime)s] [%(levelname)s] [%(name)s] - %(message)s",
-        datefmt="%m/%d/%Y %I:%M:%S %p",
-    )
-
-    loggers = set()
+    loggers: set = set()
 
     @staticmethod
-    def registerLogger(name: str):
+    def registerLogger(name: str) -> logging.Logger:
         """
-        Create and register a logger
+        Create and register a logger.
 
         Parameters
         ----------
         name: str
-            name for the logger
+            The name for the logger.
 
         Returns
         -------
-        Logger
-            A Logger object named after the file where it is created
+        logging.Logger
+            A Logger object named after the file where it is created.
         """
         logger = logging.getLogger(name)
         Log.loggers.add(logger)
@@ -46,7 +54,7 @@ class Log:
     @staticmethod
     def setAllLoggerLevel(level: int):
         """
-        Set display level for all loggers
+        Set display level for all loggers.
 
         Parameters
         ----------
@@ -57,41 +65,37 @@ class Log:
             logger.setLevel(level)
 
     @staticmethod
-    def close(logger):
+    def close(logger: logging.Logger):
         """
-        Disable a logger
+        Disable a logger.
 
         Parameters
         ----------
-        logger: Logger
+        logger: logging.Logger
             The logger to be turned off
         """
         logger.disabled = True
 
     @staticmethod
-    def open(logger):
+    def open(logger: logging.Logger):
         """
-        Enable a logger
+        Enable a logger.
 
         Parameters
         ----------
-        logger: Logger
+        logger: logging.Logger
             The logger to be turned on
         """
         logger.disabled = False
 
     @staticmethod
     def closeAll():
-        """
-        Disable all loggers
-        """
+        """Disable all loggers."""
         for logger in Log.loggers:
             logger.disabled = True
 
     @staticmethod
     def openAll():
-        """
-        Enable all loggers
-        """
+        """Enable all loggers."""
         for logger in Log.loggers:
             logger.disabled = False

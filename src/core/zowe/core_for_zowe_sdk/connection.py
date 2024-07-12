@@ -18,7 +18,7 @@ class ApiConnection:
     """
     Class used to represent a connection with a REST API.
 
-    Attributes
+    Parameters
     ----------
     host_url: str
         The base url of the rest api host
@@ -27,11 +27,15 @@ class ApiConnection:
     password: str
         The password for the user
     ssl_verification: bool
+        Options for ssl verification. True by default.
+
+    Raises
+    ------
+    MissingConnectionArgs
+        Missing connection argument.
     """
 
-    def __init__(self, host_url, user, password, ssl_verification=True):
-        """Construct an ApiConnection object."""
-
+    def __init__(self, host_url: str, user: str, password: str, ssl_verification: bool = True):
         __logger = Log.registerLogger(__name__)
         if not host_url or not user or not password:
             __logger.error("Missing connection argument")

@@ -22,9 +22,18 @@ from .session import ISession, Session
 class SdkApi:
     """
     Abstract class used to represent the base SDK API.
+
+    Parameters
+    ----------
+    profile : dict
+        Profile information in json (dict) format
+    default_url : str
+        Default url used for session
+    logger_name : str
+        Name of the logger (same as the filename by default)
     """
 
-    def __init__(self, profile, default_url, logger_name=__name__):
+    def __init__(self, profile: dict, default_url: str, logger_name: str = __name__):
         session = Session(profile)
         self.session: ISession = session.load()
 
@@ -58,26 +67,39 @@ class SdkApi:
             self.__session_arguments["cert"] = self.session.cert
 
     def __enter__(self):
+        """Return the SdkApi instance."""
         return self
 
-    def __exit__(self, exc_type, exception, traceback):
+    def __exit__(self):
+        """Delete the request_handler before exiting."""
         del self.request_handler
 
-    def _create_custom_request_arguments(self):
-        """Create a copy of the default request arguments dictionary.
+    def _create_custom_request_arguments(self) -> dict:
+        """
+        Create a copy of the default request arguments dictionary.
 
         This method is required because the way that Python handles
         dictionary creation
-        """
-        return copy.deepcopy(self._request_arguments)
-
-    def _encode_uri_component(self, str_to_adjust):
-        """Adjust string to be correct in a URL
 
         Returns
         -------
-        adjusted_str
+        dict
+            A deepcopy of the request_arguments
+        """
+        return copy.deepcopy(self._request_arguments)
+
+    def _encode_uri_component(self, str_to_adjust: str) -> str:
+        """
+        Adjust string to be correct in a URL.
+
+        Parameters
+        ----------
+        str_to_adjust : str
+            The string to encode
+
+        Returns
+        -------
+        str
             A string with special characters, acceptable for a URL
         """
-
         return urllib.parse.quote(str_to_adjust, safe="!~*'()") if str_to_adjust is not None else None

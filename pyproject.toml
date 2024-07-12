@@ -3,3 +3,13 @@ line-length = 120
 
 [tool.isort]
 profile = "black"
+
+[tool.pydoclint]
+style = 'numpy'
+check-arg-order = false
+require-return-section-when-returning-nothing = false
+quiet = true
+
+[tool.pydocstyle]
+convention = "numpy"
+add-ignore = ['D107', 'D102']

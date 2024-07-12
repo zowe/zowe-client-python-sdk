@@ -1,3 +1,7 @@
+"""Public module for class Console."""
+
+from typing import Optional
+
 from zowe.core_for_zowe_sdk import SdkApi
 
 
@@ -5,38 +9,28 @@ class Console(SdkApi):
     """
     Class used to represent the base z/OSMF Console API.
 
-    ...
-
-    Attributes
+    Parameters
     ----------
-    connection
-        Connection object
+    connection : dict
+       A profile in dict (json) format
     """
 
-    def __init__(self, connection):
-        """
-        Construct a Console object.
-
-        Parameters
-        ----------
-        connection
-            The connection object
-        """
+    def __init__(self, connection: dict):
         super().__init__(connection, "/zosmf/restconsoles/consoles/defcn", logger_name=__name__)
 
-    def issue_command(self, command, console=None):
+    def issue_command(self, command: str, console: Optional[str] = None) -> dict:
         """Issues a command on z/OS Console.
 
         Parameters
         ----------
-        command
+        command : str
             The z/OS command to be executed
-        console
-            The console that should be used to execute the command (default is None)
+        console : Optional[str]
+            Name of the console that should be used to execute the command (default is None)
 
         Returns
         -------
-        json
+        dict
             A JSON containing the response from the console command
         """
         custom_args = self._create_custom_request_arguments()
@@ -46,19 +40,20 @@ class Console(SdkApi):
         response_json = self.request_handler.perform_request("PUT", custom_args)
         return response_json
 
-    def get_response(self, response_key, console=None):
+    def get_response(self, response_key: str, console: Optional[str] = None) -> dict:
         """
         Collect outstanding synchronous z/OS Console response messages.
 
         Parameters
         ----------
-        response_key
+        response_key : str
             The command response key from the Issue Command request.
-        console
+        console : Optional[str]
             The console that should be used to get the command response.
+
         Returns
         -------
-        json
+        dict
             A JSON containing the response to the command
         """
         custom_args = self._create_custom_request_arguments()
