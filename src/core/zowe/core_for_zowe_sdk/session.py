@@ -33,6 +33,7 @@ class ISession:
     type: Optional[str] = None
     tokenType: Optional[str] = None
     tokenValue: Optional[str] = None
+    cert: Optional[str] = None
 
 
 class Session:
@@ -64,15 +65,24 @@ class Session:
         elif props.get("tokenValue") is not None:
             self.session.tokenValue = props.get("tokenValue")
             self.session.type = session_constants.AUTH_TYPE_BEARER
+        elif props.get("certFile") is not None:
+            if props.get("certKeyFile"):
+                self.session.cert = (props.get("certFile"), props.get("certKeyFile"))
+            else:
+                self.__logger.error("A cert key must be provided")
+                raise Exception("A cert key must be provided")
+            self.session.rejectUnauthorized = props.get("rejectUnauthorized")
+            self.session.type = session_constants.AUTH_TYPE_CERT_PEM
         else:
-            self.__logger.error("Authentication method not supplied")
-            raise Exception("An authentication method must be supplied")
+            self.session.type = session_constants.AUTH_TYPE_NONE
+            self.__logger.info("Authentication method not supplied")
+            # raise Exception("An authentication method must be supplied")
 
         # set additional parameters
         self.session.basePath = props.get("basePath")
         self.session.port = props.get("port", self.session.port)
         self.session.protocol = props.get("protocol", self.session.protocol)
-        self.session.rejectUnauthorized = props.get("rejectUnauthorized", self.session.rejectUnauthorized)
+        self.session.rejectUnauthorized = False if props.get("rejectUnauthorized") == False else True
 
     def load(self) -> ISession:
         return self.session

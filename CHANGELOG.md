@@ -6,6 +6,8 @@ All notable changes to the Zowe Client Python SDK will be documented in this fil
 
 ### Enhancements
 
+- Included support for `AUTH_TYPE_CERT_PEM` and `AUTH_TYPE_NONE` in `session` [#291] (https://github.com/zowe/zowe-client-python-sdk/issues/291) and [#296] (https://github.com/zowe/zowe-client-python-sdk/issues/296)
+
 ### Bug Fixes
 
 - Fixed a bug on `create` in `Datasets` where the target dataset gets created with a different block size when `like` is specified [#295] (https://github.com/zowe/zowe-client-python-sdk/issues/295)
