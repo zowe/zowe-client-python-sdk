@@ -1,5 +1,5 @@
 black
-certifi==2023.7.22
+certifi==2024.7.4
 chardet==4.0.0
 colorama==0.4.4
 commentjson==0.9.0
@@ -29,7 +29,7 @@ typing-extensions==4.0.1
 Unidecode==1.2.0
 urllib3==1.26.19
 wheel
-zipp==3.4.0
+zipp==3.19.1
 -e ./src/core[secrets]
 -e ./src/secrets
 -e ./src/zos_console

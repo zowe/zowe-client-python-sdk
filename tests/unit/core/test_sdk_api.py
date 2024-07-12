@@ -17,7 +17,7 @@ class TestSdkApiClass(TestCase):
         self.basic_props = {**common_props, "user": "Username", "password": "Password"}
         self.bearer_props = {**common_props, "tokenValue": "BearerToken"}
         self.token_props = {**common_props, "tokenType": "MyToken", "tokenValue": "TokenValue"}
-        self.cert_props = {**common_props, "cert": "cert", "certKey": "certKey"}
+        self.cert_props = {**common_props, "rejectUnauthorized": False, "certFile": "cert", "certKeyFile": "certKey"}
         self.default_url = "https://default-api.com/"
 
     def test_object_should_be_instance_of_class(self):
@@ -43,6 +43,15 @@ class TestSdkApiClass(TestCase):
             mock_logger_error.assert_called()
             self.assertIn("Host", mock_logger_error.call_args[0][0])
 
+    @mock.patch("logging.Logger.error")
+    def test_session_combined_cert_logger(self, mock_logger_error: mock.MagicMock):
+        props = {"host": "test", "certFile": "test"}
+        try:
+            sdk_api = SdkApi(props, self.default_url)
+        except Exception:
+            mock_logger_error.assert_called()
+            self.assertIn("cert key", mock_logger_error.call_args[0][0])
+
     def test_should_handle_none_auth(self):
         props = {"host": "test"}
         sdk_api = SdkApi(props, self.default_url)
@@ -51,8 +60,7 @@ class TestSdkApiClass(TestCase):
     def test_should_handle_cert_auth(self):
         props = self.cert_props
         sdk_api = SdkApi(props, self.default_url)
-        self.assertEqual(sdk_api.session.cert, self.cert_props["cert"])
-        self.assertEqual(sdk_api.session.certKey, self.cert_props["certKey"])
+        self.assertEqual(sdk_api.session.cert, (self.cert_props["certFile"], self.cert_props["certKeyFile"]))
 
     def test_should_handle_basic_auth(self):
         """Created object should handle basic authentication."""

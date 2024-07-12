@@ -54,6 +54,8 @@ class SdkApi:
             self._default_headers["Authorization"] = f"Bearer {self.session.tokenValue}"
         elif self.session.type == session_constants.AUTH_TYPE_TOKEN:
             self._default_headers["Cookie"] = f"{self.session.tokenType}={self.session.tokenValue}"
+        elif self.session.type == session_constants.AUTH_TYPE_CERT_PEM:
+            self.__session_arguments["cert"] = self.session.cert
 
     def __enter__(self):
         return self
