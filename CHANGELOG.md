@@ -10,7 +10,7 @@ All notable changes to the Zowe Client Python SDK will be documented in this fil
 
 - Updated all functions descriptions to be consitent [#279] (https://github.com/zowe/zowe-client-python-sdk/issues/279)
 
-- Support for turning off loggers [#278] (https://github.com/zowe/zowe-client-python-sdk/issues/278)
+- *Breaking*: Added Support for turning off loggers. Replaced `setLoggerLevel` in Logger class with `setAllLoggerLevel` [#278] (https://github.com/zowe/zowe-client-python-sdk/issues/278)
 
 ### Bug Fixes
 
