@@ -14,15 +14,16 @@ from .constants import zos_file_constants
 
 
 class InvalidPermsOption(Exception):
-    """Class used to represent an invalid permission value."""
+    """
+    Class used to represent an invalid permission value.
+
+    Parameters
+    ----------
+    value: int
+        The value of the permission option
+    """
 
     def __init__(self, value: int):
-        """
-        Parameters
-        ----------
-        value
-            The value of the permission option
-        """
         super().__init__("Invalid zos-files create command 'perms' option: {}".format(value))
 
 

@@ -913,9 +913,9 @@ class Datasets(SdkApi):
         from_filename: str,
         to_dataset_name: str,
         to_member_name: Optional[str] = None,
-        type=FileType.TEXT,
-        replace=False,
-    ):
+        type: str = FileType.TEXT,
+        replace: bool = False,
+    ) -> dict:
         """
         Copy a USS file to dataset.
 
@@ -927,14 +927,14 @@ class Datasets(SdkApi):
             Name of the dataset to copy to.
         to_member_name: Optional[str]
             Name of the member to copy to.
-        type: FileType, optional
+        type: str
             Type of the file to copy from. Default is FileType.TEXT.
-        replace: bool, optional
+        replace: bool
             If true, members in the target dataset are replaced.
 
         Returns
         -------
-        json
+        dict
             A JSON containing the result of the operation.
         """
         data = {
