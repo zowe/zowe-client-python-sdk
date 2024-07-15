@@ -12,4 +12,4 @@ quiet = true
 
 [tool.pydocstyle]
 convention = "numpy"
-ignore = D107
+add-ignore = 'D107'
