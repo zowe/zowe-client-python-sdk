@@ -15,8 +15,7 @@ maturin
 mccabe==0.7.0
 nose2==0.10.0
 pycodestyle==2.9.0
-pydocstyle==6.3.0
-pydoclint==0.5.3
+pydocstyle==0.5.3
 pyfakefs
 pyflakes==2.5.0
 pylama==7.7.1
@@ -30,7 +29,7 @@ typing-extensions==4.0.1
 Unidecode==1.2.0
 urllib3==1.26.19
 wheel
-zipp==3.19.1
+zipp==3.4.0
 -e ./src/core[secrets]
 -e ./src/secrets
 -e ./src/zos_console
