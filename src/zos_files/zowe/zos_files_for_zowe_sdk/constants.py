@@ -18,6 +18,8 @@ from enum import Enum
 
 
 class FileType(Enum):
+    """Class used to represent type of files."""
+
     BINARY = "binary"
     EXECUTABLE = "executable"
     TEXT = "text"
