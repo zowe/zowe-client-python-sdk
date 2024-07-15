@@ -263,7 +263,7 @@ class DatasetOption:
 
     @property
     def dataclass(self) -> Optional[str]:
-
+        """Get the data class."""
         return self.__dataclass
 
     @dataclass.setter
