@@ -12,7 +12,7 @@ Copyright Contributors to the Zowe Project.
 
 import os
 from dataclasses import dataclass
-from typing import Optional
+from typing import Dict, List, Optional
 
 from zowe.core_for_zowe_sdk import SdkApi
 from zowe.core_for_zowe_sdk.exceptions import FileNotFound
@@ -312,7 +312,7 @@ class Datasets(SdkApi):
         super().__init__(connection, "/zosmf/restfiles/", logger_name=__name__)
         self._default_headers["Accept-Encoding"] = "gzip"
 
-    def list(self, name_pattern: str, return_attributes: bool = False) -> list[dict]:
+    def list(self, name_pattern: str, return_attributes: bool = False) -> List[Dict]:
         """
         Retrieve a list of datasets based on a given pattern.
 
@@ -325,7 +325,7 @@ class Datasets(SdkApi):
 
         Returns
         -------
-        list[dict]
+        List[Dict]
             A JSON with a list of dataset names (and attributes if specified) matching the given pattern.
         """
         custom_args = self._create_custom_request_arguments()
