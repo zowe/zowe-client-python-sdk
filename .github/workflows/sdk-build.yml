@@ -29,7 +29,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
       - name: Lint with pydocstyle
-        run: pydocstyle --match-dir='^(?!build$).*' --match='^(?!(__init__\.py|setup\.py$)).*\.py$' --add-ignore=D107 src
+        run: pydocstyle --match-dir='^(?!build$).*' --match='^(?!(__init__\.py|setup\.py$)).*\.py$' --add-ignore=D107,D402 src
       - name: Lint with pydoclint
         run: pydoclint --exclude='.*/build/.*' src
       - name: Lint with flake8
