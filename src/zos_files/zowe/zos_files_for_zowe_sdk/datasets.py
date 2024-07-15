@@ -99,7 +99,7 @@ class DatasetOption:
 
     @property
     def volser(self) -> Optional[str]:
-        """Gets the volume serial number."""
+        """Get the volume serial number."""
         return self.__volser
 
     @volser.setter
@@ -109,7 +109,7 @@ class DatasetOption:
 
     @property
     def unit(self) -> Optional[str]:
-        """Gets the type of device."""
+        """Get the type of device."""
         return self.__unit
 
     @unit.setter
@@ -119,7 +119,7 @@ class DatasetOption:
 
     @property
     def dsorg(self) -> Optional[str]:
-        """Gets the organization of the dataset."""
+        """Get the organization of the dataset."""
         return self.__dsorg
 
     @dsorg.setter
@@ -131,7 +131,7 @@ class DatasetOption:
 
     @property
     def alcunit(self) -> Optional[str]:
-        """Gets the unit of space allocation."""
+        """Get the unit of space allocation."""
         return self.__alcunit
 
     @alcunit.setter
@@ -149,7 +149,7 @@ class DatasetOption:
 
     @property
     def primary(self) -> Optional[int]:
-        """Gets the primary space allocation."""
+        """Get the primary space allocation."""
         return self.__primary
 
     @primary.setter
@@ -162,7 +162,7 @@ class DatasetOption:
 
     @property
     def secondary(self) -> Optional[int]:
-        """Gets the secondary space allocation."""
+        """Get the secondary space allocation."""
         return self.__secondary
 
     @secondary.setter
@@ -176,7 +176,7 @@ class DatasetOption:
 
     @property
     def dirblk(self) -> Optional[int]:
-        """Gets the number of directory blocks."""
+        """Get the number of directory blocks."""
         return self.__dirblk
 
     @dirblk.setter
@@ -186,7 +186,7 @@ class DatasetOption:
 
     @property
     def avgblk(self) -> Optional[int]:
-        """Gets the average block size."""
+        """Get the average block size."""
         return self.__avgblk
 
     @avgblk.setter
@@ -196,7 +196,7 @@ class DatasetOption:
 
     @property
     def recfm(self) -> Optional[str]:
-        """Gets the record format."""
+        """Get the record format."""
         return self.__recfm
 
     @recfm.setter
@@ -216,7 +216,7 @@ class DatasetOption:
 
     @property
     def blksize(self) -> Optional[int]:
-        """Gets the physical block size."""
+        """Get the physical block size."""
         return self.__blksize
 
     @blksize.setter
@@ -233,7 +233,7 @@ class DatasetOption:
 
     @property
     def lrecl(self) -> Optional[int]:
-        """Gets the length of logical records."""
+        """Get the length of logical records."""
         return self.__lrecl
 
     @lrecl.setter
@@ -243,7 +243,7 @@ class DatasetOption:
 
     @property
     def storclass(self) -> Optional[str]:
-        """Gets the storage class."""
+        """Get the storage class."""
         return self.__storclass
 
     @storclass.setter
@@ -253,7 +253,7 @@ class DatasetOption:
 
     @property
     def mgmtclass(self) -> Optional[str]:
-        """Gets the management class."""
+        """Get the management class."""
         return self.__mgmtclass
 
     @mgmtclass.setter
@@ -273,7 +273,7 @@ class DatasetOption:
 
     @property
     def dsntype(self) -> Optional[str]:
-        """Gets the type of dataset."""
+        """Get the type of dataset."""
         return self.__dsntype
 
     @dsntype.setter
@@ -283,7 +283,7 @@ class DatasetOption:
 
     @property
     def like(self) -> Optional[str]:
-        """Gets the dataset name to copy attributes from."""
+        """Get the dataset name to copy attributes from."""
         return self.__like
 
     @like.setter
