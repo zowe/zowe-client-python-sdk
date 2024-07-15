@@ -10,7 +10,7 @@ SPDX-License-Identifier: EPL-2.0
 Copyright Contributors to the Zowe Project.
 """
 
-from typing import Optional
+from typing import Union
 
 import requests
 import urllib3
@@ -134,7 +134,7 @@ class RequestHandler:
             )
             raise RequestFailed(self.__response.status_code, output_str)
 
-    def __normalize_response(self) -> str | bytes | dict:
+    def __normalize_response(self) -> Union[str, bytes, dict]:
         """Normalize the response object to a JSON format.
 
         Returns
