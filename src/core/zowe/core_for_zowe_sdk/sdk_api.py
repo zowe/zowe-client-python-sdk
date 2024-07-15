@@ -70,8 +70,8 @@ class SdkApi:
         """Return the SdkApi instance."""
         return self
 
-    def __exit__(self):
-        """Delete the request_handler before exiting."""
+    def __exit__(self, exc_type, exception, traceback):
+        """Delete the request handler before exit."""
         del self.request_handler
 
     def _create_custom_request_arguments(self) -> dict:
