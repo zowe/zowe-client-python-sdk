@@ -135,11 +135,12 @@ class RequestHandler:
             raise RequestFailed(self.__response.status_code, output_str)
 
     def __normalize_response(self) -> Union[str, bytes, dict]:
-        """Normalize the response object to a JSON format.
+        """
+        Normalize the response object to a JSON format.
 
         Returns
         -------
-        str | bytes | dict
+        Union[str, bytes, dict]
             Response object at the format based on Content-Type header:
             - `bytes` when the response is binary data
             - `str` when the response is plain text
