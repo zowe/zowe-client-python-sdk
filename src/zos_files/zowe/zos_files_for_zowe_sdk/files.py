@@ -78,8 +78,8 @@ class Files(SdkApi):
 
     def copy_uss_to_data_set(
         self, from_filename, to_dataset_name, to_member_name=None, type=FileType.TEXT, replace=False
-    ):  # noqa: D402
-        """Use ds.copy_uss_to_data_set instead of this deprecated function."""
+    ):
+        """Use ds.copy_uss_to_data_set() instead of this deprecated function."""
         return self.ds.copy_uss_to_data_set(from_filename, to_dataset_name, to_member_name, type, replace)
 
     def copy_data_set_or_member(
