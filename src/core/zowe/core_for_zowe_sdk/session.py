@@ -76,8 +76,8 @@ class Session:
             if props.get("certKeyFile"):
                 self.session.cert = (props.get("certFile"), props.get("certKeyFile"))
             else:
-                self.__logger.error("A cert key must be provided")
-                raise Exception("A cert key must be provided")
+                self.__logger.error("A certificate key file must be provided when certFile is specified")
+                raise Exception("A certificate key file must be provided when certFile is specified")
             self.session.rejectUnauthorized = props.get("rejectUnauthorized")
             self.session.type = session_constants.AUTH_TYPE_CERT_PEM
         else:
@@ -89,7 +89,7 @@ class Session:
         self.session.basePath = props.get("basePath")
         self.session.port = props.get("port", self.session.port)
         self.session.protocol = props.get("protocol", self.session.protocol)
-        self.session.rejectUnauthorized = False if props.get("rejectUnauthorized") == "False" else True
+        self.session.rejectUnauthorized = False if props.get("rejectUnauthorized") == False else True
 
     def load(self) -> ISession:
         """
