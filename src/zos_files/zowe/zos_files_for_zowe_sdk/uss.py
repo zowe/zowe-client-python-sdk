@@ -164,7 +164,7 @@ class USSFiles(SdkApi):
         Returns
         -------
         dict
-            A JSON response of results of the operaiotn
+            A JSON response with results of the operation
         """
         custom_args = self._create_custom_request_arguments()
         custom_args["url"] = "{}fs/{}".format(self._request_endpoint, self._encode_uri_component(file_path.lstrip("/")))
