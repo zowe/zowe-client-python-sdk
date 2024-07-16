@@ -50,7 +50,7 @@ class TestSdkApiClass(TestCase):
             sdk_api = SdkApi(props, self.default_url)
         except Exception:
             mock_logger_error.assert_called()
-            self.assertIn("cert key", mock_logger_error.call_args[0][0])
+            self.assertIn("certificate key", mock_logger_error.call_args[0][0])
 
     def test_should_handle_none_auth(self):
         props = {"host": "test"}

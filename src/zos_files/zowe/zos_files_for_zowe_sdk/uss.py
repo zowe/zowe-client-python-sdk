@@ -24,8 +24,6 @@ class USSFiles(SdkApi):
     Class used to represent the base z/OSMF USSFiles API
     which includes all operations related to USS files.
 
-    ...
-
     Attributes
     ----------
     connection
@@ -49,6 +47,11 @@ class USSFiles(SdkApi):
     def list(self, path):
         """Retrieve a list of USS files based on a given pattern.
 
+        Parameters
+        -------
+        path: str
+            Path to retrieve the list
+
         Returns
         -------
         json
@@ -66,15 +69,16 @@ class USSFiles(SdkApi):
 
         Parameters
         ----------
-        filepath of the file to be deleted
+        filepath_name: str
+            filepath of the file to be deleted
 
-        recursive
+        recursive: bool
             If specified as True, all the files and sub-directories will be deleted.
 
         Returns
         -------
-        204
-            HTTP Response for No Content
+        json
+            A JSON containing the operation results
         """
         custom_args = self._create_custom_request_arguments()
         custom_args["url"] = "{}fs/{}".format(self._request_endpoint, filepath_name.lstrip("/"))
@@ -87,12 +91,20 @@ class USSFiles(SdkApi):
     def create(self, file_path, type, mode=None):
         """
         Add a file or directory
+
         Parameters
         ----------
-        file_path of the file to add
-        type = "file" or "dir"
-        mode Ex:- rwxr-xr-x
+        file_path: str
+            file_path of the file to add
+        type: str
+            "file" or "dir"
+        mode: str
+            Ex:- rwxr-xr-x
 
+        Returns
+        -------
+        json
+            A JSON containing the operation results
         """
 
         data = {"type": type, "mode": mode}
@@ -105,6 +117,16 @@ class USSFiles(SdkApi):
 
     def write(self, filepath_name, data, encoding=_ZOWE_FILES_DEFAULT_ENCODING):
         """Write content to an existing UNIX file.
+
+        Parameters
+        ----------
+        filepath_name: str
+            Path of the file
+        data: str
+            Contents to be written
+        encoding: str
+            Specifies the encoding schema
+
         Returns
         -------
         json
@@ -120,6 +142,11 @@ class USSFiles(SdkApi):
     def get_content(self, filepath_name):
         """Retrieve the content of a filename. The complete path must be specified.
 
+        Parameters
+        ----------
+        filepath_name: str
+            Path of the file
+
         Returns
         -------
         json
@@ -132,6 +159,13 @@ class USSFiles(SdkApi):
 
     def get_content_streamed(self, file_path, binary=False):
         """Retrieve the contents of a given USS file streamed.
+
+        Parameters
+        ----------
+        file_path: str
+            Path of the file
+        binary: bool
+            Specifies whether the contents are binary
 
         Returns
         -------
@@ -146,14 +180,34 @@ class USSFiles(SdkApi):
         return response
 
     def download(self, file_path, output_file, binary=False):
-        """Retrieve the contents of a USS file and saves it to a local file."""
+        """Retrieve the contents of a USS file and saves it to a local file.
+
+        Parameters
+        -------
+        file_path: str
+            Path of the file to be downloaded
+        output_file: str
+            Name of the file to be saved locally
+        binary: bool
+            Specifies whether the contents are binary
+        """
         response = self.get_content_streamed(file_path, binary)
         with open(output_file, "wb" if binary else "w", encoding="utf-8") as f:
             for chunk in response.iter_content(chunk_size=4096, decode_unicode=not binary):
                 f.write(chunk)
 
     def upload(self, input_file, filepath_name, encoding=_ZOWE_FILES_DEFAULT_ENCODING):
-        """Upload contents of a given file and uploads it to UNIX file"""
+        """Upload contents of a given file and uploads it to UNIX file
+
+        Parameters
+        -------
+        input_file: str
+            Name of the file to be uploaded
+        filepath_name: str
+            Path of the file where it will be created
+        encoding: str
+            Specifies encoding schema
+        """
         if os.path.isfile(input_file):
             with open(input_file, "r", encoding="utf-8") as in_file:
                 response_json = self.write(filepath_name, in_file.read())

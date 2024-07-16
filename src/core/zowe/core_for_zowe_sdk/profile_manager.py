@@ -126,7 +126,6 @@ class ProfileManager:
         Returns
         -------
         Dictionary
-
             Containing profile properties from env variables (prop: value)
         """
 
@@ -238,10 +237,10 @@ class ProfileManager:
         suppress_config_file_warnings: Optional[bool] = True,
     ) -> dict:
         """Load connection details from a team config profile.
+
         Returns
         -------
         dictionary
-
             Object containing connection details
 
         We will load properties from config files in the following order, from
@@ -355,12 +354,15 @@ class ProfileManager:
         """
         Get the highest priority layer (configuration file) based on the given profile name
 
-        Parameters:
-            profile_name (str): The name of the profile to look for in the layers.
+        Parameters
+        -------
+        profile_name: str
+            The name of the profile to look for in the layers.
 
-        Returns:
-            Optional[ConfigFile]: The highest priority layer (configuration file) that contains the specified profile,
-                                or None if the profile is not found in any layer.
+        Returns
+        -------
+        Optional[ConfigFile]
+            The highest priority layer (configuration file) that contains the specified profile, or None if the profile is not found in any layer.
         """
         highest_layer = None
         longest_match = ""
@@ -402,10 +404,14 @@ class ProfileManager:
         """
         Set a property in the profile, storing it securely if necessary.
 
-        Parameters:
-            json_path (str): The JSON path of the property to set.
-            value (str): The value to be set for the property.
-            secure (bool): If True, the property will be stored securely. Default is None.
+        Parameters
+        -------
+        json_path: str
+            The JSON path of the property to set.
+        value: str
+            The value to be set for the property.
+        secure: bool
+            If True, the property will be stored securely. Default is None.
         """
 
         # highest priority layer for the given profile name
@@ -419,9 +425,12 @@ class ProfileManager:
         """
         Set a profile in the highest priority layer (configuration file) based on the given profile name
 
-        Parameters:
-            profile_path (str): TThe path of the profile to be set. eg: profiles.zosmf
-            profile_data (dict): The data of the profile to set.
+        Parameters
+        -------
+        profile_path: str
+            The path of the profile to be set. eg: profiles.zosmf
+        profile_data: dict
+            The data of the profile to set.
         """
         highest_priority_layer = self.get_highest_priority_layer(profile_path)
 

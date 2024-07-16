@@ -19,8 +19,6 @@ class Tso(SdkApi):
     """
     Class used to represent the base z/OSMF TSO API.
 
-    ...
-
     Attributes
     ----------
     connection

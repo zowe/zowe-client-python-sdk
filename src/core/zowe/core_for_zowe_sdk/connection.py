@@ -30,9 +30,9 @@ class ApiConnection:
     """
 
     def __init__(self, host_url, user, password, ssl_verification=True):
-        __logger = Log.registerLogger(__name__)
-
         """Construct an ApiConnection object."""
+
+        __logger = Log.registerLogger(__name__)
         if not host_url or not user or not password:
             __logger.error("Missing connection argument")
             raise MissingConnectionArgs()

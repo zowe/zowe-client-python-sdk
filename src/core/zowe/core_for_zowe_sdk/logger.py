@@ -3,7 +3,13 @@ import os
 
 
 class Log:
-    """root logger setup and a function to customize logger level"""
+    """Class used to represent a logger
+
+    Attributes
+    -------
+    loggers: set
+        The set of all loggers
+    """
 
     dirname = os.path.join(os.path.expanduser("~"), ".zowe/logs")
 
@@ -20,11 +26,72 @@ class Log:
 
     @staticmethod
     def registerLogger(name: str):
+        """
+        Create and register a logger
+
+        Parameters
+        ----------
+        name: str
+            name for the logger
+
+        Returns
+        -------
+        Logger
+            A Logger object named after the file where it is created
+        """
         logger = logging.getLogger(name)
         Log.loggers.add(logger)
         return logger
 
     @staticmethod
-    def setLoggerLevel(level: int):
+    def setAllLoggerLevel(level: int):
+        """
+        Set display level for all loggers
+
+        Parameters
+        ----------
+        level: int
+            The intended logger level
+        """
         for logger in Log.loggers:
             logger.setLevel(level)
+
+    @staticmethod
+    def close(logger):
+        """
+        Disable a logger
+
+        Parameters
+        ----------
+        logger: Logger
+            The logger to be turned off
+        """
+        logger.disabled = True
+
+    @staticmethod
+    def open(logger):
+        """
+        Enable a logger
+
+        Parameters
+        ----------
+        logger: Logger
+            The logger to be turned on
+        """
+        logger.disabled = False
+
+    @staticmethod
+    def closeAll():
+        """
+        Disable all loggers
+        """
+        for logger in Log.loggers:
+            logger.disabled = True
+
+    @staticmethod
+    def openAll():
+        """
+        Enable all loggers
+        """
+        for logger in Log.loggers:
+            logger.disabled = False
