@@ -339,7 +339,7 @@ class ProfileManager:
         profile_name : Optional[str]
             The name of the profile to load. If None, profiles are loaded based only on profile type.
         profile_type : Optional[str]
-            The type of the profile to load, e.g., 'user', 'admin'. If None, profiles are loaded based only on name.
+            The type of the profile to load, e.g., 'zosmf', 'zftp'. If None, profiles are loaded based only on name.
         check_missing_props : bool
             Flag to indicate whether to check for missing secure properties.
         validate_schema : Optional[bool]
