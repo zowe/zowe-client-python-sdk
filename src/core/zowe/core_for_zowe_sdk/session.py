@@ -105,12 +105,12 @@ class Session:
     @property
     def host_url(self) -> str:
         """
-        Return the fommatted host url.
+        Return the formatted host URL.
 
         Returns
         -------
         str
-            the fommatted host url
+            the formatted host URL
         """
         basePath = self.session.basePath or ""
         return f"{self.session.protocol}://{self.session.host}:{self.session.port}{basePath}"
