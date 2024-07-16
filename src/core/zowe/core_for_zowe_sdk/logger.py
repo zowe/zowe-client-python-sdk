@@ -15,13 +15,6 @@ class Log:
 
     os.makedirs(dirname, exist_ok=True)
 
-    # logging.basicConfig(
-    #     filename=os.path.join(dirname, "python_sdk_logs.log"),
-    #     level=logging.INFO,
-    #     format="[%(asctime)s] [%(levelname)s] [%(name)s] - %(message)s",
-    #     datefmt="%m/%d/%Y %I:%M:%S %p",
-    # )
-
     loggers = set()
 
     @staticmethod
