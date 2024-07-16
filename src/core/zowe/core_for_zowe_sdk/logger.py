@@ -15,12 +15,12 @@ class Log:
 
     os.makedirs(dirname, exist_ok=True)
 
-    logging.basicConfig(
-        filename=os.path.join(dirname, "python_sdk_logs.log"),
-        level=logging.INFO,
-        format="[%(asctime)s] [%(levelname)s] [%(name)s] - %(message)s",
-        datefmt="%m/%d/%Y %I:%M:%S %p",
-    )
+    # logging.basicConfig(
+    #     filename=os.path.join(dirname, "python_sdk_logs.log"),
+    #     level=logging.INFO,
+    #     format="[%(asctime)s] [%(levelname)s] [%(name)s] - %(message)s",
+    #     datefmt="%m/%d/%Y %I:%M:%S %p",
+    # )
 
     loggers = set()
 
@@ -40,6 +40,11 @@ class Log:
             A Logger object named after the file where it is created
         """
         logger = logging.getLogger(name)
+        file_handler = logging.FileHandler(os.path.join(Log.dirname, "python_sdk_logs.log"))
+        file_handler.setLevel(logging.INFO)
+        formatter = logging.Formatter("[%(asctime)s] [%(levelname)s] [%(name)s] - %(message)s", "%m/%d/%Y %I:%M:%S %p")
+        file_handler.setFormatter(formatter)
+        logger.addHandler(file_handler)
         Log.loggers.add(logger)
         return logger
 
