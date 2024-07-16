@@ -193,7 +193,7 @@ class USSFiles(SdkApi):
 
     def upload(self, input_file: str, filepath_name: str, encoding: str = _ZOWE_FILES_DEFAULT_ENCODING):
         """
-        Upload contents of a given file and uploads it to UNIX file.
+        Upload contents of a given file and saves it to a file at the given USS path.
 
         Parameters
         ----------

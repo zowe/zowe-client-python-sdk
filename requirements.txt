@@ -30,7 +30,7 @@ typing-extensions==4.0.1
 Unidecode==1.2.0
 urllib3==1.26.19
 wheel
-zipp==3.4.0
+zipp==3.19.1
 -e ./src/core[secrets]
 -e ./src/secrets
 -e ./src/zos_console
