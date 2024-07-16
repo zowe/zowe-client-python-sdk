@@ -53,6 +53,8 @@ class Log:
         """
         for logger in Log.loggers:
             logger.setLevel(level)
+            for handler in logger.handlers:
+                handler.setLevel(level)
 
     @staticmethod
     def close(logger):
