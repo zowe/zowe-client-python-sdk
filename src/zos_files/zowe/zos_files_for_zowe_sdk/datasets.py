@@ -590,7 +590,7 @@ class Datasets(SdkApi):
         dataset_name: str
             The name of the dataset
         stream: bool
-            Specifies whether the request is streaming
+            Specifies whether the response is streamed. Default: False
 
         Returns
         -------
