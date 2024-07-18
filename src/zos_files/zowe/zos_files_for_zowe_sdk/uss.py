@@ -117,7 +117,7 @@ class USSFiles(SdkApi):
         data: str
             Contents to be written
         encoding: str
-            Specifies the encoding schema
+            Specifies the encoding name (e.g. IBM-1047)
 
         Returns
         -------
