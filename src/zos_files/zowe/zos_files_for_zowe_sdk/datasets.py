@@ -641,7 +641,7 @@ class Datasets(SdkApi):
         data: str
             Content to be written
         encoding: str
-            Specifies encoding schema
+            Specifies encoding name (e.g. IBM-1047)
 
         Returns
         -------
