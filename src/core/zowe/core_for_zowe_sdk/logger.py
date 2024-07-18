@@ -55,6 +55,7 @@ class Log:
             logger.addHandler(Log.console_handler)
         if Log.file_output:
             logger.addHandler(Log.file_handler)
+        logger.propagate = False
         Log.loggers.add(logger)
         return logger
 
