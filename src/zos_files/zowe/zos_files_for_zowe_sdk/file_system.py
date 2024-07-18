@@ -135,7 +135,7 @@ class FileSystems(SdkApi):
         options: dict
             A JSON of request body options
         encoding: str
-            Specifies optional encoding schema
+            Specifies optional encoding name (e.g. IBM-1047)
 
         Returns
         -------
