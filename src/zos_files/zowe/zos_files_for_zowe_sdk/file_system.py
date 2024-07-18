@@ -160,9 +160,9 @@ class FileSystems(SdkApi):
         Parameters
         ----------
         file_path_name: Optional[str]
-            the UNIX directory that contains the files and directories to be listed.
+            USS directory that contains the files and directories to be listed
         file_system_name: Optional[str]
-            the name for the file system to be listed
+            Name of the file system to be listed
 
         Returns
         -------
