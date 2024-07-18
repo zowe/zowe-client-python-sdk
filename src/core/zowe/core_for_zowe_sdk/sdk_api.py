@@ -37,7 +37,7 @@ class SdkApi:
         session = Session(profile)
         self.session: ISession = session.load()
 
-        self.logger = Log.registerLogger(logger_name)
+        self.logger = Log.register_logger(logger_name)
 
         self._default_service_url = default_url
         self._default_headers = {
@@ -52,7 +52,7 @@ class SdkApi:
             "headers": self._default_headers,
         }
         self.__session_arguments = {
-            "verify": self.session.rejectUnauthorized,
+            "verify": self.session.reject_unauthorized,
             "timeout": 30,
         }
         self.request_handler = RequestHandler(self.__session_arguments, logger_name=logger_name)
@@ -60,9 +60,9 @@ class SdkApi:
         if self.session.type == session_constants.AUTH_TYPE_BASIC:
             self._request_arguments["auth"] = (self.session.user, self.session.password)
         elif self.session.type == session_constants.AUTH_TYPE_BEARER:
-            self._default_headers["Authorization"] = f"Bearer {self.session.tokenValue}"
+            self._default_headers["Authorization"] = f"Bearer {self.session.token_value}"
         elif self.session.type == session_constants.AUTH_TYPE_TOKEN:
-            self._default_headers["Cookie"] = f"{self.session.tokenType}={self.session.tokenValue}"
+            self._default_headers["Cookie"] = f"{self.session.token_type}={self.session.token_value}"
         elif self.session.type == session_constants.AUTH_TYPE_CERT_PEM:
             self.__session_arguments["cert"] = self.session.cert
 

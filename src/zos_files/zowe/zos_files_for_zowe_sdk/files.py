@@ -158,11 +158,11 @@ class Files(SdkApi):
         """Use ds.delete() instead of this deprecated function."""
         return self.ds.delete(dataset_name, volume, member_name)
 
-    def create_zFS_file_system(self, file_system_name, options={}):
+    def create_zfs_file_system(self, file_system_name, options={}):
         """Use fs.create() instead of this deprecated function."""
         return self.fs.create(file_system_name, options)
 
-    def delete_zFS_file_system(self, file_system_name):
+    def delete_zfs_file_system(self, file_system_name):
         """Use fs.delete() instead of this deprecated function."""
         return self.fs.delete(file_system_name)
 

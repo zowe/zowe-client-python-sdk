@@ -67,7 +67,7 @@ class ProfileManager:
         self.__project_config = ConfigFile(type=TEAM_CONFIG, name=appname)
         self.__project_user_config = ConfigFile(type=USER_CONFIG, name=appname)
 
-        self.__logger = Log.registerLogger(__name__)
+        self.__logger = Log.register_logger(__name__)
 
         self.__global_config = ConfigFile(type=TEAM_CONFIG, name=GLOBAL_CONFIG_NAME)
         try:
@@ -261,7 +261,7 @@ class ProfileManager:
         FormatError
             If validating a format in the configuration fails.
         """
-        logger = Log.registerLogger(__name__)
+        logger = Log.register_logger(__name__)
 
         cfg_profile = Profile()
         try:
@@ -405,13 +405,13 @@ class ProfileManager:
                 cfg_schema = cfg_layer.schema_property
                 cfg_schema_dir = cfg_layer._location
 
-        usrProject = self.__project_user_config.profiles or {}
+        usr_project = self.__project_user_config.profiles or {}
         project = self.__project_config.profiles or {}
-        project_temp = always_merger.merge(deepcopy(project), usrProject)
+        project_temp = always_merger.merge(deepcopy(project), usr_project)
 
-        usrGlobal = self.__global_user_config.profiles or {}
+        usr_global = self.__global_user_config.profiles or {}
         global_ = self.__global_config.profiles or {}
-        global_temp = always_merger.merge(deepcopy(global_), usrGlobal)
+        global_temp = always_merger.merge(deepcopy(global_), usr_global)
 
         profiles_merged = project_temp
         for name, value in global_temp.items():

@@ -75,7 +75,7 @@ class ConfigFile:
     jsonc: Optional[dict] = None
     _missing_secure_props: list = field(default_factory=list)
 
-    __logger = Log.registerLogger(__name__)
+    __logger = Log.register_logger(__name__)
 
     @property
     def filename(self) -> str:

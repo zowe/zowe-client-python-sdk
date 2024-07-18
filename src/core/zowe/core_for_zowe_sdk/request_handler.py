@@ -36,7 +36,7 @@ class RequestHandler:
         self.session_arguments = session_arguments
         self.__valid_methods = ["GET", "POST", "PUT", "DELETE"]
         self.__handle_ssl_warnings()
-        self.__logger = Log.registerLogger(logger_name)
+        self.__logger = Log.register_logger(logger_name)
 
     def __handle_ssl_warnings(self):
         """Turn off warnings if the SSL verification argument if off."""
@@ -146,10 +146,10 @@ class RequestHandler:
             - `str` when the response is plain text
             - `dict` when the response is json
         """
-        contentType = self.__response.headers.get("Content-Type")
-        if contentType == "application/octet-stream":
+        content_type = self.__response.headers.get("Content-Type")
+        if content_type == "application/octet-stream":
             return self.__response.content
-        elif contentType and contentType.startswith("application/json"):
+        elif content_type and content_type.startswith("application/json"):
             return "" if self.__response.text == "" else self.__response.json()
         else:
             return self.__response.text

@@ -32,6 +32,8 @@ jobs:
         run: pydocstyle --match-dir='^(?!build$).*' --match='^(?!(__init__\.py|setup\.py$)).*\.py$' src
       - name: Lint with pydoclint
         run: pydoclint --exclude='.*/build/.*' src
+      - name: Lint with pylint
+        run: pylint src --disable=all --enable=C0103 --ignore=build
       - name: Lint with flake8
         run: |
           # stop the build if there are Python syntax errors or undefined names

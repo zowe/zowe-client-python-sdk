@@ -33,7 +33,7 @@ class Log:
     loggers: set = set()
 
     @staticmethod
-    def registerLogger(name: str) -> logging.Logger:
+    def register_logger(name: str) -> logging.Logger:
         """
         Create and register a logger.
 
@@ -52,7 +52,7 @@ class Log:
         return logger
 
     @staticmethod
-    def setAllLoggerLevel(level: int):
+    def set_all_logger_level(level: int):
         """
         Set display level for all loggers.
 
@@ -89,13 +89,13 @@ class Log:
         logger.disabled = False
 
     @staticmethod
-    def closeAll():
+    def close_all():
         """Disable all loggers."""
         for logger in Log.loggers:
             logger.disabled = True
 
     @staticmethod
-    def openAll():
+    def open_all():
         """Enable all loggers."""
         for logger in Log.loggers:
             logger.disabled = False

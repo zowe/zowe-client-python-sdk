@@ -23,14 +23,14 @@ class ISession:
 
     host: str
     port: int = session_constants.DEFAULT_HTTPS_PORT
-    rejectUnauthorized: bool = True
+    reject_unauthorized: bool = True
     user: Optional[str] = None
     password: Optional[str] = None
     protocol: str = session_constants.HTTPS_PROTOCOL
-    basePath: Optional[str] = None
+    base_path: Optional[str] = None
     type: Optional[str] = None
-    tokenType: Optional[str] = None
-    tokenValue: Optional[str] = None
+    token_type: Optional[str] = None
+    token_value: Optional[str] = None
     cert: Optional[str] = None
 
 
@@ -51,7 +51,7 @@ class Session:
 
     def __init__(self, props: dict) -> None:
         # set host and port
-        self.__logger = Log.registerLogger(__name__)
+        self.__logger = Log.register_logger(__name__)
 
         if props.get("host") is not None:
             self.session: ISession = ISession(host=props.get("host"))
@@ -63,14 +63,14 @@ class Session:
         if props.get("user") is not None and props.get("password") is not None:
             self.session.user = props.get("user")
             self.session.password = props.get("password")
-            self.session.rejectUnauthorized = props.get("rejectUnauthorized")
+            self.session.reject_unauthorized = props.get("rejectUnauthorized")
             self.session.type = session_constants.AUTH_TYPE_BASIC
         elif props.get("tokenType") is not None and props.get("tokenValue") is not None:
-            self.session.tokenType = props.get("tokenType")
-            self.session.tokenValue = props.get("tokenValue")
+            self.session.token_type = props.get("tokenType")
+            self.session.token_value = props.get("tokenValue")
             self.session.type = session_constants.AUTH_TYPE_TOKEN
         elif props.get("tokenValue") is not None:
-            self.session.tokenValue = props.get("tokenValue")
+            self.session.token_value = props.get("tokenValue")
             self.session.type = session_constants.AUTH_TYPE_BEARER
         elif props.get("certFile") is not None:
             if props.get("certKeyFile"):
@@ -78,7 +78,7 @@ class Session:
             else:
                 self.__logger.error("A certificate key file must be provided when certFile is specified")
                 raise Exception("A certificate key file must be provided when certFile is specified")
-            self.session.rejectUnauthorized = props.get("rejectUnauthorized")
+            self.session.reject_unauthorized = props.get("rejectUnauthorized")
             self.session.type = session_constants.AUTH_TYPE_CERT_PEM
         else:
             self.session.type = session_constants.AUTH_TYPE_NONE
@@ -86,10 +86,10 @@ class Session:
             # raise Exception("An authentication method must be supplied")
 
         # set additional parameters
-        self.session.basePath = props.get("basePath")
+        self.session.base_path = props.get("basePath")
         self.session.port = props.get("port", self.session.port)
         self.session.protocol = props.get("protocol", self.session.protocol)
-        self.session.rejectUnauthorized = False if props.get("rejectUnauthorized") == False else True
+        self.session.reject_unauthorized = False if props.get("rejectUnauthorized") == False else True
 
     def load(self) -> ISession:
         """
@@ -112,5 +112,5 @@ class Session:
         str
             the formatted host URL
         """
-        basePath = self.session.basePath or ""
-        return f"{self.session.protocol}://{self.session.host}:{self.session.port}{basePath}"
+        base_path = self.session.base_path or ""
+        return f"{self.session.protocol}://{self.session.host}:{self.session.port}{base_path}"
