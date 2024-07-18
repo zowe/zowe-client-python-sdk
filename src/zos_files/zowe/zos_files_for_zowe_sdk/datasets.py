@@ -702,7 +702,7 @@ class Datasets(SdkApi):
         dataset_name: str
             Name of the dataset to be created
         encoding: str
-            Specifies the encoding schema
+            Specifies the encoding name (e.g. IBM-1047)
         binary: bool
             specifies whether the file is binary
 
