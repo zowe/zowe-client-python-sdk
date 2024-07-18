@@ -63,7 +63,7 @@ class USSFiles(SdkApi):
         Parameters
         ----------
         filepath_name: str
-            filepath of the file to be deleted
+            Path of the file to be deleted
         recursive: bool
             If specified as True, all the files and sub-directories will be deleted.
 
