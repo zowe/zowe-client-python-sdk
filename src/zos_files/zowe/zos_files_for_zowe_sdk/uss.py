@@ -87,11 +87,11 @@ class USSFiles(SdkApi):
         Parameters
         ----------
         file_path: str
-            file_path of the file to add
+            Path of the file to add
         type: str
-            "file" or "dir"
+            Specify either "file" or "dir"
         mode: Optional[str]
-            Ex:- rwxr-xr-x
+            Unix permission string (e.g. `rwxr-xr-x`)
 
         Returns
         -------
