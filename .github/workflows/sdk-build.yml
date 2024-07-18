@@ -34,6 +34,8 @@ jobs:
         run: pydoclint --exclude='.*/build/.*' src
       - name: Lint with pylint
         run: pylint src --disable=all --enable=C0103 --ignore=build
+      - name: Check and add license headers
+        run: python scripts/license_header.py src
       - name: Lint with flake8
         run: |
           # stop the build if there are Python syntax errors or undefined names

@@ -18,6 +18,8 @@ All notable changes to the Zowe Client Python SDK will be documented in this fil
 
 - *Breaking*: Revised function names in `Logger` class and `files` class into snake_case. Supported for function case enforcer [#315] (https://github.com/zowe/zowe-client-python-sdk/issues/315)
 
+- Added checks and auto addition for license headers on workflow. [#293] (https://github.com/zowe/zowe-client-python-sdk/issues/293)
+
 ### Bug Fixes
 
 - Fixed a bug on `create` in `Datasets` where the target dataset gets created with a different block size when `like` is specified [#295] (https://github.com/zowe/zowe-client-python-sdk/issues/295)
