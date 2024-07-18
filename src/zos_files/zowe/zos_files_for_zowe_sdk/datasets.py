@@ -352,15 +352,15 @@ class Datasets(SdkApi):
         Parameters
         ----------
         dataset_name: str
-            The name of the dataset
+            Name of the dataset
         member_pattern: Optional[str]
-            Filters members by name pattern.
+            Filters members by name pattern
         member_start: Optional[str]
-            The starting point for listing members.
+            The starting point for listing members
         limit: int
-            The maximum number of members returned.
+            The maximum number of members returned
         attributes: str
-            The member attributes to retrieve.
+            The member attributes to retrieve
 
         Returns
         -------
@@ -411,7 +411,7 @@ class Datasets(SdkApi):
         enq: Optional[str]
             Enqueue type for the dataset to copy from
         replace: bool
-            If true, members in the target data set are replaced.
+            If true, members in the target data set are replaced
 
         Raises
         ------
