@@ -41,9 +41,9 @@ class FileSystems(SdkApi):
         Parameters
         ----------
         file_system_name: str
-            the name for the file system
+            Name of the file system
         options: dict
-            specifies file system attributes
+            Specifies file system attributes
 
         Raises
         ------
