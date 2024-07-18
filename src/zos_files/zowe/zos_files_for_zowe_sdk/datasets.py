@@ -682,7 +682,7 @@ class Datasets(SdkApi):
         output_file : str
             Name of the local file to create
         with_prefixes : bool
-            If true, include a four big endian bytes record length prefix. The default is False
+            If true, include a four big endian bytes record length prefix. Default: False
         """
         response = self.get_binary_content(dataset_name, with_prefixes=with_prefixes, stream=True)
         with open(output_file, "wb") as f:
