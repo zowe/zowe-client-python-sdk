@@ -8,7 +8,7 @@ All notable changes to the Zowe Client Python SDK will be documented in this fil
 
 - Included support for `AUTH_TYPE_CERT_PEM` and `AUTH_TYPE_NONE` in `session` [#291] (https://github.com/zowe/zowe-client-python-sdk/issues/291) and [#296] (https://github.com/zowe/zowe-client-python-sdk/issues/296)
 
-- Updated all functions descriptions to be consitent [#279] (https://github.com/zowe/zowe-client-python-sdk/issues/279)
+- Updated doc strings for all functions to be consistent [#279] (https://github.com/zowe/zowe-client-python-sdk/issues/279)
 
 - *Breaking*: Added Support for turning off loggers. Replaced `setLoggerLevel` in Logger class with `setAllLoggerLevel` [#278] (https://github.com/zowe/zowe-client-python-sdk/issues/278)
 
