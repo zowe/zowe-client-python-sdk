@@ -2,8 +2,6 @@
 
 # Including necessary paths
 import logging
-import os
-from unittest import mock
 
 from pyfakefs.fake_filesystem_unittest import TestCase
 from zowe.core_for_zowe_sdk.logger import Log
@@ -57,7 +55,7 @@ class test_logger_setLoggerLevel(TestCase):
 
     def test_console_handler(self):
         Log.close_console_output()
-        test = Log.registerLogger("test")
+        test = Log.register_logger("test")
         self.assertEqual(test.handlers[0], Log.file_handler)
 
         Log.open_console_output()
@@ -68,7 +66,7 @@ class test_logger_setLoggerLevel(TestCase):
 
     def test_file_handler(self):
         Log.close_file_output()
-        test = Log.registerLogger("test")
+        test = Log.register_logger("test")
         self.assertEqual(test.handlers[0], Log.console_handler)
 
         Log.open_file_output()
