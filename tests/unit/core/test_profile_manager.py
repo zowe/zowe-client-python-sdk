@@ -48,6 +48,7 @@ class TestZosmfProfileManager(TestCase):
         self.original_nested_file_path = os.path.join(FIXTURES_PATH, "nested.zowe.config.json")
         self.original_nested_user_file_path = os.path.join(FIXTURES_PATH, "nested.zowe.config.user.json")
         self.original_schema_file_path = os.path.join(FIXTURES_PATH, "zowe.schema.json")
+        self.fs.create_dir(os.path.join(os.path.expanduser("~"), ".zowe/logs"))
 
         loader = importlib.util.find_spec("jsonschema")
         module_path = loader.origin
