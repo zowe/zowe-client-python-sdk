@@ -10,10 +10,11 @@ import os
 
 
 class Log:
-    """Class used to represent a logger
+    """
+    Class used to represent a logger.
 
     Attributes
-    -------
+    ----------
     loggers: set
         The set of all loggers
     dirname: str
@@ -39,17 +40,6 @@ class Log:
 
     file_output: bool = True
     console_output: bool = True
-
-
-class Log:
-    """
-    Class used to represent a logger.
-
-    Attributes
-    ----------
-    loggers: set
-        The set of all loggers
-    """
 
     loggers: set = set()
 
