@@ -2,6 +2,16 @@
 
 All notable changes to the Zowe Client Python SDK will be documented in this file.
 
+## Recent Changes
+
+### Enhancements
+
+- Supported for doc string enforcer [#309] (https://github.com/zowe/zowe-client-python-sdk/issues/309)
+
+- Add type annotations for all methods [#280] (https://github.com/zowe/zowe-client-python-sdk/issues/280)
+
+### Bug Fixes
+
 ## `1.0.0-dev18`
 
 ### Enhancements
@@ -11,10 +21,6 @@ All notable changes to the Zowe Client Python SDK will be documented in this fil
 - Updated doc strings for all functions to be consistent [#279] (https://github.com/zowe/zowe-client-python-sdk/issues/279)
 
 - *Breaking*: Added Support for turning off loggers. Replaced `setLoggerLevel` in Logger class with `setAllLoggerLevel` [#278] (https://github.com/zowe/zowe-client-python-sdk/issues/278)
-
-- Supported for doc string enforcer [#309] (https://github.com/zowe/zowe-client-python-sdk/issues/309)
-
-- Add type annotations for all methods [#280] (https://github.com/zowe/zowe-client-python-sdk/issues/280)
 
 ### Bug Fixes
 
