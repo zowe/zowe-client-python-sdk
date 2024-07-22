@@ -16,8 +16,14 @@ import warnings
 from copy import deepcopy
 from typing import Optional
 
-import jsonschema
 from deepmerge import always_merger
+from jsonschema.exceptions import (
+    FormatError,
+    SchemaError,
+    UndefinedTypeCheck,
+    UnknownType,
+    ValidationError,
+)
 
 from .config_file import ConfigFile, Profile
 from .credential_manager import CredentialManager
@@ -268,25 +274,25 @@ class ProfileManager:
             cfg_profile = cfg.get_profile(
                 profile_name=profile_name, profile_type=profile_type, validate_schema=validate_schema
             )
-        except jsonschema.exceptions.ValidationError as exc:
+        except ValidationError as exc:
             logger.error(f"Instance was invalid under the provided $schema property, {exc}")
-            raise jsonschema.exceptions.ValidationError(
-                f"Instance was invalid under the provided $schema property, {exc}"
-            )
-        except jsonschema.exceptions.SchemaError as exc:
+            raise ValidationError(f"Instance was invalid under the provided $schema property, {exc}")
+        except SchemaError as exc:
             logger.error(f"The provided schema is invalid, {exc}")
-            raise jsonschema.exceptions.SchemaError(f"The provided schema is invalid, {exc}")
-        except jsonschema.exceptions.UndefinedTypeCheck as exc:
+            raise SchemaError(f"The provided schema is invalid, {exc}")
+        except UndefinedTypeCheck as exc:
             logger.error(f"A type checker was asked to check a type it did not have registered, {exc}")
-            raise jsonschema.exceptions.UndefinedTypeCheck(
-                f"A type checker was asked to check a type it did not have registered, {exc}"
-            )
-        except jsonschema.exceptions.UnknownType as exc:
+            raise UndefinedTypeCheck(f"A type checker was asked to check a type it did not have registered, {exc}")
+        except UnknownType as exc:
             logger.error(f"Unknown type is found in schema_json, {exc}")
-            raise jsonschema.exceptions.UnknownType(f"Unknown type is found in schema_json, {exc}")
-        except jsonschema.exceptions.FormatError as exc:
+            raise UnknownType(
+                f"Unknown type is found in schema_json, {exc}",
+                instance=profile_name,
+                schema=validate_schema,
+            )
+        except FormatError as exc:
             logger.error(f"Validating a format config_json failed for schema_json, {exc}")
-            raise jsonschema.exceptions.FormatError(f"Validating a format config_json failed for schema_json, {exc}")
+            raise FormatError(f"Validating a format config_json failed for schema_json, {exc}")
         except ProfileNotFound:
             if profile_name:
                 logger.warning(f"Profile '{profile_name}' not found in file '{cfg.filename}'")

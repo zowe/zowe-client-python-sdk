@@ -21,7 +21,6 @@ from zowe.zos_files_for_zowe_sdk.constants import FileType, zos_file_constants
 _ZOWE_FILES_DEFAULT_ENCODING = zos_file_constants["ZoweFilesDefaultEncoding"]
 
 
-@dataclass
 class DatasetOption:
     """A dataclass that represents options for creating a dataset.
 
@@ -285,11 +284,6 @@ class DatasetOption:
     def like(self) -> Optional[str]:
         """Get the dataset name to copy attributes from."""
         return self.__like
-
-    @like.setter
-    def like(self, like: Optional[str]):
-        """Set the dataset name to copy attributes from."""
-        self.__like = like
 
     def to_dict(self) -> dict:
         """Return the DatasetOption as a dict."""

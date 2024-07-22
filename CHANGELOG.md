@@ -10,7 +10,7 @@ All notable changes to the Zowe Client Python SDK will be documented in this fil
 
 - Add type annotations for all methods [#280] (https://github.com/zowe/zowe-client-python-sdk/issues/280)
 
-- *Breaking*: Revised function names in `Logger` class and `files` class into snake_case. Supported for function case enforcer [#315] (https://github.com/zowe/zowe-client-python-sdk/issues/315)
+- *Breaking*: Revised function names in `Logger` class and `files` class into snake_case. Enabled pylint rule to enforce function case. [#315] (https://github.com/zowe/zowe-client-python-sdk/issues/315)
 
 - Added checks and auto addition for license headers on workflow. [#293] (https://github.com/zowe/zowe-client-python-sdk/issues/293)
 
