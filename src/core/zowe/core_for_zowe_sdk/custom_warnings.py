@@ -9,7 +9,6 @@ SPDX-License-Identifier: EPL-2.0
 
 Copyright Contributors to the Zowe Project.
 """
-"""A public module for custom warnings."""
 
 
 class ProfileNotFoundWarning(Warning):

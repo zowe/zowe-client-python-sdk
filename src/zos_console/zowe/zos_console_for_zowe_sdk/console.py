@@ -9,7 +9,6 @@ SPDX-License-Identifier: EPL-2.0
 
 Copyright Contributors to the Zowe Project.
 """
-"""Public module for class Console."""
 
 from typing import Optional
 

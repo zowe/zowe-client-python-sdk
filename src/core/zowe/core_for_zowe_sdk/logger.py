@@ -9,12 +9,6 @@ SPDX-License-Identifier: EPL-2.0
 
 Copyright Contributors to the Zowe Project.
 """
-"""
-Logger module for handling application logging.
-
-This module provides the `Log` class which allows for registering,
-setting levels, opening, and closing loggers.
-"""
 
 import logging
 import os
