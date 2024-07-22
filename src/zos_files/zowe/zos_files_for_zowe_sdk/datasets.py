@@ -286,11 +286,6 @@ class DatasetOption:
         """Get the dataset name to copy attributes from."""
         return self.__like
 
-    @like.setter
-    def like(self, like: Optional[str]):
-        """Set the dataset name to copy attributes from."""
-        self.__like = like
-
     def to_dict(self) -> dict:
         """Return the DatasetOption as a dict."""
         return {key.replace("_DatasetOption__", ""): value for key, value in self.__dict__.items() if value is not None}
