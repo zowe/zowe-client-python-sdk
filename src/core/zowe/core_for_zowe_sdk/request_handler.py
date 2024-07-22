@@ -121,7 +121,9 @@ class RequestHandler:
         if self.__response.ok:
             if self.__response.status_code not in self.__expected_code:
                 self.__logger.error(
-                    f"The status code from z/OSMF was: {self.__expected_code}\nExpected: {self.__response.status_code}\nRequest output:{self.__response.text}"
+                    f"The status code from z/OSMF was: {self.__expected_code}\n"
+                    f"Expected: {self.__response.status_code}\n"
+                    f"Request output: {self.__response.text}"
                 )
                 raise UnexpectedStatus(self.__expected_code, self.__response.status_code, self.__response.text)
         else:
