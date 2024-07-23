@@ -9,8 +9,5 @@ SPDX-License-Identifier: EPL-2.0
 
 Copyright Contributors to the Zowe Project.
 """
-"""
-Zowe Python SDK - z/OSMF package
-"""
 
 from .zosmf import Zosmf
