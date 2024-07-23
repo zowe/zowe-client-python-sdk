@@ -115,7 +115,7 @@ class TestFilesIntegration(unittest.TestCase):
         mount_point = self.files_fixtures["TEST_USS_MOUNT"]
 
         # Create a zfs file system
-        zfs_file_system = self.files.create_zFS_file_system(self.test2_zfs_file_system, self.create_zfs_options)
+        zfs_file_system = self.files.create_zfs_file_system(self.test2_zfs_file_system, self.create_zfs_options)
 
         # Mount file system
         command_output = self.files.mount_file_system(
@@ -132,7 +132,7 @@ class TestFilesIntegration(unittest.TestCase):
         self.assertTrue(command_output == "")
 
         # Delete file system
-        command_output = self.files.delete_zFS_file_system(self.test2_zfs_file_system)
+        command_output = self.files.delete_zfs_file_system(self.test2_zfs_file_system)
         self.assertTrue(command_output == "")
 
     def test_upload_download_delete_dataset(self):

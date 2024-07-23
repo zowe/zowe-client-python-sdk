@@ -32,12 +32,12 @@ jobs:
         run: pydocstyle --match-dir='^(?!build$).*' --match='^(?!(__init__\.py|setup\.py$)).*\.py$' src
       - name: Lint with pydoclint
         run: pydoclint --exclude='.*/build/.*' src
-      - name: Lint with flake8
-        run: |
-          # stop the build if there are Python syntax errors or undefined names
-          flake8 ./src --count --select=E9,F63,F7,F82 --show-source --statistics
-          # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-          flake8 ./src --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+      - name: Lint with pylint
+        run: | 
+          # check for Python errors
+          pylint src --errors-only --disable=E0401,E0611 --ignore=build
+          # check for lint
+          pylint ./src --disable=all --enable=C0103,C0301 --ignore=build --max-line-length=127
       - name: Test with pytest
         run: |
           coverage run -m pytest ./tests/unit

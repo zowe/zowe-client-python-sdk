@@ -65,7 +65,8 @@ class Jobs(SdkApi):
         jobid: str
             The job id on JES
         modify_version: str
-            Default ("2.0") specifies that the request is to be processed synchronously. For asynchronous processing - change the value to "1.0"
+            Default ("2.0") specifies that the request is to be processed synchronously.
+            For asynchronous processing - change the value to "1.0"
 
         Raises
         ------
@@ -101,7 +102,8 @@ class Jobs(SdkApi):
         jobid: str
             The job id on JES
         modify_version: str
-            Default ("2.0") specifies that the request is to be processed synchronously. For asynchronous processing - change the value to "1.0"
+            Default ("2.0") specifies that the request is to be processed synchronously.
+            For asynchronous processing - change the value to "1.0"
 
         Raises
         ------
@@ -139,7 +141,8 @@ class Jobs(SdkApi):
         jobid: str
             The job id on JES
         modify_version: str
-            "2.0" specifies that the request is to be processed synchronously. For asynchronous processing - change the value to "1.0"
+            "2.0" specifies that the request is to be processed synchronously.
+            For asynchronous processing - change the value to "1.0"
 
         Returns
         -------
@@ -170,7 +173,8 @@ class Jobs(SdkApi):
         class_name: str
             The name of class to be set to
         modify_version: str
-            Default ("2.0") specifies that the request is to be processed synchronously. For asynchronous processing - change the value to "1.0"
+            Default ("2.0") specifies that the request is to be processed synchronously.
+            For asynchronous processing - change the value to "1.0"
 
         Raises
         ------
@@ -200,7 +204,8 @@ class Jobs(SdkApi):
         jobid: str
             The job id on JES
         modify_version: str
-            Default ("2.0") specifies that the request is to be processed synchronously. For asynchronous processing - change the value to "1.0"
+            Default ("2.0") specifies that the request is to be processed synchronously.
+            For asynchronous processing - change the value to "1.0"
 
         Raises
         ------
@@ -230,7 +235,8 @@ class Jobs(SdkApi):
         jobid: str
             The job id on JES
         modify_version: str
-            Default ("2.0") specifies that the request is to be processed synchronously. For asynchronous processing - change the value to "1.0"
+            Default ("2.0") specifies that the request is to be processed synchronously.
+            For asynchronous processing - change the value to "1.0"
 
         Raises
         ------

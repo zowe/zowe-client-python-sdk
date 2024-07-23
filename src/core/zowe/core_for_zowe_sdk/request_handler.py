@@ -36,7 +36,7 @@ class RequestHandler:
         self.session_arguments = session_arguments
         self.__valid_methods = ["GET", "POST", "PUT", "DELETE"]
         self.__handle_ssl_warnings()
-        self.__logger = Log.registerLogger(logger_name)
+        self.__logger = Log.register_logger(logger_name)
 
     def __handle_ssl_warnings(self):
         """Turn off warnings if the SSL verification argument if off."""
@@ -121,7 +121,9 @@ class RequestHandler:
         if self.__response.ok:
             if self.__response.status_code not in self.__expected_code:
                 self.__logger.error(
-                    f"The status code from z/OSMF was: {self.__expected_code}\nExpected: {self.__response.status_code}\nRequest output:{self.__response.text}"
+                    f"The status code from z/OSMF was: {self.__expected_code}\n"
+                    f"Expected: {self.__response.status_code}\n"
+                    f"Request output: {self.__response.text}"
                 )
                 raise UnexpectedStatus(self.__expected_code, self.__response.status_code, self.__response.text)
         else:
@@ -146,10 +148,10 @@ class RequestHandler:
             - `str` when the response is plain text
             - `dict` when the response is json
         """
-        contentType = self.__response.headers.get("Content-Type")
-        if contentType == "application/octet-stream":
+        content_type = self.__response.headers.get("Content-Type")
+        if content_type == "application/octet-stream":
             return self.__response.content
-        elif contentType and contentType.startswith("application/json"):
+        elif content_type and content_type.startswith("application/json"):
             return "" if self.__response.text == "" else self.__response.json()
         else:
             return self.__response.text

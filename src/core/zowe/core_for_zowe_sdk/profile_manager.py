@@ -16,8 +16,14 @@ import warnings
 from copy import deepcopy
 from typing import Optional
 
-import jsonschema
 from deepmerge import always_merger
+from jsonschema.exceptions import (
+    FormatError,
+    SchemaError,
+    UndefinedTypeCheck,
+    UnknownType,
+    ValidationError,
+)
 
 from .config_file import ConfigFile, Profile
 from .credential_manager import CredentialManager
@@ -67,7 +73,7 @@ class ProfileManager:
         self.__project_config = ConfigFile(type=TEAM_CONFIG, name=appname)
         self.__project_user_config = ConfigFile(type=USER_CONFIG, name=appname)
 
-        self.__logger = Log.registerLogger(__name__)
+        self.__logger = Log.register_logger(__name__)
 
         self.__global_config = ConfigFile(type=TEAM_CONFIG, name=GLOBAL_CONFIG_NAME)
         try:
@@ -261,32 +267,32 @@ class ProfileManager:
         FormatError
             If validating a format in the configuration fails.
         """
-        logger = Log.registerLogger(__name__)
+        logger = Log.register_logger(__name__)
 
         cfg_profile = Profile()
         try:
             cfg_profile = cfg.get_profile(
                 profile_name=profile_name, profile_type=profile_type, validate_schema=validate_schema
             )
-        except jsonschema.exceptions.ValidationError as exc:
+        except ValidationError as exc:
             logger.error(f"Instance was invalid under the provided $schema property, {exc}")
-            raise jsonschema.exceptions.ValidationError(
-                f"Instance was invalid under the provided $schema property, {exc}"
-            )
-        except jsonschema.exceptions.SchemaError as exc:
+            raise ValidationError(f"Instance was invalid under the provided $schema property, {exc}")
+        except SchemaError as exc:
             logger.error(f"The provided schema is invalid, {exc}")
-            raise jsonschema.exceptions.SchemaError(f"The provided schema is invalid, {exc}")
-        except jsonschema.exceptions.UndefinedTypeCheck as exc:
+            raise SchemaError(f"The provided schema is invalid, {exc}")
+        except UndefinedTypeCheck as exc:
             logger.error(f"A type checker was asked to check a type it did not have registered, {exc}")
-            raise jsonschema.exceptions.UndefinedTypeCheck(
-                f"A type checker was asked to check a type it did not have registered, {exc}"
-            )
-        except jsonschema.exceptions.UnknownType as exc:
+            raise UndefinedTypeCheck(f"A type checker was asked to check a type it did not have registered, {exc}")
+        except UnknownType as exc:
             logger.error(f"Unknown type is found in schema_json, {exc}")
-            raise jsonschema.exceptions.UnknownType(f"Unknown type is found in schema_json, {exc}")
-        except jsonschema.exceptions.FormatError as exc:
+            raise UnknownType(
+                f"Unknown type is found in schema_json, {exc}",
+                instance=profile_name,
+                schema=validate_schema,
+            )
+        except FormatError as exc:
             logger.error(f"Validating a format config_json failed for schema_json, {exc}")
-            raise jsonschema.exceptions.FormatError(f"Validating a format config_json failed for schema_json, {exc}")
+            raise FormatError(f"Validating a format config_json failed for schema_json, {exc}")
         except ProfileNotFound:
             if profile_name:
                 logger.warning(f"Profile '{profile_name}' not found in file '{cfg.filename}'")
@@ -405,13 +411,13 @@ class ProfileManager:
                 cfg_schema = cfg_layer.schema_property
                 cfg_schema_dir = cfg_layer._location
 
-        usrProject = self.__project_user_config.profiles or {}
+        usr_project = self.__project_user_config.profiles or {}
         project = self.__project_config.profiles or {}
-        project_temp = always_merger.merge(deepcopy(project), usrProject)
+        project_temp = always_merger.merge(deepcopy(project), usr_project)
 
-        usrGlobal = self.__global_user_config.profiles or {}
+        usr_global = self.__global_user_config.profiles or {}
         global_ = self.__global_config.profiles or {}
-        global_temp = always_merger.merge(deepcopy(global_), usrGlobal)
+        global_temp = always_merger.merge(deepcopy(global_), usr_global)
 
         profiles_merged = project_temp
         for name, value in global_temp.items():

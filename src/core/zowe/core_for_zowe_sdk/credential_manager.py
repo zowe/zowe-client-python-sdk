@@ -31,7 +31,7 @@ class CredentialManager:
     """A class including static functions for managing credentials."""
 
     secure_props = {}
-    __logger = Log.registerLogger(__name__)
+    __logger = Log.register_logger(__name__)
 
     @staticmethod
     def load_secure_props() -> None:

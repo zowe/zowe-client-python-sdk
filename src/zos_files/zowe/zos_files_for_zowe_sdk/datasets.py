@@ -21,7 +21,6 @@ from zowe.zos_files_for_zowe_sdk.constants import FileType, zos_file_constants
 _ZOWE_FILES_DEFAULT_ENCODING = zos_file_constants["ZoweFilesDefaultEncoding"]
 
 
-@dataclass
 class DatasetOption:
     """A dataclass that represents options for creating a dataset.
 

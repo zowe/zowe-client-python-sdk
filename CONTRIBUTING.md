@@ -65,6 +65,6 @@ Code standards
 
 This project follows the [PEP 8](https://www.python.org/dev/peps/pep-0008/) style guide.
 
-This project also uses `flake8` for code linting. Make sure to run `flake8` on your code before submitting a pull request.
+This project also uses `pydocstyle`, `pydoclint`, and `pylint` for code linting. Make sure to run them on your code before submitting a pull request.
 
 We recommend using `black` and `isort` as code formatters. Please format your code using these tools before creating a pull request.
