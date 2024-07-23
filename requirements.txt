@@ -16,6 +16,7 @@ mccabe==0.7.0
 nose2==0.10.0
 pycodestyle==2.9.0
 pydocstyle==5.1.1
+pydoclint==0.5.3
 pyfakefs
 pyflakes==2.5.0
 pylama==7.7.1
@@ -37,3 +38,4 @@ zipp==3.19.1
 -e ./src/zos_jobs
 -e ./src/zos_tso
 -e ./src/zosmf
+

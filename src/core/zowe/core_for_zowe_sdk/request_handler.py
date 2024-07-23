@@ -10,6 +10,8 @@ SPDX-License-Identifier: EPL-2.0
 Copyright Contributors to the Zowe Project.
 """
 
+from typing import Union
+
 import requests
 import urllib3
 
@@ -21,26 +23,15 @@ class RequestHandler:
     """
     Class used to handle HTTP/HTTPS requests.
 
-    Attributes
+    Parameters
     ----------
     session_arguments: dict
         Zowe SDK session arguments
-    valid_methods: list
-        List of supported request methods
+    logger_name: str
+        The logger name of the modules calling request handler
     """
 
-    def __init__(self, session_arguments, logger_name=__name__):
-        """
-        Construct a RequestHandler object.
-
-        Parameters
-        ----------
-        session_arguments
-            The Zowe SDK session arguments
-
-        logger_name
-            The logger name of the modules calling request handler
-        """
+    def __init__(self, session_arguments: dict, logger_name: str = __name__):
         self.session = requests.Session()
         self.session_arguments = session_arguments
         self.__valid_methods = ["GET", "POST", "PUT", "DELETE"]
@@ -52,7 +43,9 @@ class RequestHandler:
         if not self.session_arguments["verify"]:
             urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-    def perform_request(self, method, request_arguments, expected_code=[200], stream=False):
+    def perform_request(
+        self, method: str, request_arguments: dict, expected_code: dict = [200], stream: bool = False
+    ) -> dict:
         """Execute an HTTP/HTTPS requests from given arguments and return validated response (JSON).
 
         Parameters
@@ -61,14 +54,14 @@ class RequestHandler:
             The request method that should be used
         request_arguments: dict
             The dictionary containing the required arguments for the execution of the request
-        expected_code: int
+        expected_code: dict
             The list containing the acceptable response codes (default is [200])
-        stream: boolean
+        stream: bool
             The boolean value whether the request is stream
 
         Returns
         -------
-        normalized_response: json
+        dict
             normalized request response in json (dictionary)
         """
         self.__method = method
@@ -96,15 +89,22 @@ class RequestHandler:
             self.__logger.error(f"Invalid HTTP method input {self.__method}")
             raise InvalidRequestMethod(self.__method)
 
-    def __send_request(self, stream=False):
-        """Build a custom session object, prepare it with a custom request and send it."""
+    def __send_request(self, stream: bool = False):
+        """
+        Build a custom session object, prepare it with a custom request and send it.
+
+        Parameters
+        ----------
+        stream : bool
+            Flag indicates whether it is a streaming requests.
+        """
         session = self.session
         request_object = requests.Request(method=self.__method, **self.__request_arguments)
         prepared = session.prepare_request(request_object)
         self.__response = session.send(prepared, stream=stream, **self.session_arguments)
 
     def __del__(self):
-        """Clean up the REST session object once it is no longer needed anymore"""
+        """Clean up the REST session object once it is no longer needed anymore."""
         self.session.close()
 
     def __validate_response(self):
@@ -134,15 +134,17 @@ class RequestHandler:
             )
             raise RequestFailed(self.__response.status_code, output_str)
 
-    def __normalize_response(self):
-        """Normalize the response object to a JSON format.
+    def __normalize_response(self) -> Union[str, bytes, dict]:
+        """
+        Normalize the response object to a JSON format.
 
         Returns
         -------
-        Response object at the format based on Content-Type header:
-          - `bytes` when the response is binary data
-          - object when the response is JSON text
-          - `str` when the response is plain text
+        Union[str, bytes, dict]
+            Response object at the format based on Content-Type header:
+            - `bytes` when the response is binary data
+            - `str` when the response is plain text
+            - `dict` when the response is json
         """
         contentType = self.__response.headers.get("Content-Type")
         if contentType == "application/octet-stream":

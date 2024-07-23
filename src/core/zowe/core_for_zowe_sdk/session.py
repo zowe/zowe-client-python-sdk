@@ -19,9 +19,7 @@ from .logger import Log
 
 @dataclass
 class ISession:
-    """
-    Class to represent session parameters
-    """
+    """Class to represent session parameters."""
 
     host: str
     port: int = session_constants.DEFAULT_HTTPS_PORT
@@ -38,8 +36,17 @@ class ISession:
 
 class Session:
     """
-    Class used to set connection details received from a ProfileManager or
-    manually set by passing and ISession object
+    Class used to set connection details received from a ProfileManager or manually set by passing and ISession object.
+
+    Parameters
+    ----------
+    props : dict
+        Profile and properties
+
+    Raises
+    ------
+    Exception
+        Exception thrown when cert key is not provided
     """
 
     def __init__(self, props: dict) -> None:
@@ -85,9 +92,25 @@ class Session:
         self.session.rejectUnauthorized = False if props.get("rejectUnauthorized") == False else True
 
     def load(self) -> ISession:
+        """
+        Load a ISession object.
+
+        Returns
+        -------
+        ISession
+            A custom ISession object.
+        """
         return self.session
 
     @property
     def host_url(self) -> str:
+        """
+        Return the formatted host URL.
+
+        Returns
+        -------
+        str
+            the formatted host URL
+        """
         basePath = self.session.basePath or ""
         return f"{self.session.protocol}://{self.session.host}:{self.session.port}{basePath}"

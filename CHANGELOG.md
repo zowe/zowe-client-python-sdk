@@ -2,13 +2,23 @@
 
 All notable changes to the Zowe Client Python SDK will be documented in this file.
 
+## Recent Changes
+
+### Enhancements
+
+- Supported for doc string enforcer [#309] (https://github.com/zowe/zowe-client-python-sdk/issues/309)
+
+- Add type annotations for all methods [#280] (https://github.com/zowe/zowe-client-python-sdk/issues/280)
+
+### Bug Fixes
+
 ## `1.0.0-dev18`
 
 ### Enhancements
 
 - Included support for `AUTH_TYPE_CERT_PEM` and `AUTH_TYPE_NONE` in `session` [#291] (https://github.com/zowe/zowe-client-python-sdk/issues/291) and [#296] (https://github.com/zowe/zowe-client-python-sdk/issues/296)
 
-- Updated all functions descriptions to be consitent [#279] (https://github.com/zowe/zowe-client-python-sdk/issues/279)
+- Updated doc strings for all functions to be consistent [#279] (https://github.com/zowe/zowe-client-python-sdk/issues/279)
 
 - *Breaking*: Added Support for turning off loggers. Replaced `setLoggerLevel` in Logger class with `setAllLoggerLevel` [#278] (https://github.com/zowe/zowe-client-python-sdk/issues/278)
 
@@ -16,7 +26,7 @@ All notable changes to the Zowe Client Python SDK will be documented in this fil
 
 - Fixed a bug on `create` in `Datasets` where the target dataset gets created with a different block size when `like` is specified [#295] (https://github.com/zowe/zowe-client-python-sdk/issues/295)
 
-- Fixed a bug on `logger` that it would affect all Python application loggers. 
+- Fixed a bug on `logger` that it would affect all Python application loggers. [#314] (https://github.com/zowe/zowe-client-python-sdk/issues/314)
 
 ## `1.0.0-dev17`
 

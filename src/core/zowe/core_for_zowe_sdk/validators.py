@@ -18,23 +18,19 @@ import requests
 from jsonschema import validate
 
 
-def validate_config_json(path_config_json: Union[str, dict], path_schema_json: str, cwd: str):
+def validate_config_json(path_config_json: Union[str, dict], path_schema_json: str, cwd: str) -> None:
     """
-    Function validating that zowe.config.json file matches zowe.schema.json.
+    Validate that zowe.config.json file matches zowe.schema.json.
 
     Parameters
     ----------
-        path_config: str
-            Absolute path to zowe.config.json
-
-        path_schema: str
-            Absolute path to zowe.schema.json
-
-    Returns
-    -------
-        Provides details if config.json doesn't match schema.json, otherwise it returns None.
+    path_config_json: Union[str, dict]
+        Absolute path to zowe.config.json
+    path_schema_json: str
+        Absolute path to zowe.schema.json
+    cwd: str
+        Path of the current working directory
     """
-
     # checks if the path_schema_json point to an internet URI and download the schema using the URI
     if path_schema_json.startswith("https://") or path_schema_json.startswith("http://"):
         schema_json = requests.get(path_schema_json).json()

@@ -46,12 +46,21 @@ CURRENT_DIR = os.getcwd()
 
 class ProfileManager:
     """
+    Class used to manage profiles.
+
     Profile Manager contains the logic to merge the different properties of profiles
     (from the Project Config and the Project User Config as well as the Global Config and Global User Config).
     This class handles all the exceptions raised in the Config File to provide a smooth user experience.
+
+    Parameters
+    ----------
+    appname : Optional[str]
+        Name of the app
+    show_warnings : Optional[bool]
+        Indicates whether warnings are shown
     """
 
-    def __init__(self, appname: str = "zowe", show_warnings: bool = True):
+    def __init__(self, appname: Optional[str] = "zowe", show_warnings: Optional[bool] = True):
         self.__appname = appname
         self.__show_warnings = show_warnings
 
@@ -82,53 +91,106 @@ class ProfileManager:
 
     @property
     def config_appname(self) -> str:
-        """Returns the app name"""
+        """
+        Return the application name.
+
+        Returns
+        -------
+        str
+            The name of the application as configured in the current instance.
+        """
         return self.__appname
 
     @property
     def config_dir(self) -> Optional[str]:
-        """Returns the folder path to where the Zowe z/OSMF Team Project Config files are located."""
+        """
+        Return the folder path where the Zowe z/OSMF Team Project Config files are stored.
+
+        Returns
+        -------
+        Optional[str]
+            The directory path where the main project configuration files are located. This path can be None if not set.
+        """
         return self.__project_config.location
 
     @config_dir.setter
     def config_dir(self, dirname: str) -> None:
         """
-        Set directory/folder path to where Zowe z/OSMF Team Project Config files are located
+        Set the directory path for storing Zowe z/OSMF Team Project Config files.
+
+        Parameters
+        ----------
+        dirname : str
+            The directory path to set as the new location for the project configuration files.
         """
         self.__project_config.location = dirname
         self.__project_user_config.location = dirname
 
     @property
     def user_config_dir(self) -> Optional[str]:
-        """Returns the folder path to where the Zowe z/OSMF User Project Config files are located."""
+        """
+        Return the folder path where the Zowe z/OSMF User Project Config files are stored.
+
+        Returns
+        -------
+        Optional[str]
+            The directory path where the user-specific project configuration files are located.
+        """
         return self.__project_user_config.location
 
     @user_config_dir.setter
     def user_config_dir(self, dirname: str) -> None:
-        """Set directory/folder path to where Zowe z/OSMF User Project Config files are located"""
+        """
+        Set the directory path for storing Zowe z/OSMF User Project Config files.
+
+        Parameters
+        ----------
+        dirname : str
+            The directory path to set as the new location for the user-specific project configuration files.
+        """
         self.__project_user_config.location = dirname
 
     @property
     def config_filename(self) -> str:
-        """Return the filename for Zowe z/OSMF Team Project Config"""
+        """
+        Return the filename for the Zowe z/OSMF Team Project Config.
+
+        Returns
+        -------
+        str
+            The filename of the main project configuration file.
+        """
         return self.__project_config.filename
 
     @property
     def config_filepath(self) -> Optional[str]:
-        """Get the full Zowe z/OSMF Team Project Config filepath"""
-        return self.__project_config.filepath
-
-    @staticmethod
-    def get_env(cfg: ConfigFile, cwd=None) -> dict:
         """
-        Maps the env variables to the profile properties
+        Get the full filepath for the Zowe z/OSMF Team Project Config file.
 
         Returns
         -------
-        Dictionary
+        Optional[str]
+            Filepath of configuration file or None if the location or filename is not set.
+        """
+        return self.__project_config.filepath
+
+    @staticmethod
+    def get_env(cfg: ConfigFile, cwd: Optional[str] = None) -> dict:
+        """
+        Map the env variables to the profile properties.
+
+        Parameters
+        ----------
+        cfg : ConfigFile
+            A config file that contains the schema properties
+        cwd: Optional[str]
+            Path of current working diretory
+
+        Returns
+        -------
+        dict
             Containing profile properties from env variables (prop: value)
         """
-
         props = cfg.schema_list(cwd)
         if props == []:
             return {}
@@ -167,15 +229,38 @@ class ProfileManager:
         validate_schema: Optional[bool] = True,
     ) -> Profile:
         """
-        Get just the profile from the config file (overriden with base props in the config file)
+        Retrieve a profile from the configuration file, optionally validating the schema.
+
+        Parameters
+        ----------
+        cfg : ConfigFile
+            The configuration file object which contains the profiles.
+        profile_name : Optional[str]
+            The name of the profile to retrieve. If None, the method attempts to fetch
+            the profile based only on the type.
+        profile_type : Optional[str]
+            The type of the profile to retrieve. If None, the method attempts to fetch the profile based only on the name.
+        validate_schema : Optional[bool]
+            Whether to validate the profile against the schema present in the configuration file.
 
         Returns
         -------
         Profile
+            A NamedTuple containing the profile data, name, and any secure properties not found.
 
-            NamedTuple (data, name, secure_props_not_found)
+        Raises
+        ------
+        ValidationError
+            If the instance is invalid under the provided schema.
+        SchemaError
+            If the provided schema itself is invalid.
+        UndefinedTypeCheck
+            If a type checker is asked to check a type it does not have registered.
+        UnknownType
+            If an unknown type is found in the schema.
+        FormatError
+            If validating a format in the configuration fails.
         """
-
         logger = Log.registerLogger(__name__)
 
         cfg_profile = Profile()
@@ -236,12 +321,8 @@ class ProfileManager:
         override_with_env: Optional[bool] = False,
         suppress_config_file_warnings: Optional[bool] = True,
     ) -> dict:
-        """Load connection details from a team config profile.
-
-        Returns
-        -------
-        dictionary
-            Object containing connection details
+        """
+        Load connection details from a team config profile.
 
         We will load properties from config files in the following order, from
         highest to lowest priority:
@@ -252,8 +333,34 @@ class ProfileManager:
 
         If `profile_type` is not base, then we will load properties from both
         `profile_type` and base profiles and merge them together.
-        """
 
+        Parameters
+        ----------
+        profile_name : Optional[str]
+            The name of the profile to load. If None, profiles are loaded based only on profile type.
+        profile_type : Optional[str]
+            The type of the profile to load, e.g., 'zosmf', 'zftp'. If None, profiles are loaded based only on name.
+        check_missing_props : bool
+            Flag to indicate whether to check for missing secure properties.
+        validate_schema : Optional[bool]
+            Whether to validate the loaded profile against the schema defined in the configuration.
+        override_with_env : Optional[bool]
+            If True, overrides profile properties with values from environment variables.
+        suppress_config_file_warnings : Optional[bool]
+            Suppresses warnings from the configuration file loading process.
+
+        Raises
+        ------
+        ProfileNotFound
+            If both profile_name and profile_type are not provided, indicating which profile to load.
+        SecureValuesNotFound
+            If any secure properties are required but not found or loaded.
+
+        Returns
+        -------
+        dict
+            A dictionary containing the merged connection details from all relevant profiles.
+        """
         if profile_name is None and profile_type is None:
             self.__logger.error(f"Failed to load profile as both profile_name and profile_type are not set")
             raise ProfileNotFound(
@@ -352,17 +459,23 @@ class ProfileManager:
 
     def get_highest_priority_layer(self, json_path: str) -> Optional[ConfigFile]:
         """
-        Get the highest priority layer (configuration file) based on the given profile name
+        Get the highest priority layer (configuration file) based on the given profile name.
 
         Parameters
-        -------
-        profile_name: str
-            The name of the profile to look for in the layers.
+        ----------
+        json_path: str
+            The path of the json.
+
+        Raises
+        ------
+        FileNotFoundError
+            File is not found in given path.
 
         Returns
         -------
         Optional[ConfigFile]
-            The highest priority layer (configuration file) that contains the specified profile, or None if the profile is not found in any layer.
+            The highest priority layer (configuration file) that contains the specified profile,
+            or None if the profile is not found in any layer.
         """
         highest_layer = None
         longest_match = ""
@@ -400,20 +513,19 @@ class ProfileManager:
 
         return highest_layer
 
-    def set_property(self, json_path, value, secure=None) -> None:
+    def set_property(self, json_path: str, value: str, secure: Optional[bool] = None) -> None:
         """
         Set a property in the profile, storing it securely if necessary.
 
         Parameters
-        -------
-        json_path: str
+        ----------
+        json_path : str
             The JSON path of the property to set.
-        value: str
+        value : str
             The value to be set for the property.
-        secure: bool
+        secure : Optional[bool]
             If True, the property will be stored securely. Default is None.
         """
-
         # highest priority layer for the given profile name
         highest_priority_layer = self.get_highest_priority_layer(json_path)
 
@@ -423,10 +535,10 @@ class ProfileManager:
 
     def set_profile(self, profile_path: str, profile_data: dict) -> None:
         """
-        Set a profile in the highest priority layer (configuration file) based on the given profile name
+        Set a profile in the highest priority layer (configuration file) based on the given profile name.
 
         Parameters
-        -------
+        ----------
         profile_path: str
             The path of the profile to be set. eg: profiles.zosmf
         profile_data: dict
@@ -437,9 +549,7 @@ class ProfileManager:
         highest_priority_layer.set_profile(profile_path, profile_data)
 
     def save(self) -> None:
-        """
-        Save the layers (configuration files) to disk.
-        """
+        """Save the layers (configuration files) to disk."""
         layers = [self.__project_user_config, self.__project_config, self.__global_user_config, self.__global_config]
 
         for layer in layers:

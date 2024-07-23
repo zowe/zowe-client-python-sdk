@@ -28,19 +28,22 @@ except ImportError:
 
 
 class CredentialManager:
+    """A class including static functions for managing credentials."""
+
     secure_props = {}
     __logger = Log.registerLogger(__name__)
 
     @staticmethod
     def load_secure_props() -> None:
         """
-        load secure_props stored for the given config file
-
-        Returns
-        -------
-        None
+        Load secure_props stored for the given config file.
 
         if keyring is not initialized, set empty value
+
+        Raises
+        ------
+        SecureProfileLoadFailed
+            Fail to load secure profile
         """
         if not HAS_KEYRING:
             CredentialManager.secure_props = {}
@@ -64,13 +67,7 @@ class CredentialManager:
 
     @staticmethod
     def save_secure_props() -> None:
-        """
-        Set secure_props for the given config file
-
-        Returns
-        -------
-        None
-        """
+        """Set secure_props for the given config file."""
         if not HAS_KEYRING:
             return
 
@@ -88,18 +85,19 @@ class CredentialManager:
     @staticmethod
     def _get_credential(service_name: str, account_name: str) -> Optional[str]:
         """
-        Retrieve the credential from the keyring or storage.
-        If the credential exceeds the maximum length, retrieve it in parts.
+        Retrieve the credential from the keyring or storage (in parts after maximum length).
 
         Parameters
         ----------
         service_name: str
             The service name for the credential retrieval
+        account_name: str
+            The account name of the credential
 
         Returns
         -------
-        str
-            The retrieved  encoded credential
+        Optional[str]
+            The retrieved encoded credential
         """
         encoded_credential = keyring.get_password(service_name, account_name)
         if encoded_credential is None and sys.platform == "win32":
@@ -140,6 +138,7 @@ class CredentialManager:
     def _delete_credential(service_name: str, account_name: str) -> None:
         """
         Delete the credential from the keyring or storage.
+
         If the keyring.delete_password function is not available, iterate through and delete credentials.
 
         Parameters
@@ -148,12 +147,7 @@ class CredentialManager:
             The service name for the credential deletion
         account_name: str
             The account name for the credential deletion
-
-        Returns
-        -------
-        None
         """
-
         keyring.delete_password(service_name, account_name)
 
         # Handling multiple credentials stored when the operating system is Windows
