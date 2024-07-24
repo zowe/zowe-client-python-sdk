@@ -38,6 +38,8 @@ jobs:
           pylint src --errors-only --disable=E0401,E0611 --ignore=build
           # check for lint
           pylint ./src --disable=all --enable=C0103,C0301 --ignore=build --max-line-length=127
+      - name: Check license headers
+        run: python scripts/license_header.py src
       - name: Test with pytest
         run: |
           coverage run -m pytest ./tests/unit

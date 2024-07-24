@@ -7,7 +7,7 @@ https://www.eclipse.org/legal/epl-v20.html
 
 SPDX-License-Identifier: EPL-2.0
 
-Copyright Contributors to the Zowe project.
+Copyright Contributors to the Zowe Project.
 """
 
 from zowe.core_for_zowe_sdk import SdkApi
