@@ -23,6 +23,7 @@ class TestFilesIntegration(unittest.TestCase):
         with open(FILES_FIXTURES_PATH, "r") as fixtures_json:
             self.files_fixtures = json.load(fixtures_json)
         self.files = Files(test_profile)
+        self.addCleanup(lambda: self.files.__exit__(None, None, None))
         self.test_member_jcl = f'{self.files_fixtures["TEST_PDS"]}({self.files_fixtures["TEST_MEMBER"]})'
         self.test_member_generic = f'{self.files_fixtures["TEST_PDS"]}(TEST)'
         self.test_ds_upload = f'{self.files_fixtures["TEST_PDS"]}({self.files_fixtures["TEST_MEMBER_NEW"]})'
@@ -89,15 +90,15 @@ class TestFilesIntegration(unittest.TestCase):
         command_output = self.files.write_to_dsn(self.test_member_generic, "HELLO WORLD")
         self.assertTrue(command_output == "")
 
-    def test_copy_uss_to_dataset_should_be_possible(self):
-        """Executing copy_uss_to_dataset should be possible."""
-        command_output = self.files.copy_uss_to_dataset(
+    def test_copy_uss_to_data_set_should_be_possible(self):
+        """Executing copy_uss_to_data_set should be possible."""
+        command_output = self.files.copy_uss_to_data_set(
             self.files_fixtures["TEST_USS"], self.files_fixtures["TEST_PDS"] + "(TEST2)", replace=True
         )
         self.assertTrue(command_output == "")
 
-    def test_copy_dataset_or_member_should_be_possible(self):
-        """Executing copy_dataset_or_member should be possible."""
+    def test_copy_data_set_or_member_should_be_possible(self):
+        """Executing copy_data_set_or_member should be possible."""
         test_case = {
             "from_dataset_name": self.files_fixtures["TEST_PDS"],
             "to_dataset_name": self.files_fixtures["TEST_PDS"],
@@ -105,7 +106,7 @@ class TestFilesIntegration(unittest.TestCase):
             "to_member_name": "TEST",
             "replace": True,
         }
-        command_output = self.files.copy_dataset_or_member(**test_case)
+        command_output = self.files.copy_data_set_or_member(**test_case)
         self.assertTrue(command_output == "")
 
     def test_mount_unmount_zfs_file_system(self):
@@ -114,7 +115,7 @@ class TestFilesIntegration(unittest.TestCase):
         mount_point = self.files_fixtures["TEST_USS_MOUNT"]
 
         # Create a zfs file system
-        zfs_file_system = self.files.create_zFS_file_system(self.test2_zfs_file_system, self.create_zfs_options)
+        zfs_file_system = self.files.create_zfs_file_system(self.test2_zfs_file_system, self.create_zfs_options)
 
         # Mount file system
         command_output = self.files.mount_file_system(
@@ -131,7 +132,7 @@ class TestFilesIntegration(unittest.TestCase):
         self.assertTrue(command_output == "")
 
         # Delete file system
-        command_output = self.files.delete_zFS_file_system(self.test2_zfs_file_system)
+        command_output = self.files.delete_zfs_file_system(self.test2_zfs_file_system)
         self.assertTrue(command_output == "")
 
     def test_upload_download_delete_dataset(self):

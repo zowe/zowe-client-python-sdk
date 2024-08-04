@@ -11,6 +11,7 @@ Copyright Contributors to the Zowe Project.
 """
 
 import json
+from typing import Optional
 
 from zowe.core_for_zowe_sdk import SdkApi, constants
 
@@ -19,31 +20,22 @@ class Tso(SdkApi):
     """
     Class used to represent the base z/OSMF TSO API.
 
-    ...
-
-    Attributes
+    Parameters
     ----------
-    connection
+    connection: dict
         Connection object
-    session_not_found
-        Constant for the session not found tso message id
+    tso_profile: Optional[dict]
+        Profile used for tso connection
     """
 
-    def __init__(self, connection, tso_profile=None):
-        """
-        Construct a Tso object.
-
-        Parameters
-        ----------
-        connection
-            The connection object
-        """
+    def __init__(self, connection: dict, tso_profile: Optional[dict] = None):
         super().__init__(connection, "/zosmf/tsoApp/tso", logger_name=__name__)
         self.session_not_found = constants["TsoSessionNotFound"]
         self.tso_profile = tso_profile or {}
 
-    def issue_command(self, command):
-        """Issues a TSO command.
+    def issue_command(self, command: str) -> list:
+        """
+        Issue a TSO command.
 
         This function will first initiate a TSO session, retrieve the
         session key, send the command and finally terminate the session
@@ -69,31 +61,31 @@ class Tso(SdkApi):
 
     def start_tso_session(
         self,
-        proc=None,
-        chset=None,
-        cpage=None,
-        rows=None,
-        cols=None,
-        rsize=None,
-        acct=None,
-    ):
+        proc: Optional[str] = None,
+        chset: Optional[str] = None,
+        cpage: Optional[str] = None,
+        rows: Optional[str] = None,
+        cols: Optional[str] = None,
+        rsize: Optional[str] = None,
+        acct: Optional[str] = None,
+    ) -> str:
         """Start a TSO session.
 
         Parameters
         ----------
-        proc: str, optional
+        proc: Optional[str]
             Proc parameter for the TSO session (default is "IZUFPROC")
-        chset: str, optional
+        chset: Optional[str]
             Chset parameter for the TSO session (default is "697")
-        cpage: str, optional
+        cpage: Optional[str]
             Cpage parameter for the TSO session (default is "1047")
-        rows: str, optional
+        rows: Optional[str]
             Rows parameter for the TSO session (default is "204")
-        cols: str, optional
+        cols: Optional[str]
             Cols parameter for the TSO session (default is "160")
-        rsize: str, optional
+        rsize: Optional[str]
             Rsize parameter for the TSO session (default is "4096")
-        acctL str, optional
+        acct: Optional[str]
             Acct parameter for the TSO session (default is "DEFAULT")
 
         Returns
@@ -114,8 +106,9 @@ class Tso(SdkApi):
         response_json = self.request_handler.perform_request("POST", custom_args)
         return response_json["servletKey"]
 
-    def send_tso_message(self, session_key, message):
-        """Send a command to an existing TSO session.
+    def send_tso_message(self, session_key: str, message: str) -> list:
+        """
+        Send a command to an existing TSO session.
 
         Parameters
         ----------
@@ -130,15 +123,16 @@ class Tso(SdkApi):
             A non-normalized list from TSO containing the result from the command
         """
         custom_args = self._create_custom_request_arguments()
-        custom_args["url"] = "{}/{}".format(self.request_endpoint, str(session_key))
+        custom_args["url"] = "{}/{}".format(self._request_endpoint, str(session_key))
         # z/OSMF TSO API requires json to be formatted in specific way without spaces
         request_json = {"TSO RESPONSE": {"VERSION": "0100", "DATA": str(message)}}
         custom_args["data"] = json.dumps(request_json, separators=(",", ":"))
         response_json = self.request_handler.perform_request("PUT", custom_args)
         return response_json["tsoData"]
 
-    def ping_tso_session(self, session_key):
-        """Ping an existing TSO session and returns if it is still available.
+    def ping_tso_session(self, session_key: str) -> str:
+        """
+        Ping an existing TSO session and returns if it is still available.
 
         Parameters
         ----------
@@ -152,13 +146,14 @@ class Tso(SdkApi):
             Where the options are: 'Ping successful' or 'Ping failed'
         """
         custom_args = self._create_custom_request_arguments()
-        custom_args["url"] = "{}/{}/{}".format(self.request_endpoint, "ping", str(session_key))
+        custom_args["url"] = "{}/{}/{}".format(self._request_endpoint, "ping", str(session_key))
         response_json = self.request_handler.perform_request("PUT", custom_args)
         message_id_list = self.parse_message_ids(response_json)
         return "Ping successful" if self.session_not_found not in message_id_list else "Ping failed"
 
-    def end_tso_session(self, session_key):
-        """Terminates an existing TSO session.
+    def end_tso_session(self, session_key: str) -> str:
+        """
+        Terminates an existing TSO session.
 
         Parameters
         ----------
@@ -171,13 +166,14 @@ class Tso(SdkApi):
             A string informing if the session was terminated successfully or not
         """
         custom_args = self._create_custom_request_arguments()
-        custom_args["url"] = "{}/{}".format(self.request_endpoint, session_key)
+        custom_args["url"] = "{}/{}".format(self._request_endpoint, session_key)
         response_json = self.request_handler.perform_request("DELETE", custom_args)
         message_id_list = self.parse_message_ids(response_json)
         return "Session ended" if self.session_not_found not in message_id_list else "Session already ended"
 
-    def parse_message_ids(self, response_json):
-        """Parse TSO response and retrieve only the message ids.
+    def parse_message_ids(self, response_json: dict) -> list:
+        """
+        Parse TSO response and retrieve only the message ids.
 
         Parameters
         ----------
@@ -191,8 +187,9 @@ class Tso(SdkApi):
         """
         return [message["messageId"] for message in response_json["msgData"]] if "msgData" in response_json else []
 
-    def retrieve_tso_messages(self, response_json):
-        """Parse the TSO response and retrieve all messages.
+    def retrieve_tso_messages(self, response_json: dict) -> list:
+        """
+        Parse the TSO response and retrieve all messages.
 
         Parameters
         ----------
@@ -206,8 +203,21 @@ class Tso(SdkApi):
         """
         return [message["TSO MESSAGE"]["DATA"] for message in response_json if "TSO MESSAGE" in message]
 
-    def __get_tso_data(self, session_key):
+    def __get_tso_data(self, session_key: str) -> dict:
+        """
+        Get data from a tso session.
+
+        Parameters
+        ----------
+        session_key: str
+            The session key of an existing TSO session
+
+        Returns
+        -------
+        dict
+            A json response of the operation result
+        """
         custom_args = self._create_custom_request_arguments()
-        custom_args["url"] = "{}/{}".format(self.request_endpoint, session_key)
+        custom_args["url"] = "{}/{}".format(self._request_endpoint, session_key)
         command_output = self.request_handler.perform_request("GET", custom_args)["tsoData"]
         return command_output

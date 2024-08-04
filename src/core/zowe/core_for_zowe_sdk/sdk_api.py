@@ -10,73 +10,96 @@ SPDX-License-Identifier: EPL-2.0
 Copyright Contributors to the Zowe Project.
 """
 
+import copy
 import urllib
-from .logger import Log
 
 from . import session_constants
+from .logger import Log
 from .request_handler import RequestHandler
 from .session import ISession, Session
-from .logger import Log
 
 
 class SdkApi:
     """
     Abstract class used to represent the base SDK API.
+
+    Parameters
+    ----------
+    profile : dict
+        Profile information in json (dict) format
+    default_url : str
+        Default url used for session
+    logger_name : str
+        Name of the logger (same as the filename by default)
     """
 
-    def __init__(self, profile, default_url, logger_name = __name__):
-        self.profile = profile
+    def __init__(self, profile: dict, default_url: str, logger_name: str = __name__):
         session = Session(profile)
         self.session: ISession = session.load()
 
-        self.logger = Log.registerLogger(logger_name)
+        self.logger = Log.register_logger(logger_name)
 
-        self.default_service_url = default_url
-        self.default_headers = {
+        self._default_service_url = default_url
+        self._default_headers = {
             "Content-Type": "application/json",
             "X-CSRF-ZOSMF-HEADER": "",
         }
 
-        self.request_endpoint = session.host_url + self.default_service_url
+        self._request_endpoint = session.host_url + self._default_service_url
 
-        self.request_arguments = {
-            "url": self.request_endpoint,
-            "headers": self.default_headers,
+        self._request_arguments = {
+            "url": self._request_endpoint,
+            "headers": self._default_headers,
         }
-        self.session_arguments = {
-            "verify": self.session.rejectUnauthorized,
+        self.__session_arguments = {
+            "verify": self.session.reject_unauthorized,
             "timeout": 30,
         }
-        self.request_handler = RequestHandler(self.session_arguments, logger_name = logger_name)
+        self.request_handler = RequestHandler(self.__session_arguments, logger_name=logger_name)
 
         if self.session.type == session_constants.AUTH_TYPE_BASIC:
-            self.request_arguments["auth"] = (self.session.user, self.session.password)
+            self._request_arguments["auth"] = (self.session.user, self.session.password)
         elif self.session.type == session_constants.AUTH_TYPE_BEARER:
-            self.default_headers["Authorization"] = f"Bearer {self.session.tokenValue}"
+            self._default_headers["Authorization"] = f"Bearer {self.session.token_value}"
         elif self.session.type == session_constants.AUTH_TYPE_TOKEN:
-            self.default_headers["Cookie"] = f"{self.session.tokenType}={self.session.tokenValue}"
-    
+            self._default_headers["Cookie"] = f"{self.session.token_type}={self.session.token_value}"
+        elif self.session.type == session_constants.AUTH_TYPE_CERT_PEM:
+            self.__session_arguments["cert"] = self.session.cert
+
     def __enter__(self):
+        """Return the SdkApi instance."""
         return self
 
     def __exit__(self, exc_type, exception, traceback):
+        """Delete the request handler before exit."""
         del self.request_handler
 
-    def _create_custom_request_arguments(self):
-        """Create a copy of the default request arguments dictionary.
+    def _create_custom_request_arguments(self) -> dict:
+        """
+        Create a copy of the default request arguments dictionary.
 
         This method is required because the way that Python handles
         dictionary creation
-        """
-        return self.request_arguments.copy()
-
-    def _encode_uri_component(self, str_to_adjust):
-        """Adjust string to be correct in a URL
 
         Returns
         -------
-        adjusted_str
+        dict
+            A deepcopy of the request_arguments
+        """
+        return copy.deepcopy(self._request_arguments)
+
+    def _encode_uri_component(self, str_to_adjust: str) -> str:
+        """
+        Adjust string to be correct in a URL.
+
+        Parameters
+        ----------
+        str_to_adjust : str
+            The string to encode
+
+        Returns
+        -------
+        str
             A string with special characters, acceptable for a URL
         """
-
         return urllib.parse.quote(str_to_adjust, safe="!~*'()") if str_to_adjust is not None else None

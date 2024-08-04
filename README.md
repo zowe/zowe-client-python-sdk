@@ -25,7 +25,7 @@ Alternatively, you can choose to install only a single subpackage for a smaller 
 To install all Zowe SDK packages using pip:
 
 ```
-pip install -U --pre zowe
+pip install -U --pre zowe-python-sdk-bundle
 ```
 
 Or, to install a subpackage using pip:

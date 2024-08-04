@@ -9,7 +9,6 @@ SPDX-License-Identifier: EPL-2.0
 
 Copyright Contributors to the Zowe Project.
 """
-
 import json
 import os.path
 import re
@@ -21,13 +20,12 @@ from typing import NamedTuple, Optional
 import commentjson
 import requests
 
-from .logger import Log
 from .credential_manager import CredentialManager
 from .custom_warnings import ProfileNotFoundWarning, ProfileParsingWarning
 from .exceptions import ProfileNotFound
+from .logger import Log
 from .profile_constants import GLOBAL_CONFIG_NAME, TEAM_CONFIG, USER_CONFIG
 from .validators import validate_config_json
-from .logger import Log
 
 HOME = os.path.expanduser("~")
 GLOBAL_CONFIG_LOCATION = os.path.join(HOME, ".zowe")
@@ -39,6 +37,8 @@ CURRENT_DIR = os.getcwd()
 
 
 class Profile(NamedTuple):
+    """Class to represent a profile."""
+
     data: dict = {}
     name: str = ""
     missing_secure_props: list = []
@@ -50,17 +50,18 @@ class ConfigFile:
     Class used to represent a single config file.
 
     Mainly it will have the following details :
-    1. Type ("User Config" or "Team Config")
-        User Configs override Team Configs.
-        User Configs are used to have personalised config details
-        that the user don't want to have in the Team Config.
-    2. Directory in which the file is located.
-    3. Name (excluding .config.json or .config.user.json)
-    4. Contents of the file.
-    4.1 Profiles
-    4.2 Defaults
-    4.3 Schema Property
-    5. Secure Properties associated with the file.
+        1. Type ("User Config" or "Team Config")
+            -------
+            User Configs override Team Configs.
+            User Configs are used to have personalised config details
+            that the user don't want to have in the Team Config.
+        2. Directory in which the file is located.
+        3. Name (excluding .config.json or .config.user.json)
+        4. Contents of the file.
+            4.1 Profiles
+            4.2 Defaults
+            4.3 Schema Property
+        5. Secure Properties associated with the file.
     """
 
     type: str
@@ -73,10 +74,11 @@ class ConfigFile:
     jsonc: Optional[dict] = None
     _missing_secure_props: list = field(default_factory=list)
 
-    __logger = Log.registerLogger(__name__)
+    __logger = Log.register_logger(__name__)
 
     @property
     def filename(self) -> str:
+        # noqa: D102
         if self.type == TEAM_CONFIG:
             return f"{self.name}.config.json"
 
@@ -87,6 +89,7 @@ class ConfigFile:
 
     @property
     def filepath(self) -> Optional[str]:
+        # noqa: D102
         if not self.location:
             return None
 
@@ -94,10 +97,12 @@ class ConfigFile:
 
     @property
     def location(self) -> Optional[str]:
+        # noqa: D102
         return self._location
 
     @location.setter
     def location(self, dirname: str) -> None:
+        # noqa: D102
         if os.path.isdir(dirname):
             self._location = dirname
         else:
@@ -110,8 +115,14 @@ class ConfigFile:
         suppress_config_file_warnings: Optional[bool] = True,
     ) -> None:
         """
-        Initializes the class variable after
-        setting filepath (or if not set, autodiscover the file)
+        Initialize the class variable after setting filepath (or if not set, autodiscover the file).
+
+        Parameters
+        ----------
+        validate_schema: Optional[bool]
+            True if validation is preferred, false otherwise
+        suppress_config_file_warnings: Optional[bool]
+            True if the property should be stored securely, False otherwise.
         """
         if self.filepath is None:
             try:
@@ -140,31 +151,27 @@ class ConfigFile:
         self.__load_secure_properties()
 
     def validate_schema(self) -> None:
-        """
-        Get the $schema_property from the config and load the schema
-
-        Returns
-        -------
-        file_path to the $schema property
-        """
+        """Get the $schema_property from the config and load the schema."""
         if self.schema_property is None:  # check if the $schema property is not defined
             self.__logger.warning(f"Could not find $schema property")
             warnings.warn(f"Could not find $schema property")
         else:
             validate_config_json(self.jsonc, self.schema_property, cwd=self.location)
 
-    def schema_list(self, cwd=None) -> list:
+    def schema_list(self, cwd: str = None) -> list:
         """
-        Loads the schema properties
-        in a sorted order according to the priority
+        Load the schema properties in a sorted order according to the priority.
+
+        Parameters
+        ----------
+        cwd: str
+            current working directory
 
         Returns
         -------
-        Dictionary
-
-            Returns the profile properties from schema (prop: value)
+        list
+            Return the profile properties from schema (prop: value)
         """
-
         schema = self.schema_property
         if schema is None:
             return []
@@ -202,7 +209,22 @@ class ConfigFile:
         validate_schema: Optional[bool] = True,
     ) -> Profile:
         """
-        Load given profile including secure properties and excluding values from base profile
+        Load given profile including secure properties and excluding values from base profile.
+
+        Parameters
+        ----------
+        profile_name: Optional[str]
+            Name of the profile
+        profile_type: Optional[str]
+            Type of the profile
+        validate_schema: Optional[bool]
+            True if validation is preferred
+
+        Raises
+        ------
+        ProfileNotFound
+            Cannot find profile
+
         Returns
         -------
         Profile
@@ -226,16 +248,15 @@ class ConfigFile:
 
     def autodiscover_config_dir(self) -> None:
         """
-        Autodiscover Zowe z/OSMF Team Config files by going up the path from
-        current working directory
-        Returns
-        -------
-        None
+        Autodiscover Zowe z/OSMF Team Config files by going up the path from current working directory.
 
-        Sets path if it finds the config directory,
-        Else, it raises an Exception
+        Sets path if it finds the config directory, Else, it raises an Exception.
+
+        Raises
+        ------
+        FileNotFoundError
+            Cannot find file in directory.
         """
-
         current_dir = CURRENT_DIR
 
         while True:
@@ -254,14 +275,22 @@ class ConfigFile:
 
     def get_profilename_from_profiletype(self, profile_type: str) -> str:
         """
-        Returns profilename from given profiletype as defined in the team config profile
+        Return profilename from given profiletype as defined in the team config profile.
+
+        Parameters
+        ----------
+        profile_type: str
+            Type of the profile
+
         Returns
         -------
         str
+            The exact profilename of the profile to load from the mentioned type.
 
-        Return the exact profilename of the profile to load from the mentioned type.
-        First tries to look into the defaults, if not found,
-        then it tries to iterate through the profiles
+        Raises
+        ------
+        ProfileNotFound
+            Cannot find profile
         """
         # try to get the profilename from defaults
         try:
@@ -295,13 +324,20 @@ class ConfigFile:
             error_msg=f"No profile with matching profile_type '{profile_type}' found",
         )
 
-    def find_profile(self, path: str, profiles: dict):
+    def find_profile(self, path: str, profiles: dict) -> Optional[dict]:
         """
-        Find a profile at a specified location from within a set of nested profiles
+        Find a profile at a specified location from within a set of nested profiles.
+
+        Parameters
+        ----------
+        path: str
+            The location to look for the profile
+        profiles: dict
+            A dict of nested profiles
+
         Returns
         -------
-        dictionary
-
+        Optional[dict]
             The profile object that was found, or None if not found
         """
         segments = path.split(".")
@@ -315,15 +351,20 @@ class ConfigFile:
 
     def load_profile_properties(self, profile_name: str) -> dict:
         """
-        Load profile properties given profile_name including secure properties
-        Returns
-        -------
-        dictionary
-
-            Object containing profile properties
+        Load profile properties given profile_name including secure properties.
 
         Load exact profile properties (without prepopulated fields from base profile)
         from the profile dict and populate fields from the secure credentials storage
+
+        Parameters
+        ----------
+        profile_name: str
+            Name of the profile
+
+        Returns
+        -------
+        dict
+            Object containing profile properties
         """
         props = {}
         lst = profile_name.split(".")
@@ -343,9 +384,7 @@ class ConfigFile:
         return props
 
     def __load_secure_properties(self):
-        """
-        Inject secure properties that have been loaded from the vault into the profiles object.
-        """
+        """Inject secure properties that have been loaded from the vault into the profiles object."""
         secure_props = CredentialManager.secure_props.get(self.filepath, {})
         for key, value in secure_props.items():
             segments = [name for i, name in enumerate(key.split(".")) if i % 2 == 1]
@@ -360,9 +399,22 @@ class ConfigFile:
                 else:
                     break
 
-    def __extract_secure_properties(self, profiles_obj, json_path="profiles"):
+    def __extract_secure_properties(self, profiles_obj: dict, json_path: Optional[str] = "profiles") -> dict:
         """
-        Extract secure properties from the profiles object so they can be saved to the vault.
+        Extract secure properties from the profiles object for storage in the vault.
+
+        Parameters
+        ----------
+        profiles_obj : dict
+            The profiles object from which secure properties are extracted.
+        json_path : Optional[str]
+            The JSON path used as a base in the vault for storing secure properties.
+
+        Returns
+        -------
+        dict
+            A dictionary of secure properties keyed by JSON path in the vault.
+
         """
         secure_props = {}
         for key, value in profiles_obj.items():
@@ -375,9 +427,16 @@ class ConfigFile:
                 secure_props.update(self.__extract_secure_properties(value["profiles"], f"{json_path}.{key}.profiles"))
         return secure_props
 
-    def __set_or_create_nested_profile(self, profile_name, profile_data):
+    def __set_or_create_nested_profile(self, profile_name: str, profile_data: dict):
         """
-        Set or create a nested profile.
+        Set or create a nested profile within the profiles structure.
+
+        Parameters
+        ----------
+        profile_name : str
+            The dot-separated path name of the profile to set or create.
+        profile_data : dict
+            The data to set in the specified profile.
         """
         path = self.get_profile_path_from_name(profile_name)
         keys = path.split(".")[1:]
@@ -388,30 +447,37 @@ class ConfigFile:
 
     def __is_secure(self, json_path: str, property_name: str) -> bool:
         """
-        Check whether the given JSON path corresponds to a secure property.
+        Determine if a property should be stored securely based on its presence in the secure list.
 
-        Parameters:
-            json_path (str): The JSON path of the property to check.
-            property_name (str): The name of the property to check.
+        Parameters
+        ----------
+        json_path : str
+            The JSON path of the property within the profiles structure.
+        property_name : str
+            The name of the property to check for secure storage requirements.
 
-        Returns:
-            bool: True if the property should be stored securely, False otherwise.
+        Returns
+        -------
+        bool
+            True if the property is listed to be stored securely, False otherwise.
         """
-
         profile = self.find_profile(json_path, self.profiles)
         if profile and profile.get("secure"):
             return property_name in profile["secure"]
         return False
 
-    def set_property(self, json_path, value, secure=None) -> None:
+    def set_property(self, json_path: str, value: str, secure: Optional[bool] = None) -> None:
         """
         Set a property in the profile, storing it securely if necessary.
 
-        Parameters:
-            json_path (str): The JSON path of the property to set.
-            value (str): The value to be set for the property.
-            profile_name (str): The name of the profile to set the property in.
-            secure (bool): If True, the property will be stored securely. Default is None.
+        Parameters
+        ----------
+        json_path: str
+            The JSON path of the property to set.
+        value: str
+            The value to be set for the property.
+        secure: Optional[bool]
+            If True, the property will be stored securely. Default is None.
         """
         if self.profiles is None:
             self.init_from_file()
@@ -440,9 +506,12 @@ class ConfigFile:
         """
         Set a profile in the config file.
 
-        Parameters:
-            profile_path (str): The path of the profile to be set. eg: profiles.zosmf
-            profile_data (dict): The data to be set for the profile.
+        Parameters
+        ----------
+        profile_path: str
+            The path of the profile to be set. eg: profiles.zosmf
+        profile_data: dict
+            The data to be set for the profile.
         """
         if self.profiles is None:
             self.init_from_file()
@@ -463,13 +532,14 @@ class ConfigFile:
             }
         self.__set_or_create_nested_profile(profile_name, profile_data)
 
-    def save(self, update_secure_props=True):
+    def save(self, update_secure_props: Optional[bool] = True) -> None:
         """
-        Save the config file to disk. and secure props to vault
-        parameters:
-            secure_props (bool): If True, the secure properties will be stored in the vault. Default is True.
-        Returns:
-            None
+        Save the config file to disk. and secure props to vault.
+
+        Parameters
+        ----------
+        update_secure_props: Optional[bool]
+            If True, the secure properties will be stored in the vault. Default is True.
         """
         # Updating the config file with any changes
         if not any(self.profiles.values()):
@@ -487,6 +557,16 @@ class ConfigFile:
     def get_profile_name_from_path(self, path: str) -> str:
         """
         Get the name of the profile from the given path.
+
+        Parameters
+        ----------
+        path: str
+            The location to look for the profile
+
+        Returns
+        -------
+        str
+            Returns the profile name
         """
         segments = path.split(".")
         profile_name = ".".join(segments[i] for i in range(1, len(segments), 2) if segments[i - 1] != "properties")
@@ -495,5 +575,15 @@ class ConfigFile:
     def get_profile_path_from_name(self, short_path: str) -> str:
         """
         Get the path of the profile from the given name.
+
+        Parameters
+        ----------
+        short_path: str
+            Partial path of profile
+
+        Returns
+        -------
+        str
+            Returns the full profile path
         """
         return re.sub(r"(^|\.)", r"\1profiles.", short_path)

@@ -12,32 +12,34 @@ Copyright Contributors to the Zowe Project.
 
 
 class InvalidRequestMethod(Exception):
-    """Class used to represent an invalid request method exception."""
+    """
+    Class used to represent an invalid request method exception.
 
-    def __init__(self, input_method):
-        """
-        Parameters
-        ----------
-        input_method: str
-            The invalid HTTP method used
-        """
+    Parameters
+    ----------
+    input_method: str
+        The invalid HTTP method used
+    """
+
+    def __init__(self, input_method: str):
         super().__init__("Invalid HTTP method input {}".format(input_method))
 
 
 class UnexpectedStatus(Exception):
-    """Class used to represent an unexpected request response status exception."""
+    """
+    Class used to represent an unexpected request response status exception.
 
-    def __init__(self, expected, received, request_output):
-        """
-        Parameters
-        ----------
-        expected
-            The expected status code
-        received
-            The received status code
-        request_output
-            The output from the request
-        """
+    Parameters
+    ----------
+    expected: int
+        The expected status code
+    received: int
+        The received status code
+    request_output: int
+        The output from the request
+    """
+
+    def __init__(self, expected: int, received: int, request_output: int):
         super().__init__(
             "The status code from z/OSMF was: {}\nExpected: {}\nRequest output: {}".format(
                 received, expected, request_output
@@ -46,30 +48,32 @@ class UnexpectedStatus(Exception):
 
 
 class RequestFailed(Exception):
-    """Class used to represent a request failure exception."""
+    """
+    Class used to represent a request failure exception.
 
-    def __init__(self, status_code, request_output):
-        """
-        Parameters
-        ----------
-        status_code
-            The status code from the failed request
-        request_output
-            The output from the request
-        """
+    Parameters
+    ----------
+    status_code: int
+        The status code from the failed request
+    request_output: str
+        The output from the request
+    """
+
+    def __init__(self, status_code: int, request_output: str):
         super().__init__("HTTP Request has failed with status code {}. \n {}".format(status_code, request_output))
 
 
 class FileNotFound(Exception):
-    """Class used to represent a file not found exception."""
+    """
+    Class used to represent a file not found exception.
 
-    def __init__(self, input_path):
-        """
-        Parameters
-        ----------
-        input_path
-            The invalid input path
-        """
+    Parameters
+    ----------
+    input_path: str
+        The invalid input path
+    """
+
+    def __init__(self, input_path: str):
         super().__init__("The path {} provided is not a file.".format(input_path))
 
 
@@ -85,57 +89,60 @@ class MissingConnectionArgs(Exception):
 
 
 class SecureProfileLoadFailed(Exception):
-    """Class used to represent a secure profile load failure exception."""
+    """
+    Class used to represent a secure profile load failure exception.
+
+    Parameters
+    ----------
+    profile_name: str
+        The name of the profile it failed to load
+    error_msg: str
+        The error message received while trying to load the profile
+    """
 
     def __init__(self, profile_name: str = "unknown", error_msg: str = "error"):
-        """
-        Parameters
-        ----------
-        profile_name
-            The name of the profile it failed to load
-        error_msg
-            The error message received while trying to load the profile
-        """
         super().__init__("Failed to load secure profile '{}' because '{}'".format(profile_name, error_msg))
 
 
 class ProfileNotFound(Exception):
-    """Class used to represent a profile load failure exception."""
+    """
+    Class used to represent a profile load failure exception.
+
+    Parameters
+    ----------
+    profile_name: str
+        The name of the profile it failed to load
+    error_msg: str
+        The error message received while trying to load the profile
+    """
 
     def __init__(self, profile_name: str = "unknown", error_msg: str = "error"):
-        """
-        Parameters
-        ----------
-        profile_name
-            The name of the profile it failed to load
-        error_msg
-            The error message received while trying to load the profile
-        """
-
         super().__init__("Failed to load profile '{}' because '{}'".format(profile_name, error_msg))
 
 
 class SecureValuesNotFound(Exception):
-    """Class used to represent a profile load failure exception."""
+    """
+    Class used to represent a profile load failure exception.
+
+    Parameters
+    ----------
+    values: set
+        The list of secure values not found
+    """
 
     def __init__(self, values: set):
-        """
-        Parameters
-        ----------
-        values
-            The list of secure values not found
-        """
         super().__init__("Failed to load secure values: {}".format(str(values)))
 
 
 class UnsupportedAuthType(Exception):
-    """Class used to represent an unsupported authentication type exception."""
+    """
+    Class used to represent an unsupported authentication type exception.
+
+    Parameters
+    ----------
+    auth_type: str
+        The type of authentication on the session
+    """
 
     def __init__(self, auth_type: str):
-        """
-        Parameters
-        ----------
-        auth_type
-            The type of authentication on the session
-        """
         super().__init__("Unsupported authentication type: {}".format(auth_type))

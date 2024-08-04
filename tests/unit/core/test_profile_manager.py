@@ -17,7 +17,7 @@ from zowe.core_for_zowe_sdk import (
     ProfileManager,
     constants,
     custom_warnings,
-    exceptions
+    exceptions,
 )
 
 FIXTURES_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "fixtures")
@@ -29,6 +29,7 @@ SECURE_CONFIG_PROPS: bytes
 def keyring_get_password(serviceName: str, username: str):
     global SECURE_CONFIG_PROPS
     return SECURE_CONFIG_PROPS
+
 
 def keyring_get_password_exception():
     raise Exception
@@ -47,6 +48,7 @@ class TestZosmfProfileManager(TestCase):
         self.original_nested_file_path = os.path.join(FIXTURES_PATH, "nested.zowe.config.json")
         self.original_nested_user_file_path = os.path.join(FIXTURES_PATH, "nested.zowe.config.user.json")
         self.original_schema_file_path = os.path.join(FIXTURES_PATH, "zowe.schema.json")
+        self.fs.create_dir(os.path.join(os.path.expanduser("~"), ".zowe/logs"))
 
         loader = importlib.util.find_spec("jsonschema")
         module_path = loader.origin
@@ -254,26 +256,30 @@ class TestZosmfProfileManager(TestCase):
             # Test
             self.setUpCreds(cwd_up_file_path, secure_props={})
             config_file = ConfigFile(name=self.custom_appname, type="team_config")
-            props: dict = config_file.get_profile(profile_name=None,profile_type=None,validate_schema=False)
-        self.assertEqual(mock_logger_error.call_args[0][0], "Failed to load profile: profile_name and profile_type were not provided.")
+            props: dict = config_file.get_profile(profile_name=None, profile_type=None, validate_schema=False)
+        self.assertEqual(
+            mock_logger_error.call_args[0][0],
+            "Failed to load profile: profile_name and profile_type were not provided.",
+        )
 
     @mock.patch("logging.Logger.error")
     @mock.patch("logging.Logger.warning")
     @mock.patch("zowe.secrets_for_zowe_sdk.keyring.get_password", side_effect=keyring_get_password)
-    def test_get_profilename_from_profiletype_invalid_profile_type(self, get_pass_func, mock_logger_warning: mock.MagicMock, mock_logger_error: mock.MagicMock):
+    def test_get_profilename_from_profiletype_invalid_profile_type(
+        self, get_pass_func, mock_logger_warning: mock.MagicMock, mock_logger_error: mock.MagicMock
+    ):
         """
         Test correct warnings and exceptions are being thrown with
         empty default, invalid profile type.
 
         """
         with self.assertRaises(exceptions.ProfileNotFound):
-                config_file = ConfigFile(name="name", type="team_config", defaults={}, profiles={'a': {'none' : 'none'}})
-                config_file.get_profilename_from_profiletype('test')
+            config_file = ConfigFile(name="name", type="team_config", defaults={}, profiles={"a": {"none": "none"}})
+            config_file.get_profilename_from_profiletype("test")
 
         mock_logger_warning.assert_any_call("Given profile type 'test' has no default profile name")
         mock_logger_warning.assert_any_call("Profile 'a' has no type attribute")
         mock_logger_error.assert_called_once_with("No profile with matching profile_type 'test' found")
-
 
     @mock.patch("logging.Logger.warning")
     @mock.patch("zowe.secrets_for_zowe_sdk.keyring.get_password", side_effect=keyring_get_password)
@@ -507,7 +513,6 @@ class TestZosmfProfileManager(TestCase):
         prof_manager.config_dir = self.custom_dir
         props: dict = prof_manager.load(profile_name="zosmf")
 
-
     @mock.patch("zowe.secrets_for_zowe_sdk.keyring.get_password", side_effect=keyring_get_password)
     def test_profile_loading_with_invalid_schema(self, get_pass_func):
         """
@@ -533,7 +538,7 @@ class TestZosmfProfileManager(TestCase):
                     "profiles.zosmf.properties.password": "password",
                 },
             )
-            
+
             # Test
             prof_manager = ProfileManager(appname="invalid.zowe")
             prof_manager.config_dir = self.custom_dir
@@ -616,7 +621,7 @@ class TestZosmfProfileManager(TestCase):
 
         # Set up the ProfileManager
         profile_manager = ProfileManager()
-        profile_manager.project_user_config = project_user_config
+        profile_manager._ProfileManager__project_user_config = project_user_config
         project_user_config.get_profile_name_from_path.return_value = "zosmf"
         # Call the function being tested
         result_layer = profile_manager.get_highest_priority_layer("zosmf")

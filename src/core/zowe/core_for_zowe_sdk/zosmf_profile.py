@@ -12,6 +12,7 @@ Copyright Contributors to the Zowe Project.
 
 import base64
 import os.path
+from typing import Tuple
 
 import yaml
 
@@ -37,39 +38,38 @@ class ZosmfProfile:
     and the user opted to use the profile instead of passing the credentials directly
     in the object constructor.
 
-    Attributes
+    Parameters
     ----------
     profile_name: str
         Zowe z/OSMF profile name
     """
 
-    def __init__(self, profile_name):
-        """
-        Construct a ZosmfProfile object.
-
-        Parameters
-        ----------
-        profile_name
-            The name of the Zowe z/OSMF profile
-        """
-        self.profile_name = profile_name
-        self.__logger = Log.registerLogger(__name__)
+    def __init__(self, profile_name: str):
+        self.__profile_name = profile_name
+        self.__logger = Log.register_logger(__name__)
 
     @property
-    def profiles_dir(self):
-        """Return the os path for the Zowe z/OSMF profiles."""
+    def profiles_dir(self) -> str:
+        """
+        Return the os path for the Zowe z/OSMF profiles.
+
+        Returns
+        -------
+        str
+            the os path for the Zowe z/OSMF profiles
+        """
         home_dir = os.path.expanduser("~")
         return os.path.join(home_dir, ".zowe", "profiles", "zosmf")
 
-    def load(self):
+    def load(self) -> ApiConnection:
         """Load z/OSMF connection details from a z/OSMF profile.
 
         Returns
         -------
-        zosmf_connection
+        ApiConnection
             z/OSMF connection object
         """
-        profile_file = os.path.join(self.profiles_dir, "{}.yaml".format(self.profile_name))
+        profile_file = os.path.join(self.profiles_dir, "{}.yaml".format(self.__profile_name))
 
         with open(profile_file, "r") as fileobj:
             profile_yaml = yaml.safe_load(fileobj)
@@ -93,7 +93,7 @@ class ZosmfProfile:
 
     def __get_secure_value(self, name):
         service_name = constants["ZoweCredentialKey"]
-        account_name = "zosmf_{}_{}".format(self.profile_name, name)
+        account_name = "zosmf_{}_{}".format(self.__profile_name, name)
 
         secret_value = keyring.get_password(service_name, account_name)
 
@@ -105,17 +105,29 @@ class ZosmfProfile:
 
         return secret_value
 
-    def __load_secure_credentials(self):
-        """Load secure credentials for a z/OSMF profile."""
+    def __load_secure_credentials(self) -> Tuple[str, str]:
+        """
+        Load secure credentials for a z/OSMF profile.
+
+        Raises
+        ------
+        SecureProfileLoadFailed
+            Fail to load the profile. Cause would be provided.
+
+        Returns
+        -------
+        Tuple[str, str]
+            A tuple of username and password
+        """
         if not HAS_KEYRING:
-            self.__logger.error(f"{self.profile_name} keyring module not installed")
-            raise SecureProfileLoadFailed(self.profile_name, "Keyring module not installed")
+            self.__logger.error(f"{self.__profile_name} keyring module not installed")
+            raise SecureProfileLoadFailed(self.__profile_name, "Keyring module not installed")
 
         try:
             zosmf_user = self.__get_secure_value("user")
             zosmf_password = self.__get_secure_value("password")
         except Exception as e:
-            self.__logger.error(f"Failed to load secure profile '{self.profile_name}' because '{e}'")
-            raise SecureProfileLoadFailed(self.profile_name, e)
+            self.__logger.error(f"Failed to load secure profile '{self.__profile_name}' because '{e}'")
+            raise SecureProfileLoadFailed(self.__profile_name, e)
         else:
             return (zosmf_user, zosmf_password)

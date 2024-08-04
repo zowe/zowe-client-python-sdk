@@ -3,3 +3,9 @@ line-length = 120
 
 [tool.isort]
 profile = "black"
+
+[tool.pydoclint]
+style = "numpy"
+check-arg-order = false
+require-return-section-when-returning-nothing = false
+quiet = true

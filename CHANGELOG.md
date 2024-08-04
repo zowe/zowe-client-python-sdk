@@ -2,14 +2,54 @@
 
 All notable changes to the Zowe Client Python SDK will be documented in this file.
 
-## Recent Changes
+## `1.0.0-dev19`
 
 ### Enhancements
 
+- Supported for doc string enforcer [#309] (https://github.com/zowe/zowe-client-python-sdk/issues/309)
+
+- Add type annotations for all methods [#280] (https://github.com/zowe/zowe-client-python-sdk/issues/280)
+
+- *Breaking*: Revised function names in `Logger` class and `files` class into snake_case. Enabled pylint rule to enforce function case. [#315] (https://github.com/zowe/zowe-client-python-sdk/issues/315)
+
+- Added checks and auto addition for license headers on workflow. [#293] (https://github.com/zowe/zowe-client-python-sdk/issues/293)
+
+### Bug Fixes
+
+## `1.0.0-dev18`
+
+### Enhancements
+
+- Included support for `AUTH_TYPE_CERT_PEM` and `AUTH_TYPE_NONE` in `session` [#291] (https://github.com/zowe/zowe-client-python-sdk/issues/291) and [#296] (https://github.com/zowe/zowe-client-python-sdk/issues/296)
+
+- Updated doc strings for all functions to be consistent [#279] (https://github.com/zowe/zowe-client-python-sdk/issues/279)
+
+- *Breaking*: Added Support for turning off loggers. Replaced `setLoggerLevel` in Logger class with `setAllLoggerLevel` [#278] (https://github.com/zowe/zowe-client-python-sdk/issues/278)
+
+### Bug Fixes
+
+- Fixed a bug on `create` in `Datasets` where the target dataset gets created with a different block size when `like` is specified [#295] (https://github.com/zowe/zowe-client-python-sdk/issues/295)
+
+- Fixed a bug on `logger` that it would affect all Python application loggers. [#314] (https://github.com/zowe/zowe-client-python-sdk/issues/314)
+
+## `1.0.0-dev17`
+
+### Enhancements
+
+### Bug Fixes
+
+- Fixed a bug on `_create_custom_request_arguments` where changes on `custom_args` will stay after the function returns [#299](https://github.com/zowe/zowe-client-python-sdk/issues/299)
+
+## `1.0.0-dev16`
+
+### Enhancements
+
+- Renamed Python SDK bundle [#286](https://github.com/zowe/zowe-client-python-sdk/issues/286)
 - Added logger class to core SDK [#185](https://github.com/zowe/zowe-client-python-sdk/issues/185)
 - Added classes for handling `Datasets`, `USSFiles`, and `FileSystems` in favor of the single Files class. [#264](https://github.com/zowe/zowe-client-python-sdk/issues/264)
 - Refactored tests into proper folders and files and add more tests [#265](https://github.com/zowe/zowe-client-python-sdk/issues/265)
-- **Breaking:** Standardized `response` outputs based on `Content-Type`. [#266](https://github.com/zowe/zowe-client-python-sdk/issues/266) 
+- **Breaking:** Standardized `response` outputs based on `Content-Type`. [#266](https://github.com/zowe/zowe-client-python-sdk/issues/266)
+- Refactored `create` function in `Datasets` class to accept `DatasetOptions` class as parameters. [#214] (https://github.com/zowe/zowe-client-python-sdk/issues/214)
 
 ### Bug Fixes
 
@@ -44,6 +84,11 @@ All notable changes to the Zowe Client Python SDK will be documented in this fil
 
 ### Bug Fixes
 
+- *Breaking*: Replaced `datasets` in function names with `data_sets` as a standard. [#83] (https://github.com/zowe/zowe-client-python-sdk/issues/83)
+- *Breaking*: Made unnecessary public variables to private [#83] (https://github.com/zowe/zowe-client-python-sdk/issues/83)
+  - `profile_manager._appname -> profile_manager.__appname`
+  - `profile_manager._show_warnings -> profile_manager.__show_warnings`
+  - `... and others ...`
 - Fixed `Files.create_data_set` to accept "FBA", "FBM", "VBA", "VBM" as valid recfm [#240](https://github.com/zowe/zowe-client-python-sdk/issues/240)
 - Fixed an issue with `Jobs.list_jobs` user correlator parameter [#242](https://github.com/zowe/zowe-client-python-sdk/issues/242)
 - Fixed default encoding for I/O operations to be UTF-8 on Windows [#243](https://github.com/zowe/zowe-client-python-sdk/issues/243)

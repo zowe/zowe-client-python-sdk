@@ -1,9 +1,17 @@
-"""
-Zowe Python SDK - z/OS Files package
+"""Zowe Python Client SDK.
+
+This program and the accompanying materials are made available under the terms of the
+Eclipse Public License v2.0 which accompanies this distribution, and is available at
+
+https://www.eclipse.org/legal/epl-v20.html
+
+SPDX-License-Identifier: EPL-2.0
+
+Copyright Contributors to the Zowe Project.
 """
 
 from . import constants, exceptions
-from .files import Files
-from .datasets import Datasets
-from .uss import USSFiles
+from .datasets import DatasetOption, Datasets
 from .file_system import FileSystems
+from .files import Files
+from .uss import USSFiles

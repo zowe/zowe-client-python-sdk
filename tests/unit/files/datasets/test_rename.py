@@ -1,7 +1,7 @@
 import re
 from unittest import TestCase, mock
 
-from zowe.zos_files_for_zowe_sdk import Files, exceptions, Datasets
+from zowe.zos_files_for_zowe_sdk import Datasets, Files, exceptions
 
 
 class TestCreateClass(TestCase):
@@ -18,14 +18,14 @@ class TestCreateClass(TestCase):
         }
 
     @mock.patch("requests.Session.send")
-    def test_rename_dataset(self, mock_send_request):
+    def test_rename_data_set(self, mock_send_request):
         """Test renaming dataset sends a request"""
         mock_send_request.return_value = mock.Mock(headers={"Content-Type": "application/json"}, status_code=200)
 
-        Files(self.test_profile).rename_dataset("MY.OLD.DSN", "MY.NEW.DSN")
+        Files(self.test_profile).rename_data_set("MY.OLD.DSN", "MY.NEW.DSN")
         mock_send_request.assert_called_once()
 
-    def test_rename_dataset_parameterized(self):
+    def test_rename_data_set_parameterized(self):
         """Test renaming a dataset with different values"""
         test_values = [
             (("DSN.OLD", "DSN.NEW"), True),
@@ -45,7 +45,7 @@ class TestCreateClass(TestCase):
                 },
             }
 
-            files_test_profile.rename_dataset(test_case[0][0], test_case[0][1])
+            files_test_profile.rename_data_set(test_case[0][0], test_case[0][1])
 
             custom_args = files_test_profile._create_custom_request_arguments()
             custom_args["json"] = data
@@ -55,20 +55,20 @@ class TestCreateClass(TestCase):
             )
 
     @mock.patch("requests.Session.send")
-    def test_rename_dataset_member(self, mock_send_request):
+    def test_rename_data_set_member(self, mock_send_request):
         """Test renaming dataset member sends a request"""
         mock_send_request.return_value = mock.Mock(headers={"Content-Type": "application/json"}, status_code=200)
 
-        Files(self.test_profile).rename_dataset_member("MY.DS.NAME", "MEMBEROLD", "MEMBERNEW")
+        Files(self.test_profile).rename_data_set_member("MY.DS.NAME", "MEMBEROLD", "MEMBERNEW")
         mock_send_request.assert_called_once()
 
-    def test_rename_dataset_member_raises_exception(self):
+    def test_rename_data_set_member_raises_exception(self):
         """Test renaming a dataset member raises error when assigning invalid values to enq parameter"""
         with self.assertRaises(ValueError) as e_info:
-            Files(self.test_profile).rename_dataset_member("MY.DS.NAME", "MEMBER1", "MEMBER1N", "RANDOM")
+            Files(self.test_profile).rename_data_set_member("MY.DS.NAME", "MEMBER1", "MEMBER1N", "RANDOM")
         self.assertEqual(str(e_info.exception), "Invalid value for enq.")
 
-    def test_rename_dataset_member_parameterized(self):
+    def test_rename_data_set_member_parameterized(self):
         """Test renaming a dataset member with different values"""
         test_values = [
             (("DSN", "MBROLD$", "MBRNEW$", "EXCLU"), True),
@@ -94,7 +94,7 @@ class TestCreateClass(TestCase):
             if len(test_case[0]) > 3:
                 data["enq"] = test_case[0][3].strip()
             if test_case[1]:
-                files_test_profile.rename_dataset_member(*test_case[0])
+                files_test_profile.rename_data_set_member(*test_case[0])
                 custom_args = files_test_profile._create_custom_request_arguments()
                 custom_args["json"] = data
                 ds_path = "{}({})".format(test_case[0][0], test_case[0][2])
@@ -107,5 +107,5 @@ class TestCreateClass(TestCase):
                 )
             else:
                 with self.assertRaises(ValueError) as e_info:
-                    files_test_profile.rename_dataset_member(*test_case[0])
+                    files_test_profile.rename_data_set_member(*test_case[0])
                 self.assertEqual(str(e_info.exception), "Invalid value for enq.")
