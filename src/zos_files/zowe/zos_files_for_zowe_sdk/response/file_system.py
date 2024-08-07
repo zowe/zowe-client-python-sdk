@@ -9,6 +9,7 @@ SPDX-License-Identifier: EPL-2.0
 
 Copyright Contributors to the Zowe Project.
 """
+
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
 
@@ -40,7 +41,7 @@ class FileSystemResponse:
 
 @dataclass
 class FileSystemListResponse:
-    items: Optional[list[FileSystemResponse]] = None
+    items: Optional[List[FileSystemResponse]] = None
     returnedRows: Optional[int] = None
     totalRows: Optional[int] = None
     JSONversion: Optional[int] = None

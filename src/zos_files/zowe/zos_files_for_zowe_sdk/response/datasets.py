@@ -9,13 +9,14 @@ SPDX-License-Identifier: EPL-2.0
 
 Copyright Contributors to the Zowe Project.
 """
+
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
 
 
 @dataclass
 class DatasetListResponse:
-    items: Optional[list[dict]] = None
+    items: Optional[List[dict]] = None
     returnedRows: Optional[int] = None
     totalRows: Optional[int] = None
     JSONversion: Optional[int] = None
@@ -78,7 +79,7 @@ class DatasetResponse:
 
 @dataclass
 class MemberListResponse:
-    items: Optional[list[dict]] = None
+    items: Optional[List[dict]] = None
     totalRows: Optional[int] = None
     JSONversion: Optional[int] = None
 

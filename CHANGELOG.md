@@ -14,6 +14,8 @@ All notable changes to the Zowe Client Python SDK will be documented in this fil
 
 - Added checks and auto addition for license headers on workflow. [#293] (https://github.com/zowe/zowe-client-python-sdk/issues/293)
 
+- *Breaking*: Update custom class for REST API responses [#89] (https://github.com/zowe/zowe-client-python-sdk/issues/89)
+
 ### Bug Fixes
 
 ## `1.0.0-dev18`

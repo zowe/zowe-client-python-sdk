@@ -11,7 +11,7 @@ Copyright Contributors to the Zowe Project.
 """
 
 import os
-from typing import Optional
+from typing import List, Optional
 
 from zowe.core_for_zowe_sdk import SdkApi
 
@@ -265,7 +265,7 @@ class Jobs(SdkApi):
         prefix: str = "*",
         max_jobs: int = 1000,
         user_correlator: Optional[str] = None,
-    ) -> list[JobResponse]:
+    ) -> List[JobResponse]:
         """
         Retrieve list of jobs on JES based on the provided arguments.
 
@@ -369,7 +369,7 @@ class Jobs(SdkApi):
         response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[201])
         return JobResponse(response_json)
 
-    def get_spool_files(self, correlator: str) -> list[SpoolResponse]:
+    def get_spool_files(self, correlator: str) -> List[SpoolResponse]:
         """
         Retrieve the spool files for a job identified by the correlator.
 

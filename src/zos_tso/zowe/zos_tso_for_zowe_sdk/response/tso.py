@@ -9,6 +9,7 @@ SPDX-License-Identifier: EPL-2.0
 
 Copyright Contributors to the Zowe Project.
 """
+
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
 
@@ -19,7 +20,7 @@ class StartResponse:
     queueID: Optional[str] = None
     sessionID: Optional[str] = None
     ver: Optional[str] = None
-    tsoData: Optional[list[dict]] = None
+    tsoData: Optional[List[dict]] = None
     reused: Optional[bool] = None
     timeout: Optional[bool] = None
 
@@ -37,7 +38,7 @@ class EndResponse:
     reused: Optional[bool] = None
     timeout: Optional[bool] = None
     msgData: Optional[str] = None
-    msgId: Optional[list] = None
+    msgId: Optional[List] = None
 
     def __getitem__(self, key: str) -> Any:
         return self.__dict__[key]
@@ -50,7 +51,7 @@ class EndResponse:
 class SendResponse:
     servletKey: Optional[str] = None
     ver: Optional[str] = None
-    tsoData: Optional[list[dict]] = None
+    tsoData: Optional[List[dict]] = None
     reused: Optional[bool] = None
     timeout: Optional[bool] = None
 
