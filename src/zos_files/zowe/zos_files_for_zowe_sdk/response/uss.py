@@ -11,7 +11,7 @@ Copyright Contributors to the Zowe Project.
 """
 
 from dataclasses import dataclass
-from typing import Any, Optional
+from typing import Any, List, Optional
 
 
 @dataclass

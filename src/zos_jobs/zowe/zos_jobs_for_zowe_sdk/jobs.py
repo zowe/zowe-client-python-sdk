@@ -282,7 +282,7 @@ class Jobs(SdkApi):
 
         Returns
         -------
-        list[JobResponse]
+        List[JobResponse]
             A list of jobs on JES queue based on the given parameters
         """
         custom_args = self._create_custom_request_arguments()
@@ -380,7 +380,7 @@ class Jobs(SdkApi):
 
         Returns
         -------
-        list[SpoolResponse]
+        List[SpoolResponse]
             A JSON object containing the result of the request execution
         """
         custom_args = self._create_custom_request_arguments()
