@@ -15,6 +15,8 @@ from typing import Optional
 from zowe.core_for_zowe_sdk import SdkApi
 from zowe.zos_files_for_zowe_sdk import constants, exceptions
 
+from .response import FileSystemListResponse
+
 _ZOWE_FILES_DEFAULT_ENCODING = constants.zos_file_constants["ZoweFilesDefaultEncoding"]
 
 
@@ -150,7 +152,9 @@ class FileSystems(SdkApi):
         response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[204])
         return response_json
 
-    def list(self, file_path_name: Optional[str] = None, file_system_name: Optional[str] = None) -> dict:
+    def list(
+        self, file_path_name: Optional[str] = None, file_system_name: Optional[str] = None
+    ) -> FileSystemListResponse:
         """
         List all mounted filesystems.
 
@@ -166,7 +170,7 @@ class FileSystems(SdkApi):
 
         Returns
         -------
-        dict
+        FileSystemListResponse
             A JSON containing the result of the operation
         """
         custom_args = self._create_custom_request_arguments()
@@ -174,4 +178,4 @@ class FileSystems(SdkApi):
         custom_args["params"] = {"path": file_path_name, "fsname": file_system_name}
         custom_args["url"] = "{}mfs".format(self._request_endpoint)
         response_json = self.request_handler.perform_request("GET", custom_args, expected_code=[200])
-        return response_json
+        return FileSystemListResponse(response_json)

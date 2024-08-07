@@ -4,6 +4,7 @@ import unittest
 
 from zowe.core_for_zowe_sdk import ProfileManager
 from zowe.zos_tso_for_zowe_sdk import Tso
+from zowe.zos_tso_for_zowe_sdk.response import IssueResponse
 
 
 class TestTsoIntegration(unittest.TestCase):
@@ -18,8 +19,8 @@ class TestTsoIntegration(unittest.TestCase):
     def test_issue_command_should_return_valid_response(self):
         """Executing the issue_command method should return a valid response from TSO"""
         command_output = self.tso.issue_command("TIME")
-        self.assertIsInstance(command_output, list)
-        self.assertIn("TIME", command_output[0])
+        self.assertIsInstance(command_output, IssueResponse)
+        self.assertIn("TIME", command_output.tso_messages[0])
 
     def test_start_tso_session_should_return_a_session_key(self):
         """Executing the start_tso_session method should return a valid TSO session key"""

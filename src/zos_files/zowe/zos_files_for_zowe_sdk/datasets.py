@@ -17,6 +17,7 @@ from typing import Dict, List, Optional
 from zowe.core_for_zowe_sdk import SdkApi
 from zowe.core_for_zowe_sdk.exceptions import FileNotFound
 from zowe.zos_files_for_zowe_sdk.constants import FileType, zos_file_constants
+from zowe.zos_files_for_zowe_sdk.response import DatasetListResponse, MemberListResponse
 
 _ZOWE_FILES_DEFAULT_ENCODING = zos_file_constants["ZoweFilesDefaultEncoding"]
 
@@ -306,7 +307,7 @@ class Datasets(SdkApi):
         super().__init__(connection, "/zosmf/restfiles/", logger_name=__name__)
         self._default_headers["Accept-Encoding"] = "gzip"
 
-    def list(self, name_pattern: str, return_attributes: bool = False) -> List[Dict]:
+    def list(self, name_pattern: str, return_attributes: bool = False) -> DatasetListResponse:
         """
         Retrieve a list of datasets based on a given pattern.
 
@@ -319,7 +320,7 @@ class Datasets(SdkApi):
 
         Returns
         -------
-        List[Dict]
+        DatasetListResponse
             A JSON with a list of dataset names (and attributes if specified) matching the given pattern.
         """
         custom_args = self._create_custom_request_arguments()
@@ -330,7 +331,7 @@ class Datasets(SdkApi):
             custom_args["headers"]["X-IBM-Attributes"] = "base"
 
         response_json = self.request_handler.perform_request("GET", custom_args)
-        return response_json
+        return DatasetListResponse(response_json, return_attributes)
 
     def list_members(
         self,
@@ -339,7 +340,7 @@ class Datasets(SdkApi):
         member_start: Optional[str] = None,
         limit: int = 1000,
         attributes: str = "member",
-    ) -> dict:
+    ) -> MemberListResponse:
         """
         Retrieve the list of members on a given PDS/PDSE.
 
@@ -358,7 +359,7 @@ class Datasets(SdkApi):
 
         Returns
         -------
-        dict
+        MemberListResponse
             A JSON with a list of members from a given PDS/PDSE
         """
         custom_args = self._create_custom_request_arguments()
@@ -372,7 +373,7 @@ class Datasets(SdkApi):
         custom_args["headers"]["X-IBM-Max-Items"] = "{}".format(limit)
         custom_args["headers"]["X-IBM-Attributes"] = attributes
         response_json = self.request_handler.perform_request("GET", custom_args)
-        return response_json["items"]  # type: ignore
+        return MemberListResponse(response_json, (attributes == "base"))
 
     def copy_data_set_or_member(
         self,

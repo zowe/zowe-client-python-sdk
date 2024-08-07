@@ -17,6 +17,8 @@ from zowe.core_for_zowe_sdk import SdkApi
 from zowe.core_for_zowe_sdk.exceptions import FileNotFound
 from zowe.zos_files_for_zowe_sdk.constants import zos_file_constants
 
+from .response import USSListResponse
+
 _ZOWE_FILES_DEFAULT_ENCODING = zos_file_constants["ZoweFilesDefaultEncoding"]
 
 
@@ -36,7 +38,7 @@ class USSFiles(SdkApi):
         super().__init__(connection, "/zosmf/restfiles/", logger_name=__name__)
         self._default_headers["Accept-Encoding"] = "gzip"
 
-    def list(self, path: str) -> dict:
+    def list(self, path: str) -> USSListResponse:
         """
         Retrieve a list of USS files based on a given pattern.
 
@@ -47,14 +49,14 @@ class USSFiles(SdkApi):
 
         Returns
         -------
-        dict
-            A JSON with a list of dataset names matching the given pattern
+        USSListResponse
+            A JSON with a list of file names matching the given pattern
         """
         custom_args = self._create_custom_request_arguments()
         custom_args["params"] = {"path": path}
         custom_args["url"] = "{}fs".format(self._request_endpoint)
         response_json = self.request_handler.perform_request("GET", custom_args)
-        return response_json
+        return USSListResponse(response_json)
 
     def delete(self, filepath_name: str, recursive: bool = False) -> dict:
         """

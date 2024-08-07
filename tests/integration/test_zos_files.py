@@ -7,6 +7,10 @@ import unittest
 import urllib3
 from zowe.core_for_zowe_sdk import ProfileManager
 from zowe.zos_files_for_zowe_sdk import Files
+from zowe.zos_files_for_zowe_sdk.response.datasets import (
+    DatasetListResponse,
+    MemberListResponse,
+)
 
 FIXTURES_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fixtures")
 FILES_FIXTURES_PATH = os.path.join(FIXTURES_PATH, "files.json")
@@ -46,24 +50,24 @@ class TestFilesIntegration(unittest.TestCase):
             command_output = self.files.list_dsn(self.files_fixtures["TEST_HLQ"], scenario["attributes"])
 
             # Assert that command_output['items'] is a list
-            self.assertIsInstance(command_output["items"], list)
+            self.assertIsInstance(command_output, DatasetListResponse)
 
             # Assert that command_output['items'] contains at least one item
             self.assertGreater(len(command_output["items"]), 0)
 
             # Assert that the first item in the list has 'dsname' defined
             first_item = command_output["items"][0]
-            self.assertIn("dsname", first_item)
+            self.assertTrue(hasattr(first_item, "dsname"))
 
             # Assert that the first item in the list has the expected attributes defined
-            attributes = first_item.keys()
+            attributes = dir(first_item)
             for expected_attr in scenario["expected_attributes"]:
                 self.assertIn(expected_attr, attributes)
 
     def test_list_members_should_return_a_list_of_members(self):
         """Executing list_dsn_members should return a list of members."""
         command_output = self.files.list_dsn_members(self.files_fixtures["TEST_PDS"])
-        self.assertIsInstance(command_output, list)
+        self.assertIsInstance(command_output, MemberListResponse)
 
     def test_get_dsn_content_should_return_content_from_dataset(self):
         """Executing get_dsn_content should return content from dataset."""
@@ -88,14 +92,14 @@ class TestFilesIntegration(unittest.TestCase):
     def test_write_to_dsn_should_be_possible(self):
         """Executing write_to_dsn should be possible."""
         command_output = self.files.write_to_dsn(self.test_member_generic, "HELLO WORLD")
-        self.assertTrue(command_output == "")
+        self.assertTrue(command_output == None)
 
     def test_copy_uss_to_data_set_should_be_possible(self):
         """Executing copy_uss_to_data_set should be possible."""
         command_output = self.files.copy_uss_to_data_set(
             self.files_fixtures["TEST_USS"], self.files_fixtures["TEST_PDS"] + "(TEST2)", replace=True
         )
-        self.assertTrue(command_output == "")
+        self.assertTrue(command_output == None)
 
     def test_copy_data_set_or_member_should_be_possible(self):
         """Executing copy_data_set_or_member should be possible."""
@@ -107,7 +111,7 @@ class TestFilesIntegration(unittest.TestCase):
             "replace": True,
         }
         command_output = self.files.copy_data_set_or_member(**test_case)
-        self.assertTrue(command_output == "")
+        self.assertTrue(command_output == None)
 
     def test_mount_unmount_zfs_file_system(self):
         """Mounting a zfs filesystem should be possible"""
@@ -121,7 +125,7 @@ class TestFilesIntegration(unittest.TestCase):
         command_output = self.files.mount_file_system(
             self.test2_zfs_file_system, mount_point, self.mount_zfs_file_system_options
         )
-        self.assertTrue(command_output == "")
+        self.assertTrue(command_output == None)
 
         # List a zfs file system
         command_output = self.files.list_unix_file_systems(file_system_name=self.test2_zfs_file_system.upper())
@@ -129,11 +133,11 @@ class TestFilesIntegration(unittest.TestCase):
 
         # Unmount file system
         command_output = self.files.unmount_file_system(self.test2_zfs_file_system)
-        self.assertTrue(command_output == "")
+        self.assertTrue(command_output == None)
 
         # Delete file system
         command_output = self.files.delete_zfs_file_system(self.test2_zfs_file_system)
-        self.assertTrue(command_output == "")
+        self.assertTrue(command_output == None)
 
     def test_upload_download_delete_dataset(self):
         self.files.upload_file_to_dsn(SAMPLE_JCL_FIXTURE_PATH, self.test_ds_upload)

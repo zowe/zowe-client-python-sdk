@@ -75,4 +75,4 @@ class TestRequestHandlerClass(unittest.TestCase):
         )
         request_handler = RequestHandler(self.session_arguments)
         response = request_handler.perform_request("GET", {"url": "https://www.zowe.org"})
-        self.assertTrue(response == "")
+        self.assertTrue(response == None)

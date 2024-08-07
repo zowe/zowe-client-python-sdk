@@ -15,6 +15,8 @@ from typing import Optional
 
 from zowe.core_for_zowe_sdk import SdkApi
 
+from .response import JobResponse, SpoolResponse, StatusResponse
+
 
 class Jobs(SdkApi):
     """
@@ -31,7 +33,7 @@ class Jobs(SdkApi):
     def __init__(self, connection: dict):
         super().__init__(connection, "/zosmf/restjobs/jobs/", logger_name=__name__)
 
-    def get_job_status(self, jobname: str, jobid: str) -> dict:
+    def get_job_status(self, jobname: str, jobid: str) -> JobResponse:
         """
         Retrieve the status of a given job on JES.
 
@@ -44,7 +46,7 @@ class Jobs(SdkApi):
 
         Returns
         -------
-        dict
+        JobResponse
             A JSON object containing the status of the job on JES
         """
         custom_args = self._create_custom_request_arguments()
@@ -52,9 +54,9 @@ class Jobs(SdkApi):
         request_url = "{}{}".format(self._request_endpoint, self._encode_uri_component(job_url))
         custom_args["url"] = request_url
         response_json = self.request_handler.perform_request("GET", custom_args)
-        return response_json
+        return JobResponse(response_json)
 
-    def cancel_job(self, jobname: str, jobid: str, modify_version: str = "2.0") -> dict:
+    def cancel_job(self, jobname: str, jobid: str, modify_version: str = "2.0") -> StatusResponse:
         """
         Cancel a job.
 
@@ -75,7 +77,7 @@ class Jobs(SdkApi):
 
         Returns
         -------
-        dict
+        StatusResponse
             A JSON object containing the result of the request execution
         """
         if modify_version not in ("1.0", "2.0"):
@@ -89,9 +91,9 @@ class Jobs(SdkApi):
         custom_args["json"] = {"request": "cancel", "version": modify_version}
 
         response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[202, 200])
-        return response_json
+        return StatusResponse(response_json)
 
-    def delete_job(self, jobname: str, jobid: str, modify_version: str = "2.0") -> dict:
+    def delete_job(self, jobname: str, jobid: str, modify_version: str = "2.0") -> StatusResponse:
         """
         Delete the given job on JES.
 
@@ -112,7 +114,7 @@ class Jobs(SdkApi):
 
         Returns
         -------
-        dict
+        StatusResponse
             A JSON object containing the result of the request execution
         """
         if modify_version not in ("1.0", "2.0"):
@@ -126,9 +128,9 @@ class Jobs(SdkApi):
         custom_args["headers"]["X-IBM-Job-Modify-Version"] = modify_version
 
         response_json = self.request_handler.perform_request("DELETE", custom_args, expected_code=[202, 200])
-        return response_json
+        return StatusResponse(response_json)
 
-    def _issue_job_request(self, req: dict, jobname: str, jobid: str, modify_version: str) -> dict:
+    def _issue_job_request(self, req: dict, jobname: str, jobid: str, modify_version: str) -> StatusResponse:
         """
         Issue a job request.
 
@@ -146,7 +148,7 @@ class Jobs(SdkApi):
 
         Returns
         -------
-        dict
+        StatusResponse
             A JSON object containing the result of the request execution
         """
         custom_args = self._create_custom_request_arguments()
@@ -158,9 +160,11 @@ class Jobs(SdkApi):
         custom_args["headers"]["X-IBM-Job-Modify-Version"] = modify_version
 
         response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[202, 200])
-        return response_json
+        return StatusResponse(response_json)
 
-    def change_job_class(self, jobname: str, jobid: str, class_name: str, modify_version: str = "2.0") -> dict:
+    def change_job_class(
+        self, jobname: str, jobid: str, class_name: str, modify_version: str = "2.0"
+    ) -> StatusResponse:
         """
         Change the job class.
 
@@ -183,17 +187,17 @@ class Jobs(SdkApi):
 
         Returns
         -------
-        dict
+        StatusResponse
             A JSON object containing the result of the request execution
         """
         if modify_version not in ("1.0", "2.0"):
             self.logger.error('Accepted values for modify_version: "1.0" or "2.0"')
             raise ValueError('Accepted values for modify_version: "1.0" or "2.0"')
 
-        response_json = self._issue_job_request({"class": class_name}, jobname, jobid, modify_version)
-        return response_json
+        response = self._issue_job_request({"class": class_name}, jobname, jobid, modify_version)
+        return response
 
-    def hold_job(self, jobname: str, jobid: str, modify_version: str = "2.0") -> dict:
+    def hold_job(self, jobname: str, jobid: str, modify_version: str = "2.0") -> StatusResponse:
         """
         Hold the given job on JES.
 
@@ -214,17 +218,17 @@ class Jobs(SdkApi):
 
         Returns
         -------
-        dict
+        StatusResponse
             A JSON object containing the result of the request execution
         """
         if modify_version not in ("1.0", "2.0"):
             self.logger.error('Accepted values for modify_version: "1.0" or "2.0"')
             raise ValueError('Accepted values for modify_version: "1.0" or "2.0"')
 
-        response_json = self._issue_job_request({"request": "hold"}, jobname, jobid, modify_version)
-        return response_json
+        response = self._issue_job_request({"request": "hold"}, jobname, jobid, modify_version)
+        return response
 
-    def release_job(self, jobname: str, jobid: str, modify_version: str = "2.0") -> dict:
+    def release_job(self, jobname: str, jobid: str, modify_version: str = "2.0") -> StatusResponse:
         """
         Release the given job on JES.
 
@@ -245,15 +249,15 @@ class Jobs(SdkApi):
 
         Returns
         -------
-        dict
+        StatusResponse
             A JSON object containing the result of the request execution
         """
         if modify_version not in ("1.0", "2.0"):
             self.logger.error('Modify version not accepted; Must be "1.0" or "2.0"')
             raise ValueError('Accepted values for modify_version: "1.0" or "2.0"')
 
-        response_json = self._issue_job_request({"request": "release"}, jobname, jobid, modify_version)
-        return response_json
+        response = self._issue_job_request({"request": "release"}, jobname, jobid, modify_version)
+        return response
 
     def list_jobs(
         self,
@@ -261,7 +265,7 @@ class Jobs(SdkApi):
         prefix: str = "*",
         max_jobs: int = 1000,
         user_correlator: Optional[str] = None,
-    ) -> dict:
+    ) -> list[JobResponse]:
         """
         Retrieve list of jobs on JES based on the provided arguments.
 
@@ -278,8 +282,8 @@ class Jobs(SdkApi):
 
         Returns
         -------
-        dict
-            A JSON object containing a list of jobs on JES queue based on the given parameters
+        list[JobResponse]
+            A list of jobs on JES queue based on the given parameters
         """
         custom_args = self._create_custom_request_arguments()
         params = {"prefix": prefix, "max-jobs": max_jobs}
@@ -289,9 +293,12 @@ class Jobs(SdkApi):
             params["user-correlator"] = user_correlator
         custom_args["params"] = params
         response_json = self.request_handler.perform_request("GET", custom_args)
-        return response_json
+        response = []
+        for item in response_json:
+            response.append(JobResponse(item))
+        return response
 
-    def submit_from_mainframe(self, jcl_path: str) -> dict:
+    def submit_from_mainframe(self, jcl_path: str) -> JobResponse:
         """
         Submit a job from a given dataset.
 
@@ -302,16 +309,16 @@ class Jobs(SdkApi):
 
         Returns
         -------
-        dict
+        JobResponse
             A JSON object containing the result of the request execution
         """
         custom_args = self._create_custom_request_arguments()
         request_body = {"file": "//'%s'" % jcl_path}
         custom_args["json"] = request_body
         response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[201])
-        return response_json
+        return JobResponse(response_json)
 
-    def submit_from_local_file(self, jcl_path: str) -> dict:
+    def submit_from_local_file(self, jcl_path: str) -> JobResponse:
         """
         Submit a job from local file.
 
@@ -331,7 +338,7 @@ class Jobs(SdkApi):
 
         Returns
         -------
-        dict
+        JobResponse
             A JSON object containing the result of the request execution
         """
         if os.path.isfile(jcl_path):
@@ -342,7 +349,7 @@ class Jobs(SdkApi):
             self.logger.error("Provided argument is not a file path {}".format(jcl_path))
             raise FileNotFoundError("Provided argument is not a file path {}".format(jcl_path))
 
-    def submit_plaintext(self, jcl: str) -> dict:
+    def submit_plaintext(self, jcl: str) -> JobResponse:
         """
         Submit a job from plain text input.
 
@@ -353,16 +360,16 @@ class Jobs(SdkApi):
 
         Returns
         -------
-        dict
+        JobResponse
             A JSON object containing the result of the request execution
         """
         custom_args = self._create_custom_request_arguments()
         custom_args["data"] = str(jcl)
         custom_args["headers"] = {"Content-Type": "text/plain", "X-CSRF-ZOSMF-HEADER": ""}
         response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[201])
-        return response_json
+        return JobResponse(response_json)
 
-    def get_spool_files(self, correlator: str) -> dict:
+    def get_spool_files(self, correlator: str) -> list[SpoolResponse]:
         """
         Retrieve the spool files for a job identified by the correlator.
 
@@ -373,7 +380,7 @@ class Jobs(SdkApi):
 
         Returns
         -------
-        dict
+        list[SpoolResponse]
             A JSON object containing the result of the request execution
         """
         custom_args = self._create_custom_request_arguments()
@@ -381,9 +388,12 @@ class Jobs(SdkApi):
         request_url = "{}{}".format(self._request_endpoint, self._encode_uri_component(job_url))
         custom_args["url"] = request_url
         response_json = self.request_handler.perform_request("GET", custom_args)
-        return response_json
+        response = []
+        for item in response_json:
+            response.append(SpoolResponse(item))
+        return response
 
-    def get_jcl_text(self, correlator: str) -> dict:
+    def get_jcl_text(self, correlator: str) -> str:
         """
         Retrieve the input JCL text for job with specified correlator.
 
@@ -394,8 +404,8 @@ class Jobs(SdkApi):
 
         Returns
         -------
-        dict
-            A JSON object containing the result of the request execution
+        str
+            A str object containing the result of the request execution
         """
         custom_args = self._create_custom_request_arguments()
         job_url = "{}/files/JCL/records".format(correlator)
@@ -404,7 +414,7 @@ class Jobs(SdkApi):
         response_json = self.request_handler.perform_request("GET", custom_args)
         return response_json
 
-    def get_spool_file_contents(self, correlator: str, id: str) -> dict:
+    def get_spool_file_contents(self, correlator: str, id: str) -> str:
         """
         Retrieve the contents of a single spool file from a job.
 
@@ -418,8 +428,8 @@ class Jobs(SdkApi):
 
         Returns
         -------
-        dict
-            A JSON object containing the result of the request execution
+        str
+            The contents of the spool file
         """
         custom_args = self._create_custom_request_arguments()
         job_url = "{}/files/{}/records".format(correlator, id)

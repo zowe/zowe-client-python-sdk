@@ -27,6 +27,11 @@ class TestZosmfClass(unittest.TestCase):
     @mock.patch("requests.Session.send")
     def test_list_systems(self, mock_send_request):
         """Listing z/OSMF systems should send a REST request"""
-        mock_send_request.return_value = mock.Mock(headers={"Content-Type": "application/json"}, status_code=200)
+        mock_response = mock.Mock()
+        mock_response.headers = {"Content-Type": "application/json"}
+        mock_response.status_code = 200
+        mock_response.json.return_value = {}
+        mock_send_request.return_value = mock_response
+
         Zosmf(self.connection_dict).list_systems()
         mock_send_request.assert_called_once()

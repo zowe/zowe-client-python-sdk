@@ -9,4 +9,4 @@ SPDX-License-Identifier: EPL-2.0
 
 Copyright Contributors to the Zowe Project.
 """
-__version__ = "1.0.0-dev19"
+from .console import GetReponseResponse, IssueCommandResponse

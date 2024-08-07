@@ -44,8 +44,8 @@ class RequestHandler:
             urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
     def perform_request(
-        self, method: str, request_arguments: dict, expected_code: dict = [200], stream: bool = False
-    ) -> dict:
+        self, method: str, request_arguments: dict, expected_code: list = [200], stream: bool = False
+    ) -> Union[str, bytes, dict, None]:
         """Execute an HTTP/HTTPS requests from given arguments and return validated response (JSON).
 
         Parameters
@@ -54,14 +54,14 @@ class RequestHandler:
             The request method that should be used
         request_arguments: dict
             The dictionary containing the required arguments for the execution of the request
-        expected_code: dict
+        expected_code: list
             The list containing the acceptable response codes (default is [200])
         stream: bool
             The boolean value whether the request is stream
 
         Returns
         -------
-        dict
+        Union[str, bytes, dict, None]
             normalized request response in json (dictionary)
         """
         self.__method = method
@@ -136,13 +136,13 @@ class RequestHandler:
             )
             raise RequestFailed(self.__response.status_code, output_str)
 
-    def __normalize_response(self) -> Union[str, bytes, dict]:
+    def __normalize_response(self) -> Union[str, bytes, dict, None]:
         """
         Normalize the response object to a JSON format.
 
         Returns
         -------
-        Union[str, bytes, dict]
+        Union[str, bytes, dict, None]
             Response object at the format based on Content-Type header:
             - `bytes` when the response is binary data
             - `str` when the response is plain text
@@ -152,6 +152,6 @@ class RequestHandler:
         if content_type == "application/octet-stream":
             return self.__response.content
         elif content_type and content_type.startswith("application/json"):
-            return "" if self.__response.text == "" else self.__response.json()
+            return None if self.__response.text == "" else self.__response.json()
         else:
             return self.__response.text
