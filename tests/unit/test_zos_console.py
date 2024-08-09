@@ -27,26 +27,40 @@ class TestConsoleClass(unittest.TestCase):
     @mock.patch("requests.Session.send")
     def test_issue_command_makes_request_to_the_default_console(self, mock_send):
         """Issued command should be sent to the correct default console name if no name is specified"""
-        is_console_name_correct = False
+
         def send_request_side_effect(self, **other_args):
             assert "/defcn" in self.url
-            return mock.Mock(headers={"Content-type": "application/json"}, status_code=200)
+            mock_response = mock.Mock()
+            mock_response.headers = {"Content-Type": "application/json"}
+            mock_response.status_code = 200
+            mock_response.json.return_value = {}
+            return mock_response
+
         mock_send.side_effect = send_request_side_effect
         Console(self.session_details).issue_command("TESTCMD")
 
     @mock.patch("requests.Session.send")
     def test_issue_command_makes_request_to_the_custom_console(self, mock_send):
         """Issued command should be sent to the correct custom console name if the console name is specified"""
-        is_console_name_correct = False
+
         def send_request_side_effect(self, **other_args):
             assert "/TESTCNSL" in self.url
-            return mock.Mock(headers={"Content-type": "application/json"}, status_code=200)
+            mock_response = mock.Mock()
+            mock_response.headers = {"Content-Type": "application/json"}
+            mock_response.status_code = 200
+            mock_response.json.return_value = {}
+            return mock_response
+
         mock_send.side_effect = send_request_side_effect
         Console(self.session_details).issue_command("TESTCMD", "TESTCNSL")
 
     @mock.patch("requests.Session.send")
     def test_get_response_should_return_messages(self, mock_send_request):
         """Getting z/OS Console response messages on sending a response key"""
-        mock_send_request.return_value = mock.Mock(headers={"Content-type": "application/json"}, status_code=200)
+        mock_response = mock.Mock()
+        mock_response.headers = {"Content-Type": "application/json"}
+        mock_response.status_code = 200
+        mock_response.json.return_value = {}
+        mock_send_request.return_value = mock_response
         Console(self.session_details).get_response("console-key")
         mock_send_request.assert_called_once()

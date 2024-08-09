@@ -68,3 +68,15 @@ class TestFilesClass(TestCase):
 
         Files(self.test_profile).unmount_file_system("file_system_name")
         mock_send_request.assert_called_once()
+
+    @mock.patch("requests.Session.send")
+    def test_list_fs(self, mock_send_request):
+        """Test list DSN sends request"""
+        mock_response = mock.Mock()
+        mock_response.headers = {"Content-Type": "application/json"}
+        mock_response.status_code = 200
+        mock_response.json.return_value = {}
+        mock_send_request.return_value = mock_response
+
+        Files(self.test_profile).list_unix_file_systems()
+        mock_send_request.assert_called()

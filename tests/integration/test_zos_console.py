@@ -24,4 +24,4 @@ class TestConsoleIntegration(unittest.TestCase):
         """Test that response message can be received from the console"""
         command_output = self.console.issue_command("D T")
         response = self.console.get_response(command_output["cmd-response-key"])
-        self.assertTrue("cmd-response" in response)
+        self.assertTrue(hasattr(response, "cmd_response"))

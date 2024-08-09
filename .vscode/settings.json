@@ -17,7 +17,8 @@
         "./src/zos_console",
         "./src/zos_files",
         "./src/zos_jobs",
-        "./src/zosmf"
+        "./src/zosmf",
+        "./src/zos_tso"
     ],
     "python.linting.enabled": true,
     "python.linting.pylintEnabled": true,

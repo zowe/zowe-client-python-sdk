@@ -12,6 +12,8 @@ Copyright Contributors to the Zowe Project.
 
 from zowe.core_for_zowe_sdk import SdkApi
 
+from .response import ZosmfResponse
+
 
 class Zosmf(SdkApi):
     """
@@ -26,28 +28,28 @@ class Zosmf(SdkApi):
     def __init__(self, connection: dict):
         super().__init__(connection, "/zosmf/info", logger_name=__name__)
 
-    def get_info(self) -> dict:
+    def get_info(self) -> ZosmfResponse:
         """
         Return a JSON response from the GET request to z/OSMF info endpoint.
 
         Returns
         -------
-        dict
+        ZosmfResponse
             A JSON containing the z/OSMF Info REST API data
         """
         response_json = self.request_handler.perform_request("GET", self._request_arguments)
-        return response_json
+        return ZosmfResponse(response_json)
 
-    def list_systems(self) -> dict:
+    def list_systems(self) -> ZosmfResponse:
         """
         Return a JSON response from the GET request to z/OSMF info endpoint.
 
         Returns
         -------
-        dict
+        ZosmfResponse
             Return a list of the systems that are defined to a z/OSMF instance
         """
         custom_args = self._create_custom_request_arguments()
         custom_args["url"] = "{}/systems".format(self._request_endpoint)
         response_json = self.request_handler.perform_request("GET", custom_args, expected_code=[200])
-        return response_json
+        return ZosmfResponse(response_json)

@@ -1,8 +1,9 @@
 """Unit tests for the Zowe Python SDK z/OS Files package."""
+
 import re
 from unittest import TestCase, mock
 
-from zowe.zos_files_for_zowe_sdk import Files, exceptions, Datasets
+from zowe.zos_files_for_zowe_sdk import Datasets, Files, exceptions
 
 
 class TestFilesClass(TestCase):
@@ -17,7 +18,7 @@ class TestFilesClass(TestCase):
             "port": 443,
             "rejectUnauthorized": True,
         }
-        
+
     @mock.patch("requests.Session.send")
     def test_delete_uss(self, mock_send_request):
         """Test deleting a directory recursively sends a request"""
@@ -56,3 +57,15 @@ class TestFilesClass(TestCase):
         mock_send_request.assert_called_once()
         prepared_request = mock_send_request.call_args[0][0]
         self.assertEqual(prepared_request.method, "PUT")
+
+    @mock.patch("requests.Session.send")
+    def test_list_uss(self, mock_send_request):
+        """Test list DSN sends request"""
+        mock_response = mock.Mock()
+        mock_response.headers = {"Content-Type": "application/json"}
+        mock_response.status_code = 200
+        mock_response.json.return_value = {}
+        mock_send_request.return_value = mock_response
+
+        Files(self.test_profile).list_files("")
+        mock_send_request.assert_called()
