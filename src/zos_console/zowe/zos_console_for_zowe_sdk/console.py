@@ -14,7 +14,7 @@ from typing import Optional
 
 from zowe.core_for_zowe_sdk import SdkApi
 
-from .response import GetReponseResponse, IssueCommandResponse
+from .response import ConsoleResponse, IssueCommandResponse
 
 
 class Console(SdkApi):
@@ -52,7 +52,7 @@ class Console(SdkApi):
         response_json = self.request_handler.perform_request("PUT", custom_args)
         return IssueCommandResponse(response_json)
 
-    def get_response(self, response_key: str, console: Optional[str] = None) -> GetReponseResponse:
+    def get_response(self, response_key: str, console: Optional[str] = None) -> ConsoleResponse:
         """
         Collect outstanding synchronous z/OS Console response messages.
 
@@ -65,11 +65,11 @@ class Console(SdkApi):
 
         Returns
         -------
-        GetReponseResponse
+        ConsoleResponse
             A JSON containing the response to the command
         """
         custom_args = self._create_custom_request_arguments()
         request_url = "{}/solmsgs/{}".format(console or "defcn", response_key)
         custom_args["url"] = self._request_endpoint.replace("defcn", request_url)
         response_json = self.request_handler.perform_request("GET", custom_args)
-        return GetReponseResponse(response_json)
+        return ConsoleResponse(response_json)

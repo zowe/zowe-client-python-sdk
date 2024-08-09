@@ -9,6 +9,7 @@ SPDX-License-Identifier: EPL-2.0
 
 Copyright Contributors to the Zowe Project.
 """
+
 from dataclasses import dataclass
 from typing import Any, Optional
 
@@ -33,7 +34,7 @@ class IssueCommandResponse:
 
 
 @dataclass
-class GetReponseResponse:
+class ConsoleResponse:
     cmd_response: Optional[str] = None
     sol_key_detected: Optional[bool] = None
 
