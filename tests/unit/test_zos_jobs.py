@@ -26,7 +26,11 @@ class TestJobsClass(TestCase):
     @mock.patch("requests.Session.send")
     def test_cancel_job(self, mock_send_request):
         """Test cancelling a job sends a request"""
-        mock_send_request.return_value = mock.Mock(headers={"Content-Type": "application/json"}, status_code=200)
+        mock_response = mock.Mock()
+        mock_response.headers = {"Content-Type": "application/json"}
+        mock_response.status_code = 200
+        mock_response.json.return_value = {}
+        mock_send_request.return_value = mock_response
 
         Jobs(self.test_profile).cancel_job("TESTJOB2", "JOB00084")
         mock_send_request.assert_called_once()
@@ -34,7 +38,11 @@ class TestJobsClass(TestCase):
     @mock.patch("requests.Session.send")
     def test_hold_job(self, mock_send_request):
         """Test holding a job sends a request"""
-        mock_send_request.return_value = mock.Mock(headers={"Content-Type": "application/json"}, status_code=200)
+        mock_response = mock.Mock()
+        mock_response.headers = {"Content-Type": "application/json"}
+        mock_response.status_code = 200
+        mock_response.json.return_value = {}
+        mock_send_request.return_value = mock_response
 
         Jobs(self.test_profile).hold_job("TESTJOB2", "JOB00084")
         mock_send_request.assert_called_once()
@@ -50,7 +58,11 @@ class TestJobsClass(TestCase):
     @mock.patch("requests.Session.send")
     def test_modified_version_release_job(self, mock_send_request):
         """Test holding a job sends a request"""
-        mock_send_request.return_value = mock.Mock(headers={"Content-Type": "application/json"}, status_code=200)
+        mock_response = mock.Mock()
+        mock_response.headers = {"Content-Type": "application/json"}
+        mock_response.status_code = 200
+        mock_response.json.return_value = {}
+        mock_send_request.return_value = mock_response
 
         with self.assertRaises(ValueError):
             Jobs(self.test_profile).release_job("TESTJOB2", "JOB00084", modify_version="3.0")
@@ -58,7 +70,11 @@ class TestJobsClass(TestCase):
     @mock.patch("requests.Session.send")
     def test_release_job(self, mock_send_request):
         """Test releasing a job sends a request"""
-        mock_send_request.return_value = mock.Mock(headers={"Content-Type": "application/json"}, status_code=200)
+        mock_response = mock.Mock()
+        mock_response.headers = {"Content-Type": "application/json"}
+        mock_response.status_code = 200
+        mock_response.json.return_value = {}
+        mock_send_request.return_value = mock_response
 
         Jobs(self.test_profile).release_job("TESTJOB2", "JOB00084")
         mock_send_request.assert_called_once()
@@ -66,7 +82,11 @@ class TestJobsClass(TestCase):
     @mock.patch("requests.Session.send")
     def test_change_job_class(self, mock_send_request):
         """Test changing the job class sends a request"""
-        mock_send_request.return_value = mock.Mock(headers={"Content-Type": "application/json"}, status_code=200)
+        mock_response = mock.Mock()
+        mock_response.headers = {"Content-Type": "application/json"}
+        mock_response.status_code = 200
+        mock_response.json.return_value = {}
+        mock_send_request.return_value = mock_response
 
         Jobs(self.test_profile).change_job_class("TESTJOB2", "JOB00084", "A")
         mock_send_request.assert_called_once()
@@ -92,7 +112,9 @@ class TestJobsClass(TestCase):
         jobs_test_object = Jobs(self.test_profile)
 
         for test_case in test_values:
-            jobs_test_object.request_handler.perform_request = mock.Mock()
+            mock_response = mock.Mock()
+            mock_response.json.return_value = {}
+            jobs_test_object.request_handler.perform_request = mock_response.json
 
             if test_case[1]:
                 jobs_test_object.cancel_job(*test_case[0])

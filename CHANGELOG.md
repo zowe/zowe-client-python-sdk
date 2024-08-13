@@ -2,6 +2,15 @@
 
 All notable changes to the Zowe Client Python SDK will be documented in this file.
 
+## Recent Changes
+
+### Enhancements
+
+- *Breaking*: Update method return types to use custom classes for REST API responses [#89] (https://github.com/zowe/zowe-client-python-sdk/issues/89)
+
+### Bug Fixes
+
+
 ## `1.0.0-dev19`
 
 ### Enhancements

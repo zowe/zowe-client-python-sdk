@@ -40,7 +40,7 @@ def main():
         if "build" in root.split(os.path.sep):
             continue
         for file in files:
-            if file.endswith(".py"):
+            if file.endswith(".py") and file is not "_version.py":
                 file_path = os.path.join(root, file)
                 if not check_and_add_license_header(file_path, write_header):
                     print(f"License header missing in: {file_path}")

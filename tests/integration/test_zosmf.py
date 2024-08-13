@@ -1,8 +1,10 @@
 """Integration tests for the Zowe Python SDK z/OSMF package."""
+
 import unittest
 
 from zowe.core_for_zowe_sdk import ProfileManager
 from zowe.zosmf_for_zowe_sdk import Zosmf
+from zowe.zosmf_for_zowe_sdk.response import ZosmfResponse
 
 
 class TestZosmfIntegration(unittest.TestCase):
@@ -17,9 +19,9 @@ class TestZosmfIntegration(unittest.TestCase):
     def test_get_info_should_return_valid_response(self):
         """Executing the get_info method should return a valid response."""
         command_output = self.zosmf.get_info()
-        self.assertIsInstance(command_output, dict)
+        self.assertIsInstance(command_output, ZosmfResponse)
 
     def test_list_systems_should_return_valid_response(self):
         """Executing the list_systems method should return a valid response."""
         command_output = self.zosmf.list_systems()
-        self.assertIsInstance(command_output, dict)
+        self.assertIsInstance(command_output, ZosmfResponse)
