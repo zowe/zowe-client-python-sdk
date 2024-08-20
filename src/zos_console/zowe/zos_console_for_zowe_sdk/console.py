@@ -27,7 +27,7 @@ class Console(SdkApi):
        A profile in dict (json) format
     """
 
-    def __init__(self, connection: dict):
+    def __init__(self, connection: dict, log = False):
         super().__init__(connection, "/zosmf/restconsoles/consoles/defcn", logger_name=__name__)
 
     def issue_command(self, command: str, console: Optional[str] = None) -> IssueCommandResponse:

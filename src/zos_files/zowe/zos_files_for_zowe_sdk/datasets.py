@@ -303,7 +303,7 @@ class Datasets(SdkApi):
         A profile for connection in dict (json) format
     """
 
-    def __init__(self, connection: dict):
+    def __init__(self, connection: dict, log = False):
         super().__init__(connection, "/zosmf/restfiles/", logger_name=__name__)
         self._default_headers["Accept-Encoding"] = "gzip"
 
