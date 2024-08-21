@@ -30,7 +30,7 @@ class Tso(SdkApi):
         Profile used for tso connection
     """
 
-    def __init__(self, connection: dict, tso_profile: Optional[dict] = None):
+    def __init__(self, connection: dict, tso_profile: Optional[dict] = None, log = False):
         super().__init__(connection, "/zosmf/tsoApp/tso", logger_name=__name__)
         self.session_not_found = constants["TsoSessionNotFound"]
         self.tso_profile = tso_profile or {}

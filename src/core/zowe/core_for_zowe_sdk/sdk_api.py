@@ -40,7 +40,7 @@ class SdkApi:
         self.logger = Log.register_logger(logger_name)
 
         if log == False:
-            Log.close(logger)
+            Log.close(self.logger)
 
         self._default_service_url = default_url
         self._default_headers = {

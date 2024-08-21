@@ -30,7 +30,7 @@ class Jobs(SdkApi):
         A profile for connection in dict (json) format
     """
 
-    def __init__(self, connection: dict):
+    def __init__(self, connection: dict, log = False):
         super().__init__(connection, "/zosmf/restjobs/jobs/", logger_name=__name__)
 
     def get_job_status(self, jobname: str, jobid: str) -> JobResponse:
