@@ -45,8 +45,8 @@ class Files(SdkApi):
     uss: USSFiles
     fs: FileSystems
 
-    def __init__(self, connection: dict, log = False):
-        super().__init__(connection, "/zosmf/restfiles/", logger_name=__name__)
+    def __init__(self, connection: dict, log = True):
+        super().__init__(connection, "/zosmf/restfiles/", logger_name=__name__, log=log)
         self._default_headers["Accept-Encoding"] = "gzip"
         self.ds = Datasets(connection)
         self.uss = USSFiles(connection)

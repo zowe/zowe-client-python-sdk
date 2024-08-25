@@ -33,7 +33,7 @@ class SdkApi:
         Name of the logger (same as the filename by default)
     """
 
-    def __init__(self, profile: dict, default_url: str, logger_name: str = __name__, log = False):
+    def __init__(self, profile: dict, default_url: str, logger_name: str = __name__, log = True):
         session = Session(profile)
         self.session: ISession = session.load()
 

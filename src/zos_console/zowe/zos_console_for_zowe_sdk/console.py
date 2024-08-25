@@ -28,7 +28,7 @@ class Console(SdkApi):
     """
 
     def __init__(self, connection: dict, log = False):
-        super().__init__(connection, "/zosmf/restconsoles/consoles/defcn", logger_name=__name__)
+        super().__init__(connection, "/zosmf/restconsoles/consoles/defcn", logger_name=__name__, log=log)
 
     def issue_command(self, command: str, console: Optional[str] = None) -> IssueCommandResponse:
         """Issues a command on z/OS Console.
