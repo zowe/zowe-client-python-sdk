@@ -40,6 +40,6 @@ setup(
         "requests~=2.32.0",
         "urllib3~=1.26.18",
     ],
-    extras_require={"secrets": [resolve_sdk_dep("secrets", "~=" + __version__)]},
+    extras_require={"secrets": [resolve_sdk_dep("secrets", "~=1.0.0.dev")]},
     packages=find_namespace_packages(include=["zowe.*"]),
 )
