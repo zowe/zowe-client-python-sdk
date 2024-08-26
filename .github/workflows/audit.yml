@@ -1,0 +1,21 @@
+name: Audit
+
+on:
+  pull_request:
+    branches:
+      - main
+  schedule:
+    - cron: '0 10 * * *'
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Check Vulnerabilities
+      uses: pypa/gh-action-pip-audit@v1.1.0
+      with:
+        inputs: requirements.txt docs/requirements.txt
