@@ -50,9 +50,9 @@ jobs:
           with open(os.environ["GITHUB_OUTPUT"], 'a') as f:
             print("version=" + ("-".join(new_version.rsplit(".", 1)) if new_version.count(".") > 2 else new_version), file=f)
 
-      - name: Update version (cargo)
-        run: cargo install cargo-edit && cargo set-version ${{ steps.update-version.outputs.version }}
-        working-directory: src/secrets
+      # - name: Update version (cargo)
+      #   run: cargo install cargo-edit && cargo set-version ${{ steps.update-version.outputs.version }}
+      #   working-directory: src/secrets
 
       - name: Update version (git)
         run: git add src/_version.py src/secrets/Cargo.*
