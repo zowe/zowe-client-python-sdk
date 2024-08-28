@@ -31,6 +31,8 @@ class SdkApi:
         Default url used for session
     logger_name : str
         Name of the logger (same as the filename by default)
+    log : boolean
+        Flag to disable logger
     """
 
     def __init__(self, profile: dict, default_url: str, logger_name: str = __name__, log = True):

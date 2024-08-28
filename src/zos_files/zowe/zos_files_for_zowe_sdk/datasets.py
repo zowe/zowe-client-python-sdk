@@ -304,7 +304,7 @@ class Datasets(SdkApi):
     """
 
     def __init__(self, connection: dict, log = True):
-        super().__init__(connection, "/zosmf/restfiles/", logger_name=__name__)
+        super().__init__(connection, "/zosmf/restfiles/", logger_name=__name__, log=log)
         self._default_headers["Accept-Encoding"] = "gzip"
 
     def list(self, name_pattern: str, return_attributes: bool = False) -> DatasetListResponse:
