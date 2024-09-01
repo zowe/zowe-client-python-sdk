@@ -25,6 +25,11 @@ class TestSdkApiClass(TestCase):
         sdk_api = SdkApi(self.basic_props, self.default_url)
         self.assertIsInstance(sdk_api, SdkApi)
 
+    def test_object_should_be_instance_with_logger_set_to_false(self):
+        """Created object should be instance with logger set to False of SdkApi class."""
+        sdk_api = SdkApi(self.basic_props, self.default_url, log=False)
+        self.assertIsInstance(sdk_api, SdkApi)
+
     @mock.patch("requests.Session.close")
     def test_context_manager_closes_session(self, mock_close_request):
 
