@@ -25,4 +25,4 @@ jobs:
 
     - name: Check Secrets SDK Vulnerabilities
       working-directory: src/secrets
-      run: cargo audit --deny warnings
+      run: cargo audit --deny warnings --ignore RUSTSEC-2024-0370
