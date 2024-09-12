@@ -28,6 +28,8 @@ class Jobs(SdkApi):
     ----------
     connection : dict
         A profile for connection in dict (json) format
+    log : boolean
+        Flag to disable logger
     """
 
     def __init__(self, connection: dict, log = True):

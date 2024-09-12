@@ -26,6 +26,8 @@ class Tso(SdkApi):
     ----------
     connection: dict
         Connection object
+    log : boolean
+        Flag to disable logger
     tso_profile: Optional[dict]
         Profile used for tso connection
     """
