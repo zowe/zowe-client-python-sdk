@@ -1,5 +1,8 @@
 **What It Does**
 <!-- A list of relevant issues, enhancements, fixed bugs, etc -->
+<!-- **Does this close any currently open issues?**
+If this PR closes an issue, please uncomment the line below and include the issue number.
+Fixes #(issue_number) -->
 
 **How to Test**
 <!-- If a bug has been fixed, how can reviewers verify that the change(s) fixed it? -->
