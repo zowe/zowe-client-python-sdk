@@ -25,11 +25,11 @@ class Console(SdkApi):
     ----------
     connection : dict
        A profile in dict (json) format
-    log : boolean
+    log : bool
         Flag to disable logger
     """
 
-    def __init__(self, connection: dict, log = True):
+    def __init__(self, connection: dict, log: bool = True):
         super().__init__(connection, "/zosmf/restconsoles/consoles/defcn", logger_name=__name__, log=log)
 
     def issue_command(self, command: str, console: Optional[str] = None) -> IssueCommandResponse:

@@ -20,8 +20,6 @@ class Log:
 
     Attributes
     ----------
-    loggers: set
-        The set of all loggers
     dirname: str
         Path where the log file is saved
     file_handler: logging.FileHandler
@@ -32,6 +30,8 @@ class Log:
         Specifies whether log messages would be saved to a file. True by default.
     console_output: bool
         Specifies whether log messages would be printed out on console. True by default.
+    loggers: set
+        The set of all loggers
     """
 
     dirname: str = os.path.join(os.path.expanduser("~"), ".zowe/logs")
