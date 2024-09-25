@@ -301,10 +301,12 @@ class Datasets(SdkApi):
     ----------
     connection : dict
         A profile for connection in dict (json) format
+    log : bool
+        Flag to disable logger
     """
 
-    def __init__(self, connection: dict):
-        super().__init__(connection, "/zosmf/restfiles/", logger_name=__name__)
+    def __init__(self, connection: dict, log: bool = True):
+        super().__init__(connection, "/zosmf/restfiles/", logger_name=__name__, log=log)
         self._default_headers["Accept-Encoding"] = "gzip"
 
     def list(self, name_pattern: str, return_attributes: bool = False) -> DatasetListResponse:

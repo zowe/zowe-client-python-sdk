@@ -28,10 +28,12 @@ class Tso(SdkApi):
         Connection object
     tso_profile: Optional[dict]
         Profile used for tso connection
+    log : bool
+        Flag to disable logger
     """
 
-    def __init__(self, connection: dict, tso_profile: Optional[dict] = None):
-        super().__init__(connection, "/zosmf/tsoApp/tso", logger_name=__name__)
+    def __init__(self, connection: dict, tso_profile: Optional[dict] = None, log: bool = True):
+        super().__init__(connection, "/zosmf/tsoApp/tso", logger_name=__name__, log=log)
         self.session_not_found = constants["TsoSessionNotFound"]
         self.tso_profile = tso_profile or {}
 

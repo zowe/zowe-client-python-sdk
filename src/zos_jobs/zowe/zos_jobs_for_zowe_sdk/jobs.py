@@ -28,10 +28,12 @@ class Jobs(SdkApi):
     ----------
     connection : dict
         A profile for connection in dict (json) format
+    log : bool
+        Flag to disable logger
     """
 
-    def __init__(self, connection: dict):
-        super().__init__(connection, "/zosmf/restjobs/jobs/", logger_name=__name__)
+    def __init__(self, connection: dict, log: bool = True):
+        super().__init__(connection, "/zosmf/restjobs/jobs/", logger_name=__name__, log=log)
 
     def get_job_status(self, jobname: str, jobid: str) -> JobResponse:
         """
