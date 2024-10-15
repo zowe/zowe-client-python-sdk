@@ -13,8 +13,9 @@ Copyright Contributors to the Zowe Project.
 from typing import Optional
 
 from zowe.core_for_zowe_sdk import SdkApi
-from zowe.zos_files_for_zowe_sdk import constants, exceptions
+from zowe.zos_files_for_zowe_sdk import constants
 
+from .exceptions import InvalidPermsOption, MaxAllocationQuantityExceeded
 from .response import FileSystemListResponse
 
 _ZOWE_FILES_DEFAULT_ENCODING = constants.zos_file_constants["ZoweFilesDefaultEncoding"]
@@ -65,12 +66,12 @@ class FileSystems(SdkApi):
             if key == "perms":
                 if value < 0 or value > 777:
                     self.logger.error("Invalid Permissions Option.")
-                    raise exceptions.InvalidPermsOption(value)
+                    raise InvalidPermsOption(value)
 
             if key == "cylsPri" or key == "cylsSec":
                 if value > constants.zos_file_constants["MaxAllocationQuantity"]:
                     self.logger.error("Maximum allocation quantity exceeded.")
-                    raise exceptions.MaxAllocationQuantityExceeded
+                    raise MaxAllocationQuantityExceeded()
 
         custom_args = self._create_custom_request_arguments()
         custom_args["url"] = "{}mfs/zfs/{}".format(self._request_endpoint, file_system_name)
