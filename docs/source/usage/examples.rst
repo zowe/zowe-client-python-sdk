@@ -12,6 +12,9 @@ Create a dictionary to handle communication with the plug-in:
         "port": 443, # Include the port if different from the default (443)
         "user": "<user>",
         "password": "<password>",
+        # "rejectUnauthorized": True, # Set to False to disable SSL verification
+        # "basePath": "", # Define base path if using Zowe API ML (e.g. "/ibmzosmf/api/v1" for z/OSMF)
+        # "protocol": "https", # Include the protocol if different from the default (https)
     }
 
     my_console = Console(profile)
