@@ -136,7 +136,7 @@ Create a dictionary to handle communication with the plug-in:
 Alternatively, you can use an existing Zowe CLI profile instead:
 
 ```python
-    from zowe.zos_core_for_zowe_sdk import ProfileManager
+    from zowe.core_for_zowe_sdk import ProfileManager
     from zowe.zos_console_for_zowe_sdk import Console
 
     profile = ProfileManager().load(profile_type="zosmf")
