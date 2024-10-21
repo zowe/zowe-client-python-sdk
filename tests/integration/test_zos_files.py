@@ -153,7 +153,7 @@ class TestFilesIntegration(unittest.TestCase):
         os.unlink(SAMPLE_JCL_FIXTURE_PATH + ".tmp")
 
     def test_upload_download_delete_uss(self):
-        self.files.upload_file_to_uss(SAMPLE_JCL_FIXTURE_PATH, self.test_uss_upload)
+        self.USSFiles.upload(SAMPLE_JCL_FIXTURE_PATH, self.test_uss_upload)
         self.files.download_uss(self.test_uss_upload, SAMPLE_JCL_FIXTURE_PATH + ".tmp")
         with open(SAMPLE_JCL_FIXTURE_PATH, "r") as in_file:
             old_file_content = in_file.read()
