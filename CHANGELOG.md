@@ -139,3 +139,7 @@ All notable changes to the Zowe Client Python SDK will be documented in this fil
 - Fixed profile merge order to match Node.js SDK [#190](https://github.com/zowe/zowe-client-python-sdk/issues/190)
 - Fixed issue for datasets and jobs with special characters in URL [#211](https://github.com/zowe/zowe-client-python-sdk/issues/211)
 - Fixed exception handling in session.py [#213](https://github.com/zowe/zowe-client-python-sdk/issues/213)
+
+### Bug Fixes
+- Updated the sample scripts in readmes to remove/ stop using methods that were deprecated in #276
+- Therefore this fixes #336
