@@ -124,8 +124,7 @@ Create a dictionary to handle communication with the plug-in:
 ```python
     from zowe.zos_console_for_zowe_sdk import Console
     profile = {
-        "host": "example.com",
-        "port": 443,
+        "host_url": "example.com:443",
         "user": "<user>",
         "password": "<password>"
     }
