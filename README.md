@@ -1,4 +1,4 @@
-# Zowe Python Client SDK
+# Zowe Client Python SDK
 
 ![](https://img.shields.io/badge/license-EPL--2.0-blue) [![Latest Release](https://img.shields.io/github/v/release/zowe/zowe-client-python-sdk)](https://github.com/zowe/zowe-client-python-sdk/releases/latest) [![Documentation Status](https://readthedocs.org/projects/zowe-client-python-sdk/badge/?version=latest)](https://zowe-client-python-sdk.readthedocs.io/en/latest/index.html)
 
@@ -136,7 +136,7 @@ Create a dictionary to handle communication with the plug-in:
 Alternatively, you can use an existing Zowe CLI profile instead:
 
 ```python
-    from zowe.zos_core_for_zowe_sdk import ProfileManager
+    from zowe.core_for_zowe_sdk import ProfileManager
     from zowe.zos_console_for_zowe_sdk import Console
 
     profile = ProfileManager().load(profile_type="zosmf")

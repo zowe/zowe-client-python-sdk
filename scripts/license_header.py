@@ -2,7 +2,7 @@ import os
 import sys
 
 # Define the license header you expect in each file
-LICENSE_HEADER = '''"""Zowe Python Client SDK.
+LICENSE_HEADER = '''"""Zowe Client Python SDK.
 
 This program and the accompanying materials are made available under the terms of the
 Eclipse Public License v2.0 which accompanies this distribution, and is available at
