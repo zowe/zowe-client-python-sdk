@@ -1,7 +1,7 @@
-Zowe Python Client SDK
+Zowe Client Python SDK
 ======================
   
-The Zowe Python Client SDK consists of Python packages that enable programmatic interactions with z/OS REST API interfaces.
+The Zowe Client Python SDK consists of Python packages that enable programmatic interactions with z/OS REST API interfaces.
 
 [Zowe Docs](https://docs.zowe.org/stable/user-guide/sdks-using) provide more information on installing and using the SDK.
 
