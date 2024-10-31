@@ -145,5 +145,4 @@ All notable changes to the Zowe Client Python SDK will be documented in this fil
 - Fixed exception handling in session.py [#213](https://github.com/zowe/zowe-client-python-sdk/issues/213)
 
 ### Bug Fixes
-- Updated the sample scripts in readmes to remove/ stop using methods that were deprecated in #276
-- Therefore this fixes #336
+- Updated the sample scripts in readmes to remove/ stop using methods that were deprecated in #276. [#336](https://github.com/zowe/zowe-client-python-sdk/issues/336)
