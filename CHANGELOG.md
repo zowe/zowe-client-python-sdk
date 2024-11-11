@@ -6,12 +6,12 @@ All notable changes to the Zowe Client Python SDK will be documented in this fil
 
 ### Enhancements
 
-- Turning of logger at the class-constructor level [#316] (https://github.com/zowe/zowe-client-python-sdk/issues/316)
+- Turning off logger at the class-constructor level [#316](https://github.com/zowe/zowe-client-python-sdk/issues/316)
 
 ### Bug Fixes
 
-- Fixed the inconsistent use of the SDK name across SDKs in all files by implementing the "find and replace" tool. [#328](https://github.com/zowe/zowe-client-python-sdk/issues/328)
-- Updated the sample scripts in readmes to remove/ stop using methods that were deprecated in [#276](https://github.com/zowe/zowe-client-python-sdk/issues/276). [#336](https://github.com/zowe/zowe-client-python-sdk/issues/336)
+- Fixed the inconsistent use of the SDK name across SDKs in all files. [#328](https://github.com/zowe/zowe-client-python-sdk/issues/328)
+- Updated the sample scripts in readmes to stop using methods that were deprecated in [#276](https://github.com/zowe/zowe-client-python-sdk/issues/276). [#336](https://github.com/zowe/zowe-client-python-sdk/issues/336)
 
 ## `1.0.0-dev21`
 
@@ -144,7 +144,3 @@ All notable changes to the Zowe Client Python SDK will be documented in this fil
 - Fixed profile merge order to match Node.js SDK [#190](https://github.com/zowe/zowe-client-python-sdk/issues/190)
 - Fixed issue for datasets and jobs with special characters in URL [#211](https://github.com/zowe/zowe-client-python-sdk/issues/211)
 - Fixed exception handling in session.py [#213](https://github.com/zowe/zowe-client-python-sdk/issues/213)
-<<<<<<< HEAD
-
-### Bug Fixes
-- Updated the sample scripts in readmes to remove/ stop using methods that were deprecated in #276. [#336](https://github.com/zowe/zowe-client-python-sdk/issues/336)
