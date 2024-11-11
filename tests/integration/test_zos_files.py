@@ -77,12 +77,12 @@ class TestFilesIntegration(unittest.TestCase):
     def test_get_content_should_return_response_content(self):
         """Executing get_content should return response object from the server."""
         command_output = self.files.ds.get_content(self.test_member_jcl)
-        self.assertIsInstance(command_output.raw, urllib3.response.HTTPResponse)
+        self.assertIsInstance(command_output, str)
 
     def test_get_binary_content_should_return_response_content(self):
         """Executing get_binary_content should return response object from the server."""
         command_output = self.files.ds.get_binary_content(self.test_member_jcl)
-        self.assertIsInstance(command_output.raw, urllib3.response.HTTPResponse)
+        self.assertIsInstance(command_output, bytes)
 
     def test_get_file_content_streamed_should_return_response_content(self):
         """Executing get_binary_content should return response object from the server."""
@@ -149,11 +149,11 @@ class TestFilesIntegration(unittest.TestCase):
             new_file_content = in_file.read().rstrip()
         self.assertEqual(old_file_content, new_file_content)
 
-        self.Dataset.delete(self.files_fixtures["TEST_PDS"], member_name=self.files_fixtures["TEST_MEMBER_NEW"])
+        self.files.ds.delete(self.files_fixtures["TEST_PDS"], member_name=self.files_fixtures["TEST_MEMBER_NEW"])
         os.unlink(SAMPLE_JCL_FIXTURE_PATH + ".tmp")
 
     def test_upload_download_delete_uss(self):
-        self.USSFiles.upload(SAMPLE_JCL_FIXTURE_PATH, self.test_uss_upload)
+        self.files.uss.upload(SAMPLE_JCL_FIXTURE_PATH, self.test_uss_upload)
         self.files.uss.download(self.test_uss_upload, SAMPLE_JCL_FIXTURE_PATH + ".tmp")
         with open(SAMPLE_JCL_FIXTURE_PATH, "r") as in_file:
             old_file_content = in_file.read()
