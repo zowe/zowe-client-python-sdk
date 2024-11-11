@@ -70,7 +70,7 @@ class TestFilesIntegration(unittest.TestCase):
         self.assertIsInstance(command_output, MemberListResponse)
 
     def test_get_content_should_return_content_from_dataset(self):
-        """Executing gget_content should return content from dataset."""
+        """Executing get_content should return content from dataset."""
         command_output = self.files.ds.get_content(self.test_member_jcl)
         self.assertIsInstance(command_output, str)
 
@@ -85,7 +85,7 @@ class TestFilesIntegration(unittest.TestCase):
         self.assertIsInstance(command_output, bytes)
 
     def test_get_file_content_streamed_should_return_response_content(self):
-        """Executing get_binary_content should return response object from the server."""
+        """Executing get_content_streamed should return response object from the server."""
         command_output = self.files.uss.get_content_streamed(self.files_fixtures["TEST_USS"])
         self.assertIsInstance(command_output.raw, urllib3.response.HTTPResponse)
 
