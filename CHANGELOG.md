@@ -6,11 +6,12 @@ All notable changes to the Zowe Client Python SDK will be documented in this fil
 
 ### Enhancements
 
-- Turning of logger at the class-constructor level [#316] (https://github.com/zowe/zowe-client-python-sdk/issues/316)
+- Turning off logger at the class-constructor level [#316](https://github.com/zowe/zowe-client-python-sdk/issues/316)
 
 ### Bug Fixes
 
-- Fixed the inconsistent use of the SDK name across SDKs in all files by implementing the "find and replace" tool. [#328](https://github.com/zowe/zowe-client-python-sdk/issues/328)
+- Fixed the inconsistent use of the SDK name across SDKs in all files. [#328](https://github.com/zowe/zowe-client-python-sdk/issues/328)
+- Updated the sample scripts in readmes to stop using methods that were deprecated in [#276](https://github.com/zowe/zowe-client-python-sdk/issues/276). [#336](https://github.com/zowe/zowe-client-python-sdk/issues/336)
 
 ## `1.0.0-dev21`
 

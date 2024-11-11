@@ -9,7 +9,7 @@ connection = {"plugin_profile": "xxxx"}
 # -----------------------------------------------------
 print("...SYS1 datasets\n")
 my_files = Files(connection)
-my_dsn_list = my_files.list_dsn("SYS1.**.*")
+my_dsn_list = my_files.ds.list("SYS1.**.*")
 datasets = my_dsn_list["items"]
 for ds in datasets:
     print(ds["dsname"])
@@ -19,7 +19,7 @@ for ds in datasets:
 
 # -----------------------------------------------------
 print("...files in /etc\n")
-my_file_list = my_files.list_files("/etc")
+my_file_list = my_files.uss.list("/etc")
 files = my_file_list["items"]
 for file in files:
     print(file["name"], file["mode"])
@@ -28,5 +28,5 @@ for file in files:
 # Get the content of one of the files.
 # -----------------------------------------------------
 print("...content of a file\n")
-my_file_content = my_files.get_file_content("/z/tm891807/file.txt")
+my_file_content = my_files.uss.get_content("/z/tm891807/file.txt")
 print(my_file_content)
