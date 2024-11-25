@@ -20,7 +20,6 @@ All notable changes to the Zowe Client Python SDK will be documented in this fil
 
 - Fixed Core SDK package referencing a non-existent version of Secrets SDK.
 
-
 ## `1.0.0-dev20`
 
 ### Enhancements
