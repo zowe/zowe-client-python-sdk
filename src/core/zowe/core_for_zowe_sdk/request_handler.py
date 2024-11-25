@@ -98,10 +98,8 @@ class RequestHandler:
         stream : bool
             Flag indicates whether it is a streaming requests.
         """
-        session = self.session
-        request_object = requests.Request(method=self.__method, **self.__request_arguments)
-        prepared = session.prepare_request(request_object)
-        self.__response = session.send(prepared, stream=stream, **self.session_arguments)
+        self.__response = self.session.request(
+            method=self.__method, stream=stream, **self.session_arguments, **self.__request_arguments)
 
     def __del__(self):
         """Clean up the REST session object once it is no longer needed anymore."""
