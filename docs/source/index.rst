@@ -9,8 +9,8 @@ Python developers can leverage the Zowe SDK in order to create powerful scripts/
    :maxdepth: 2
    :caption: Contents:
 
-   usage/getting-started
    about/about
+   usage/getting-started
    packages/packages
    classes/index
    contributing/contributing

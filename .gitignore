@@ -180,3 +180,5 @@ docs/source/classes
 # Team config files
 zowe.config*.json
 zowe.schema.json
+
+node_modules/
