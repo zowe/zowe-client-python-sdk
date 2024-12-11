@@ -7,7 +7,6 @@
     "test": "tests"
   },
   "scripts": {
-    "postinstall": "npm run src:install && npm run doc:install",
     "src:install": "python -m pip install -r requirements.txt",
     "src:pydocstyle": "pydocstyle --match-dir='^(?!(build|response)$).*' --match='^(?!(__init__\\.py|setup\\.py$)).*\\.py$' src",
     "src:pydoclint": "pydoclint --exclude='.*/(build|response)/.*' src",
@@ -19,10 +18,15 @@
     "src:test:pytest": "coverage run -m pytest ./tests/unit",
     "src:test:xml": "coverage xml",
     "doc:install": "python -m pip install -r docs/requirements.txt",
+    "doc:dev": "npm run doc:clean && npm run doc:build && npm run doc:open",
     "doc:build": "cd docs && make html",
+    "doc:clean": "cd docs && make clean",
     "doc:open": "opener docs/build/html/index.html",
     "env:create": "python -m venv env",
-    "env:delete": "deactivate && rimraf env"
+    "env:active": "run-script-os",
+    "env:active:win32": "echo 'To activate, run the following command:\n\nenv\\Scripts\\activate\n\nTo deactivate, simply run:\n\ndeactivate\n'",
+    "env:active:default": "echo 'To activate, run the following command:\n\nsource env/bin/activate\n\nTo deactivate, simply run:\n\ndeactivate\n'",
+    "env:delete": "rimraf env"
   },
   "repository": {
     "type": "git",
@@ -41,6 +45,7 @@
   "homepage": "https://github.com/zowe/zowe-client-python-sdk#readme",
   "devDependencies": {
     "opener": "^1.5.2",
-    "rimraf": "^6.0.1"
+    "rimraf": "^6.0.1",
+    "run-script-os": "^1.1.6"
   }
 }

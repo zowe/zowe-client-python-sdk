@@ -16,11 +16,13 @@ This document is intended to help you build the documentation that will eventual
 These steps should help you to build the documentation
 
 0. Clone the repository, open a terminal, and `cd` into the repository directory
-1. Create a virtual environment and install all dependencies:
-    - `python -m venv venv`
-    - `python -m pip install -r docs/requirements.txt`
-2. On the terminal, navigate to the docs folder and run `make html`
-    - `cd docs`
-    - `make html`
-3. On the file explorer, navigate to the `<repo>/docs/build/html/` directory
-4. Open the `index.html` in a browser.
+1. Install project dependencies:
+    - `npm install`
+2. Create a virtual environment:
+    - `npm run env:create`
+3. Activate the virtual environment:
+    - `npm run env:activate`
+4. Install the doc dependencies
+    - `npm run doc:install`
+5. Build and open the documentation:
+    - `npm run doc:dev`
