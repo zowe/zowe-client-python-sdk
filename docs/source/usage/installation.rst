@@ -1,23 +1,17 @@
 Installation
 ============
+When installing the Zowe Client Python SDK you have two options:
 
-When installing the Zowe Client Python SDK you have two options.
+- Install **all Zowe packages** to install everything under the `zowe` namespace in PyPi.
+- Install a **single subpackage** for a smaller installation.
 
-- Install all the Zowe packages
-- Install a single sub-package
-
-The choice depends on your intentions. If you chose to install all Zowe SDK packages
-this means that you will install everything under the `zowe` namespace in PyPi. 
-
-Alternatively you can chose to install only a single subpackage for a smaller installation.
-
-To install all Zowe SDK packages using pip:
+To install all Zowe SDK packages using `pip`:
 
 .. code-block::
 
     pip install -U --pre zowe-python-sdk-bundle
 
-To install only a subpackage using pip:
+To install only a subpackage using `pip`:
 
 .. code-block::
 
