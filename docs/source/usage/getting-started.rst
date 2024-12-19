@@ -1,5 +1,6 @@
 Getting started
 =================
+Review the requirements and installation instructions to get started using the Zowe Client Python SDK.
 
 .. toctree::
    :maxdepth: 2
@@ -8,3 +9,4 @@ Getting started
    installation
    examples
    advanced
+

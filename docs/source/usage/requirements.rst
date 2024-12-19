@@ -1,8 +1,8 @@
 Requirements
 =============
 
-The project requires the following:
+Zowe Client Python SDK requires the following:
 
-- Python 3.9 and above
-- Sphinx (optional - To build project documentation)
-- Enchant (optional - to build project documentation)
+- **Python** 3.9+ to run your script
+- (optional) **Sphinx** to build project documentation
+- (optional) **Enchant** to build project documentation
