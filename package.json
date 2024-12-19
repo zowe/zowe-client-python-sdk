@@ -1,0 +1,51 @@
+{
+  "name": "zowe-client-python-sdk",
+  "description": "Zowe Client Python SDK",
+  "private": true,
+  "directories": {
+    "doc": "docs",
+    "test": "tests"
+  },
+  "scripts": {
+    "src:install": "python -m pip install -r requirements.txt",
+    "src:pydocstyle": "pydocstyle --match-dir='^(?!(build|response)$).*' --match='^(?!(__init__\\.py|setup\\.py$)).*\\.py$' src",
+    "src:pydoclint": "pydoclint --exclude='.*/(build|response)/.*' src",
+    "src:lint": "npm run src:lint:error && npm run src:lint:other",
+    "src:lint:error": "pylint src --errors-only --disable=E0401,E0611 --ignore=build",
+    "src:lint:other": "pylint ./src --disable=all --enable=C0103,C0301 --ignore=build,response --max-line-length=127",
+    "src:license": "python scripts/license_header.py src",
+    "src:test": "npm run src:test:pytest && npm run src:test:xml",
+    "src:test:pytest": "coverage run -m pytest ./tests/unit",
+    "src:test:xml": "coverage xml",
+    "doc:install": "python -m pip install -r docs/requirements.txt",
+    "doc:dev": "npm run doc:clean && npm run doc:build && npm run doc:open",
+    "doc:build": "cd docs && make html",
+    "doc:clean": "cd docs && make clean",
+    "doc:open": "opener docs/build/html/index.html",
+    "env:create": "python -m venv env",
+    "env:active": "run-script-os",
+    "env:active:win32": "echo 'To activate, run the following command:\n\nenv\\Scripts\\activate\n\nTo deactivate, simply run:\n\ndeactivate\n'",
+    "env:active:default": "echo 'To activate, run the following command:\n\nsource env/bin/activate\n\nTo deactivate, simply run:\n\ndeactivate\n'",
+    "env:delete": "rimraf env"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zowe/zowe-client-python-sdk.git"
+  },
+  "keywords": [
+    "zowe",
+    "python",
+    "sdk"
+  ],
+  "author": "Zowe",
+  "license": "EPL-2.0",
+  "bugs": {
+    "url": "https://github.com/zowe/zowe-client-python-sdk/issues"
+  },
+  "homepage": "https://github.com/zowe/zowe-client-python-sdk#readme",
+  "devDependencies": {
+    "opener": "^1.5.2",
+    "rimraf": "^6.0.1",
+    "run-script-os": "^1.1.6"
+  }
+}
