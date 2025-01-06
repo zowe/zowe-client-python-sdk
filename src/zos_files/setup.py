@@ -25,8 +25,8 @@ setup(
     long_description=open("README.md", "r").read(),
     long_description_content_type="text/markdown",
     url="https://github.com/zowe/zowe-client-python-sdk",
-    author="Guilherme Cartier",
-    author_email="gcartier94@gmail.com",
+    author="Zowe",
+    author_email="zowe.robot@gmail.com",
     license="EPL-2.0",
     classifiers=[
         "Programming Language :: Python :: 3",
