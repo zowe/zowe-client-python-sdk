@@ -13,11 +13,25 @@ class TestSdkApiClass(TestCase):
 
     def setUp(self):
         """Setup fixtures for SdkApi class."""
-        common_props = {"host": "mock-url.com", "port": 443, "protocol": "https", "rejectUnauthorized": True}
+        common_props = {
+            "host": "mock-url.com",
+            "port": 443,
+            "protocol": "https",
+            "rejectUnauthorized": True,
+        }
         self.basic_props = {**common_props, "user": "Username", "password": "Password"}
         self.bearer_props = {**common_props, "tokenValue": "BearerToken"}
-        self.token_props = {**common_props, "tokenType": "MyToken", "tokenValue": "TokenValue"}
-        self.cert_props = {**common_props, "rejectUnauthorized": False, "certFile": "cert", "certKeyFile": "certKey"}
+        self.token_props = {
+            **common_props,
+            "tokenType": "MyToken",
+            "tokenValue": "TokenValue",
+        }
+        self.cert_props = {
+            **common_props,
+            "rejectUnauthorized": False,
+            "certFile": "cert",
+            "certKeyFile": "certKey",
+        }
         self.default_url = "https://default-api.com/"
 
     def test_object_should_be_instance_of_class(self):
@@ -65,7 +79,10 @@ class TestSdkApiClass(TestCase):
     def test_should_handle_cert_auth(self):
         props = self.cert_props
         sdk_api = SdkApi(props, self.default_url)
-        self.assertEqual(sdk_api.session.cert, (self.cert_props["certFile"], self.cert_props["certKeyFile"]))
+        self.assertEqual(
+            sdk_api.session.cert,
+            (self.cert_props["certFile"], self.cert_props["certKeyFile"]),
+        )
 
     def test_should_handle_basic_auth(self):
         """Created object should handle basic authentication."""

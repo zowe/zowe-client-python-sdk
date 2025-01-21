@@ -110,7 +110,12 @@ class USSFiles(SdkApi):
         response_json = self.request_handler.perform_request("POST", custom_args, expected_code=[201])
         return response_json
 
-    def write(self, filepath_name: str, data: str, encoding: str = _ZOWE_FILES_DEFAULT_ENCODING) -> dict:
+    def write(
+        self,
+        filepath_name: str,
+        data: str,
+        encoding: str = _ZOWE_FILES_DEFAULT_ENCODING,
+    ) -> dict:
         """
         Write content to an existing UNIX file.
 
@@ -195,7 +200,12 @@ class USSFiles(SdkApi):
             for chunk in response.iter_content(chunk_size=4096, decode_unicode=not binary):
                 f.write(chunk)
 
-    def upload(self, input_file: str, filepath_name: str, encoding: str = _ZOWE_FILES_DEFAULT_ENCODING):
+    def upload(
+        self,
+        input_file: str,
+        filepath_name: str,
+        encoding: str = _ZOWE_FILES_DEFAULT_ENCODING,
+    ):
         """
         Upload contents of a given file and saves it to a file at the given USS path.
 

@@ -3,6 +3,7 @@ deepmerge==1.1.0
 jsonschema==4.17.3
 PyYAML==6.0.1
 requests==2.32.0
+paramiko==3.5.0
 
 # Dev deps
 black
@@ -24,3 +25,4 @@ wheel
 -e ./src/zos_jobs
 -e ./src/zos_tso
 -e ./src/zosmf
+-e ./src/zos_uss

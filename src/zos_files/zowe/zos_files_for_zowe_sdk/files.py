@@ -74,12 +74,24 @@ class Files(SdkApi):
         """Use ds.list() instead of this deprecated function."""
         return self.ds.list(name_pattern, return_attributes)
 
-    def list_dsn_members(self, dataset_name, member_pattern=None, member_start=None, limit=1000, attributes="member"):
+    def list_dsn_members(
+        self,
+        dataset_name,
+        member_pattern=None,
+        member_start=None,
+        limit=1000,
+        attributes="member",
+    ):
         """Use ds.list_members() instead of this deprecated function."""
         return self.ds.list_members(dataset_name, member_pattern, member_start, limit, attributes)
 
     def copy_uss_to_data_set(
-        self, from_filename, to_dataset_name, to_member_name=None, type=FileType.TEXT, replace=False
+        self,
+        from_filename,
+        to_dataset_name,
+        to_member_name=None,
+        type=FileType.TEXT,
+        replace=False,
     ):
         """Use ds.copy_uss_to_data_set() instead of this deprecated function."""
         return self.ds.copy_uss_to_data_set(from_filename, to_dataset_name, to_member_name, type, replace)
@@ -97,7 +109,14 @@ class Files(SdkApi):
     ):
         """Use ds.copy_data_set_or_member() instead of this deprecated function."""
         return self.ds.copy_data_set_or_member(
-            from_dataset_name, to_dataset_name, from_member_name, volser, alias, to_member_name, enq, replace
+            from_dataset_name,
+            to_dataset_name,
+            from_member_name,
+            volser,
+            alias,
+            to_member_name,
+            enq,
+            replace,
         )
 
     def get_dsn_content(self, dataset_name):
@@ -140,7 +159,13 @@ class Files(SdkApi):
         """Use ds.download_binary() instead of this deprecated function."""
         self.ds.download_binary(dataset_name, output_file, with_prefixes)
 
-    def upload_file_to_dsn(self, input_file, dataset_name, encoding=_ZOWE_FILES_DEFAULT_ENCODING, binary=False):
+    def upload_file_to_dsn(
+        self,
+        input_file,
+        dataset_name,
+        encoding=_ZOWE_FILES_DEFAULT_ENCODING,
+        binary=False,
+    ):
         """Use ds.upload_file() instead of this deprecated function."""
         self.ds.upload_file(input_file, dataset_name, encoding, binary)
 
@@ -168,7 +193,13 @@ class Files(SdkApi):
         """Use fs.delete() instead of this deprecated function."""
         return self.fs.delete(file_system_name)
 
-    def mount_file_system(self, file_system_name, mount_point, options={}, encoding=_ZOWE_FILES_DEFAULT_ENCODING):
+    def mount_file_system(
+        self,
+        file_system_name,
+        mount_point,
+        options={},
+        encoding=_ZOWE_FILES_DEFAULT_ENCODING,
+    ):
         """Use fs.mount() instead of this deprecated function."""
         return self.fs.mount(file_system_name, mount_point, options, encoding)
 
