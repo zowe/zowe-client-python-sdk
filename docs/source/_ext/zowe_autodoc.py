@@ -58,7 +58,11 @@ def main():
             if len(class_names) == 1:
                 rst_name = f"{py_name[:-3]}.rst"
                 rst_contents = render_template(
-                    CLASS_TEMPLATE, {"fullname": f"{sdk_name}.{pkg_name}.{class_names[0]}", "header": class_names[0]}
+                    CLASS_TEMPLATE,
+                    {
+                        "fullname": f"{sdk_name}.{pkg_name}.{class_names[0]}",
+                        "header": class_names[0],
+                    },
                 )
                 with open(f"docs/source/classes/{sdk_name}/{rst_name}", "w", encoding="utf-8") as f:
                     f.write(rst_contents)
@@ -71,9 +75,16 @@ def main():
                     rst_name = f"{class_name.lower()}.rst"
                     rst_contents = render_template(
                         CLASS_TEMPLATE,
-                        {"fullname": f"{sdk_name}.{pkg_name}.{module_name}.{class_name}", "header": class_name},
+                        {
+                            "fullname": f"{sdk_name}.{pkg_name}.{module_name}.{class_name}",
+                            "header": class_name,
+                        },
                     )
-                    with open(f"docs/source/classes/{sdk_name}/{module_name}/{rst_name}", "w", encoding="utf-8") as f:
+                    with open(
+                        f"docs/source/classes/{sdk_name}/{module_name}/{rst_name}",
+                        "w",
+                        encoding="utf-8",
+                    ) as f:
                         f.write(rst_contents)
                     child_rst_names.append(rst_name)
                 rst_name = f"{module_name}/index.rst"
@@ -104,7 +115,11 @@ def main():
 
     rst_contents = render_template(
         INDEX_TEMPLATE,
-        {"filelist": "\n   ".join(f"{name}/index" for name in sdk_names), "header": "Classes", "maxdepth": 3},
+        {
+            "filelist": "\n   ".join(f"{name}/index" for name in sdk_names),
+            "header": "Classes",
+            "maxdepth": 3,
+        },
     )
     with open(f"docs/source/classes/index.rst", "w", encoding="utf-8") as f:
         f.write(rst_contents)

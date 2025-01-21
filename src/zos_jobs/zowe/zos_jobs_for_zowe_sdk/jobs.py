@@ -367,7 +367,10 @@ class Jobs(SdkApi):
         """
         custom_args = self._create_custom_request_arguments()
         custom_args["data"] = str(jcl)
-        custom_args["headers"] = {"Content-Type": "text/plain", "X-CSRF-ZOSMF-HEADER": ""}
+        custom_args["headers"] = {
+            "Content-Type": "text/plain",
+            "X-CSRF-ZOSMF-HEADER": "",
+        }
         response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[201])
         return JobResponse(response_json)
 
