@@ -54,6 +54,7 @@ jsonschema
 pyyaml
 requests>=2.22
 urllib3
+paramiko
 ```
 
 It also has an optional dependency on the Zowe Secrets SDK for storing client secrets which can be installed with the `secrets` extra:

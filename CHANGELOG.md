@@ -8,6 +8,7 @@ All notable changes to the Zowe Client Python SDK will be documented in this fil
 
 - Turning off logger at the class-constructor level [#316](https://github.com/zowe/zowe-client-python-sdk/issues/316)
 - Added support for commonly used environmental variables, like `REQUESTS_CA_BUNDLE` and `CURL_CA_BUNDLE`. [#346](https://github.com/zowe/zowe-client-python-sdk/issues/346)
+- Add method to issue SSH commands. [#253](https://github.com/zowe/zowe-client-python-sdk/issues/253)
 
 ### Bug Fixes
 
