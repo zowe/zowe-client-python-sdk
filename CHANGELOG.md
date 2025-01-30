@@ -2,6 +2,10 @@
 
 All notable changes to the Zowe Client Python SDK will be documented in this file.
 
+## Recent Changes
+
+- Add method to issue SSH commands. [#253](https://github.com/zowe/zowe-client-python-sdk/issues/253)
+
 ## `1.0.0-dev22`
 
 ### Enhancements

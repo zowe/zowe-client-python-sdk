@@ -26,3 +26,13 @@ These steps should help you to build the documentation
     - `npm run doc:install`
 5. Build and open the documentation:
     - `npm run doc:dev`
+
+## Best practices
+
+When using paramiko to interact with z/OS UNIX System Services (USS), it's important to consider encoding and special character handling. 
+Since z/OS uses EBCDIC-based encodings (e.g., IBM-1047, IBM-037, etc.), some commands may return unexpected results when processed in a UTF-8 environment. This is because by default, paramiko reads responses in UTF-8, but z/OS USS may return data in an EBCDIC codepage.
+Certain special characters, such as ööö, 👍, or 🔟, may not be correctly interpreted if the encoding is mismatched.
+If you experience unexpected characters in output, check the terminal's encoding settings (local command on Linux).
+Some commands may alter the terminal's codepage, affecting subsequent outputs.
+For example, switching between ASCII and EBCDIC on mainframes can impact character interpretation.
+If a command affects encoding, reset it after execution.
