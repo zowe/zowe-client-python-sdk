@@ -14,8 +14,10 @@ from zowe.core_for_zowe_sdk import SdkApi
 
 from .response import ZosmfResponse
 
+from typing import Any
 
-class Zosmf(SdkApi):
+
+class Zosmf(SdkApi): # type: ignore
     """
     Class used to represent the base z/OSMF API.
 
@@ -27,7 +29,7 @@ class Zosmf(SdkApi):
         Flag to disable logger
     """
 
-    def __init__(self, connection: dict, log: bool = True):
+    def __init__(self, connection: dict[str, Any], log: bool = True):
         super().__init__(connection, "/zosmf/info", logger_name=__name__, log=log)
 
     def get_info(self) -> ZosmfResponse:

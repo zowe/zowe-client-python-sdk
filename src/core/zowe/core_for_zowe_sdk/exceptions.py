@@ -80,7 +80,7 @@ class FileNotFound(Exception):
 class MissingConnectionArgs(Exception):
     """Class used to represent a missing connection argument exception."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(
             "You must provide host, user, and password for a z/OSMF "
             "connection, or the name of a z/OSMF profile that exists on your "
@@ -130,7 +130,7 @@ class SecureValuesNotFound(Exception):
         The list of secure values not found
     """
 
-    def __init__(self, values: set):
+    def __init__(self, values: set[str]):
         super().__init__("Failed to load secure values: {}".format(str(values)))
 
 
