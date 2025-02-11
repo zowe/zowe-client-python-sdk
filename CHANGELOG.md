@@ -16,9 +16,16 @@ All notable changes to the Zowe Client Python SDK will be documented in this fil
 
 ## `1.0.0-dev21`
 
+### Enhancements
+- Split response classes into individual modules for better maintainability:
+    - `JobResponse` now lives in `job_response.py`
+    - `SpoolResponse` now lives in `spool_response.py`
+    - `StatusResponse` now lives in `status_response.py`
+- Updated imports in relevant modules to reflect these changes.
+
 ### Bug Fixes
 
-- Fixed Core SDK package referencing a non-existent version of Secrets SDK.
+- Fixed Core SDK package referencing a non-existent version of Secrets SDK. 
 
 ## `1.0.0-dev20`
 
@@ -28,6 +35,7 @@ All notable changes to the Zowe Client Python SDK will be documented in this fil
 
 ### Bug Fixes
 
+- Validate existing type annotations. [#321] (https://github.com/zowe/zowe-client-python-sdk/issues/321)
 
 ## `1.0.0-dev19`
 

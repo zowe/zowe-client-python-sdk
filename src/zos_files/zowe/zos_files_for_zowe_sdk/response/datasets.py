@@ -16,12 +16,12 @@ from typing import Any, Dict, List, Optional
 
 @dataclass
 class DatasetListResponse:
-    items: Optional[List[dict]] = None
+    items: Optional[List[dict[str, Any]]] = None
     returnedRows: Optional[int] = None
     totalRows: Optional[int] = None
     JSONversion: Optional[int] = None
 
-    def __init__(self, response: dict, attributes: bool) -> None:
+    def __init__(self, response: dict[str, Any], attributes: bool) -> None:
         for key, value in response.items():
             if key == "items":
                 value = (
@@ -79,11 +79,11 @@ class DatasetResponse:
 
 @dataclass
 class MemberListResponse:
-    items: Optional[List[dict]] = None
+    items: Optional[List[dict[str, Any]]] = None
     totalRows: Optional[int] = None
     JSONversion: Optional[int] = None
 
-    def __init__(self, response: dict, attributes: bool) -> None:
+    def __init__(self, response: dict[str, Any], attributes: bool) -> None:
         for key, value in response.items():
             if key == "items":
                 value = (
