@@ -19,7 +19,7 @@ Reference
 
    ../classes/zos_files/index
 
-Interacting with USS via z/OSMF
+Interacting with z/OS Unix via z/OSMF
 ===============================
 
 The Zowe Client Python SDK leverages the z/OS Management Facility (z/OSMF) REST interface to interact with Unix System Services (USS) on z/OS. 
@@ -35,8 +35,8 @@ In summary, it might appear that all USS functionality is routed through z/OSMF,
 Paramiko and Encoding Considerations
 ======================================
 
-When using Paramiko to interact with z/OS UNIX System Services (USS), it is important to consider encoding and the handling of special characters. 
-By default, Paramiko decodes responses using UTF-8, but z/OS USS may return data in an EBCDIC codepage (e.g., IBM-1047, IBM-037, etc.). 
+When using Paramiko to interact with z/OS Unix, it is important to consider encoding and the handling of special characters. 
+By default, Paramiko decodes responses using UTF-8, but z/OS Unix may return data in an EBCDIC codepage (e.g., IBM-1047, IBM-037, etc.). 
 This mismatch can result in unexpected output, particularly with special characters like ``ööö``, ``👍``, or ``🔟``.
 
 If you experience unexpected characters in your output, please check your terminal's encoding settings (for example, using ``locale`` on Linux). 
