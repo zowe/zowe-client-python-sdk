@@ -22,7 +22,7 @@ setup(
     name="zowe_zos_uss_for_zowe_sdk",
     version=__version__,
     description="Zowe Python SDK - z/OS UNIX System Services (USS) package",
-    long_description=open("README.md", "r").read(),
+    long_description=open("README.md", "r", encoding="utf-8").read(),
     long_description_content_type="text/markdown",
     url="https://github.com/zowe/zowe-client-python-sdk",
     author="Zowe",
