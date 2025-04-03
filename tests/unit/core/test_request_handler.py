@@ -23,7 +23,10 @@ class TestRequestHandlerClass(unittest.TestCase):
     @mock.patch("logging.Logger.error")
     @mock.patch("requests.Session.send")
     def test_perform_streamed_request(
-        self, mock_send_request, mock_logger_error: mock.MagicMock, mock_logger_debug: mock.MagicMock
+        self,
+        mock_send_request,
+        mock_logger_error: mock.MagicMock,
+        mock_logger_debug: mock.MagicMock,
     ):
         """Performing a streamed request should call 'send_request' method"""
         mock_send_request.return_value = mock.Mock(status_code=200)

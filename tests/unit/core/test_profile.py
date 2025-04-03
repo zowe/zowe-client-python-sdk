@@ -3,9 +3,8 @@
 import os
 import unittest
 
-from zowe.core_for_zowe_sdk import (
-    ZosmfProfile
-)
+from zowe.core_for_zowe_sdk import ZosmfProfile
+
 
 class TestZosmfProfileClass(unittest.TestCase):
     """ZosmfProfile class unit tests."""
