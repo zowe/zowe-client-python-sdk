@@ -12,7 +12,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [ubuntu-22.04, macos-latest, windows-latest]
         python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
     env:
       OS: ${{ matrix.os }}
@@ -33,7 +33,7 @@ jobs:
       - name: Lint with pydoclint
         run: pydoclint --exclude='.*/(build|response)/.*' src
       - name: Lint with pylint
-        run: | 
+        run: |
           # check for Python errors
           pylint src --errors-only --disable=E0401,E0611 --ignore=build
           # check for lint
