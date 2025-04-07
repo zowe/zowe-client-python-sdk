@@ -9,4 +9,9 @@ SPDX-License-Identifier: EPL-2.0
 
 Copyright Contributors to the Zowe Project.
 """
-from .jobs import JobResponse, SpoolResponse, StatusResponse
+from .job_response import JobResponse
+from .spool_response import SpoolResponse
+from .status_response import StatusResponse
+
+
+__all__ = ["JobResponse", "SpoolResponse", "StatusResponse"]

@@ -29,7 +29,7 @@ class JobResponse:
     status: Optional[str] = None
     retcode: Optional[str] = None
 
-    def __init__(self, response: dict) -> None:
+    def __init__(self, response: Dict[str, Any]) -> None:
         for k, value in response.items():
             key = k.replace("-", "_")
             if key == "class":
@@ -57,7 +57,7 @@ class StatusResponse:
     jobname: Optional[str] = None
     status: Optional[int] = None
 
-    def __init__(self, response: dict) -> None:
+    def __init__(self, response: Dict[str, Any]) -> None:
         for k, value in response.items():
             key = k.replace("-", "_")
             super().__setattr__(key, value)
@@ -86,7 +86,7 @@ class SpoolResponse:
     jobname: Optional[str] = None
     procstep: Optional[str] = None
 
-    def __init__(self, response: dict) -> None:
+    def __init__(self, response: Dict[str, Any]) -> None:
         for k, value in response.items():
             key = k.replace("-", "_")
             if key == "class":

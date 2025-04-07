@@ -11,14 +11,15 @@ Copyright Contributors to the Zowe Project.
 """
 
 import os
-from typing import List, Optional
+import json
+from typing import List, Optional, Any
 
 from zowe.core_for_zowe_sdk import SdkApi
 
 from .response import JobResponse, SpoolResponse, StatusResponse
 
 
-class Jobs(SdkApi):
+class Jobs(SdkApi): # type: ignore
     """
     Class used to represent the base z/OSMF Jobs API.
 
@@ -32,7 +33,7 @@ class Jobs(SdkApi):
         Flag to disable logger
     """
 
-    def __init__(self, connection: dict, log: bool = True):
+    def __init__(self, connection: dict[str, Any], log: bool = True):
         super().__init__(connection, "/zosmf/restjobs/jobs/", logger_name=__name__, log=log)
 
     def get_job_status(self, jobname: str, jobid: str) -> JobResponse:
@@ -132,7 +133,7 @@ class Jobs(SdkApi):
         response_json = self.request_handler.perform_request("DELETE", custom_args, expected_code=[202, 200])
         return StatusResponse(response_json)
 
-    def _issue_job_request(self, req: dict, jobname: str, jobid: str, modify_version: str) -> StatusResponse:
+    def _issue_job_request(self, req: dict[str, Any], jobname: str, jobid: str, modify_version: str) -> StatusResponse:
         """
         Issue a job request.
 
@@ -414,7 +415,10 @@ class Jobs(SdkApi):
         request_url = "{}{}".format(self._request_endpoint, self._encode_uri_component(job_url))
         custom_args["url"] = request_url
         response_json = self.request_handler.perform_request("GET", custom_args)
-        return response_json
+        if isinstance(response_json, dict):
+            return json.dumps(response_json)  # Convert dict to JSON string
+        else:
+            return ""
 
     def get_spool_file_contents(self, correlator: str, id: str) -> str:
         """
@@ -438,9 +442,14 @@ class Jobs(SdkApi):
         request_url = "{}{}".format(self._request_endpoint, self._encode_uri_component(job_url))
         custom_args["url"] = request_url
         response_json = self.request_handler.perform_request("GET", custom_args)
-        return response_json
+        if isinstance(response_json, str):
+            return response_json  # Directly return if it's already a string
+        elif isinstance(response_json, dict):
+            return str(response_json)  # Convert dict to string (you can choose better formatting like json.dumps if needed)
+        else:
+            return ""
 
-    def get_job_output_as_files(self, status: dict, output_dir: str):
+    def get_job_output_as_files(self, status: dict[str, Any], output_dir: str) -> None:
         """
         Get all spool files and submitted jcl text in separate files in the specified output directory.
 

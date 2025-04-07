@@ -10,4 +10,7 @@ SPDX-License-Identifier: EPL-2.0
 Copyright Contributors to the Zowe Project.
 """
 
-from .console import ConsoleResponse, IssueCommandResponse
+from .console_response import ConsoleResponse 
+from .response import IssueCommandResponse
+
+__all__= ["ConsoleResponse", "IssueCommandResponse"]

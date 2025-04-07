@@ -20,7 +20,7 @@ class StartResponse:
     queueID: Optional[str] = None
     sessionID: Optional[str] = None
     ver: Optional[str] = None
-    tsoData: Optional[List[dict]] = None
+    tsoData: Optional[List[Dict[str, str]]] = None
     reused: Optional[bool] = None
     timeout: Optional[bool] = None
 
@@ -38,7 +38,7 @@ class EndResponse:
     reused: Optional[bool] = None
     timeout: Optional[bool] = None
     msgData: Optional[str] = None
-    msgId: Optional[List] = None
+    msgId: Optional[List[str]] = None
 
     def __getitem__(self, key: str) -> Any:
         return self.__dict__[key]
@@ -51,7 +51,7 @@ class EndResponse:
 class SendResponse:
     servletKey: Optional[str] = None
     ver: Optional[str] = None
-    tsoData: Optional[List[dict]] = None
+    tsoData: Optional[List[Dict[str, Any]]] = None
     reused: Optional[bool] = None
     timeout: Optional[bool] = None
 
@@ -67,9 +67,9 @@ class IssueResponse:
     start_response: StartResponse
     send_response: SendResponse
     end_response: EndResponse
-    tso_messages: list
+    tso_messages: list[str]
 
-    def __init__(self, start, send, end, msg):
+    def __init__(self, start: StartResponse, send: SendResponse, end: EndResponse, msg: List[str]) -> None:
         self.start_response = start
         self.send_response = send
         self.end_response = end

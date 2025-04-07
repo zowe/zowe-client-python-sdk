@@ -9,4 +9,10 @@ SPDX-License-Identifier: EPL-2.0
 
 Copyright Contributors to the Zowe Project.
 """
-from .tso import EndResponse, IssueResponse, SendResponse, StartResponse
+from .end_response import EndResponse
+from .issue_response import IssueResponse
+from .send_response import SendResponse
+from .start_response import StartResponse
+
+__all__ = ["EndResponse", "IssueResponse", "SendResponse", "StartResponse"]
+
