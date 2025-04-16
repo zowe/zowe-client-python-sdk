@@ -41,7 +41,8 @@ class TestFilesClass(TestCase):
         """Test that the correct exception is raised when an invalid permission option is provided"""
         with self.assertRaises(exceptions.InvalidPermsOption) as e_info:
             Files(self.test_profile).create_zfs_file_system(
-                "file_system_name", {"perms": -1, "cylsPri": 16777213, "cylsSec": 16777215}
+                "file_system_name",
+                {"perms": -1, "cylsPri": 16777213, "cylsSec": 16777215},
             )
         self.assertEqual(str(e_info.exception), "Invalid zos-files create command 'perms' option: -1")
 
@@ -49,7 +50,8 @@ class TestFilesClass(TestCase):
         """Test that the correct exception is raised when an invalid memory allocation option is provided"""
         with self.assertRaises(exceptions.MaxAllocationQuantityExceeded) as e_info:
             Files(self.test_profile).create_zfs_file_system(
-                "file_system_name", {"perms": 775, "cylsPri": 1677755513, "cylsSec": 16777215}
+                "file_system_name",
+                {"perms": 775, "cylsPri": 1677755513, "cylsSec": 16777215},
             )
         self.assertEqual(str(e_info.exception), "Maximum allocation quantity of 16777215 exceeded")
 

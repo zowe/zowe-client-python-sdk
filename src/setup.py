@@ -13,9 +13,8 @@ Copyright Contributors to the Zowe Project.
 import os.path
 import uuid
 
-from setuptools import setup
-
 from _version import __version__
+from setuptools import setup
 
 src_dir = os.path.realpath(os.path.dirname(__file__))
 uuid4 = uuid.uuid4()
