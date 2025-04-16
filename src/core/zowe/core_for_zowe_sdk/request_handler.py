@@ -10,7 +10,7 @@ SPDX-License-Identifier: EPL-2.0
 Copyright Contributors to the Zowe Project.
 """
 
-from typing import Union
+from typing import Union, Any
 
 import requests
 import urllib3
@@ -31,21 +31,21 @@ class RequestHandler:
         The logger name of the modules calling request handler
     """
 
-    def __init__(self, session_arguments: dict, logger_name: str = __name__):
+    def __init__(self, session_arguments: dict[str, Any], logger_name: str = __name__):
         self.session = requests.Session()
         self.session_arguments = session_arguments
         self.__valid_methods = ["GET", "POST", "PUT", "DELETE"]
         self.__handle_ssl_warnings()
         self.__logger = Log.register_logger(logger_name)
 
-    def __handle_ssl_warnings(self):
+    def __handle_ssl_warnings(self) -> None:
         """Turn off warnings if the SSL verification argument if off."""
         if not self.session_arguments["verify"]:
             urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
     def perform_request(
-        self, method: str, request_arguments: dict, expected_code: list = [200], stream: bool = False
-    ) -> Union[str, bytes, dict, None]:
+        self, method: str, request_arguments: dict[str, Any], expected_code: list[int] = [200], stream: bool = False
+    ) -> Union[str, bytes, dict[str, Any], None]:
         """Execute an HTTP/HTTPS requests from given arguments and return validated response (JSON).
 
         Parameters
@@ -74,10 +74,11 @@ class RequestHandler:
         self.__send_request(stream=stream)
         self.__validate_response()
         if stream:
-            return self.__response
-        return self.__normalize_response()
+            return self.__response.content
+        else:
+            return self.__normalize_response()
 
-    def __validate_method(self):
+    def __validate_method(self) -> None:
         """Check if the input request method for the request is supported.
 
         Raises
@@ -89,7 +90,7 @@ class RequestHandler:
             self.__logger.error(f"Invalid HTTP method input {self.__method}")
             raise InvalidRequestMethod(self.__method)
 
-    def __send_request(self, stream: bool = False):
+    def __send_request(self, stream: bool = False) -> None:
         """
         Build a custom session object, prepare it with a custom request and send it.
 
@@ -101,11 +102,11 @@ class RequestHandler:
         self.__response = self.session.request(
             method=self.__method, stream=stream, **self.session_arguments, **self.__request_arguments)
 
-    def __del__(self):
+    def __del__(self) -> None:
         """Clean up the REST session object once it is no longer needed anymore."""
         self.session.close()
 
-    def __validate_response(self):
+    def __validate_response(self) -> None:
         """Validate if request response is acceptable based on expected code list.
 
         Raises
@@ -123,7 +124,7 @@ class RequestHandler:
                     f"Expected: {self.__response.status_code}\n"
                     f"Request output: {self.__response.text}"
                 )
-                raise UnexpectedStatus(self.__expected_code, self.__response.status_code, self.__response.text)
+                raise UnexpectedStatus(self.__response.status_code, self.__response.status_code, len(self.__response.text))
         else:
             output_str = str(self.__response.request.url)
             output_str += "\n" + str(self.__response.request.headers)
@@ -134,7 +135,7 @@ class RequestHandler:
             )
             raise RequestFailed(self.__response.status_code, output_str)
 
-    def __normalize_response(self) -> Union[str, bytes, dict, None]:
+    def __normalize_response(self) -> Union[str, bytes, dict[str, Any], None]:
         """
         Normalize the response object to a JSON format.
 

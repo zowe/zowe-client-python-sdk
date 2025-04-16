@@ -10,7 +10,7 @@ SPDX-License-Identifier: EPL-2.0
 Copyright Contributors to the Zowe Project.
 """
 
-from typing import Optional
+from typing import Optional, Any
 
 from zowe.core_for_zowe_sdk import SdkApi
 from zowe.zos_files_for_zowe_sdk import constants
@@ -21,7 +21,7 @@ from .response import FileSystemListResponse
 _ZOWE_FILES_DEFAULT_ENCODING = constants.zos_file_constants["ZoweFilesDefaultEncoding"]
 
 
-class FileSystems(SdkApi):
+class FileSystems(SdkApi): #type: ignore
     """
     Class used to represent the base z/OSMF FileSystems API.
 
@@ -35,11 +35,11 @@ class FileSystems(SdkApi):
         Flag to disable logger
     """
 
-    def __init__(self, connection: dict, log: bool = True):
+    def __init__(self, connection: dict[str, Any], log: bool = True):
         super().__init__(connection, "/zosmf/restfiles/", logger_name=__name__, log=log)
         self._default_headers["Accept-Encoding"] = "gzip"
 
-    def create(self, file_system_name: str, options: dict = {}) -> dict:
+    def create(self, file_system_name: str, options: dict[str, Any] = {}) -> dict[str, Any]:
         """
         Create a z/OS UNIX zFS Filesystem.
 
@@ -77,9 +77,11 @@ class FileSystems(SdkApi):
         custom_args["url"] = "{}mfs/zfs/{}".format(self._request_endpoint, file_system_name)
         custom_args["json"] = options
         response_json = self.request_handler.perform_request("POST", custom_args, expected_code=[201])
+        if not isinstance(response_json, dict):
+            raise TypeError(f"Expected dict, but got {type(response_json).__name__}")
         return response_json
 
-    def delete(self, file_system_name: str) -> dict:
+    def delete(self, file_system_name: str) -> dict[str, Any]:
         """
         Delete a zFS Filesystem.
 
@@ -96,11 +98,15 @@ class FileSystems(SdkApi):
         custom_args = self._create_custom_request_arguments()
         custom_args["url"] = "{}mfs/zfs/{}".format(self._request_endpoint, file_system_name)
         response_json = self.request_handler.perform_request("DELETE", custom_args, expected_code=[204])
+        if response_json is None:
+            return {}
+        if not isinstance(response_json, dict):
+            raise TypeError(f"Expected dict, but got {type(response_json).__name__}")
         return response_json
 
     def mount(
-        self, file_system_name: str, mount_point: str, options: dict = {}, encoding: str = _ZOWE_FILES_DEFAULT_ENCODING
-    ) -> dict:
+        self, file_system_name: str, mount_point: str, options: dict[str, Any] = {}, encoding: str = _ZOWE_FILES_DEFAULT_ENCODING
+    ) -> dict[str, Any]:
         """
         Mount a z/OS UNIX file system on a specified directory.
 
@@ -127,9 +133,13 @@ class FileSystems(SdkApi):
         custom_args["json"] = options
         custom_args["headers"]["Content-Type"] = "text/plain; charset={}".format(encoding)
         response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[204])
+        if response_json is None:
+            return {}
+        if not isinstance(response_json, dict):
+            raise TypeError(f"Expected dict, but got {type(response_json).__name__}")
         return response_json
 
-    def unmount(self, file_system_name: str, options: dict = {}, encoding: str = _ZOWE_FILES_DEFAULT_ENCODING) -> dict:
+    def unmount(self, file_system_name: str, options: dict[str, Any] = {}, encoding: str = _ZOWE_FILES_DEFAULT_ENCODING) -> dict[str, Any]:
         """
         Unmount a z/OS UNIX file system on a specified directory.
 
@@ -153,6 +163,10 @@ class FileSystems(SdkApi):
         custom_args["json"] = options
         custom_args["headers"]["Content-Type"] = "text/plain; charset={}".format(encoding)
         response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[204])
+        if response_json is None:
+            return {}
+        if not isinstance(response_json, dict):
+            raise TypeError(f"Expected dict, but got {type(response_json).__name__}")
         return response_json
 
     def list(

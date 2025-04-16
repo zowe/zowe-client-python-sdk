@@ -14,7 +14,7 @@ import os
 import os.path
 import warnings
 from copy import deepcopy
-from typing import Optional
+from typing import Optional, Dict, Any
 
 from deepmerge import always_merger
 from jsonschema.exceptions import (
@@ -66,12 +66,12 @@ class ProfileManager:
         Indicates whether warnings are shown
     """
 
-    def __init__(self, appname: Optional[str] = "zowe", show_warnings: Optional[bool] = True):
-        self.__appname = appname
+    def __init__(self, appname:str = "zowe", show_warnings: Optional[bool] = True):
+        self.__appname = appname if appname is not None else "zowe"  # Ensure it is a string
         self.__show_warnings = show_warnings
 
-        self.__project_config = ConfigFile(type=TEAM_CONFIG, name=appname)
-        self.__project_user_config = ConfigFile(type=USER_CONFIG, name=appname)
+        self.__project_config = ConfigFile(type=TEAM_CONFIG, name=self.__appname)
+        self.__project_user_config = ConfigFile(type=USER_CONFIG, name=self.__appname)
 
         self.__logger = Log.register_logger(__name__)
 
@@ -181,49 +181,60 @@ class ProfileManager:
         return self.__project_config.filepath
 
     @staticmethod
-    def get_env(cfg: ConfigFile, cwd: Optional[str] = None) -> dict:
+    def get_env(cfg: ConfigFile, cwd: Optional[str] = None) -> Dict[str, Any]:
         """
         Map the env variables to the profile properties.
 
         Parameters
         ----------
         cfg : ConfigFile
-            A config file that contains the schema properties
+            A config file that contains the schema properties.
         cwd: Optional[str]
-            Path of current working diretory
+            Path of current working directory.
 
         Returns
         -------
-        dict
-            Containing profile properties from env variables (prop: value)
+        Dict[str, Any]
+            Containing profile properties from env variables (prop: value).
         """
-        props = cfg.schema_list(cwd)
-        if props == []:
+        props_list = cfg.schema_list(cwd)
+        if not props_list:  # If the list is empty, return an empty dictionary.
             return {}
 
-        env, env_var = {}, {}
+        # Ensure `props` is a dictionary
+        props: Dict[str, Any] = {}
+        if isinstance(props_list, list):
+            for item in props_list:
+                if isinstance(item, dict):
+                    props.update(item)
 
-        for var in list(os.environ.keys()):
+        env: Dict[str, Optional[str]] = {}
+        env_var: Dict[str, Any] = {}
+
+        for var in os.environ.keys():
             if var.startswith("ZOWE_OPT"):
-                env[var[len("ZOWE_OPT_") :].lower()] = os.environ.get(var)
+                env[var[len("ZOWE_OPT_"):].lower()] = os.environ.get(var)
 
         for k, v in env.items():
             word = k.split("_")
+            k = word[0] + word[1].capitalize() if len(word) > 1 else word[0]
 
-            if len(word) > 1:
-                k = word[0] + word[1].capitalize()
-            else:
-                k = word[0]
+            if k in props:
+                prop_type = props[k].get("type")
 
-            if k in list(props.keys()):
-                if props[k]["type"] == "number":
-                    env_var[k] = int(v)
+                if prop_type == "number":
+                    try:
+                        env_var[k] = int(v) if v is not None and v.lstrip("-").isdigit() else 0
+                    except ValueError:
+                        env_var[k] = 0  # Default value if conversion fails
 
-                elif props[k]["type"] == "string":
-                    env_var[k] = str(v)
+                elif prop_type == "string":
+                    env_var[k] = v if v is not None else ""
 
-                elif props[k]["type"] == "boolean":
-                    env_var[k] = bool(v)
+                elif prop_type == "boolean":
+                    env_var[k] = v.lower() in ["true", "1", "yes"] if isinstance(v, str) else bool(v)
+                else:
+                    env_var[k]= v    
 
         return env_var
 
@@ -326,7 +337,7 @@ class ProfileManager:
         validate_schema: Optional[bool] = True,
         override_with_env: Optional[bool] = False,
         suppress_config_file_warnings: Optional[bool] = True,
-    ) -> dict:
+    ) -> Dict[str, Any]:
         """
         Load connection details from a team config profile.
 
@@ -364,25 +375,25 @@ class ProfileManager:
 
         Returns
         -------
-        dict
+        Dict[str, Any]
             A dictionary containing the merged connection details from all relevant profiles.
         """
         if profile_name is None and profile_type is None:
             self.__logger.error(f"Failed to load profile as both profile_name and profile_type are not set")
             raise ProfileNotFound(
-                profile_name=profile_name,
+                profile_name=profile_name if profile_name is not None else "<unknown>",
                 error_msg="Could not find profile as both profile_name and profile_type is not set.",
             )
 
         if not self.__show_warnings:
             warnings.simplefilter("ignore")
 
-        profile_props: dict = {}
-        env_var: dict = {}
+        profile_props: dict[str, Any] = {}
+        env_var: dict[str, Any] = {}
         missing_secure_props = []  # track which secure props were not loaded
 
-        defaults_merged: dict = {}
-        profiles_merged: dict = {}
+        defaults_merged: dict[str, Any] = {}
+        profiles_merged: dict[str, Any] = {}
         cfg_name = None
         cfg_schema = None
         cfg_schema_dir = None
@@ -426,7 +437,7 @@ class ProfileManager:
 
         cfg = ConfigFile(
             type="Merged Config",
-            name=cfg_name,
+            name=cfg_name if cfg_name is not None else "default_config",
             profiles=profiles_merged,
             defaults=defaults_merged,
             schema_property=cfg_schema,
@@ -499,7 +510,7 @@ class ProfileManager:
 
             while parts:
                 current_name = ".".join(parts)
-                profile = layer.find_profile(current_name, layer.profiles)
+                profile = layer.find_profile(current_name, layer.profiles or {})
 
                 if profile is not None and len(current_name) > len(longest_match):
                     highest_layer = layer
@@ -536,10 +547,13 @@ class ProfileManager:
         highest_priority_layer = self.get_highest_priority_layer(json_path)
 
         # Set the property in the highest priority layer
+        if highest_priority_layer is not None:
+            highest_priority_layer.set_property(json_path, value, secure=secure)
+        else:
+            self.__logger.error(f"Could not find a valid layer to set property for {json_path}")
+            raise FileNotFoundError(f"Could not find a valid layer for {json_path}")
 
-        highest_priority_layer.set_property(json_path, value, secure=secure)
-
-    def set_profile(self, profile_path: str, profile_data: dict) -> None:
+    def set_profile(self, profile_path: str, profile_data: dict[str, Any]) -> None:
         """
         Set a profile in the highest priority layer (configuration file) based on the given profile name.
 
@@ -547,12 +561,15 @@ class ProfileManager:
         ----------
         profile_path: str
             The path of the profile to be set. eg: profiles.zosmf
-        profile_data: dict
+        profile_data: dict[str, Any]
             The data of the profile to set.
         """
         highest_priority_layer = self.get_highest_priority_layer(profile_path)
-
-        highest_priority_layer.set_profile(profile_path, profile_data)
+        if highest_priority_layer is not None:
+            highest_priority_layer.set_profile(profile_path, profile_data)
+        else:
+            self.__logger.error(f"Could not find a valid layer to set profile for {profile_path}")
+            raise FileNotFoundError(f"Could not find a valid layer for {profile_path}")
 
     def save(self) -> None:
         """Save the layers (configuration files) to disk."""

@@ -12,7 +12,7 @@ Copyright Contributors to the Zowe Project.
 
 import base64
 import sys
-from typing import Optional
+from typing import Optional, Any, Dict
 
 import commentjson
 
@@ -30,7 +30,7 @@ except ImportError:
 class CredentialManager:
     """A class including static functions for managing credentials."""
 
-    secure_props = {}
+    secure_props: dict[str, Any] = {}
     __logger = Log.register_logger(__name__)
 
     @staticmethod
@@ -50,16 +50,16 @@ class CredentialManager:
             return
 
         try:
-            secret_value = CredentialManager._get_credential(constants["ZoweServiceName"], constants["ZoweAccountName"])
+            secret_value = CredentialManager._get_credential(str(constants["ZoweServiceName"]), str(constants["ZoweAccountName"]))
             # Handle the case when secret_value is None
             if secret_value is None:
                 return
 
         except Exception as exc:
             CredentialManager.__logger.error(f"Fail to load secure profile {constants['ZoweServiceName']}")
-            raise SecureProfileLoadFailed(constants["ZoweServiceName"], error_msg=str(exc)) from exc
+            raise SecureProfileLoadFailed(str(constants["ZoweServiceName"]), error_msg=str(exc)) from exc
 
-        secure_config: str
+        secure_config: bytes
         secure_config = secret_value.encode()
         secure_config_json = commentjson.loads(base64.b64decode(secure_config).decode())
         # update the secure props
@@ -77,9 +77,9 @@ class CredentialManager:
             encoded_credential = base64.b64encode(commentjson.dumps(credential).encode()).decode()
             if sys.platform == "win32":
                 # Delete the existing credential
-                CredentialManager._delete_credential(constants["ZoweServiceName"], constants["ZoweAccountName"])
+                CredentialManager._delete_credential(str(constants["ZoweServiceName"]), str(constants["ZoweAccountName"]))
             CredentialManager._set_credential(
-                constants["ZoweServiceName"], constants["ZoweAccountName"], encoded_credential
+                str(constants["ZoweServiceName"]), str(constants["ZoweAccountName"]), encoded_credential
             )
 
     @staticmethod
@@ -99,7 +99,7 @@ class CredentialManager:
         Optional[str]
             The retrieved encoded credential
         """
-        encoded_credential = keyring.get_password(service_name, account_name)
+        encoded_credential: Optional[str] = keyring.get_password(service_name, account_name)
         if encoded_credential is None and sys.platform == "win32":
             # Retrieve the secure value with an index
             index = 1
@@ -120,9 +120,9 @@ class CredentialManager:
     @staticmethod
     def _set_credential(service_name: str, account_name: str, encoded_credential: str) -> None:
         # Check if the encoded credential exceeds the maximum length for win32
-        if sys.platform == "win32" and len(encoded_credential) > constants["WIN32_CRED_MAX_STRING_LENGTH"]:
+        if sys.platform == "win32" and len(encoded_credential) > int(constants["WIN32_CRED_MAX_STRING_LENGTH"]):
             # Split the encoded credential string into chunks of maximum length
-            chunk_size = constants["WIN32_CRED_MAX_STRING_LENGTH"]
+            chunk_size = int(constants["WIN32_CRED_MAX_STRING_LENGTH"])
             encoded_credential += "\0"
             chunks = [encoded_credential[i : i + chunk_size] for i in range(0, len(encoded_credential), chunk_size)]
             # Set the individual chunks as separate keyring entries
