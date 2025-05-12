@@ -30,7 +30,7 @@ class InvalidPermsOption(Exception):
 class MaxAllocationQuantityExceeded(Exception):
     """Class used to represent an invalid allocation quantity."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(
             "Maximum allocation quantity of {} exceeded".format(zos_file_constants["MaxAllocationQuantity"])
         )
