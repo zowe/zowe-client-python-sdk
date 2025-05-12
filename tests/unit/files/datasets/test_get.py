@@ -1,7 +1,7 @@
 import re
 from unittest import TestCase, mock
 
-from zowe.zos_files_for_zowe_sdk import Files, exceptions, Datasets
+from zowe.zos_files_for_zowe_sdk import Datasets, Files, exceptions
 
 
 class TestGetClass(TestCase):
@@ -16,7 +16,7 @@ class TestGetClass(TestCase):
             "port": 443,
             "rejectUnauthorized": True,
         }
-    
+
     @mock.patch("requests.Session.send")
     def test_get(self, mock_send_request):
         """Test list members sends request"""

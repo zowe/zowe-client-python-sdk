@@ -12,7 +12,8 @@
         "./src/zos_files",
         "./src/zos_jobs",
         "./src/zos_tso",
-        "./src/zosmf"
+        "./src/zosmf",
+        "./src/zos_uss"
     ],
     "python.testing.pytestArgs": ["tests"],
     "python.testing.pytestEnabled": true,

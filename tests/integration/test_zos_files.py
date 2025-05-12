@@ -7,10 +7,7 @@ import unittest
 import urllib3
 from zowe.core_for_zowe_sdk import ProfileManager
 from zowe.zos_files_for_zowe_sdk import Files
-from zowe.zos_files_for_zowe_sdk.response.datasets import (
-    DatasetListResponse,
-    MemberListResponse,
-)
+from zowe.zos_files_for_zowe_sdk.response.datasets import DatasetListResponse, MemberListResponse
 
 FIXTURES_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fixtures")
 FILES_FIXTURES_PATH = os.path.join(FIXTURES_PATH, "files.json")
@@ -34,7 +31,12 @@ class TestFilesIntegration(unittest.TestCase):
         self.test_uss_upload = self.files_fixtures["TEST_USS_NEW"]
         self.test1_zfs_file_system = f'{self.user_name}.{self.files_fixtures["TEST1_ZFS"]}'
         self.test2_zfs_file_system = f'{self.user_name}.{self.files_fixtures["TEST2_ZFS"]}'
-        self.create_zfs_options = {"perms": 755, "cylsPri": 10, "cylsSec": 2, "timeout": 20}
+        self.create_zfs_options = {
+            "perms": 755,
+            "cylsPri": 10,
+            "cylsSec": 2,
+            "timeout": 20,
+        }
         self.mount_zfs_file_system_options = {"fs-type": "ZFS", "mode": "rdonly"}
 
     def test_list_dsn_should_return_a_list_of_datasets(self):
@@ -97,7 +99,9 @@ class TestFilesIntegration(unittest.TestCase):
     def test_copy_uss_to_data_set_should_be_possible(self):
         """Executing copy_uss_to_data_set should be possible."""
         command_output = self.files.ds.copy_uss_to_data_set(
-            self.files_fixtures["TEST_USS"], self.files_fixtures["TEST_PDS"] + "(TEST2)", replace=True
+            self.files_fixtures["TEST_USS"],
+            self.files_fixtures["TEST_PDS"] + "(TEST2)",
+            replace=True,
         )
         self.assertTrue(command_output == None)
 
@@ -149,7 +153,10 @@ class TestFilesIntegration(unittest.TestCase):
             new_file_content = in_file.read().rstrip()
         self.assertEqual(old_file_content, new_file_content)
 
-        self.files.ds.delete(self.files_fixtures["TEST_PDS"], member_name=self.files_fixtures["TEST_MEMBER_NEW"])
+        self.files.ds.delete(
+            self.files_fixtures["TEST_PDS"],
+            member_name=self.files_fixtures["TEST_MEMBER_NEW"],
+        )
         os.unlink(SAMPLE_JCL_FIXTURE_PATH + ".tmp")
 
     def test_upload_download_delete_uss(self):

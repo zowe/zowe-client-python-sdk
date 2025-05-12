@@ -21,7 +21,15 @@ class TestCreateClass(TestCase):
     def test_create_data_set_accept_valid_recfm(self, mock_send_request):
         """Test if create dataset does accept all accepted record formats"""
         mock_send_request.return_value = mock.Mock(headers={"Content-Type": "application/json"}, status_code=201)
-        option = DatasetOption(alcunit="CYL", dsorg="PO", primary=1, dirblk=5, recfm="F", blksize=6160, lrecl=80)
+        option = DatasetOption(
+            alcunit="CYL",
+            dsorg="PO",
+            primary=1,
+            dirblk=5,
+            recfm="F",
+            blksize=6160,
+            lrecl=80,
+        )
         for recfm in ["F", "FB", "V", "VB", "U", "FBA", "FBM", "VBA", "VBM"]:
             option.recfm = recfm
             Files(self.test_profile).create_data_set("DSNAME123", options=option)
@@ -46,7 +54,15 @@ class TestCreateClass(TestCase):
     def test_create_data_set_does_not_accept_invalid_recfm(self):
         """Test if create dataset raises an error for invalid record formats"""
         with self.assertRaises(KeyError):
-            option = DatasetOption(alcunit="CYL", dsorg="PO", primary=1, dirblk=5, recfm="XX", blksize=6160, lrecl=80)
+            option = DatasetOption(
+                alcunit="CYL",
+                dsorg="PO",
+                primary=1,
+                dirblk=5,
+                recfm="XX",
+                blksize=6160,
+                lrecl=80,
+            )
             Files(self.test_profile).create_data_set("DSNAME123", options=option)
 
     def test_create_data_set_raises_error_without_required_arguments(self):
@@ -54,7 +70,10 @@ class TestCreateClass(TestCase):
         option = DatasetOption(alcunit="CYL", dsorg="PO", primary=1, dirblk=25, recfm="FB", blksize=6160)
         with self.assertRaises(ValueError) as e_info:
             obj = Files(self.test_profile).create_data_set("DSNAME123", options=option)
-        self.assertEqual(str(e_info.exception), "If 'like' is not specified, you must specify 'primary' and 'lrecl'.")
+        self.assertEqual(
+            str(e_info.exception),
+            "If 'like' is not specified, you must specify 'primary' and 'lrecl'.",
+        )
 
     def test_create_data_set_raises_error_with_invalid_arguments_parameterized(self):
         """Test not providing valid arguments raises an error"""
@@ -77,7 +96,15 @@ class TestCreateClass(TestCase):
                 "blksize": 32760,
                 "lrecl": 260,
             },
-            {"alcunit": "CYL", "dsorg": "PS", "primary": 1, "dirblk": 5, "recfm": "FB", "blksize": 6160, "lrecl": 80},
+            {
+                "alcunit": "CYL",
+                "dsorg": "PS",
+                "primary": 1,
+                "dirblk": 5,
+                "recfm": "FB",
+                "blksize": 6160,
+                "lrecl": 80,
+            },
             {
                 "alcunit": "CYL",
                 "dsorg": "invalid",
@@ -106,13 +133,53 @@ class TestCreateClass(TestCase):
     def test_create_data_set_parameterized(self):
         """Test create dataset with different values"""
         test_values = [
-            (DatasetOption(alcunit="CYL", dsorg="PO", primary=1, dirblk=5, recfm="FB", blksize=6160, lrecl=80), True),
-            (DatasetOption(alcunit="CYL", dsorg="PO", primary=1, dirblk=25, recfm="FB", blksize=6160, lrecl=80), True),
             (
-                DatasetOption(alcunit="CYL", dsorg="PO", primary=1, dirblk=25, recfm="VB", blksize=32760, lrecl=260),
+                DatasetOption(
+                    alcunit="CYL",
+                    dsorg="PO",
+                    primary=1,
+                    dirblk=5,
+                    recfm="FB",
+                    blksize=6160,
+                    lrecl=80,
+                ),
                 True,
             ),
-            (DatasetOption(alcunit="CYL", dsorg="PS", primary=1, recfm="FB", blksize=6160, lrecl=80), True),
+            (
+                DatasetOption(
+                    alcunit="CYL",
+                    dsorg="PO",
+                    primary=1,
+                    dirblk=25,
+                    recfm="FB",
+                    blksize=6160,
+                    lrecl=80,
+                ),
+                True,
+            ),
+            (
+                DatasetOption(
+                    alcunit="CYL",
+                    dsorg="PO",
+                    primary=1,
+                    dirblk=25,
+                    recfm="VB",
+                    blksize=32760,
+                    lrecl=260,
+                ),
+                True,
+            ),
+            (
+                DatasetOption(
+                    alcunit="CYL",
+                    dsorg="PS",
+                    primary=1,
+                    recfm="FB",
+                    blksize=6160,
+                    lrecl=80,
+                ),
+                True,
+            ),
             (DatasetOption(alcunit="CYL", dsorg="PS", recfm="FB", blksize=6160), False),
         ]
 
@@ -133,7 +200,8 @@ class TestCreateClass(TestCase):
                 with self.assertRaises(ValueError) as e_info:
                     files_test_profile.create_data_set("DSN", test_case[0])
                 self.assertEqual(
-                    str(e_info.exception), "If 'like' is not specified, you must specify 'primary' and 'lrecl'."
+                    str(e_info.exception),
+                    "If 'like' is not specified, you must specify 'primary' and 'lrecl'.",
                 )
 
     @mock.patch("requests.Session.send")
@@ -222,7 +290,15 @@ class TestCreateClass(TestCase):
 
     def test_secondary_setter(self):
         """Test create secondary with different values"""
-        options = DatasetOption(alcunit="CYL", dsorg="PO", primary=10, dirblk=5, recfm="FB", blksize=6160, lrecl=80)
+        options = DatasetOption(
+            alcunit="CYL",
+            dsorg="PO",
+            primary=10,
+            dirblk=5,
+            recfm="FB",
+            blksize=6160,
+            lrecl=80,
+        )
         self.assertEqual(options.secondary, 1)
         options.secondary = 100
         self.assertEqual(options.secondary, 100)

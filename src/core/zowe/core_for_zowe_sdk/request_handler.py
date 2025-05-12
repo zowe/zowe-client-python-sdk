@@ -44,7 +44,11 @@ class RequestHandler:
             urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
     def perform_request(
-        self, method: str, request_arguments: dict, expected_code: list = [200], stream: bool = False
+        self,
+        method: str,
+        request_arguments: dict,
+        expected_code: list = [200],
+        stream: bool = False,
     ) -> Union[str, bytes, dict, None]:
         """Execute an HTTP/HTTPS requests from given arguments and return validated response (JSON).
 
@@ -99,7 +103,11 @@ class RequestHandler:
             Flag indicates whether it is a streaming requests.
         """
         self.__response = self.session.request(
-            method=self.__method, stream=stream, **self.session_arguments, **self.__request_arguments)
+            method=self.__method,
+            stream=stream,
+            **self.session_arguments,
+            **self.__request_arguments,
+        )
 
     def __del__(self):
         """Clean up the REST session object once it is no longer needed anymore."""
@@ -123,7 +131,11 @@ class RequestHandler:
                     f"Expected: {self.__response.status_code}\n"
                     f"Request output: {self.__response.text}"
                 )
-                raise UnexpectedStatus(self.__expected_code, self.__response.status_code, self.__response.text)
+                raise UnexpectedStatus(
+                    self.__expected_code,
+                    self.__response.status_code,
+                    self.__response.text,
+                )
         else:
             output_str = str(self.__response.request.url)
             output_str += "\n" + str(self.__response.request.headers)

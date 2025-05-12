@@ -422,7 +422,10 @@ class Datasets(SdkApi):
         """
         data = {
             "request": "copy",
-            "from-dataset": {"dsn": from_dataset_name.strip(), "member": from_member_name},
+            "from-dataset": {
+                "dsn": from_dataset_name.strip(),
+                "member": from_member_name,
+            },
             "replace": replace,
         }
 
@@ -687,7 +690,11 @@ class Datasets(SdkApi):
                 f.write(chunk)
 
     def upload_file(
-        self, input_file: str, dataset_name: str, encoding: str = _ZOWE_FILES_DEFAULT_ENCODING, binary: bool = False
+        self,
+        input_file: str,
+        dataset_name: str,
+        encoding: str = _ZOWE_FILES_DEFAULT_ENCODING,
+        binary: bool = False,
     ) -> None:
         """
         Upload contents of a given file and uploads it to a dataset.
@@ -817,18 +824,28 @@ class Datasets(SdkApi):
         dict
             A JSON containing the result of the operation
         """
-        data = {"request": "rename", "from-dataset": {"dsn": before_dataset_name.strip()}}
+        data = {
+            "request": "rename",
+            "from-dataset": {"dsn": before_dataset_name.strip()},
+        }
 
         custom_args = self._create_custom_request_arguments()
         custom_args["json"] = data
         custom_args["url"] = "{}ds/{}".format(
-            self._request_endpoint, self._encode_uri_component(after_dataset_name).strip()
+            self._request_endpoint,
+            self._encode_uri_component(after_dataset_name).strip(),
         )
 
         response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[200])
         return response_json
 
-    def rename_member(self, dataset_name: str, before_member_name: str, after_member_name: str, enq: str = "") -> dict:
+    def rename_member(
+        self,
+        dataset_name: str,
+        before_member_name: str,
+        after_member_name: str,
+        enq: str = "",
+    ) -> dict:
         """
         Rename the data set member.
 
@@ -877,7 +894,12 @@ class Datasets(SdkApi):
         response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[200])
         return response_json
 
-    def delete(self, dataset_name: str, volume: Optional[str] = None, member_name: Optional[str] = None) -> dict:
+    def delete(
+        self,
+        dataset_name: str,
+        volume: Optional[str] = None,
+        member_name: Optional[str] = None,
+    ) -> dict:
         """
         Delete a sequential or partitioned data.
 
