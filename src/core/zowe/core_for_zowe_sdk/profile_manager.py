@@ -17,29 +17,14 @@ from copy import deepcopy
 from typing import Optional
 
 from deepmerge import always_merger
-from jsonschema.exceptions import (
-    FormatError,
-    SchemaError,
-    UndefinedTypeCheck,
-    UnknownType,
-    ValidationError,
-)
+from jsonschema.exceptions import FormatError, SchemaError, UndefinedTypeCheck, UnknownType, ValidationError
 
 from .config_file import ConfigFile, Profile
 from .credential_manager import CredentialManager
-from .custom_warnings import (
-    ConfigNotFoundWarning,
-    ProfileNotFoundWarning,
-    SecurePropsNotFoundWarning,
-)
+from .custom_warnings import ConfigNotFoundWarning, ProfileNotFoundWarning, SecurePropsNotFoundWarning
 from .exceptions import ProfileNotFound, SecureProfileLoadFailed, SecureValuesNotFound
 from .logger import Log
-from .profile_constants import (
-    BASE_PROFILE,
-    GLOBAL_CONFIG_NAME,
-    TEAM_CONFIG,
-    USER_CONFIG,
-)
+from .profile_constants import BASE_PROFILE, GLOBAL_CONFIG_NAME, TEAM_CONFIG, USER_CONFIG
 
 HAS_KEYRING = True
 
@@ -272,7 +257,9 @@ class ProfileManager:
         cfg_profile = Profile()
         try:
             cfg_profile = cfg.get_profile(
-                profile_name=profile_name, profile_type=profile_type, validate_schema=validate_schema
+                profile_name=profile_name,
+                profile_type=profile_type,
+                validate_schema=validate_schema,
             )
         except ValidationError as exc:
             logger.error(f"Instance was invalid under the provided $schema property, {exc}")
@@ -485,7 +472,12 @@ class ProfileManager:
         """
         highest_layer = None
         longest_match = ""
-        layers = [self.__project_user_config, self.__project_config, self.__global_user_config, self.__global_config]
+        layers = [
+            self.__project_user_config,
+            self.__project_config,
+            self.__global_user_config,
+            self.__global_config,
+        ]
 
         original_name = layers[0].get_profile_name_from_path(json_path)
 
@@ -556,7 +548,12 @@ class ProfileManager:
 
     def save(self) -> None:
         """Save the layers (configuration files) to disk."""
-        layers = [self.__project_user_config, self.__project_config, self.__global_user_config, self.__global_config]
+        layers = [
+            self.__project_user_config,
+            self.__project_config,
+            self.__global_user_config,
+            self.__global_config,
+        ]
 
         for layer in layers:
             layer.save(False)

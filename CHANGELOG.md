@@ -4,16 +4,13 @@ All notable changes to the Zowe Client Python SDK will be documented in this fil
 
 ## Recent Changes
 
-### Bug Fixes
-
-- Updated the `pyo3` dependency of the Secrets SDK for technical currency. [#355](https://github.com/zowe/zowe-client-python-sdk/pull/355)
+- Added `execute_command` method to issue SSH commands. [#253](https://github.com/zowe/zowe-client-python-sdk/issues/253)
 
 ## `1.0.0-dev22`
 
 ### Enhancements
 
 - Turning off logger at the class-constructor level [#316](https://github.com/zowe/zowe-client-python-sdk/issues/316)
-- Added support for commonly used environmental variables, like `REQUESTS_CA_BUNDLE` and `CURL_CA_BUNDLE`. [#346](https://github.com/zowe/zowe-client-python-sdk/issues/346)
 
 ### Bug Fixes
 

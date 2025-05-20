@@ -39,7 +39,10 @@ class Log:
     file_handler: logging.FileHandler = logging.FileHandler(os.path.join(dirname, "python_sdk_logs.log"))
     file_handler.setLevel(logging.INFO)
     file_handler.setFormatter(
-        logging.Formatter("[%(asctime)s] [%(levelname)s] [%(name)s] - %(message)s", "%m/%d/%Y %I:%M:%S %p")
+        logging.Formatter(
+            "[%(asctime)s] [%(levelname)s] [%(name)s] - %(message)s",
+            "%m/%d/%Y %I:%M:%S %p",
+        )
     )
     console_handler: logging.StreamHandler = logging.StreamHandler()
 

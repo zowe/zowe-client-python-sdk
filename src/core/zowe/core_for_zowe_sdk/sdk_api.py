@@ -35,7 +35,13 @@ class SdkApi:
         Flag to disable logger
     """
 
-    def __init__(self, profile: dict, default_url: str, logger_name: str = __name__, log: bool = True):
+    def __init__(
+        self,
+        profile: dict,
+        default_url: str,
+        logger_name: str = __name__,
+        log: bool = True,
+    ):
         session = Session(profile)
         self.session: ISession = session.load()
 

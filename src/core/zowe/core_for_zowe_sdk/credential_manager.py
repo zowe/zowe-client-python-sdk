@@ -79,7 +79,9 @@ class CredentialManager:
                 # Delete the existing credential
                 CredentialManager._delete_credential(constants["ZoweServiceName"], constants["ZoweAccountName"])
             CredentialManager._set_credential(
-                constants["ZoweServiceName"], constants["ZoweAccountName"], encoded_credential
+                constants["ZoweServiceName"],
+                constants["ZoweAccountName"],
+                encoded_credential,
             )
 
     @staticmethod
