@@ -6,6 +6,7 @@ requests==2.32.0
 paramiko==3.5.0
 
 # Dev deps
+setuptools
 black
 coverage
 isort
