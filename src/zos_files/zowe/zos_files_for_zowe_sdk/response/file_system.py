@@ -46,7 +46,7 @@ class FileSystemListResponse:
     totalRows: Optional[int] = None
     JSONversion: Optional[int] = None
 
-    def __init__(self, response: dict) -> None:
+    def __init__(self, response: Dict[str, Any]) -> None:
         for key, value in response.items():
             if key == "items":
                 value = [FileSystemResponse(**x) for x in value]

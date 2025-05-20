@@ -12,6 +12,7 @@ Copyright Contributors to the Zowe Project.
 
 import logging
 import os
+from typing import Any
 
 
 class Log:
@@ -41,12 +42,12 @@ class Log:
     file_handler.setFormatter(
         logging.Formatter("[%(asctime)s] [%(levelname)s] [%(name)s] - %(message)s", "%m/%d/%Y %I:%M:%S %p")
     )
-    console_handler: logging.StreamHandler = logging.StreamHandler()
+    console_handler: logging.StreamHandler[Any] = logging.StreamHandler()
 
     file_output: bool = True
     console_output: bool = True
 
-    loggers: set = set()
+    loggers: set[logging.Logger] = set()
 
     @staticmethod
     def register_logger(name: str) -> logging.Logger:
@@ -73,7 +74,7 @@ class Log:
         return logger
 
     @staticmethod
-    def set_all_logger_level(level: int):
+    def set_all_logger_level(level: int) -> None:
         """
         Set display level for all loggers.
 
@@ -88,7 +89,7 @@ class Log:
                 handler.setLevel(level)
 
     @staticmethod
-    def close(logger: logging.Logger):
+    def close(logger: logging.Logger) -> None:
         """
         Disable a logger.
 
@@ -100,7 +101,7 @@ class Log:
         logger.disabled = True
 
     @staticmethod
-    def open(logger: logging.Logger):
+    def open(logger: logging.Logger) -> None:
         """
         Enable a logger.
 
@@ -112,33 +113,33 @@ class Log:
         logger.disabled = False
 
     @staticmethod
-    def close_all():
+    def close_all() -> None:
         """Disable all loggers."""
         for logger in Log.loggers:
             logger.disabled = True
 
     @staticmethod
-    def open_all():
+    def open_all() -> None:
         """Enable all loggers."""
         for logger in Log.loggers:
             logger.disabled = False
 
     @staticmethod
-    def close_console_output():
+    def close_console_output() -> None:
         """Turn off log output to console."""
         Log.console_output = False
         for logger in Log.loggers:
             logger.removeHandler(Log.console_handler)
 
     @staticmethod
-    def open_console_output():
+    def open_console_output() -> None:
         """Turn on log output to console."""
         Log.console_output = True
         for logger in Log.loggers:
             logger.addHandler(Log.console_handler)
 
     @staticmethod
-    def set_console_output_level(level: int):
+    def set_console_output_level(level: int) -> None:
         """
         Set the level for the console handler.
 
@@ -150,21 +151,21 @@ class Log:
         Log.console_handler.level = level
 
     @staticmethod
-    def close_file_output():
+    def close_file_output() -> None:
         """Turn off log output to a file."""
         Log.file_output = False
         for logger in Log.loggers:
             logger.removeHandler(Log.file_handler)
 
     @staticmethod
-    def open_file_output():
+    def open_file_output() -> None:
         """Turn on log output to a file."""
         Log.file_output = True
         for logger in Log.loggers:
             logger.addHandler(Log.file_handler)
 
     @staticmethod
-    def set_file_output_level(level: int):
+    def set_file_output_level(level: int) -> None:
         """
         Set the level for the file handler.
 

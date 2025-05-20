@@ -21,7 +21,7 @@ src_dir = os.path.realpath(os.path.dirname(__file__))
 uuid4 = uuid.uuid4()
 
 
-def resolve_sdk_dep(sdk_name, version_spec):
+def resolve_sdk_dep(sdk_name: str, version_spec: str) -> str:
     # if os.path.exists(os.path.join(src_dir, sdk_name, "zowe")):
     #     # Handle building from a Git checkout
     #     # Based on https://github.com/lab-cosmo/equistore/blob/master/python/equistore-torch/setup.py#L212
