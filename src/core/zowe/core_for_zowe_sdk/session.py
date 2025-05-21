@@ -77,7 +77,7 @@ class Session:
             self.session.type = session_constants.AUTH_TYPE_BEARER
         elif props.get("certFile") is not None:
             if isinstance(cert_file, str) and isinstance(cert_key_file, str):
-                self.session.cert = f"{cert_file},{cert_key_file}"
+                self.session.cert = (cert_file, cert_key_file)
             else:
                 self.__logger.error("A certificate key file must be provided when certFile is specified")
                 raise ValueError("A certificate key file must be provided when certFile is specified")

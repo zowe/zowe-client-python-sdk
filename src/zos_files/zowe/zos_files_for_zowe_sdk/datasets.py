@@ -421,7 +421,7 @@ class Datasets(SdkApi): # type: ignore[misc]
         dict
             A JSON containing the result of the operation
         """
-        data = {
+        data: Dict[str, Any] = {
             "request": "copy",
             "from-dataset": {"dsn": from_dataset_name.strip(), "member": from_member_name},
             "replace": replace,
@@ -434,7 +434,16 @@ class Datasets(SdkApi): # type: ignore[misc]
             else:
                 self.logger.error("Invalid value for enq.")
                 raise ValueError("Invalid value for enq.")
-        return data
+        if volser:
+            data["from-dataset"]["volser"] = volser
+        if alias is not None:  # because it can be false so
+            data["from-dataset"]["alias"] = alias
+
+        custom_args = self._create_custom_request_arguments()
+        custom_args["json"] = data
+        custom_args["url"] = "{}ds/{}".format(self._request_endpoint, self._encode_uri_component(path_to_member))
+        response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[200])
+        return response_json if isinstance(response_json, dict) else {}
 
     def copy_data_set_or_member_with_options(
         self,
@@ -599,7 +608,7 @@ class Datasets(SdkApi): # type: ignore[misc]
         response_json = self.request_handler.perform_request("POST", custom_args, expected_code=[201])
         return response_json if isinstance(response_json, dict) else {}
 
-    def get_content(self, dataset_name: str, stream: bool = False) -> dict[str, Any]:
+    def get_content(self, dataset_name: str, stream: bool = False) -> str:
         """
         Retrieve the contents of a given dataset.
 
@@ -612,15 +621,15 @@ class Datasets(SdkApi): # type: ignore[misc]
 
         Returns
         -------
-        dict
-            A JSON with the contents of a given dataset
+        str
+            Contents of a given dataset in string
         """
         custom_args = self._create_custom_request_arguments()
         custom_args["url"] = "{}ds/{}".format(self._request_endpoint, self._encode_uri_component(dataset_name))
-        response_json = self.request_handler.perform_request("GET", custom_args, stream=stream)
-        return response_json if isinstance(response_json, dict) else {}
+        response = self.request_handler.perform_request("GET", custom_args, stream=stream)
+        return response
 
-    def get_binary_content(self, dataset_name: str, stream: bool = False, with_prefixes: bool = False) -> dict[str, Any]:
+    def get_binary_content(self, dataset_name: str, stream: bool = False, with_prefixes: bool = False) -> bytes:
         """
         Retrieve the contents of a given dataset as a binary bytes object.
 
@@ -635,8 +644,8 @@ class Datasets(SdkApi): # type: ignore[misc]
 
         Returns
         -------
-        dict
-            A JSON with the contents of a given dataset
+        bytes
+            Contents of a given dataset in bytes
         """
         custom_args = self._create_custom_request_arguments()
         custom_args["url"] = "{}ds/{}".format(self._request_endpoint, self._encode_uri_component(dataset_name))
@@ -646,7 +655,7 @@ class Datasets(SdkApi): # type: ignore[misc]
         else:
             custom_args["headers"]["X-IBM-Data-Type"] = "binary"
         response = self.request_handler.perform_request("GET", custom_args, stream=stream)
-        return response if isinstance(response, dict) else {}
+        return response
 
     def write(self, dataset_name: str, data: Any, encoding: str = _ZOWE_FILES_DEFAULT_ENCODING) -> dict[str, Any]:
         """
@@ -919,8 +928,9 @@ class Datasets(SdkApi): # type: ignore[misc]
 
         response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[200])
         return response_json if isinstance(response_json, dict) else {}
-
-    def delete(self, dataset_name: str, volume: Optional[str] = None, member_name: Optional[str] = None) -> dict[str, Any]:
+    
+    
+    def delete(self, dataset_name: str, volume: Optional[str] = None, member_name: Optional[str] = None) -> dict:
         """
         Delete a sequential or partitioned data.
 
@@ -946,7 +956,8 @@ class Datasets(SdkApi): # type: ignore[misc]
             url = "{}ds/-{}/{}".format(self._request_endpoint, volume, self._encode_uri_component(dataset_name))
         custom_args["url"] = url
         response_json = self.request_handler.perform_request("DELETE", custom_args, expected_code=[200, 202, 204])
-        return response_json if isinstance(response_json, dict) else {}
+        return response_json
+        
 
     def copy_uss_to_data_set(
         self,

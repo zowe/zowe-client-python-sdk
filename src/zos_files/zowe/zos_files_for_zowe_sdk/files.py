@@ -15,7 +15,7 @@ from typing import Optional, Any, Dict, List, Union
 from zowe.core_for_zowe_sdk import SdkApi
 from zowe.zos_files_for_zowe_sdk.constants import FileType, zos_file_constants
 
-from .datasets import DatasetOption, Datasets
+from .datasets import DatasetOption, Datasets, DatasetListResponse
 from .file_system import FileSystems
 from .uss import USSFiles
 
@@ -68,12 +68,11 @@ class Files(SdkApi): #type: ignore
 
     def delete_uss(self, filepath_name: str, recursive: bool =False) -> None:
         """Use uss.delete() instead of this deprecated function."""
-        self.uss.delete(filepath_name, recursive)
+        return self.uss.delete(filepath_name, recursive)
 
     def list_dsn(self, name_pattern: str, return_attributes: bool =False) -> list[str]:
         """Use ds.list() instead of this deprecated function."""
-        result = self.ds.list(name_pattern, return_attributes)
-        return [str(item) for item in result]
+        return self.ds.list(name_pattern, return_attributes)
 
     def list_dsn_members(self, dataset_name: str, member_pattern: Optional[str] = None, member_start: Optional[str] = None, limit: int = 1000, attributes: str ="member") -> list[str]:
         """Use ds.list_members() instead of this deprecated function."""
@@ -87,7 +86,7 @@ class Files(SdkApi): #type: ignore
         self, from_filename: str, to_dataset_name: str, to_member_name:Optional[str]=None, type: FileType=FileType.TEXT, replace: bool=False
     ) -> None:
         """Use ds.copy_uss_to_data_set() instead of this deprecated function."""
-        self.ds.copy_uss_to_data_set(from_filename, to_dataset_name, to_member_name, type, replace)
+        return self.ds.copy_uss_to_data_set(from_filename, to_dataset_name, to_member_name, type, replace)
 
     def copy_data_set_or_member(
         self,
@@ -101,7 +100,7 @@ class Files(SdkApi): #type: ignore
         replace: bool = False,
     ) -> None:
         """Use ds.copy_data_set_or_member() instead of this deprecated function."""
-        self.ds.copy_data_set_or_member(
+        return self.ds.copy_data_set_or_member(
             from_dataset_name, to_dataset_name, from_member_name, volser, alias, to_member_name, enq, replace
         )
 
@@ -111,15 +110,15 @@ class Files(SdkApi): #type: ignore
 
     def create_data_set(self, dataset_name: str, options: Optional[DatasetOption] = None) -> None:
         """Use ds.create() instead of this deprecated function."""
-        self.ds.create(dataset_name, options)
+        return self.ds.create(dataset_name, options)
 
     def create_default_data_set(self, dataset_name: str, default_type: str) -> None:
         """Use ds.create_default() instead of this deprecated function."""
-        self.ds.create_default(dataset_name, default_type)
+        return self.ds.create_default(dataset_name, default_type)
 
     def create_uss(self, file_path: str, file_type: str, mode:Optional[str]=None) -> None:
         """Use uss.create() instead of this deprecated function."""
-        self.uss.create(file_path, file_type, mode)
+        return self.uss.create(file_path, file_type, mode)
 
     def get_dsn_content_streamed(self, dataset_name: str) -> Dict[str, Any]:
         """Use ds.get_content() instead of this deprecated function."""
@@ -135,52 +134,52 @@ class Files(SdkApi): #type: ignore
 
     def write_to_dsn(self, dataset_name: str, data: Union[str, bytes], encoding: str=_ZOWE_FILES_DEFAULT_ENCODING) -> None:
         """Use ds.write() instead of this deprecated function."""
-        self.ds.write(dataset_name, data, encoding)
+        return self.ds.write(dataset_name, data, encoding)
 
     def download_dsn(self, dataset_name: str, output_file: str) -> None:
         """Use ds.download() instead of this deprecated function."""
-        self.ds.download(dataset_name, output_file)
+        return self.ds.download(dataset_name, output_file)
 
     def download_binary_dsn(self, dataset_name: str, output_file: str, with_prefixes: bool=False) -> None:
         """Use ds.download_binary() instead of this deprecated function."""
-        self.ds.download_binary(dataset_name, output_file, with_prefixes)
+        return self.ds.download_binary(dataset_name, output_file, with_prefixes)
 
     def upload_file_to_dsn(self, input_file: str, dataset_name: str, encoding: str=_ZOWE_FILES_DEFAULT_ENCODING, binary: bool=False) -> None:
         """Use ds.upload_file() instead of this deprecated function."""
-        self.ds.upload_file(input_file, dataset_name, encoding, binary)
+        return self.ds.upload_file(input_file, dataset_name, encoding, binary)
 
     def write_to_uss(self, filepath_name: str, data: str, encoding: str=_ZOWE_FILES_DEFAULT_ENCODING) -> None:
         """Use uss.write() instead of this deprecated function."""
-        self.uss.write(filepath_name, data, encoding)
+        return self.uss.write(filepath_name, data, encoding)
 
     def upload_file_to_uss(self, input_file: str, filepath_name: str, encoding: str=_ZOWE_FILES_DEFAULT_ENCODING) -> None:
         """Use uss.upload() instead of this deprecated function."""
-        self.uss.upload(input_file, filepath_name, encoding)
+        return self.uss.upload(input_file, filepath_name, encoding)
 
     def download_uss(self, file_path: str, output_file: str, binary: bool=False) -> None:
         """Use uss.download() instead of this deprecated function."""
-        self.uss.download(file_path, output_file, binary)
+        return self.uss.download(file_path, output_file, binary)
 
-    def delete_data_set(self, dataset_name: str, volume: Optional[str]=None, member_name: Optional[str]=None) -> None:
+    def delete_data_set(self, dataset_name: str, volume: Optional[str]=None, member_name: Optional[str]=None) -> dict:
         """Use ds.delete() instead of this deprecated function."""
-        self.ds.delete(dataset_name, volume, member_name)
+        return self.ds.delete(dataset_name, volume, member_name)
 
     def create_zfs_file_system(self, file_system_name: str, options: Optional[Dict[str, Any]]= None) -> None:
         """Use fs.create() instead of this deprecated function."""
         options = options or {}
-        self.fs.create(file_system_name, options)
+        return self.fs.create(file_system_name, options)
 
     def delete_zfs_file_system(self, file_system_name: str) -> None:
         """Use fs.delete() instead of this deprecated function."""
-        self.fs.delete(file_system_name)
+        return self.fs.delete(file_system_name)
 
     def mount_file_system(self, file_system_name: str, mount_point: str, options: Dict[str, Any]={}, encoding: str=_ZOWE_FILES_DEFAULT_ENCODING) -> None:
         """Use fs.mount() instead of this deprecated function."""
-        self.fs.mount(file_system_name, mount_point, options, encoding)
+        return self.fs.mount(file_system_name, mount_point, options, encoding)
 
     def unmount_file_system(self, file_system_name: str, options: Optional[Dict[str, Any]]=None, encoding: str=_ZOWE_FILES_DEFAULT_ENCODING) -> None:
         """Use fs.unmount() instead of this deprecated function."""
-        self.fs.unmount(file_system_name, options or {}, encoding)
+        return self.fs.unmount(file_system_name, options or {}, encoding)
 
     def list_unix_file_systems(self, file_path_name: Optional[str]=None, file_system_name: Optional[str]=None) -> List[Dict[str, Any]]:
         """Use fs.list() instead of this deprecated function."""
@@ -194,7 +193,7 @@ class Files(SdkApi): #type: ignore
 
     def recall_migrated_data_set(self, dataset_name: str, wait: bool=False) -> None:
         """Use ds.recall_migrated() instead of this deprecated function."""
-        self.ds.recall_migrated(dataset_name, wait)
+        return self.ds.recall_migrated(dataset_name, wait)
 
     def delete_migrated_data_set(self, dataset_name: str, purge: bool=False, wait: bool=False) -> Optional[Dict[str, Any]]:
         """Use ds.delete_migrated() instead of this deprecated function."""
@@ -206,8 +205,8 @@ class Files(SdkApi): #type: ignore
 
     def rename_data_set(self, before_dataset_name: str, after_dataset_name: str) -> None:
         """Use ds.rename() instead of this deprecated function."""
-        self.ds.rename(before_dataset_name, after_dataset_name)
+        return self.ds.rename(before_dataset_name, after_dataset_name)
 
     def rename_data_set_member(self, dataset_name: str, before_member_name: str, after_member_name: str, enq: str="") -> None:
         """Use ds.rename_member() instead of this deprecated function."""
-        self.ds.rename_member(dataset_name, before_member_name, after_member_name, enq)
+        return self.ds.rename_member(dataset_name, before_member_name, after_member_name, enq)

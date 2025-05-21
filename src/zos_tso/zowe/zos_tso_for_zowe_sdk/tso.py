@@ -299,4 +299,4 @@ class Tso(SdkApi): # type: ignore
         custom_args = self._create_custom_request_arguments()
         custom_args["url"] = "{}/{}".format(self._request_endpoint, session_key)
         command_output = self.request_handler.perform_request("GET", custom_args)["tsoData"]
-        return dict(command_output)
+        return command_output

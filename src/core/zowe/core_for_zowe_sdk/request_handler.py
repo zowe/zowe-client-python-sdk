@@ -74,7 +74,7 @@ class RequestHandler:
         self.__send_request(stream=stream)
         self.__validate_response()
         if stream:
-            return self.__response.content
+            return self.__response
         else:
             return self.__normalize_response()
 
@@ -124,7 +124,7 @@ class RequestHandler:
                     f"Expected: {self.__response.status_code}\n"
                     f"Request output: {self.__response.text}"
                 )
-                raise UnexpectedStatus(self.__response.status_code, self.__response.status_code, len(self.__response.text))
+                raise UnexpectedStatus(self.__expected_code, self.__response.status_code, self.__response.text)
         else:
             output_str = str(self.__response.request.url)
             output_str += "\n" + str(self.__response.request.headers)
