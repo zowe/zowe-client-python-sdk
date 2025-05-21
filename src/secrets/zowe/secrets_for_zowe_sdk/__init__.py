@@ -10,7 +10,5 @@ SPDX-License-Identifier: EPL-2.0
 Copyright Contributors to the Zowe Project.
 """
 
-from .keyring import keyring
-
-__all__ = ["keyring"]
+from . import keyring
 
