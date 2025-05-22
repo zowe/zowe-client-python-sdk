@@ -414,11 +414,8 @@ class Jobs(SdkApi): # type: ignore
         job_url = "{}/files/JCL/records".format(correlator)
         request_url = "{}{}".format(self._request_endpoint, self._encode_uri_component(job_url))
         custom_args["url"] = request_url
-        response_json = self.request_handler.perform_request("GET", custom_args)
-        if isinstance(response_json, dict):
-            return json.dumps(response_json)  # Convert dict to JSON string
-        else:
-            return ""
+        response_json: str = self.request_handler.perform_request("GET", custom_args)
+        return response_json
 
     def get_spool_file_contents(self, correlator: str, id: str) -> str:
         """
@@ -441,13 +438,8 @@ class Jobs(SdkApi): # type: ignore
         job_url = "{}/files/{}/records".format(correlator, id)
         request_url = "{}{}".format(self._request_endpoint, self._encode_uri_component(job_url))
         custom_args["url"] = request_url
-        response_json = self.request_handler.perform_request("GET", custom_args)
-        if isinstance(response_json, str):
-            return response_json  # Directly return if it's already a string
-        elif isinstance(response_json, dict):
-            return str(response_json)  # Convert dict to string (you can choose better formatting like json.dumps if needed)
-        else:
-            return ""
+        response_json: str = self.request_handler.perform_request("GET", custom_args)
+        return response_json
 
     def get_job_output_as_files(self, status: dict[str, Any], output_dir: str) -> None:
         """

@@ -11,6 +11,7 @@ Copyright Contributors to the Zowe Project.
 """
 
 from typing import Union, Any
+from requests import Response
 
 import requests
 import urllib3
@@ -45,7 +46,7 @@ class RequestHandler:
 
     def perform_request(
         self, method: str, request_arguments: dict[str, Any], expected_code: list[int] = [200], stream: bool = False
-    ) -> Union[str, bytes, dict[str, Any], None]:
+    ) -> Union[str, bytes, Response, dict[str, Any], None]:
         """Execute an HTTP/HTTPS requests from given arguments and return validated response (JSON).
 
         Parameters
@@ -61,7 +62,7 @@ class RequestHandler:
 
         Returns
         -------
-        Union[str, bytes, dict, None]
+        Union[str, bytes, Response, dict[str, Any], None]
             normalized request response in json (dictionary)
         """
         self.__method = method
@@ -135,7 +136,7 @@ class RequestHandler:
             )
             raise RequestFailed(self.__response.status_code, output_str)
 
-    def __normalize_response(self) -> Union[str, bytes, dict[str, Any], None]:
+    def __normalize_response(self) -> Union[str, bytes, dict[str,Any], None]:
         """
         Normalize the response object to a JSON format.
 
@@ -145,7 +146,8 @@ class RequestHandler:
             Response object at the format based on Content-Type header:
             - `bytes` when the response is binary data
             - `str` when the response is plain text
-            - `dict` when the response is json
+            - `dict[str, Any]` when the response is json
+            - `None` when the response has empty text
         """
         content_type = self.__response.headers.get("Content-Type")
         if content_type == "application/octet-stream":

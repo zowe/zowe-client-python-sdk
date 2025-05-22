@@ -39,7 +39,7 @@ class UnexpectedStatus(Exception):
         The output from the request
     """
 
-    def __init__(self, expected: int, received: int, request_output: int):
+    def __init__(self, expected: list[int], received: int, request_output: str):
         super().__init__(
             "The status code from z/OSMF was: {}\nExpected: {}\nRequest output: {}".format(
                 received, expected, request_output

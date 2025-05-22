@@ -74,11 +74,6 @@ class TestFilesIntegration(unittest.TestCase):
         command_output = self.files.ds.get_content(self.test_member_jcl)
         self.assertIsInstance(command_output, str)
 
-    def test_get_content_should_return_response_content(self):
-        """Executing get_content should return response object from the server."""
-        command_output = self.files.ds.get_content(self.test_member_jcl)
-        self.assertIsInstance(command_output, str)
-
     def test_get_binary_content_should_return_response_content(self):
         """Executing get_binary_content should return response object from the server."""
         command_output = self.files.ds.get_binary_content(self.test_member_jcl)
