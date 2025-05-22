@@ -12,6 +12,8 @@ Copyright Contributors to the Zowe Project.
 
 from typing import Optional, Any, Dict, List, Union
 
+from requests import Response
+
 from zowe.core_for_zowe_sdk import SdkApi
 from zowe.zos_files_for_zowe_sdk.constants import FileType, zos_file_constants
 from zowe.zos_files_for_zowe_sdk.response import DatasetListResponse, MemberListResponse
@@ -103,7 +105,7 @@ class Files(SdkApi): #type: ignore
             from_dataset_name, to_dataset_name, from_member_name, volser, alias, to_member_name, enq, replace
         )
 
-    def get_dsn_content(self, dataset_name: str) -> Union[str, bytes, dict[str, Any]]:
+    def get_dsn_content(self, dataset_name: str) -> Union[str, None]:
         """Use ds.get_content() instead of this deprecated function."""
         return self.ds.get_content(dataset_name)
 
@@ -119,7 +121,7 @@ class Files(SdkApi): #type: ignore
         """Use uss.create() instead of this deprecated function."""
         return self.uss.create(file_path, file_type, mode)
 
-    def get_dsn_content_streamed(self, dataset_name: str) -> Dict[str, Any]:
+    def get_dsn_content_streamed(self, dataset_name: str) -> Response:
         """Use ds.get_content() instead of this deprecated function."""
         return self.ds.get_content(dataset_name, stream=True)
 
@@ -127,7 +129,7 @@ class Files(SdkApi): #type: ignore
         """Use ds.get_binary_content() instead of this deprecated function."""
         return self.ds.get_binary_content(dataset_name, with_prefixes)
 
-    def get_dsn_binary_content_streamed(self, dataset_name: str, with_prefixes: bool=False) -> bytes:
+    def get_dsn_binary_content_streamed(self, dataset_name: str, with_prefixes: bool=False) -> Response:
         """Use ds.get_binary_content() instead of this deprecated function."""
         return self.ds.get_binary_content(dataset_name, stream=True, with_prefixes=with_prefixes)
 

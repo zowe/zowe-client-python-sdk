@@ -11,7 +11,9 @@ Copyright Contributors to the Zowe Project.
 """
 
 import os
-from typing import Dict, Optional, Any
+from typing import Dict, Optional, Any, Union
+
+from requests import Response
 
 from zowe.core_for_zowe_sdk import SdkApi
 from zowe.core_for_zowe_sdk.exceptions import FileNotFound
@@ -577,7 +579,7 @@ class Datasets(SdkApi): # type: ignore[misc]
         response_json: dict[str, Any] = self.request_handler.perform_request("POST", custom_args, expected_code=[201])
         return response_json
 
-    def get_content(self, dataset_name: str, stream: bool = False) -> dict[str, Any]:
+    def get_content(self, dataset_name: str, stream: bool = False) -> Union[str, None, Response]:
         """
         Retrieve the contents of a given dataset.
 
@@ -595,10 +597,10 @@ class Datasets(SdkApi): # type: ignore[misc]
         """
         custom_args = self._create_custom_request_arguments()
         custom_args["url"] = "{}ds/{}".format(self._request_endpoint, self._encode_uri_component(dataset_name))
-        response: dict[str, Any] = self.request_handler.perform_request("GET", custom_args, stream=stream)
+        response: Union[str, Response] = self.request_handler.perform_request("GET", custom_args, stream=stream)
         return response
 
-    def get_binary_content(self, dataset_name: str, stream: bool = False, with_prefixes: bool = False) -> bytes:
+    def get_binary_content(self, dataset_name: str, stream: bool = False, with_prefixes: bool = False) -> Union[bytes, Response]:
         """
         Retrieve the contents of a given dataset as a binary bytes object.
 
@@ -623,7 +625,7 @@ class Datasets(SdkApi): # type: ignore[misc]
             custom_args["headers"]["X-IBM-Data-Type"] = "record"
         else:
             custom_args["headers"]["X-IBM-Data-Type"] = "binary"
-        response: bytes = self.request_handler.perform_request("GET", custom_args, stream=stream)
+        response: Union[bytes, Response] = self.request_handler.perform_request("GET", custom_args, stream=stream)
         return response
 
     def write(self, dataset_name: str, data: Any, encoding: str = _ZOWE_FILES_DEFAULT_ENCODING) -> dict[str, Any]:
