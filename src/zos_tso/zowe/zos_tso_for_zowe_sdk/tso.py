@@ -11,7 +11,7 @@ Copyright Contributors to the Zowe Project.
 """
 
 import json
-from typing import Optional, Any, Dict
+from typing import Optional, Any
 
 from zowe.core_for_zowe_sdk import SdkApi, constants
 

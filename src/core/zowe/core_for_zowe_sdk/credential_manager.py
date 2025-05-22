@@ -12,7 +12,7 @@ Copyright Contributors to the Zowe Project.
 
 import base64
 import sys
-from typing import Optional, Any, Dict
+from typing import Optional, Any
 
 import commentjson
 

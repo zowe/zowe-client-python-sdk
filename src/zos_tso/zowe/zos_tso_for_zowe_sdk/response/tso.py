@@ -11,7 +11,7 @@ Copyright Contributors to the Zowe Project.
 """
 
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 
 @dataclass
@@ -20,7 +20,7 @@ class StartResponse:
     queueID: Optional[str] = None
     sessionID: Optional[str] = None
     ver: Optional[str] = None
-    tsoData: Optional[List[Dict[str, str]]] = None
+    tsoData: Optional[list[dict[str, str]]] = None
     reused: Optional[bool] = None
     timeout: Optional[bool] = None
 
@@ -50,7 +50,7 @@ class EndResponse:
 @dataclass
 class SendResponse:
     servletKey: str
-    tsoData: List[Dict[str, Any]]
+    tsoData: list[dict[str, Any]]
     ver: Optional[str] = None
     reused: Optional[bool] = None
     timeout: Optional[bool] = None
@@ -69,7 +69,7 @@ class IssueResponse:
     end_response: EndResponse
     tso_messages: list[str]
 
-    def __init__(self, start: StartResponse, send: SendResponse, end: EndResponse, msg: List[str]) -> None:
+    def __init__(self, start: StartResponse, send: SendResponse, end: EndResponse, msg: list[str]) -> None:
         self.start_response = start
         self.send_response = send
         self.end_response = end

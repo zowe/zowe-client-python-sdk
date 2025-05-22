@@ -11,7 +11,7 @@ Copyright Contributors to the Zowe Project.
 """
 
 import os
-from typing import Dict, Optional, Any, Union
+from typing import Optional, Any, Union
 
 from requests import Response
 
@@ -287,13 +287,13 @@ class DatasetOption:
         """Get the dataset name to copy attributes from."""
         return self.__like
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Return the DatasetOption as a dict."""
         return {key.replace("_DatasetOption__", ""): value for key, value in self.__dict__.items() if value is not None}
 
 
 class Datasets(SdkApi): # type: ignore[misc]
-    def __init__(self, connection: Dict[str, str], log: bool = True, base_url: str = "/zosmf/restfiles/", **kwargs: Any)  -> None:
+    def __init__(self, connection: dict[str, str], log: bool = True, base_url: str = "/zosmf/restfiles/", **kwargs: Any)  -> None:
         """
         Class used to represent the base z/OSMF Datasets API.
 
@@ -421,7 +421,7 @@ class Datasets(SdkApi): # type: ignore[misc]
         dict
             A JSON containing the result of the operation
         """
-        data: Dict[str, Any] = {
+        data: dict[str, Any] = {
             "request": "copy",
             "from-dataset": {"dsn": from_dataset_name.strip(), "member": from_member_name},
             "replace": replace,

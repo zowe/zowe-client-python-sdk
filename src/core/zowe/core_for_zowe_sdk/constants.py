@@ -10,9 +10,9 @@ SPDX-License-Identifier: EPL-2.0
 Copyright Contributors to the Zowe Project.
 """
 
-from typing import Dict, Union
+from typing import Union
 
-constants: Dict[str, Union[str,int]] = {
+constants: dict[str, Union[str,int]] = {
     "SecureValuePrefix": "managed by ",
     "TsoSessionNotFound": "IZUG1126E",
     "ZoweCredentialKey": "Zowe-Plugin",

@@ -14,7 +14,7 @@ import os
 import os.path
 import warnings
 from copy import deepcopy
-from typing import Optional, Dict, Any
+from typing import Optional, Any
 
 from deepmerge import always_merger
 from jsonschema.exceptions import (
@@ -181,7 +181,7 @@ class ProfileManager:
         return self.__project_config.filepath
 
     @staticmethod
-    def get_env(cfg: ConfigFile, cwd: Optional[str] = None) -> Dict[str, Any]:
+    def get_env(cfg: ConfigFile, cwd: Optional[str] = None) -> dict[str, Any]:
         """
         Map the env variables to the profile properties.
 
@@ -194,7 +194,7 @@ class ProfileManager:
 
         Returns
         -------
-        Dict[str, Any]
+        dict[str, Any]
             Containing profile properties from env variables (prop: value).
         """
         props_list = cfg.schema_list(cwd)
@@ -202,14 +202,14 @@ class ProfileManager:
             return {}
 
         # Ensure `props` is a dictionary
-        props: Dict[str, Any] = {}
+        props: dict[str, Any] = {}
         if isinstance(props_list, list):
             for item in props_list:
                 if isinstance(item, dict):
                     props.update(item)
 
-        env: Dict[str, Optional[str]] = {}
-        env_var: Dict[str, Any] = {}
+        env: dict[str, Optional[str]] = {}
+        env_var: dict[str, Any] = {}
 
         for var in os.environ.keys():
             if var.startswith("ZOWE_OPT"):
@@ -337,7 +337,7 @@ class ProfileManager:
         validate_schema: Optional[bool] = True,
         override_with_env: Optional[bool] = False,
         suppress_config_file_warnings: Optional[bool] = True,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Load connection details from a team config profile.
 
@@ -375,7 +375,7 @@ class ProfileManager:
 
         Returns
         -------
-        Dict[str, Any]
+        dict[str, Any]
             A dictionary containing the merged connection details from all relevant profiles.
         """
         if profile_name is None and profile_type is None:

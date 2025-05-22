@@ -11,7 +11,7 @@ Copyright Contributors to the Zowe Project.
 """
 
 from dataclasses import dataclass
-from typing import Any, Optional, Dict
+from typing import Any, Optional
 
 
 @dataclass
@@ -21,7 +21,7 @@ class IssueCommandResponse:
     cmd_response_uri: Optional[str] = None
     cmd_response: Optional[str] = None
 
-    def __init__(self, response: Dict[str, Any]) -> None:
+    def __init__(self, response: dict[str, Any]) -> None:
         for k, value in response.items():
             key = k.replace("-", "_")
             super().__setattr__(key, value)
@@ -38,7 +38,7 @@ class ConsoleResponse:
     cmd_response: Optional[str] = None
     sol_key_detected: Optional[bool] = None
 
-    def __init__(self, response: Dict[str, Any]) -> None:
+    def __init__(self, response: dict[str, Any]) -> None:
         for k, value in response.items():
             key = k.replace("-", "_")
             super().__setattr__(key, value)
