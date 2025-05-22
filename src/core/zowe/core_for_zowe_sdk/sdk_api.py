@@ -17,7 +17,7 @@ from . import session_constants
 from .logger import Log
 from .request_handler import RequestHandler
 from .session import ISession, Session
-from typing import Dict, Any, Optional, Type, Union
+from typing import Any, Optional, Type
 
 
 class SdkApi:
@@ -81,7 +81,7 @@ class SdkApi:
         """Delete the request handler before exit."""
         del self.request_handler
 
-    def _create_custom_request_arguments(self) -> Dict[str, Any]:
+    def _create_custom_request_arguments(self) -> dict[str, Any]:
         """
         Create a copy of the default request arguments dictionary.
 
@@ -90,7 +90,7 @@ class SdkApi:
 
         Returns
         -------
-        Dict[str, Any]
+        dict[str, Any]
             A deepcopy of the request_arguments
         """
         return copy.deepcopy(self._request_arguments)

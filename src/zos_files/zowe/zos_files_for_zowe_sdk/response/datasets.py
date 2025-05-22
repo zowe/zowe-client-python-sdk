@@ -11,12 +11,12 @@ Copyright Contributors to the Zowe Project.
 """
 
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 
 @dataclass
 class DatasetListResponse:
-    items: Optional[List[dict[str, Any]]] = None
+    items: Optional[list[dict[str, Any]]] = None
     returnedRows: Optional[int] = None
     totalRows: Optional[int] = None
     JSONversion: Optional[int] = None
@@ -79,7 +79,7 @@ class DatasetResponse:
 
 @dataclass
 class MemberListResponse:
-    items: Optional[List[dict[str, Any]]] = None
+    items: Optional[list[dict[str, Any]]] = None
     totalRows: Optional[int] = None
     JSONversion: Optional[int] = None
 

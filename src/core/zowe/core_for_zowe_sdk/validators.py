@@ -11,7 +11,7 @@ Copyright Contributors to the Zowe Project.
 """
 
 import os
-from typing import Union, Dict, Any
+from typing import Union, Any
 
 import commentjson
 import requests

@@ -10,7 +10,7 @@ SPDX-License-Identifier: EPL-2.0
 Copyright Contributors to the Zowe Project.
 """
 
-from typing import Optional, Any, Dict, List, Union
+from typing import Optional, Any, Union
 
 from requests import Response
 
@@ -165,7 +165,7 @@ class Files(SdkApi): #type: ignore
         """Use ds.delete() instead of this deprecated function."""
         return self.ds.delete(dataset_name, volume, member_name)
 
-    def create_zfs_file_system(self, file_system_name: str, options: Optional[Dict[str, Any]]= None) -> dict[str, Any]:
+    def create_zfs_file_system(self, file_system_name: str, options: Optional[dict[str, Any]]= None) -> dict[str, Any]:
         """Use fs.create() instead of this deprecated function."""
         options = options or {}
         return self.fs.create(file_system_name, options)
@@ -174,11 +174,11 @@ class Files(SdkApi): #type: ignore
         """Use fs.delete() instead of this deprecated function."""
         return self.fs.delete(file_system_name)
 
-    def mount_file_system(self, file_system_name: str, mount_point: str, options: Dict[str, Any]={}, encoding: str=_ZOWE_FILES_DEFAULT_ENCODING) -> dict[str, Any]:
+    def mount_file_system(self, file_system_name: str, mount_point: str, options: dict[str, Any]={}, encoding: str=_ZOWE_FILES_DEFAULT_ENCODING) -> dict[str, Any]:
         """Use fs.mount() instead of this deprecated function."""
         return self.fs.mount(file_system_name, mount_point, options, encoding)
 
-    def unmount_file_system(self, file_system_name: str, options: Optional[Dict[str, Any]]=None, encoding: str=_ZOWE_FILES_DEFAULT_ENCODING) -> dict[str, Any]:
+    def unmount_file_system(self, file_system_name: str, options: Optional[dict[str, Any]]=None, encoding: str=_ZOWE_FILES_DEFAULT_ENCODING) -> dict[str, Any]:
         """Use fs.unmount() instead of this deprecated function."""
         return self.fs.unmount(file_system_name, options or {}, encoding)
 
@@ -190,7 +190,7 @@ class Files(SdkApi): #type: ignore
         """Use ds.recall_migrated() instead of this deprecated function."""
         return self.ds.recall_migrated(dataset_name, wait)
 
-    def delete_migrated_data_set(self, dataset_name: str, purge: bool=False, wait: bool=False) -> Optional[Dict[str, Any]]:
+    def delete_migrated_data_set(self, dataset_name: str, purge: bool=False, wait: bool=False) -> Optional[dict[str, Any]]:
         """Use ds.delete_migrated() instead of this deprecated function."""
         return self.ds.delete_migrated(dataset_name, purge, wait)
 
