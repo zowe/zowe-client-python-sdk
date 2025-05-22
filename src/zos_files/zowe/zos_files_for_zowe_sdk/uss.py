@@ -12,7 +12,7 @@ Copyright Contributors to the Zowe Project.
 
 import os
 import base64
-from typing import Optional, Any, Dict
+from typing import Optional, Any, Dict, Union
 import requests
 
 
@@ -84,11 +84,8 @@ class USSFiles(SdkApi): #type: ignore
         if recursive:
             custom_args["headers"]["X-IBM-Option"] = "recursive"
 
-        response_json = self.request_handler.perform_request("DELETE", custom_args, expected_code=[204])
-        if isinstance(response_json, dict):
-            return response_json
-        else:
-            return {}
+        response_json:dict[str, Any] = self.request_handler.perform_request("DELETE", custom_args, expected_code=[204])
+        return response_json
 
     def create(self, file_path: str, type: str, mode: Optional[str] = None) -> dict[str, Any]:
         """
@@ -113,11 +110,8 @@ class USSFiles(SdkApi): #type: ignore
         custom_args = self._create_custom_request_arguments()
         custom_args["json"] = data
         custom_args["url"] = "{}fs/{}".format(self._request_endpoint, file_path.lstrip("/"))
-        response_json = self.request_handler.perform_request("POST", custom_args, expected_code=[201])
-        if isinstance(response_json, dict):
-            return response_json
-        else:
-            return {}
+        response_json: dict[str,Any] = self.request_handler.perform_request("POST", custom_args, expected_code=[201])
+        return response_json
 
     def write(self, filepath_name: str, data: str, encoding: str = _ZOWE_FILES_DEFAULT_ENCODING) -> dict[str, Any]:
         """
@@ -141,11 +135,8 @@ class USSFiles(SdkApi): #type: ignore
         custom_args["url"] = "{}fs/{}".format(self._request_endpoint, filepath_name.lstrip("/"))
         custom_args["data"] = data
         custom_args["headers"]["Content-Type"] = "text/plain; charset={}".format(encoding)
-        response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[204, 201])
-        if isinstance(response_json, dict):
-            return response_json
-        else:
-            return {}
+        response_json: dict[str,Any] = self.request_handler.perform_request("PUT", custom_args, expected_code=[204, 201])
+        return response_json
 
     def get_content(self, filepath_name: str) -> dict[str, Any]:
         """
@@ -163,13 +154,10 @@ class USSFiles(SdkApi): #type: ignore
         """
         custom_args = self._create_custom_request_arguments()
         custom_args["url"] = "{}fs{}".format(self._request_endpoint, filepath_name)
-        response_json = self.request_handler.perform_request("GET", custom_args)
-        if isinstance(response_json, dict):
-            return response_json
-        else:
-            return {}
+        response_json: dict[str,Any] = self.request_handler.perform_request("GET", custom_args)
+        return response_json
 
-    def get_content_streamed(self, file_path: str, binary: bool = False) -> Dict[str, Any]:
+    def get_content_streamed(self, file_path: str, binary: bool = False) -> Union[dict[str, Any], bytes]:
         """
         Retrieve the contents of a given USS file streamed.
 
@@ -182,27 +170,15 @@ class USSFiles(SdkApi): #type: ignore
 
         Returns
         -------
-        dict
-            A JSON response with results of the operation
+        Union[dict[str, Any], bytes]
+            File content in JSON format or bytes 
         """
         custom_args = self._create_custom_request_arguments()
         custom_args["url"] = "{}fs/{}".format(self._request_endpoint, self._encode_uri_component(file_path.lstrip("/")))
         if binary:
             custom_args["headers"]["X-IBM-Data-Type"] = "binary"
-        response = self.request_handler.perform_request("GET", custom_args, stream=True)
-        if binary:
-            encoded_content = base64.b64encode(response.content).decode("utf-8")
-            return {
-                "content_type": response.headers.get("Content-Type"),
-                "content_length": len(response.content),
-                "file_content": encoded_content,
-            }
-        else:
-            try:
-                response_json = response.json()
-                return response_json if isinstance(response_json, dict) else {}
-            except ValueError:
-                return {"error": "Failed to parse response as JSON"}
+        result: Union[dict[str, Any], bytes] = self.request_handler.perform_request("GET", custom_args, stream=True)
+        return result
 
     def download(self, file_path: str, output_file: str, binary: bool = False) -> None:
         """

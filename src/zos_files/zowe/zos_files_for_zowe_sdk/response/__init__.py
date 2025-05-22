@@ -13,4 +13,4 @@ from .datasets import DatasetListResponse, MemberListResponse
 from .file_system import FileSystemListResponse
 from .uss import USSListResponse
 
-__all__ = ["USSListResponse", "FileSystemListResponse"]
+__all__ = ["USSListResponse", "FileSystemListResponse", "DatasetListResponse", "MemberListResponse"]

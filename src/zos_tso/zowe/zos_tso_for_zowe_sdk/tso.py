@@ -149,7 +149,7 @@ class Tso(SdkApi): # type: ignore
         response_json = self.request_handler.perform_request("POST", custom_args)
         return StartResponse(**response_json)
 
-    def send_tso_message(self, session_key: str, message: str) -> list[str]:
+    def send_tso_message(self, session_key: str, message: str) -> list[dict[str, Any]]:
         """
         Send a command to an existing TSO session.
 
@@ -282,7 +282,7 @@ class Tso(SdkApi): # type: ignore
         """
         return [message["TSO MESSAGE"]["DATA"] for message in response_json if "TSO MESSAGE" in message]
 
-    def __get_tso_data(self, session_key: str) -> dict[str, Any]:
+    def __get_tso_data(self, session_key: str) -> list[dict[str, Any]]:
         """
         Get data from a tso session.
 
@@ -298,5 +298,5 @@ class Tso(SdkApi): # type: ignore
         """
         custom_args = self._create_custom_request_arguments()
         custom_args["url"] = "{}/{}".format(self._request_endpoint, session_key)
-        command_output = self.request_handler.perform_request("GET", custom_args)["tsoData"]
+        command_output:list[dict[str,Any]] = self.request_handler.perform_request("GET", custom_args)["tsoData"]
         return command_output

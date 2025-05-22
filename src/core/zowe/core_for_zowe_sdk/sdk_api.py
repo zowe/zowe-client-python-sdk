@@ -57,7 +57,7 @@ class SdkApi:
             "url": self._request_endpoint,
             "headers": self._default_headers,
         }
-        self.__session_arguments = {
+        self.__session_arguments:dict[str, Any] = {
             "verify": self.session.reject_unauthorized,
             "timeout": 30,
         }
@@ -70,7 +70,7 @@ class SdkApi:
         elif self.session.type == session_constants.AUTH_TYPE_TOKEN:
             self._default_headers["Cookie"] = f"{self.session.token_type}={self.session.token_value}"
         elif self.session.type == session_constants.AUTH_TYPE_CERT_PEM:
-            cert: Optional[Union[str, tuple[str, str]]] = self.session.cert
+            cert: Optional[tuple[str, str]] = self.session.cert
             self.__session_arguments["cert"] = cert
 
     def __enter__(self) -> "SdkApi":

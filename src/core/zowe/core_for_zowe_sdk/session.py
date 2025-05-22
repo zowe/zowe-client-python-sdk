@@ -31,7 +31,7 @@ class ISession:
     type: Optional[str] = None
     token_type: Optional[str] = None
     token_value: Optional[str] = None
-    cert: Optional[str] = None
+    cert: Optional[tuple[str,str]] = None
 
 
 class Session:

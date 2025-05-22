@@ -11,9 +11,7 @@ Copyright Contributors to the Zowe Project.
 """
 
 import os
-from dataclasses import dataclass
-from typing import Dict, List, Optional, Any
-from enum import Enum
+from typing import Dict, Optional, Any
 
 from zowe.core_for_zowe_sdk import SdkApi
 from zowe.core_for_zowe_sdk.exceptions import FileNotFound
@@ -442,37 +440,8 @@ class Datasets(SdkApi): # type: ignore[misc]
         custom_args = self._create_custom_request_arguments()
         custom_args["json"] = data
         custom_args["url"] = "{}ds/{}".format(self._request_endpoint, self._encode_uri_component(path_to_member))
-        response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[200])
-        return response_json if isinstance(response_json, dict) else {}
-
-    def copy_data_set_or_member_with_options(
-        self,
-        from_dataset_name: str,
-        to_dataset_name: str,
-        from_member_name: Optional[str] = None,
-        volser: Optional[str] = None,
-        alias: Optional[bool] = None,
-        to_member_name: Optional[str] = None,
-        enq: Optional[str] = None,
-        replace: bool = False,
-    ) -> Dict[str, Any]:
-        """Copy a dataset or a member from one dataset to another."""
-                
-        data: Dict[str, Any] = {
-            "from-dataset": {}  
-        }
-        if volser:
-            data["from-dataset"]["volser"] = volser
-        if alias is not None:  # because it can be false so
-            data["from-dataset"]["alias"] = alias
-
-        path_to_member = from_member_name if from_member_name else ""
-
-        custom_args = self._create_custom_request_arguments()
-        custom_args["json"] = data
-        custom_args["url"] = "{}ds/{}".format(self._request_endpoint, self._encode_uri_component(path_to_member))
-        response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[200])
-        return response_json if isinstance(response_json, dict) else {}
+        response_json: dict[str, Any] = self.request_handler.perform_request("PUT", custom_args, expected_code=[200])
+        return response_json
 
     def create(self, dataset_name: str, options: Optional[DatasetOption] = None) -> dict[str, Any]:
         """
@@ -522,8 +491,8 @@ class Datasets(SdkApi): # type: ignore[misc]
         custom_args = self._create_custom_request_arguments()
         custom_args["url"] = "{}ds/{}".format(self._request_endpoint, self._encode_uri_component(dataset_name))
         custom_args["json"] = options.to_dict() if options else {}
-        response_json = self.request_handler.perform_request("POST", custom_args, expected_code=[201])
-        return response_json if isinstance(response_json, dict) else {}
+        response_json: dict[str, Any] = self.request_handler.perform_request("POST", custom_args, expected_code=[201])
+        return response_json
 
     def create_default(self, dataset_name: str, default_type: str) -> dict[str, Any]:
         """
@@ -605,10 +574,10 @@ class Datasets(SdkApi): # type: ignore[misc]
             }
 
         custom_args["url"] = "{}ds/{}".format(self._request_endpoint, self._encode_uri_component(dataset_name))
-        response_json = self.request_handler.perform_request("POST", custom_args, expected_code=[201])
-        return response_json if isinstance(response_json, dict) else {}
+        response_json: dict[str, Any] = self.request_handler.perform_request("POST", custom_args, expected_code=[201])
+        return response_json
 
-    def get_content(self, dataset_name: str, stream: bool = False) -> str:
+    def get_content(self, dataset_name: str, stream: bool = False) -> dict[str, Any]:
         """
         Retrieve the contents of a given dataset.
 
@@ -626,7 +595,7 @@ class Datasets(SdkApi): # type: ignore[misc]
         """
         custom_args = self._create_custom_request_arguments()
         custom_args["url"] = "{}ds/{}".format(self._request_endpoint, self._encode_uri_component(dataset_name))
-        response = self.request_handler.perform_request("GET", custom_args, stream=stream)
+        response: dict[str, Any] = self.request_handler.perform_request("GET", custom_args, stream=stream)
         return response
 
     def get_binary_content(self, dataset_name: str, stream: bool = False, with_prefixes: bool = False) -> bytes:
@@ -654,7 +623,7 @@ class Datasets(SdkApi): # type: ignore[misc]
             custom_args["headers"]["X-IBM-Data-Type"] = "record"
         else:
             custom_args["headers"]["X-IBM-Data-Type"] = "binary"
-        response = self.request_handler.perform_request("GET", custom_args, stream=stream)
+        response: bytes = self.request_handler.perform_request("GET", custom_args, stream=stream)
         return response
 
     def write(self, dataset_name: str, data: Any, encoding: str = _ZOWE_FILES_DEFAULT_ENCODING) -> dict[str, Any]:
@@ -692,9 +661,8 @@ class Datasets(SdkApi): # type: ignore[misc]
         else:
             raise ValueError("Data must be either a string or bytes.")
                 
-        response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[204, 201])       
-        return response_json if isinstance(response_json, dict) else {}
-
+        response_json: dict[str, Any] = self.request_handler.perform_request("PUT", custom_args, expected_code=[204, 201])       
+        return response_json
 
     def download(self, dataset_name: str, output_file: str) -> None:
         """
@@ -708,10 +676,6 @@ class Datasets(SdkApi): # type: ignore[misc]
             Name of the file to be saved locally
         """
         response = self.get_content(dataset_name, stream=True)
-        if isinstance(response, dict):
-            # Handle the case where response is a dictionary
-            raise ValueError("Expected a streamable response, but got a dictionary.")
-
         with open(output_file, "w", encoding="utf-8") as f:
             for chunk in response.iter_content(chunk_size=4096, decode_unicode=True):
                 f.write(chunk)
@@ -730,10 +694,6 @@ class Datasets(SdkApi): # type: ignore[misc]
             If true, include a four big endian bytes record length prefix. Default: False
         """
         response = self.get_binary_content(dataset_name, with_prefixes=with_prefixes, stream=True)
-        if isinstance(response, dict):
-            # Handle the case where response is a dictionary (e.g., JSON)
-            raise ValueError("Expected a streamable response, but got a dictionary. Please check the response format.")
-
         with open(output_file, "wb") as f:
             for chunk in response.iter_content(chunk_size=4096):
                 f.write(chunk)
@@ -793,8 +753,8 @@ class Datasets(SdkApi): # type: ignore[misc]
         custom_args["json"] = data
         custom_args["url"] = "{}ds/{}".format(self._request_endpoint, self._encode_uri_component(dataset_name))
 
-        response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[200])
-        return response_json if isinstance(response_json, dict) else {}
+        response_json: dict[str, Any] = self.request_handler.perform_request("PUT", custom_args, expected_code=[200])
+        return response_json
 
     def delete_migrated(self, dataset_name: str, purge: bool = False, wait: bool = False) -> dict[str, Any]:
         """
@@ -824,8 +784,8 @@ class Datasets(SdkApi): # type: ignore[misc]
         custom_args["json"] = data
         custom_args["url"] = "{}ds/{}".format(self._request_endpoint, self._encode_uri_component(dataset_name))
 
-        response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[200])
-        return response_json if isinstance(response_json, dict) else {}
+        response_json: dict[str, Any] = self.request_handler.perform_request("PUT", custom_args, expected_code=[200])
+        return response_json
 
     def migrate(self, dataset_name: str, wait: bool = False) -> dict[str, Any]:
         """
@@ -849,8 +809,8 @@ class Datasets(SdkApi): # type: ignore[misc]
         custom_args["json"] = data
         custom_args["url"] = "{}ds/{}".format(self._request_endpoint, self._encode_uri_component(dataset_name))
 
-        response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[200])
-        return response_json if isinstance(response_json, dict) else {}
+        response_json: dict[str, Any] = self.request_handler.perform_request("PUT", custom_args, expected_code=[200])
+        return response_json
 
     def rename(self, before_dataset_name: str, after_dataset_name: str) -> dict[str, Any]:
         """
@@ -877,8 +837,8 @@ class Datasets(SdkApi): # type: ignore[misc]
             self._request_endpoint, self._encode_uri_component(after_dataset_name).strip()
         )
 
-        response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[200])
-        return response_json if isinstance(response_json, dict) else {}
+        response_json: dict[str, Any] = self.request_handler.perform_request("PUT", custom_args, expected_code=[200])
+        return response_json
 
     def rename_member(self, dataset_name: str, before_member_name: str, after_member_name: str, enq: str = "") -> dict[str, Any]:
         """
@@ -926,11 +886,11 @@ class Datasets(SdkApi): # type: ignore[misc]
         custom_args["json"] = data
         custom_args["url"] = "{}ds/{}".format(self._request_endpoint, self._encode_uri_component(path_to_member))
 
-        response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[200])
-        return response_json if isinstance(response_json, dict) else {}
+        response_json: dict[str, Any]= self.request_handler.perform_request("PUT", custom_args, expected_code=[200])
+        return response_json
     
     
-    def delete(self, dataset_name: str, volume: Optional[str] = None, member_name: Optional[str] = None) -> dict:
+    def delete(self, dataset_name: str, volume: Optional[str] = None, member_name: Optional[str] = None) -> dict[str, Any]:
         """
         Delete a sequential or partitioned data.
 
@@ -955,7 +915,7 @@ class Datasets(SdkApi): # type: ignore[misc]
         if volume is not None:
             url = "{}ds/-{}/{}".format(self._request_endpoint, volume, self._encode_uri_component(dataset_name))
         custom_args["url"] = url
-        response_json = self.request_handler.perform_request("DELETE", custom_args, expected_code=[200, 202, 204])
+        response_json: dict[str, Any] = self.request_handler.perform_request("DELETE", custom_args, expected_code=[200, 202, 204])
         return response_json
         
 
@@ -964,7 +924,7 @@ class Datasets(SdkApi): # type: ignore[misc]
         from_filename: str,
         to_dataset_name: str,
         to_member_name: Optional[str] = None,
-        type: str = FileType.TEXT,
+        type: FileType = FileType.TEXT,
         replace: bool = False,
     ) -> dict[str, Any]:
         """
@@ -978,7 +938,7 @@ class Datasets(SdkApi): # type: ignore[misc]
             Name of the dataset to copy to.
         to_member_name: Optional[str]
             Name of the member to copy to.
-        type: str
+        type: FileType
             Type of the file to copy from. Default is FileType.TEXT.
         replace: bool
             If true, members in the target dataset are replaced.
@@ -990,7 +950,7 @@ class Datasets(SdkApi): # type: ignore[misc]
         """
         data = {
             "request": "copy",
-            "from-file": {"filename": from_filename.strip(), "type": type.value if isinstance(type, Enum) else type},
+            "from-file": {"filename": from_filename.strip(), "type": type.value},
             "replace": replace,
         }
 
@@ -998,5 +958,5 @@ class Datasets(SdkApi): # type: ignore[misc]
         custom_args = self._create_custom_request_arguments()
         custom_args["json"] = data
         custom_args["url"] = "{}ds/{}".format(self._request_endpoint, self._encode_uri_component(path_to_member))
-        response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[200])
-        return response_json if isinstance(response_json, dict) else {}
+        response_json: dict[str, Any] = self.request_handler.perform_request("PUT", custom_args, expected_code=[200])
+        return response_json 
