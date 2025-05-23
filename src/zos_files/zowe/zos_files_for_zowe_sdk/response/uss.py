@@ -11,7 +11,7 @@ Copyright Contributors to the Zowe Project.
 """
 
 from dataclasses import dataclass
-from typing import Any, List, Optional
+from typing import Any, Optional
 
 
 @dataclass
@@ -34,7 +34,7 @@ class USSResponse:
 
 @dataclass
 class USSListResponse:
-    items: Optional[List[dict[str, Any]]] = None
+    items: Optional[list[dict[str, Any]]] = None
     returnedRows: Optional[int] = None
     totalRows: Optional[int] = None
     JSONversion: Optional[int] = None

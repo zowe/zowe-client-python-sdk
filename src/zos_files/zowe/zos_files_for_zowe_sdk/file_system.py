@@ -39,7 +39,7 @@ class FileSystems(SdkApi): #type: ignore
         super().__init__(connection, "/zosmf/restfiles/", logger_name=__name__, log=log)
         self._default_headers["Accept-Encoding"] = "gzip"
 
-    def create(self, file_system_name: str, options: dict[str, Any] = {}) -> dict[str, Any]:
+    def create(self, file_system_name: str, options: dict[str, Any] = {}) -> None:
         """
         Create a z/OS UNIX zFS Filesystem.
 
@@ -56,11 +56,6 @@ class FileSystems(SdkApi): #type: ignore
             Thrown when file system exceeds max allocation quantity
         InvalidPermsOption
             Thrown when invalid permission option is provided
-
-        Returns
-        -------
-        dict
-            A JSON containing the result of the operation
         """
         for key, value in options.items():
             if key == "perms":
@@ -76,12 +71,9 @@ class FileSystems(SdkApi): #type: ignore
         custom_args = self._create_custom_request_arguments()
         custom_args["url"] = "{}mfs/zfs/{}".format(self._request_endpoint, file_system_name)
         custom_args["json"] = options
-        response_json = self.request_handler.perform_request("POST", custom_args, expected_code=[201])
-        if not isinstance(response_json, dict):
-            raise TypeError(f"Expected dict, but got {type(response_json).__name__}")
-        return response_json
+        self.request_handler.perform_request("POST", custom_args, expected_code=[201])
 
-    def delete(self, file_system_name: str) -> dict[str, Any]:
+    def delete(self, file_system_name: str) -> None:
         """
         Delete a zFS Filesystem.
 
@@ -89,24 +81,14 @@ class FileSystems(SdkApi): #type: ignore
         ----------
         file_system_name: str
             Name of the file system
-
-        Returns
-        -------
-        dict
-            A JSON containing the result of the operation
         """
         custom_args = self._create_custom_request_arguments()
         custom_args["url"] = "{}mfs/zfs/{}".format(self._request_endpoint, file_system_name)
-        response_json = self.request_handler.perform_request("DELETE", custom_args, expected_code=[204])
-        if response_json is None:
-            return {}
-        if not isinstance(response_json, dict):
-            raise TypeError(f"Expected dict, but got {type(response_json).__name__}")
-        return response_json
+        self.request_handler.perform_request("DELETE", custom_args, expected_code=[204])
 
     def mount(
         self, file_system_name: str, mount_point: str, options: dict[str, Any] = {}, encoding: str = _ZOWE_FILES_DEFAULT_ENCODING
-    ) -> dict[str, Any]:
+    ) -> None:
         """
         Mount a z/OS UNIX file system on a specified directory.
 
@@ -120,11 +102,6 @@ class FileSystems(SdkApi): #type: ignore
             A JSON of request body options
         encoding: str
             Specifies optional encoding name (e.g. IBM-1047)
-
-        Returns
-        -------
-        dict
-            A JSON containing the result of the operation
         """
         options["action"] = "mount"
         options["mount-point"] = mount_point
@@ -132,14 +109,9 @@ class FileSystems(SdkApi): #type: ignore
         custom_args["url"] = "{}mfs/{}".format(self._request_endpoint, file_system_name)
         custom_args["json"] = options
         custom_args["headers"]["Content-Type"] = "text/plain; charset={}".format(encoding)
-        response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[204])
-        if response_json is None:
-            return {}
-        if not isinstance(response_json, dict):
-            raise TypeError(f"Expected dict, but got {type(response_json).__name__}")
-        return response_json
+        self.request_handler.perform_request("PUT", custom_args, expected_code=[204])
 
-    def unmount(self, file_system_name: str, options: dict[str, Any] = {}, encoding: str = _ZOWE_FILES_DEFAULT_ENCODING) -> dict[str, Any]:
+    def unmount(self, file_system_name: str, options: dict[str, Any] = {}, encoding: str = _ZOWE_FILES_DEFAULT_ENCODING) -> None:
         """
         Unmount a z/OS UNIX file system on a specified directory.
 
@@ -151,23 +123,14 @@ class FileSystems(SdkApi): #type: ignore
             A JSON of request body options
         encoding: str
             Specifies optional encoding name (e.g. IBM-1047)
-
-        Returns
-        -------
-        dict
-            A JSON containing the result of the operation
         """
         options["action"] = "unmount"
         custom_args = self._create_custom_request_arguments()
         custom_args["url"] = "{}mfs/{}".format(self._request_endpoint, file_system_name)
         custom_args["json"] = options
         custom_args["headers"]["Content-Type"] = "text/plain; charset={}".format(encoding)
-        response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[204])
-        if response_json is None:
-            return {}
-        if not isinstance(response_json, dict):
-            raise TypeError(f"Expected dict, but got {type(response_json).__name__}")
-        return response_json
+        self.request_handler.perform_request("PUT", custom_args, expected_code=[204])
+        
 
     def list(
         self, file_path_name: Optional[str] = None, file_system_name: Optional[str] = None
