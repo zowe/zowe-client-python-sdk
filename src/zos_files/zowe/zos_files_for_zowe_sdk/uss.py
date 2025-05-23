@@ -11,7 +11,6 @@ Copyright Contributors to the Zowe Project.
 """
 
 import os
-import base64
 from typing import Optional, Any, Union
 import requests
 
@@ -63,7 +62,7 @@ class USSFiles(SdkApi): #type: ignore
         response_json = self.request_handler.perform_request("GET", custom_args)
         return USSListResponse(response_json)
 
-    def delete(self, filepath_name: str, recursive: bool = False) -> dict[str, Any]:
+    def delete(self, filepath_name: str, recursive: bool = False) -> None:
         """
         Delete a file or directory.
 
@@ -73,21 +72,15 @@ class USSFiles(SdkApi): #type: ignore
             Path of the file to be deleted
         recursive: bool
             If specified as True, all the files and sub-directories will be deleted.
-
-        Returns
-        -------
-        dict
-            A JSON containing the operation results
         """
         custom_args = self._create_custom_request_arguments()
         custom_args["url"] = "{}fs/{}".format(self._request_endpoint, filepath_name.lstrip("/"))
         if recursive:
             custom_args["headers"]["X-IBM-Option"] = "recursive"
 
-        response_json:dict[str, Any] = self.request_handler.perform_request("DELETE", custom_args, expected_code=[204])
-        return response_json
+        self.request_handler.perform_request("DELETE", custom_args, expected_code=[204])
 
-    def create(self, file_path: str, type: str, mode: Optional[str] = None) -> dict[str, Any]:
+    def create(self, file_path: str, type: str, mode: Optional[str] = None) -> None:
         """
         Add a file or directory.
 
@@ -110,10 +103,9 @@ class USSFiles(SdkApi): #type: ignore
         custom_args = self._create_custom_request_arguments()
         custom_args["json"] = data
         custom_args["url"] = "{}fs/{}".format(self._request_endpoint, file_path.lstrip("/"))
-        response_json: dict[str,Any] = self.request_handler.perform_request("POST", custom_args, expected_code=[201])
-        return response_json
+        self.request_handler.perform_request("POST", custom_args, expected_code=[201])
 
-    def write(self, filepath_name: str, data: str, encoding: str = _ZOWE_FILES_DEFAULT_ENCODING) -> dict[str, Any]:
+    def write(self, filepath_name: str, data: str, encoding: str = _ZOWE_FILES_DEFAULT_ENCODING) -> None:
         """
         Write content to an existing UNIX file.
 
@@ -135,10 +127,9 @@ class USSFiles(SdkApi): #type: ignore
         custom_args["url"] = "{}fs/{}".format(self._request_endpoint, filepath_name.lstrip("/"))
         custom_args["data"] = data
         custom_args["headers"]["Content-Type"] = "text/plain; charset={}".format(encoding)
-        response_json: dict[str,Any] = self.request_handler.perform_request("PUT", custom_args, expected_code=[204, 201])
-        return response_json
+        self.request_handler.perform_request("PUT", custom_args, expected_code=[204, 201])
 
-    def get_content(self, filepath_name: str) -> dict[str, Any]:
+    def get_content(self, filepath_name: str) -> Union[str, None]:
         """
         Retrieve the content of a filename. The complete path must be specified.
 
@@ -149,15 +140,15 @@ class USSFiles(SdkApi): #type: ignore
 
         Returns
         -------
-        dict
-            A JSON with the contents of the specified USS file
+        Union[str, None]
+            Contents of a given dataset in string, or None if the dataset is empty
         """
         custom_args = self._create_custom_request_arguments()
         custom_args["url"] = "{}fs{}".format(self._request_endpoint, filepath_name)
-        response_json: dict[str,Any] = self.request_handler.perform_request("GET", custom_args)
+        response_json = self.request_handler.perform_request("GET", custom_args)
         return response_json
 
-    def get_content_streamed(self, file_path: str, binary: bool = False) -> Union[dict[str, Any], bytes]:
+    def get_content_streamed(self, file_path: str, binary: bool = False) -> requests.Response:
         """
         Retrieve the contents of a given USS file streamed.
 
@@ -170,15 +161,15 @@ class USSFiles(SdkApi): #type: ignore
 
         Returns
         -------
-        Union[dict[str, Any], bytes]
-            File content in JSON format or bytes 
+        requests.Response
+            A requests.Response object with content of the file
         """
         custom_args = self._create_custom_request_arguments()
         custom_args["url"] = "{}fs/{}".format(self._request_endpoint, self._encode_uri_component(file_path.lstrip("/")))
         if binary:
             custom_args["headers"]["X-IBM-Data-Type"] = "binary"
-        result: Union[dict[str, Any], bytes] = self.request_handler.perform_request("GET", custom_args, stream=True)
-        return result
+        response = self.request_handler.perform_request("GET", custom_args, stream=True)
+        return response
 
     def download(self, file_path: str, output_file: str, binary: bool = False) -> None:
         """
@@ -220,7 +211,7 @@ class USSFiles(SdkApi): #type: ignore
         """
         if os.path.isfile(input_file):
             with open(input_file, "r", encoding="utf-8") as in_file:
-                response_json = self.write(filepath_name, in_file.read())
+                self.write(filepath_name, in_file.read())
         else:
             self.logger.error(f"File {input_file} not found.")
             raise FileNotFound(input_file)
