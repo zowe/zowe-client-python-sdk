@@ -40,14 +40,14 @@ fn find_password(service: String) -> PyResult<Option<String>> {
 fn find_credentials(service: String) -> PyResult<Vec<(String, String)>> {
     let mut creds: Vec<(String, String)> = vec![];
     match os::find_credentials(&service, &mut creds) {
-        Ok(res) => Ok(creds),
+        Ok(_res) => Ok(creds),
         Err(e) => Err(PyValueError::new_err(format!("{:#?}", e))),
     }
 }
 
 /// A Python module implemented in Rust.
 #[pymodule]
-fn keyring(_py: Python, m: &PyModule) -> PyResult<()> {
+fn keyring(_py: Python, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(get_password, m)?)?;
     m.add_function(wrap_pyfunction!(set_password, m)?)?;
     m.add_function(wrap_pyfunction!(delete_password, m)?)?;
