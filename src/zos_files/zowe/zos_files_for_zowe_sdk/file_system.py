@@ -29,7 +29,7 @@ class FileSystems(SdkApi): #type: ignore
 
     Parameters
     ----------
-    connection : dict
+    connection : dict[str, Any]
         A profile for connection in dict (json) format
     log : bool
         Flag to disable logger
@@ -47,7 +47,7 @@ class FileSystems(SdkApi): #type: ignore
         ----------
         file_system_name: str
             Name of the file system
-        options: dict
+        options: dict[str, Any]
             Specifies file system attributes
 
         Raises
@@ -87,7 +87,11 @@ class FileSystems(SdkApi): #type: ignore
         self.request_handler.perform_request("DELETE", custom_args, expected_code=[204])
 
     def mount(
-        self, file_system_name: str, mount_point: str, options: dict[str, Any] = {}, encoding: str = _ZOWE_FILES_DEFAULT_ENCODING
+        self, 
+        file_system_name: str, 
+        mount_point: str, 
+        options: dict[str, Any] = {}, 
+        encoding: str = _ZOWE_FILES_DEFAULT_ENCODING
     ) -> None:
         """
         Mount a z/OS UNIX file system on a specified directory.
@@ -98,7 +102,7 @@ class FileSystems(SdkApi): #type: ignore
             Name for the file system
         mount_point: str
             Mount point to be used for mounting the UNIX file system
-        options: dict
+        options: dict[str, Any]
             A JSON of request body options
         encoding: str
             Specifies optional encoding name (e.g. IBM-1047)
@@ -111,7 +115,12 @@ class FileSystems(SdkApi): #type: ignore
         custom_args["headers"]["Content-Type"] = "text/plain; charset={}".format(encoding)
         self.request_handler.perform_request("PUT", custom_args, expected_code=[204])
 
-    def unmount(self, file_system_name: str, options: dict[str, Any] = {}, encoding: str = _ZOWE_FILES_DEFAULT_ENCODING) -> None:
+    def unmount(
+        self, 
+        file_system_name: str, 
+        options: dict[str, Any] = {}, 
+        encoding: str = _ZOWE_FILES_DEFAULT_ENCODING
+    ) -> None:
         """
         Unmount a z/OS UNIX file system on a specified directory.
 
@@ -119,7 +128,7 @@ class FileSystems(SdkApi): #type: ignore
         ----------
         file_system_name: str
             Name for the file system
-        options: dict
+        options: dict[str, Any]
             A JSON of request body options
         encoding: str
             Specifies optional encoding name (e.g. IBM-1047)

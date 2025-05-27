@@ -26,7 +26,7 @@ class SdkApi:
 
     Parameters
     ----------
-    profile : dict
+    profile : dict[str, Any]
         Profile information in json (dict) format
     default_url : str
         Default url used for session
@@ -77,7 +77,11 @@ class SdkApi:
         """Return the SdkApi instance."""
         return self
 
-    def __exit__(self, exc_type: Optional[Type[BaseException]], exception: Optional[BaseException], traceback: Optional[object]) -> None:
+    def __exit__(self, 
+        exc_type: Optional[Type[BaseException]], 
+        exception: Optional[BaseException], 
+        traceback: Optional[object]
+    ) -> None:
         """Delete the request handler before exit."""
         del self.request_handler
 

@@ -23,7 +23,7 @@ class Console(SdkApi): #type: ignore
 
     Parameters
     ----------
-    connection : dict
+    connection : dict[str, Any]
        A profile in dict (json) format
     log : bool
         Flag to disable logger

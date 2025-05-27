@@ -24,9 +24,9 @@ class Tso(SdkApi): # type: ignore
 
     Parameters
     ----------
-    connection: dict
+    connection: dict[str, Any]
         Connection object
-    tso_profile: Optional[dict]
+    tso_profile: Optional[dict[str, Any]]
         Profile used for tso connection
     log : bool
         Flag to disable logger
@@ -162,7 +162,7 @@ class Tso(SdkApi): # type: ignore
 
         Returns
         -------
-        list
+        list[dict[str, Any]]
             A non-normalized list from TSO containing the result from the command
         """
         return list(self.send(session_key, message).tsoData)
@@ -256,12 +256,12 @@ class Tso(SdkApi): # type: ignore
 
         Parameters
         ----------
-        response_json: dict
+        response_json: dict[str, Any]
             The JSON containing the TSO response
 
         Returns
         -------
-        list
+        list[str]
             A list containing the TSO response message ids
         """
         return [message["messageId"] for message in response_json["msgData"]] if "msgData" in response_json else []
@@ -272,17 +272,17 @@ class Tso(SdkApi): # type: ignore
 
         Parameters
         ----------
-        response_json: dict
+        response_json: list[dict[str, Any]]
             The JSON containing the TSO response
 
         Returns
         -------
-        list
+        list[str]
             A list containing the TSO response messages
         """
         return [message["TSO MESSAGE"]["DATA"] for message in response_json if "TSO MESSAGE" in message]
 
-    def __get_tso_data(self, session_key: str) -> list[dict[str, Any]]:
+    def __get_tso_data(self, session_key: str) -> dict[str, Any]:
         """
         Get data from a tso session.
 
@@ -293,10 +293,10 @@ class Tso(SdkApi): # type: ignore
 
         Returns
         -------
-        dict
+        dict[str, Any]
             A json response of the operation result
         """
         custom_args = self._create_custom_request_arguments()
         custom_args["url"] = "{}/{}".format(self._request_endpoint, session_key)
-        command_output:list[dict[str,Any]] = self.request_handler.perform_request("GET", custom_args)["tsoData"]
+        command_output:dict[str,Any] = self.request_handler.perform_request("GET", custom_args)["tsoData"]
         return command_output

@@ -293,21 +293,22 @@ class DatasetOption:
 
 
 class Datasets(SdkApi): # type: ignore[misc]
-    def __init__(self, connection: dict[str, str], log: bool = True, base_url: str = "/zosmf/restfiles/", **kwargs: Any)  -> None:
-        """
-        Class used to represent the base z/OSMF Datasets API.
+    """
+    Class used to represent the base z/OSMF Datasets API.
 
-        It includes all operations related to datasets.
+    It includes all operations related to datasets.
 
-        Parameters
-        ----------
-        connection : dict
-            A profile for connection in dict (json) format
-        log : bool
-            Flag to disable logger
-        """
+    Parameters
+    ----------
+    connection : dict[str, Any]
+        A profile for connection in dict (json) format
+    log : bool
+        Flag to disable logger
+    """
 
-        super().__init__(connection, "/zosmf/restfiles/", logger_name=__name__, log=log, **kwargs)
+    def __init__(self, connection: dict[str, Any], log: bool = True)  -> None:
+
+        super().__init__(connection, "/zosmf/restfiles/", logger_name=__name__, log=log)
         self._default_headers["Accept-Encoding"] = "gzip"
 
     def list(self, name_pattern: str, return_attributes: bool = False) -> DatasetListResponse:
@@ -582,7 +583,12 @@ class Datasets(SdkApi): # type: ignore[misc]
         response: Union[str, Response] = self.request_handler.perform_request("GET", custom_args, stream=stream)
         return response
 
-    def get_binary_content(self, dataset_name: str, stream: bool = False, with_prefixes: bool = False) -> Union[bytes, Response]:
+    def get_binary_content(
+        self, 
+        dataset_name: str, 
+        stream: bool = False, 
+        with_prefixes: bool = False
+    ) -> Union[bytes, Response]:
         """
         Retrieve the contents of a given dataset as a binary bytes object.
 
@@ -594,6 +600,11 @@ class Datasets(SdkApi): # type: ignore[misc]
             Specifies whether the request is streaming
         with_prefixes: bool
             If True include a 4 byte big endian record len prefix. Default: False
+
+        Returns
+        -------
+        Union[bytes, Response]
+            Contents of a given dataset in bytes or a requests.Response object if streaming.
         """
         custom_args = self._create_custom_request_arguments()
         custom_args["url"] = "{}ds/{}".format(self._request_endpoint, self._encode_uri_component(dataset_name))
@@ -605,7 +616,7 @@ class Datasets(SdkApi): # type: ignore[misc]
         response: Union[bytes, Response] = self.request_handler.perform_request("GET", custom_args, stream=stream)
         return response
 
-    def write(self, dataset_name: str, data: Any, encoding: str = _ZOWE_FILES_DEFAULT_ENCODING) -> None:
+    def write(self, dataset_name: str, data: Union[str, bytes], encoding: str = _ZOWE_FILES_DEFAULT_ENCODING) -> None:
         """
         Write content to an existing dataset.
 
@@ -613,10 +624,15 @@ class Datasets(SdkApi): # type: ignore[misc]
         ----------
         dataset_name: str
             Name of the dataset to retrieve
-        data: str or bytes
+        data: Union[str, bytes]
             Content to be written
         encoding: str
             Specifies encoding name (e.g. IBM-1047) for text data
+
+        Raises
+        ------
+        ValueError
+            Data must be either a string or bytes.
         """
         custom_args = self._create_custom_request_arguments()
         custom_args["url"] = "{}ds/{}".format(self._request_endpoint, self._encode_uri_component(dataset_name))

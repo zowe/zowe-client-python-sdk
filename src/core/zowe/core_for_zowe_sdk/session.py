@@ -40,12 +40,12 @@ class Session:
 
     Parameters
     ----------
-    props : dict
+    props : dict[str, Any]
         Profile and properties
 
     Raises
     ------
-    Exception
+    ValueError
         Exception thrown when cert key is not provided
     """
 

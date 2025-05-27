@@ -31,11 +31,11 @@ class UnexpectedStatus(Exception):
 
     Parameters
     ----------
-    expected: int
-        The expected status code
+    expected: list[int]
+        The list of expected status code
     received: int
         The received status code
-    request_output: int
+    request_output: str
         The output from the request
     """
 
@@ -126,7 +126,7 @@ class SecureValuesNotFound(Exception):
 
     Parameters
     ----------
-    values: set
+    values: set[str]
         The list of secure values not found
     """
 

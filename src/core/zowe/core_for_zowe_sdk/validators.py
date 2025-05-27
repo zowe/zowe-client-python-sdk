@@ -24,7 +24,7 @@ def validate_config_json(path_config_json: Union[str, dict[str, Any]], path_sche
 
     Parameters
     ----------
-    path_config_json: Union[str, dict]
+    path_config_json: Union[str, dict[str, Any]]
         Absolute path to zowe.config.json
     path_schema_json: str
         Absolute path to zowe.schema.json

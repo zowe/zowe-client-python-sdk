@@ -26,7 +26,7 @@ class Jobs(SdkApi): # type: ignore
 
     Parameters
     ----------
-    connection : dict
+    connection : dict[str, Any]
         A profile for connection in dict (json) format
     log : bool
         Flag to disable logger
@@ -138,7 +138,7 @@ class Jobs(SdkApi): # type: ignore
 
         Parameters
         ----------
-        req: dict
+        req: dict[str, Any]
             A json representation of the request
         jobname: str
             The name of the job
@@ -460,7 +460,7 @@ class Jobs(SdkApi): # type: ignore
 
         Parameters
         ----------
-        status: dict
+        status: dict[str, Any]
             The response json describing the job to be used. (i.e. from the last get_status call)
         output_dir: str
             The output directory where the output files will be stored. The directory does not have to exist yet

@@ -50,7 +50,8 @@ class CredentialManager:
             return
 
         try:
-            secret_value = CredentialManager._get_credential(str(constants["ZoweServiceName"]), str(constants["ZoweAccountName"]))
+            secret_value = CredentialManager._get_credential(
+                str(constants["ZoweServiceName"]), str(constants["ZoweAccountName"]))
             # Handle the case when secret_value is None
             if secret_value is None:
                 return

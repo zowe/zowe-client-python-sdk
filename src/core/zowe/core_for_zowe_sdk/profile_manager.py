@@ -66,7 +66,7 @@ class ProfileManager:
         Indicates whether warnings are shown
     """
 
-    def __init__(self, appname:str = "zowe", show_warnings: Optional[bool] = True):
+    def __init__(self, appname:Optional[str] = "zowe", show_warnings: Optional[bool] = True):
         self.__appname = appname if appname is not None else "zowe"  # Ensure it is a string
         self.__show_warnings = show_warnings
 
@@ -542,6 +542,11 @@ class ProfileManager:
             The value to be set for the property.
         secure : Optional[bool]
             If True, the property will be stored securely. Default is None.
+
+        Raises
+        ------
+        FileNotFoundError
+            No property file found at given path.
         """
         # highest priority layer for the given profile name
         highest_priority_layer = self.get_highest_priority_layer(json_path)
@@ -563,6 +568,11 @@ class ProfileManager:
             The path of the profile to be set. eg: profiles.zosmf
         profile_data: dict[str, Any]
             The data of the profile to set.
+
+        Raises
+        ------
+        FileNotFoundError
+            No profile file found at given path.
         """
         highest_priority_layer = self.get_highest_priority_layer(profile_path)
         if highest_priority_layer is not None:

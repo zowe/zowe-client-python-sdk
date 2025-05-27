@@ -250,7 +250,9 @@ class ConfigFile:
         ------
         ProfileNotFound
             Cannot find profile
-
+        ValueError
+            Missing profile type
+        
         Returns
         -------
         Profile
@@ -404,6 +406,11 @@ class ConfigFile:
         -------
         dict[str, Any]
             Object containing profile properties
+
+        Raises
+        ------
+        ValueError
+            Profile cannot be None
         """
         props: dict[str, Any] = {}
         lst = profile_name.split(".")
@@ -449,7 +456,11 @@ class ConfigFile:
                 else:
                     break
 
-    def __extract_secure_properties(self, profiles_obj: dict[str, Any], json_path: Optional[str] = "profiles") -> dict[str, Any]:
+    def __extract_secure_properties(
+        self, 
+        profiles_obj: dict[str, Any], 
+        json_path: Optional[str] = "profiles"
+    ) -> dict[str, Any]:
         """
         Extract secure properties from the profiles object for storage in the vault.
 
@@ -464,7 +475,6 @@ class ConfigFile:
         -------
         dict[str, Any]
             A dictionary of secure properties keyed by JSON path in the vault.
-
         """
         secure_props = {}
         for key, value in profiles_obj.items():
@@ -603,6 +613,11 @@ class ConfigFile:
         ----------
         update_secure_props: Optional[bool]
             If True, the secure properties will be stored in the vault. Default is True.
+
+        Raises
+        ------
+        ValueError
+            Filepath must be set and valid.
         """
         # Ensure profiles is initialized
         if self.profiles is None:

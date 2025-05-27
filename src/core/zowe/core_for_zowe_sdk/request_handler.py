@@ -26,7 +26,7 @@ class RequestHandler:
 
     Parameters
     ----------
-    session_arguments: dict
+    session_arguments: dict[str, Any]
         Zowe SDK session arguments
     logger_name: str
         The logger name of the modules calling request handler
@@ -53,9 +53,9 @@ class RequestHandler:
         ----------
         method: str
             The request method that should be used
-        request_arguments: dict
+        request_arguments: dict[str, Any]
             The dictionary containing the required arguments for the execution of the request
-        expected_code: list
+        expected_code: list[int]
             The list containing the acceptable response codes (default is [200])
         stream: bool
             The boolean value whether the request is stream
@@ -142,7 +142,7 @@ class RequestHandler:
 
         Returns
         -------
-        Union[str, bytes, dict, None]
+        Union[str, bytes, dict[str, Any], None]
             Response object at the format based on Content-Type header:
             - `bytes` when the response is binary data
             - `str` when the response is plain text
