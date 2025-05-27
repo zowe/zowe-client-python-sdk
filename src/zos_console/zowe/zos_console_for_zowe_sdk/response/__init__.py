@@ -11,3 +11,5 @@ Copyright Contributors to the Zowe Project.
 """
 
 from .console import ConsoleResponse, IssueCommandResponse
+
+__all__= ["ConsoleResponse", "IssueCommandResponse"]
