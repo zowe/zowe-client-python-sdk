@@ -25,7 +25,7 @@ class Log:
         Path where the log file is saved
     file_handler: logging.FileHandler
         Shared FileHandler object for managing log file output
-    console_handler: logging.StreamHandler[Any]
+    console_handler: logging.StreamHandler
         Shared StreamHandler object for managing log console output
     file_output: bool
         Specifies whether log messages would be saved to a file. True by default.
