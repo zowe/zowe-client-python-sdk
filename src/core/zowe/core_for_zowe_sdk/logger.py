@@ -42,7 +42,7 @@ class Log:
     file_handler.setFormatter(
         logging.Formatter("[%(asctime)s] [%(levelname)s] [%(name)s] - %(message)s", "%m/%d/%Y %I:%M:%S %p")
     )
-    console_handler: logging.StreamHandler[Any] = logging.StreamHandler() # pylint: disable=unsubscriptable-object
+    console_handler: logging.StreamHandler = logging.StreamHandler() # pylint: disable=unsubscriptable-object
 
     file_output: bool = True
     console_output: bool = True
