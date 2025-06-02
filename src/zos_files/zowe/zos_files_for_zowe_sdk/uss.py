@@ -130,7 +130,7 @@ class USSFiles(SdkApi): #type: ignore
 
         Returns
         -------
-        Union[str, None]
+        Optional[str]
             Contents of a given dataset in string, or None if the dataset is empty
         """
         custom_args = self._create_custom_request_arguments()
