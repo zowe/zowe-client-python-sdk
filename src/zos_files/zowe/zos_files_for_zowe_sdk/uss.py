@@ -119,7 +119,7 @@ class USSFiles(SdkApi): #type: ignore
         custom_args["headers"]["Content-Type"] = "text/plain; charset={}".format(encoding)
         self.request_handler.perform_request("PUT", custom_args, expected_code=[204, 201])
 
-    def get_content(self, filepath_name: str) -> Union[str, None]:
+    def get_content(self, filepath_name: str) -> Optional[str]:
         """
         Retrieve the content of a filename. The complete path must be specified.
 

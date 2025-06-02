@@ -67,7 +67,7 @@ class Files(SdkApi): #type: ignore
         """Use uss.get_content_streamed() instead of this deprecated function."""
         return self.uss.get_content_streamed(file_path, binary)
 
-    def get_file_content(self, filepath_name: str) -> Union[str, None]:
+    def get_file_content(self, filepath_name: str) -> Optional[str]:
         """Use uss.get_content() instead of this deprecated function."""
         return self.uss.get_content(filepath_name)
 
@@ -116,7 +116,7 @@ class Files(SdkApi): #type: ignore
             from_dataset_name, to_dataset_name, from_member_name, volser, alias, to_member_name, enq, replace
         )
 
-    def get_dsn_content(self, dataset_name: str) -> Union[str, None]:
+    def get_dsn_content(self, dataset_name: str) -> Optional[str]:
         """Use ds.get_content() instead of this deprecated function."""
         return self.ds.get_content(dataset_name)
 

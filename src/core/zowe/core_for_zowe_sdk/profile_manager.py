@@ -60,14 +60,14 @@ class ProfileManager:
 
     Parameters
     ----------
-    appname : Optional[str]
+    appname : str
         Name of the app
-    show_warnings : Optional[bool]
+    show_warnings : bool
         Indicates whether warnings are shown
     """
 
-    def __init__(self, appname:Optional[str] = "zowe", show_warnings: Optional[bool] = True):
-        self.__appname = appname if appname is not None else "zowe"  # Ensure it is a string
+    def __init__(self, appname: str = "zowe", show_warnings: bool = True):
+        self.__appname = appname
         self.__show_warnings = show_warnings
 
         self.__project_config = ConfigFile(type=TEAM_CONFIG, name=self.__appname)

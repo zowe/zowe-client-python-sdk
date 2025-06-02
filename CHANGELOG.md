@@ -12,7 +12,7 @@ All notable changes to the Zowe Client Python SDK will be documented in this fil
 
 ## Recent Changes
 
-- Validate existing type annotations. [#321] (https://github.com/zowe/zowe-client-python-sdk/issues/321)
+- Fixed missing and incorrect type annotations. [#321] (https://github.com/zowe/zowe-client-python-sdk/issues/321)
 
 ### Enhancements
 

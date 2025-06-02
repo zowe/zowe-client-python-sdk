@@ -121,7 +121,7 @@ class CredentialManager:
     @staticmethod
     def _set_credential(service_name: str, account_name: str, encoded_credential: str) -> None:
         # Check if the encoded credential exceeds the maximum length for win32
-        if sys.platform == "win32" and len(encoded_credential) > int(constants["WIN32_CRED_MAX_STRING_LENGTH"]):
+        if sys.platform == "win32" and len(encoded_credential) > constants["WIN32_CRED_MAX_STRING_LENGTH"]:
             # Split the encoded credential string into chunks of maximum length
             chunk_size = int(constants["WIN32_CRED_MAX_STRING_LENGTH"])
             encoded_credential += "\0"
