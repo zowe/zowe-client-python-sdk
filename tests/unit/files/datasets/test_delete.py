@@ -30,13 +30,13 @@ class TestDeleteClass(TestCase):
         """Test list members sends request"""
         self.files_instance = Files(self.test_profile)
         mock_send_request.return_value = mock.Mock(headers={"Content-Type": "application/json"}, status_code=200)
-        mock_send_request.return_value.json.return_value = {}
+        mock_send_request.return_value.json.return_value = None
 
         test_cases = [("MY.PDS", 1000, "m1"), ("MY.C", 100, "m2"), ("MY.D", 1000, "member"), ("MY.E", 500, "extended")]
 
         for dataset_name, volume, member_name in test_cases:
             result = self.files_instance.delete_data_set(dataset_name, volume, member_name)
-            self.assertEqual(result, {})
+            self.assertEqual(result, None)
             mock_send_request.assert_called()
             prepared_request = mock_send_request.call_args[0][0]
             self.assertEqual(prepared_request.method, "DELETE")

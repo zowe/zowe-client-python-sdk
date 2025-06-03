@@ -9,8 +9,9 @@ SPDX-License-Identifier: EPL-2.0
 
 Copyright Contributors to the Zowe Project.
 """
+
 from dataclasses import dataclass, field
-from typing import Any, List, Optional
+from typing import Any, Optional
 
 
 @dataclass
@@ -32,12 +33,12 @@ class ZosmfResponse:
     zosmf_port: Optional[str] = None
     zosmf_version: Optional[str] = None
     zosmf_hostname: Optional[str] = None
-    plugins: List[Plugin] = field(default_factory=list)
+    plugins: list[Plugin] = field(default_factory=list)
     zosmf_saf_realm: Optional[str] = None
     zosmf_full_version: Optional[str] = None
     api_version: Optional[str] = None
 
-    def __init__(self, response: dict) -> None:
+    def __init__(self, response: dict[str, Any]) -> None:
         for k, value in response.items():
             key = k.replace("-", "_")
             if key == "plugins":

@@ -10,7 +10,7 @@ SPDX-License-Identifier: EPL-2.0
 Copyright Contributors to the Zowe Project.
 """
 
-from typing import Optional
+from typing import Optional, Any
 
 from zowe.core_for_zowe_sdk import SdkApi
 from zowe.zos_files_for_zowe_sdk import constants
@@ -21,7 +21,7 @@ from .response import FileSystemListResponse
 _ZOWE_FILES_DEFAULT_ENCODING = constants.zos_file_constants["ZoweFilesDefaultEncoding"]
 
 
-class FileSystems(SdkApi):
+class FileSystems(SdkApi):  # type: ignore
     """
     Class used to represent the base z/OSMF FileSystems API.
 
@@ -29,17 +29,17 @@ class FileSystems(SdkApi):
 
     Parameters
     ----------
-    connection : dict
+    connection : dict[str, Any]
         A profile for connection in dict (json) format
     log : bool
         Flag to disable logger
     """
 
-    def __init__(self, connection: dict, log: bool = True):
+    def __init__(self, connection: dict[str, Any], log: bool = True):
         super().__init__(connection, "/zosmf/restfiles/", logger_name=__name__, log=log)
         self._default_headers["Accept-Encoding"] = "gzip"
 
-    def create(self, file_system_name: str, options: dict = {}) -> dict:
+    def create(self, file_system_name: str, options: dict[str, Any] = {}) -> None:
         """
         Create a z/OS UNIX zFS Filesystem.
 
@@ -47,7 +47,7 @@ class FileSystems(SdkApi):
         ----------
         file_system_name: str
             Name of the file system
-        options: dict
+        options: dict[str, Any]
             Specifies file system attributes
 
         Raises
@@ -56,11 +56,6 @@ class FileSystems(SdkApi):
             Thrown when file system exceeds max allocation quantity
         InvalidPermsOption
             Thrown when invalid permission option is provided
-
-        Returns
-        -------
-        dict
-            A JSON containing the result of the operation
         """
         for key, value in options.items():
             if key == "perms":
@@ -76,10 +71,9 @@ class FileSystems(SdkApi):
         custom_args = self._create_custom_request_arguments()
         custom_args["url"] = "{}mfs/zfs/{}".format(self._request_endpoint, file_system_name)
         custom_args["json"] = options
-        response_json = self.request_handler.perform_request("POST", custom_args, expected_code=[201])
-        return response_json
+        self.request_handler.perform_request("POST", custom_args, expected_code=[201])
 
-    def delete(self, file_system_name: str) -> dict:
+    def delete(self, file_system_name: str) -> None:
         """
         Delete a zFS Filesystem.
 
@@ -87,20 +81,18 @@ class FileSystems(SdkApi):
         ----------
         file_system_name: str
             Name of the file system
-
-        Returns
-        -------
-        dict
-            A JSON containing the result of the operation
         """
         custom_args = self._create_custom_request_arguments()
         custom_args["url"] = "{}mfs/zfs/{}".format(self._request_endpoint, file_system_name)
-        response_json = self.request_handler.perform_request("DELETE", custom_args, expected_code=[204])
-        return response_json
+        self.request_handler.perform_request("DELETE", custom_args, expected_code=[204])
 
     def mount(
-        self, file_system_name: str, mount_point: str, options: dict = {}, encoding: str = _ZOWE_FILES_DEFAULT_ENCODING
-    ) -> dict:
+        self,
+        file_system_name: str,
+        mount_point: str,
+        options: dict[str, Any] = {},
+        encoding: str = _ZOWE_FILES_DEFAULT_ENCODING,
+    ) -> None:
         """
         Mount a z/OS UNIX file system on a specified directory.
 
@@ -110,15 +102,10 @@ class FileSystems(SdkApi):
             Name for the file system
         mount_point: str
             Mount point to be used for mounting the UNIX file system
-        options: dict
+        options: dict[str, Any]
             A JSON of request body options
         encoding: str
             Specifies optional encoding name (e.g. IBM-1047)
-
-        Returns
-        -------
-        dict
-            A JSON containing the result of the operation
         """
         options["action"] = "mount"
         options["mount-point"] = mount_point
@@ -126,10 +113,11 @@ class FileSystems(SdkApi):
         custom_args["url"] = "{}mfs/{}".format(self._request_endpoint, file_system_name)
         custom_args["json"] = options
         custom_args["headers"]["Content-Type"] = "text/plain; charset={}".format(encoding)
-        response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[204])
-        return response_json
+        self.request_handler.perform_request("PUT", custom_args, expected_code=[204])
 
-    def unmount(self, file_system_name: str, options: dict = {}, encoding: str = _ZOWE_FILES_DEFAULT_ENCODING) -> dict:
+    def unmount(
+        self, file_system_name: str, options: dict[str, Any] = {}, encoding: str = _ZOWE_FILES_DEFAULT_ENCODING
+    ) -> None:
         """
         Unmount a z/OS UNIX file system on a specified directory.
 
@@ -137,23 +125,17 @@ class FileSystems(SdkApi):
         ----------
         file_system_name: str
             Name for the file system
-        options: dict
+        options: dict[str, Any]
             A JSON of request body options
         encoding: str
             Specifies optional encoding name (e.g. IBM-1047)
-
-        Returns
-        -------
-        dict
-            A JSON containing the result of the operation
         """
         options["action"] = "unmount"
         custom_args = self._create_custom_request_arguments()
         custom_args["url"] = "{}mfs/{}".format(self._request_endpoint, file_system_name)
         custom_args["json"] = options
         custom_args["headers"]["Content-Type"] = "text/plain; charset={}".format(encoding)
-        response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[204])
-        return response_json
+        self.request_handler.perform_request("PUT", custom_args, expected_code=[204])
 
     def list(
         self, file_path_name: Optional[str] = None, file_system_name: Optional[str] = None

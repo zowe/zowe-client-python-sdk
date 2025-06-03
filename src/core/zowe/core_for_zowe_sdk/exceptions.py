@@ -31,15 +31,15 @@ class UnexpectedStatus(Exception):
 
     Parameters
     ----------
-    expected: int
-        The expected status code
+    expected: list[int]
+        The list of expected status code
     received: int
         The received status code
-    request_output: int
+    request_output: str
         The output from the request
     """
 
-    def __init__(self, expected: int, received: int, request_output: int):
+    def __init__(self, expected: list[int], received: int, request_output: str):
         super().__init__(
             "The status code from z/OSMF was: {}\nExpected: {}\nRequest output: {}".format(
                 received, expected, request_output
@@ -80,7 +80,7 @@ class FileNotFound(Exception):
 class MissingConnectionArgs(Exception):
     """Class used to represent a missing connection argument exception."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(
             "You must provide host, user, and password for a z/OSMF "
             "connection, or the name of a z/OSMF profile that exists on your "
@@ -126,11 +126,11 @@ class SecureValuesNotFound(Exception):
 
     Parameters
     ----------
-    values: set
+    values: set[str]
         The list of secure values not found
     """
 
-    def __init__(self, values: set):
+    def __init__(self, values: set[str]):
         super().__init__("Failed to load secure values: {}".format(str(values)))
 
 

@@ -1,9 +1,7 @@
 import unittest
 
-from zowe.core_for_zowe_sdk import (
-    ApiConnection,
-    exceptions
-)
+from zowe.core_for_zowe_sdk import ApiConnection, exceptions
+
 
 class TestApiConnectionClass(unittest.TestCase):
     """ApiConnection class unit tests."""
