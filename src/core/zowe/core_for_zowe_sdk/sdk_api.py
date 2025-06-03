@@ -57,7 +57,7 @@ class SdkApi:
             "url": self._request_endpoint,
             "headers": self._default_headers,
         }
-        self.__session_arguments:dict[str, Any] = {
+        self.__session_arguments: dict[str, Any] = {
             "verify": self.session.reject_unauthorized,
             "timeout": 30,
         }
@@ -77,10 +77,8 @@ class SdkApi:
         """Return the SdkApi instance."""
         return self
 
-    def __exit__(self, 
-        exc_type: Optional[Type[BaseException]], 
-        exception: Optional[BaseException], 
-        traceback: Optional[object]
+    def __exit__(
+        self, exc_type: Optional[Type[BaseException]], exception: Optional[BaseException], traceback: Optional[object]
     ) -> None:
         """Delete the request handler before exit."""
         del self.request_handler

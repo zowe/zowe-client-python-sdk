@@ -12,7 +12,7 @@ Copyright Contributors to the Zowe Project.
 
 from typing import Union
 
-constants: dict[str, Union[str,int]] = {
+constants: dict[str, Union[str, int]] = {
     "SecureValuePrefix": "managed by ",
     "TsoSessionNotFound": "IZUG1126E",
     "ZoweCredentialKey": "Zowe-Plugin",

@@ -17,7 +17,7 @@ from zowe.core_for_zowe_sdk import SdkApi
 from .response import ConsoleResponse, IssueCommandResponse
 
 
-class Console(SdkApi): #type: ignore
+class Console(SdkApi):  # type: ignore
     """
     Class used to represent the base z/OSMF Console API.
 

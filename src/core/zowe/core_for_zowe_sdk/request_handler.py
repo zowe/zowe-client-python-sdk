@@ -101,7 +101,8 @@ class RequestHandler:
             Flag indicates whether it is a streaming requests.
         """
         self.__response = self.session.request(
-            method=self.__method, stream=stream, **self.session_arguments, **self.__request_arguments)
+            method=self.__method, stream=stream, **self.session_arguments, **self.__request_arguments
+        )
 
     def __del__(self) -> None:
         """Clean up the REST session object once it is no longer needed anymore."""
@@ -136,7 +137,7 @@ class RequestHandler:
             )
             raise RequestFailed(self.__response.status_code, output_str)
 
-    def __normalize_response(self) -> Union[str, bytes, dict[str,Any], None]:
+    def __normalize_response(self) -> Union[str, bytes, dict[str, Any], None]:
         """
         Normalize the response object to a JSON format.
 

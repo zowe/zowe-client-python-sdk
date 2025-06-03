@@ -21,7 +21,7 @@ from .response import FileSystemListResponse
 _ZOWE_FILES_DEFAULT_ENCODING = constants.zos_file_constants["ZoweFilesDefaultEncoding"]
 
 
-class FileSystems(SdkApi): #type: ignore
+class FileSystems(SdkApi):  # type: ignore
     """
     Class used to represent the base z/OSMF FileSystems API.
 
@@ -87,11 +87,11 @@ class FileSystems(SdkApi): #type: ignore
         self.request_handler.perform_request("DELETE", custom_args, expected_code=[204])
 
     def mount(
-        self, 
-        file_system_name: str, 
-        mount_point: str, 
-        options: dict[str, Any] = {}, 
-        encoding: str = _ZOWE_FILES_DEFAULT_ENCODING
+        self,
+        file_system_name: str,
+        mount_point: str,
+        options: dict[str, Any] = {},
+        encoding: str = _ZOWE_FILES_DEFAULT_ENCODING,
     ) -> None:
         """
         Mount a z/OS UNIX file system on a specified directory.
@@ -116,10 +116,7 @@ class FileSystems(SdkApi): #type: ignore
         self.request_handler.perform_request("PUT", custom_args, expected_code=[204])
 
     def unmount(
-        self, 
-        file_system_name: str, 
-        options: dict[str, Any] = {}, 
-        encoding: str = _ZOWE_FILES_DEFAULT_ENCODING
+        self, file_system_name: str, options: dict[str, Any] = {}, encoding: str = _ZOWE_FILES_DEFAULT_ENCODING
     ) -> None:
         """
         Unmount a z/OS UNIX file system on a specified directory.
@@ -139,7 +136,6 @@ class FileSystems(SdkApi): #type: ignore
         custom_args["json"] = options
         custom_args["headers"]["Content-Type"] = "text/plain; charset={}".format(encoding)
         self.request_handler.perform_request("PUT", custom_args, expected_code=[204])
-        
 
     def list(
         self, file_path_name: Optional[str] = None, file_system_name: Optional[str] = None

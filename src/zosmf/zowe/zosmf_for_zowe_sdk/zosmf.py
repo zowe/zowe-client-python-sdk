@@ -17,7 +17,7 @@ from .response import ZosmfResponse
 from typing import Any
 
 
-class Zosmf(SdkApi): # type: ignore
+class Zosmf(SdkApi):  # type: ignore
     """
     Class used to represent the base z/OSMF API.
 

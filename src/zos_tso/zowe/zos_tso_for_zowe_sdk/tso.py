@@ -18,7 +18,7 @@ from zowe.core_for_zowe_sdk import SdkApi, constants
 from .response import EndResponse, IssueResponse, SendResponse, StartResponse
 
 
-class Tso(SdkApi): # type: ignore
+class Tso(SdkApi):  # type: ignore
     """
     Class used to represent the base z/OSMF TSO API.
 
@@ -298,5 +298,5 @@ class Tso(SdkApi): # type: ignore
         """
         custom_args = self._create_custom_request_arguments()
         custom_args["url"] = "{}/{}".format(self._request_endpoint, session_key)
-        command_output:dict[str,Any] = self.request_handler.perform_request("GET", custom_args)["tsoData"]
+        command_output = self.request_handler.perform_request("GET", custom_args)["tsoData"]
         return command_output

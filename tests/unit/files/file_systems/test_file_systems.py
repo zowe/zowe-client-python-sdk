@@ -24,22 +24,18 @@ class TestFilesClass(TestCase):
         """Test creating a zfs sends a request"""
         mock_send_request.return_value = mock.Mock(headers={"Content-Type": "application/json"}, status_code=201)
 
-        try: 
-            Files(self.test_profile).create_zfs_file_system(
-                "file_system_name", {"perms": 100, "cylsPri": 16777213, "cylsSec": 16777215}
-            )
-        except:    
-            mock_send_request.assert_called_once()
+        Files(self.test_profile).create_zfs_file_system(
+            "file_system_name", {"perms": 100, "cylsPri": 16777213, "cylsSec": 16777215}
+        )
+        mock_send_request.assert_called_once()
 
     @mock.patch("requests.Session.send")
     def test_delete_zfs_file_system(self, mock_send_request):
         """Test deleting a zfs sends a request"""
         mock_send_request.return_value = mock.Mock(headers={"Content-Type": "application/json"}, status_code=204)
 
-        try:
-            Files(self.test_profile).delete_zfs_file_system("file_system_name")
-        except TypeError:
-            mock_send_request.assert_called_once()
+        Files(self.test_profile).delete_zfs_file_system("file_system_name")
+        mock_send_request.assert_called_once()
 
     def test_invalid_permission(self):
         """Test that the correct exception is raised when an invalid permission option is provided"""
@@ -62,10 +58,8 @@ class TestFilesClass(TestCase):
         """Test mounting a zfs sends a request"""
         mock_send_request.return_value = mock.Mock(headers={"Content-Type": "application/json"}, status_code=204)
 
-        try:
-            Files(self.test_profile).mount_file_system("file_system_name", "mount_point")
-        except TypeError:
-            mock_send_request.assert_called_once()
+        Files(self.test_profile).mount_file_system("file_system_name", "mount_point")
+        mock_send_request.assert_called_once()
 
     @mock.patch("requests.Session.send")
     def test_unmount_zFS_file_system(self, mock_send_request):
@@ -86,7 +80,5 @@ class TestFilesClass(TestCase):
         mock_response.json.return_value = {}
         mock_send_request.return_value = mock_response
 
-        try:
-            Files(self.test_profile).list_unix_file_systems()
-        except TypeError:
-            mock_send_request.assert_called()
+        Files(self.test_profile).list_unix_file_systems()
+        mock_send_request.assert_called()

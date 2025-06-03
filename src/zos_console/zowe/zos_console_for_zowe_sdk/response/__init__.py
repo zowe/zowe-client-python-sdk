@@ -11,4 +11,3 @@ Copyright Contributors to the Zowe Project.
 """
 
 from .console import ConsoleResponse, IssueCommandResponse
-

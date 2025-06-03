@@ -292,7 +292,7 @@ class DatasetOption:
         return {key.replace("_DatasetOption__", ""): value for key, value in self.__dict__.items() if value is not None}
 
 
-class Datasets(SdkApi): # type: ignore[misc]
+class Datasets(SdkApi):  # type: ignore[misc]
     """
     Class used to represent the base z/OSMF Datasets API.
 
@@ -306,7 +306,7 @@ class Datasets(SdkApi): # type: ignore[misc]
         Flag to disable logger
     """
 
-    def __init__(self, connection: dict[str, Any], log: bool = True)  -> None:
+    def __init__(self, connection: dict[str, Any], log: bool = True) -> None:
 
         super().__init__(connection, "/zosmf/restfiles/", logger_name=__name__, log=log)
         self._default_headers["Accept-Encoding"] = "gzip"
@@ -584,10 +584,7 @@ class Datasets(SdkApi): # type: ignore[misc]
         return response
 
     def get_binary_content(
-        self, 
-        dataset_name: str, 
-        stream: bool = False, 
-        with_prefixes: bool = False
+        self, dataset_name: str, stream: bool = False, with_prefixes: bool = False
     ) -> Union[bytes, Response]:
         """
         Retrieve the contents of a given dataset as a binary bytes object.
@@ -641,16 +638,16 @@ class Datasets(SdkApi): # type: ignore[misc]
         if isinstance(data, str):
             custom_args["data"] = data
             custom_args["headers"]["Content-Type"] = "text/plain; charset={}".format(encoding)
-        
+
         # Check if the data is bytes (binary content)
         elif isinstance(data, bytes):
             custom_args["data"] = data
             custom_args["headers"]["Content-Type"] = "application/octet-stream"
-        
+
         # Raise an error if data is neither str nor bytes
         else:
             raise ValueError("Data must be either a string or bytes.")
-                
+
         self.request_handler.perform_request("PUT", custom_args, expected_code=[204, 201])
 
     def download(self, dataset_name: str, output_file: str) -> None:
@@ -847,8 +844,7 @@ class Datasets(SdkApi): # type: ignore[misc]
         custom_args["url"] = "{}ds/{}".format(self._request_endpoint, self._encode_uri_component(path_to_member))
 
         self.request_handler.perform_request("PUT", custom_args, expected_code=[200])
-    
-    
+
     def delete(self, dataset_name: str, volume: Optional[str] = None, member_name: Optional[str] = None) -> None:
         """
         Delete a sequential or partitioned data.
@@ -870,7 +866,6 @@ class Datasets(SdkApi): # type: ignore[misc]
             url = "{}ds/-{}/{}".format(self._request_endpoint, volume, self._encode_uri_component(dataset_name))
         custom_args["url"] = url
         self.request_handler.perform_request("DELETE", custom_args, expected_code=[200, 202, 204])
-        
 
     def copy_uss_to_data_set(
         self,

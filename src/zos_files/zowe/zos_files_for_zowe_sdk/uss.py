@@ -24,7 +24,7 @@ from .response import USSListResponse
 _ZOWE_FILES_DEFAULT_ENCODING = zos_file_constants["ZoweFilesDefaultEncoding"]
 
 
-class USSFiles(SdkApi): #type: ignore
+class USSFiles(SdkApi):  # type: ignore
     """
     Class used to represent the base z/OSMF USSFiles API.
 
@@ -177,7 +177,7 @@ class USSFiles(SdkApi): #type: ignore
         Raises
         ------
         TypeError
-            Thrown when Ill connecttion with no Response object returned.
+            Thrown when the `get_content_streamed` request does not return a valid Response object.
         """
         response = self.get_content_streamed(file_path, binary)
         if not isinstance(response, requests.Response):

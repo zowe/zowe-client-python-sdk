@@ -51,7 +51,8 @@ class CredentialManager:
 
         try:
             secret_value = CredentialManager._get_credential(
-                str(constants["ZoweServiceName"]), str(constants["ZoweAccountName"]))
+                str(constants["ZoweServiceName"]), str(constants["ZoweAccountName"])
+            )
             # Handle the case when secret_value is None
             if secret_value is None:
                 return
@@ -78,7 +79,9 @@ class CredentialManager:
             encoded_credential = base64.b64encode(commentjson.dumps(credential).encode()).decode()
             if sys.platform == "win32":
                 # Delete the existing credential
-                CredentialManager._delete_credential(str(constants["ZoweServiceName"]), str(constants["ZoweAccountName"]))
+                CredentialManager._delete_credential(
+                    str(constants["ZoweServiceName"]), str(constants["ZoweAccountName"])
+                )
             CredentialManager._set_credential(
                 str(constants["ZoweServiceName"]), str(constants["ZoweAccountName"]), encoded_credential
             )

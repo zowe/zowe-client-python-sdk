@@ -9,6 +9,7 @@ SPDX-License-Identifier: EPL-2.0
 
 Copyright Contributors to the Zowe Project.
 """
+
 import json
 import os.path
 import re
@@ -176,7 +177,7 @@ class ConfigFile:
             properties from schema
         """
         schema: Optional[Union[str, dict[str, Any]]] = self.schema_property
-    
+
         # Ensure schema is a string, otherwise return empty list
         if not isinstance(schema, str):
             return []
@@ -217,7 +218,7 @@ class ConfigFile:
 
         try:
             profile_schema = schema_json["properties"]["profiles"]["patternProperties"]["^\\S*$"]["allOf"]
-            
+
             for props in profile_schema:
                 props = props["then"]
                 while "properties" in props:
@@ -252,7 +253,7 @@ class ConfigFile:
             Cannot find profile
         ValueError
             Missing profile type
-        
+
         Returns
         -------
         Profile
@@ -270,7 +271,7 @@ class ConfigFile:
 
         if profile_name is None:
             if profile_type is None:
-                raise ValueError("profile_type cannot be None when profile_name is missing.") 
+                raise ValueError("profile_type cannot be None when profile_name is missing.")
             profile_name = self.get_profilename_from_profiletype(profile_type=profile_type or "")
         props: dict[str, Any] = self.load_profile_properties(profile_name=profile_name)
 
@@ -380,7 +381,7 @@ class ConfigFile:
         for k, v in profiles.items():
             if not isinstance(v, dict):  # Ensure v is a dictionary
                 continue  # Skip invalid entries
-        
+
             if len(segments) == 1 and segments[0] == k:
                 return v  # Ensured to be dict[str, Any]
 
@@ -457,9 +458,7 @@ class ConfigFile:
                     break
 
     def __extract_secure_properties(
-        self, 
-        profiles_obj: dict[str, Any], 
-        json_path: Optional[str] = "profiles"
+        self, profiles_obj: dict[str, Any], json_path: Optional[str] = "profiles"
     ) -> dict[str, Any]:
         """
         Extract secure properties from the profiles object for storage in the vault.
@@ -504,8 +503,8 @@ class ConfigFile:
         keys = path.split(".")[1:]
         nested_profiles = self.profiles
         for key in keys:
-            if not isinstance(nested_profiles, dict):  
-                return 
+            if not isinstance(nested_profiles, dict):
+                return
             nested_profiles = nested_profiles.setdefault(key, {})
         if isinstance(nested_profiles, dict):
             nested_profiles.update(profile_data)
@@ -526,7 +525,7 @@ class ConfigFile:
         bool
             True if the property is listed to be stored securely, False otherwise.
         """
-        if not isinstance(self.profiles, dict):  
+        if not isinstance(self.profiles, dict):
             return False
         profile = self.find_profile(json_path, self.profiles)
         if profile and profile.get("secure"):
@@ -559,8 +558,8 @@ class ConfigFile:
         is_secure = secure if secure is not None else is_property_secure
 
         current_profile = self.find_profile(profile_name, self.profiles) or {}
-        
-        if not isinstance(current_profile, dict):  
+
+        if not isinstance(current_profile, dict):
             current_profile = {}
 
         current_properties = current_profile.setdefault("properties", {})
@@ -622,23 +621,23 @@ class ConfigFile:
         # Ensure profiles is initialized
         if self.profiles is None:
             self.profiles = {}
-        
+
         if not isinstance(self.filepath, str):
             raise ValueError("Filepath is not set or invalid")
 
         if not isinstance(self.jsonc, dict):
             self.jsonc = {}
-        
+
         # Updating the config file with any changes
         if not any(self.profiles.values()):
             return
 
         profiles_temp = deepcopy(self.profiles)
         secure_props = self.__extract_secure_properties(profiles_temp)
-        
+
         if CredentialManager.secure_props is None:
             CredentialManager.secure_props = {}
-        
+
         CredentialManager.secure_props[self.filepath] = secure_props
         with open(self.filepath, "w") as file:
             self.jsonc["profiles"] = profiles_temp

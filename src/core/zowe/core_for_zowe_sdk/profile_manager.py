@@ -213,7 +213,7 @@ class ProfileManager:
 
         for var in os.environ.keys():
             if var.startswith("ZOWE_OPT"):
-                env[var[len("ZOWE_OPT_"):].lower()] = os.environ.get(var)
+                env[var[len("ZOWE_OPT_") :].lower()] = os.environ.get(var)
 
         for k, v in env.items():
             word = k.split("_")
@@ -234,7 +234,7 @@ class ProfileManager:
                 elif prop_type == "boolean":
                     env_var[k] = v.lower() in ["true", "1", "yes"] if isinstance(v, str) else bool(v)
                 else:
-                    env_var[k]= v    
+                    env_var[k] = v
 
         return env_var
 
