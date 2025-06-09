@@ -435,7 +435,7 @@ class ConfigFile:
             if profile is not None:
                 props = {**profile.get("properties", {}), **props}
                 secure_fields.extend(profile.get("secure", []))  # Ensures secure_fields gets a list
-            elif not self.__suppress_config_file_warnings:
+            else:
                 self.__logger.warning(f"Profile {profile_name} not found")
                 warnings.warn(f"Profile {profile_name} not found", ProfileNotFoundWarning)
 

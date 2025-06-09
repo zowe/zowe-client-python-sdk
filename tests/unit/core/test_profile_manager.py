@@ -275,6 +275,7 @@ class TestZosmfProfileManager(TestCase):
         """
         with self.assertRaises(exceptions.ProfileNotFound):
             config_file = ConfigFile(name="name", type="team_config", defaults={}, profiles={"a": {"none": "none"}})
+            config_file.suppress_config_warnings(False)
             config_file.get_profilename_from_profiletype("test")
 
         mock_logger_warning.assert_any_call("Given profile type 'test' has no default profile name")
@@ -291,6 +292,7 @@ class TestZosmfProfileManager(TestCase):
         """
         with self.assertWarns(UserWarning):
             config_file = ConfigFile(name="name", type="team_config")
+            config_file.suppress_config_warnings(False)
             config_file.validate_schema()
         self.assertEqual(mock_logger_warning.call_args[0][0], "Could not find $schema property")
 
