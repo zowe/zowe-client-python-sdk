@@ -197,6 +197,7 @@ class ProfileManager:
         dict[str, Any]
             Containing profile properties from env variables (prop: value).
         """
+        logger = Log.register_logger(__name__)
         props_list = cfg.schema_list(cwd)
         if not props_list:  # If the list is empty, return an empty dictionary.
             return {}
@@ -226,13 +227,15 @@ class ProfileManager:
                     try:
                         env_var[k] = int(v) if v is not None and v.lstrip("-").isdigit() else 0
                     except ValueError:
+                        logger.warning("Environment variable is set to '0' due to ValueError.")
+                        warnings.warn("Environment variable is set to '0' due to ValueError.")
                         env_var[k] = 0  # Default value if conversion fails
 
                 elif prop_type == "string":
                     env_var[k] = v if v is not None else ""
 
                 elif prop_type == "boolean":
-                    env_var[k] = v.lower() in ["true", "1", "yes"] if isinstance(v, str) else bool(v)
+                    env_var[k] = v.lower() in ["true", "1", "yes"] if isinstance(v, str) else bool(v)      
                 else:
                     env_var[k] = v
 
@@ -335,8 +338,7 @@ class ProfileManager:
         profile_type: Optional[str] = None,
         check_missing_props: bool = True,
         validate_schema: Optional[bool] = True,
-        override_with_env: Optional[bool] = False,
-        suppress_config_file_warnings: Optional[bool] = True,
+        override_with_env: Optional[bool] = False
     ) -> dict[str, Any]:
         """
         Load connection details from a team config profile.
@@ -363,8 +365,6 @@ class ProfileManager:
             Whether to validate the loaded profile against the schema defined in the configuration.
         override_with_env : Optional[bool]
             If True, overrides profile properties with values from environment variables.
-        suppress_config_file_warnings : Optional[bool]
-            Suppresses warnings from the configuration file loading process.
 
         Raises
         ------
@@ -381,7 +381,7 @@ class ProfileManager:
         if profile_name is None and profile_type is None:
             self.__logger.error(f"Failed to load profile as both profile_name and profile_type are not set")
             raise ProfileNotFound(
-                profile_name=profile_name if profile_name is not None else "<unknown>",
+                profile_name="<unknown>",
                 error_msg="Could not find profile as both profile_name and profile_type is not set.",
             )
 
@@ -406,7 +406,7 @@ class ProfileManager:
         ):
             if cfg_layer.profiles is None:
                 try:
-                    cfg_layer.init_from_file(validate_schema, suppress_config_file_warnings)
+                    cfg_layer.init_from_file(validate_schema)
                 except SecureProfileLoadFailed:
                     self.__logger.warning(f"Could not load secure properties for {cfg_layer.filepath}")
                     warnings.warn(
@@ -437,7 +437,7 @@ class ProfileManager:
 
         cfg = ConfigFile(
             type="Merged Config",
-            name=cfg_name if cfg_name is not None else "default_config",
+            name=cfg_name,
             profiles=profiles_merged,
             defaults=defaults_merged,
             schema_property=cfg_schema,
@@ -542,21 +542,9 @@ class ProfileManager:
             The value to be set for the property.
         secure : Optional[bool]
             If True, the property will be stored securely. Default is None.
-
-        Raises
-        ------
-        FileNotFoundError
-            No property file found at given path.
         """
-        # highest priority layer for the given profile name
         highest_priority_layer = self.get_highest_priority_layer(json_path)
-
-        # Set the property in the highest priority layer
-        if highest_priority_layer is not None:
-            highest_priority_layer.set_property(json_path, value, secure=secure)
-        else:
-            self.__logger.error(f"Could not find a valid layer to set property for {json_path}")
-            raise FileNotFoundError(f"Could not find a valid layer for {json_path}")
+        highest_priority_layer.set_property(json_path, value, secure=secure)
 
     def set_profile(self, profile_path: str, profile_data: dict[str, Any]) -> None:
         """
@@ -568,18 +556,9 @@ class ProfileManager:
             The path of the profile to be set. eg: profiles.zosmf
         profile_data: dict[str, Any]
             The data of the profile to set.
-
-        Raises
-        ------
-        FileNotFoundError
-            No profile file found at given path.
         """
         highest_priority_layer = self.get_highest_priority_layer(profile_path)
-        if highest_priority_layer is not None:
-            highest_priority_layer.set_profile(profile_path, profile_data)
-        else:
-            self.__logger.error(f"Could not find a valid layer to set profile for {profile_path}")
-            raise FileNotFoundError(f"Could not find a valid layer for {profile_path}")
+        highest_priority_layer.set_profile(profile_path, profile_data)
 
     def save(self) -> None:
         """Save the layers (configuration files) to disk."""

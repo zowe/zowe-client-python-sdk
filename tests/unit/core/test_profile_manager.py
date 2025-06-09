@@ -822,3 +822,20 @@ class TestZosmfProfileManager(TestCase):
         self.assertEqual(
             ["port"], list(config_file.jsonc["profiles"]["lpar1"]["profiles"]["zosmf"]["properties"].keys())
         )
+
+def test_find_profile_with_non_dict_value():
+    """Test what happens when a non-dict value is passed to find_profile."""
+    config_file = ConfigFile(type="Team Config", name="test")
+    
+    profiles = {
+        "my_profile": False, 
+        "valid_profile": {"type": "zosmf", "properties": {"host": "example.com"}}
+    }
+    
+    result = config_file.find_profile("my_profile", profiles)
+    
+    assert result is None
+    
+    valid_result = config_file.find_profile("valid_profile", profiles)
+    assert valid_result is not None
+    assert valid_result["type"] == "zosmf"

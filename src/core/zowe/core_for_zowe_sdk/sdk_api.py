@@ -64,7 +64,7 @@ class SdkApi:
         self.request_handler = RequestHandler(self.__session_arguments, logger_name=logger_name)
 
         if self.session.type == session_constants.AUTH_TYPE_BASIC:
-            self._request_arguments["auth"] = (self.session.user or "", self.session.password or "")
+            self._request_arguments["auth"] = (self.session.user, self.session.password)
         elif self.session.type == session_constants.AUTH_TYPE_BEARER:
             self._default_headers["Authorization"] = f"Bearer {self.session.token_value}"
         elif self.session.type == session_constants.AUTH_TYPE_TOKEN:

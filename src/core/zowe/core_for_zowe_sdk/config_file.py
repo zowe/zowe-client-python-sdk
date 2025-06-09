@@ -75,6 +75,7 @@ class ConfigFile:
     jsonc: Optional[dict[str, Any]] = None
     _missing_secure_props: list[str] = field(default_factory=list)
 
+    __suppress_config_file_warnings: Optional[bool] = True,
     __logger = Log.register_logger(__name__)
 
     @property
@@ -112,8 +113,7 @@ class ConfigFile:
 
     def init_from_file(
         self,
-        validate_schema: Optional[bool] = True,
-        suppress_config_file_warnings: Optional[bool] = True,
+        validate_schema: Optional[bool] = True
     ) -> None:
         """
         Initialize the class variable after setting filepath (or if not set, autodiscover the file).
@@ -122,8 +122,6 @@ class ConfigFile:
         ----------
         validate_schema: Optional[bool]
             True if validation is preferred, false otherwise
-        suppress_config_file_warnings: Optional[bool]
-            True if the property should be stored securely, False otherwise.
         """
         if self.filepath is None:
             try:
@@ -132,7 +130,7 @@ class ConfigFile:
                 pass
 
         if self.filepath is None or not os.path.isfile(self.filepath):
-            if not suppress_config_file_warnings:
+            if not self.__suppress_config_file_warnings:
                 self.__logger.warning(f"Config file does not exist at {self.filepath}")
                 warnings.warn(f"Config file does not exist at {self.filepath}")
             return
@@ -140,7 +138,7 @@ class ConfigFile:
         with open(self.filepath, encoding="UTF-8", mode="r") as fileobj:
             profile_jsonc = commentjson.load(fileobj)
 
-        self.profiles = profile_jsonc.get("profiles", {})
+        self.profiles = profile_jsonc.get("profiles", {}) if profile_jsonc.get("profiles", {}) is not None else []
         self.schema_property = profile_jsonc.get("$schema", None)
         self.defaults = profile_jsonc.get("defaults", {})
         self.jsonc = profile_jsonc
@@ -154,8 +152,9 @@ class ConfigFile:
     def validate_schema(self) -> None:
         """Get the $schema_property from the config and load the schema."""
         if self.schema_property is None:  # check if the $schema property is not defined
-            self.__logger.warning(f"Could not find $schema property")
-            warnings.warn(f"Could not find $schema property")
+            if not self.__suppress_config_file_warnings:
+                self.__logger.warning(f"Could not find $schema property")
+                warnings.warn(f"Could not find $schema property")
         else:
             jsonc_data: dict[str, Any] = self.jsonc if self.jsonc is not None else {}
             schema_data: str = str(self.schema_property) if isinstance(self.schema_property, (str, dict)) else ""
@@ -189,7 +188,10 @@ class ConfigFile:
                 response = requests.get(schema)
                 response.raise_for_status()  # Ensure it's a valid response
                 schema_json = response.json()
-            except requests.RequestException:
+            except requests.RequestException as e:
+                if not self.__suppress_config_file_warnings:
+                    warnings.warn(f"Invalid schema request: {e}")
+                    self.__logger.warning(f"Invalid schema request: {e}")
                 return []
 
         elif schema.startswith("file://") or os.path.isfile(schema):
@@ -197,15 +199,21 @@ class ConfigFile:
                 schema_path = schema.replace("file://", "")
                 with open(schema_path, "r", encoding="utf-8") as f:
                     schema_json = json.load(f)
-            except (OSError, json.JSONDecodeError):
+            except (OSError, json.JSONDecodeError) as e:
+                if not self.__suppress_config_file_warnings:
+                    warnings.warn(f"Invalid schema file '{schema_path}': {e}")
+                    self.__logger.warning(f"Invalid schema file '{schema_path}': {e}")
                 return []
 
         elif not os.path.isabs(schema):
             try:
-                schema_path = os.path.join(self.location if self.location else (cwd if cwd else ""), schema)
+                schema_path = os.path.join(self.location or cwd or "", schema)
                 with open(schema_path, "r", encoding="utf-8") as f:
                     schema_json = json.load(f)
-            except (OSError, json.JSONDecodeError):
+            except (OSError, json.JSONDecodeError) as e:
+                if not self.__suppress_config_file_warnings:
+                    warnings.warn(f"Invalid JSON in schema file '{schema_path}': {e}")
+                    self.__logger.warning(f"Invalid JSON in schema file '{schema_path}': {e}")
                 return []
         else:
             return []
@@ -218,7 +226,6 @@ class ConfigFile:
 
         try:
             profile_schema = schema_json["properties"]["profiles"]["patternProperties"]["^\\S*$"]["allOf"]
-
             for props in profile_schema:
                 props = props["then"]
                 while "properties" in props:
@@ -251,8 +258,6 @@ class ConfigFile:
         ------
         ProfileNotFound
             Cannot find profile
-        ValueError
-            Missing profile type
 
         Returns
         -------
@@ -270,9 +275,8 @@ class ConfigFile:
             )
 
         if profile_name is None:
-            if profile_type is None:
-                raise ValueError("profile_type cannot be None when profile_name is missing.")
             profile_name = self.get_profilename_from_profiletype(profile_type=profile_type or "")
+        
         props: dict[str, Any] = self.load_profile_properties(profile_name=profile_name)
 
         return Profile(props, profile_name, self._missing_secure_props)
@@ -327,11 +331,12 @@ class ConfigFile:
         if self.defaults is not None and profile_type in self.defaults:
             return str(self.defaults[profile_type])
 
-        self.__logger.warn(f"Given profile type '{profile_type}' has no default profile name")
-        warnings.warn(
-            f"Given profile type '{profile_type}' has no default profile name",
-            ProfileParsingWarning,
-        )
+        if not self.__suppress_config_file_warnings:
+            self.__logger.warning(f"Given profile type '{profile_type}' has no default profile name")
+            warnings.warn(
+                f"Given profile type '{profile_type}' has no default profile name",
+                ProfileParsingWarning,
+            )
 
         # Ensure profiles exist before iterating
         if self.profiles is None:
@@ -348,11 +353,12 @@ class ConfigFile:
                 if profile_type == temp_profile_type:
                     return key
             except KeyError:
-                self.__logger.warning(f"Profile '{key}' has no type attribute")
-                warnings.warn(
-                    f"Profile '{key}' has no type attribute",
-                    ProfileParsingWarning,
-                )
+                if not self.__suppress_config_file_warnings:
+                    self.__logger.warning(f"Profile '{key}' has no type attribute")
+                    warnings.warn(
+                        f"Profile '{key}' has no type attribute",
+                        ProfileParsingWarning,
+                    )
 
         # if no profile with matching type found, we raise an exception
         self.__logger.error(f"No profile with matching profile_type '{profile_type}' found")
@@ -380,15 +386,17 @@ class ConfigFile:
         segments = path.split(".")
         for k, v in profiles.items():
             if not isinstance(v, dict):  # Ensure v is a dictionary
+                if not self.__suppress_config_file_warnings:
+                    if not self.__suppress_config_file_warnings:
+                        self.__logger.warning("Invalid profile passed when schame validation is off")
                 continue  # Skip invalid entries
 
-            if len(segments) == 1 and segments[0] == k:
-                return v  # Ensured to be dict[str, Any]
-
-            if segments[0] == k and isinstance(v.get("profiles"), dict):
-                segments.pop(0)
-                return self.find_profile(".".join(segments), v["profiles"])  # Recursive call
-
+            if segments[0] == k:
+                if len(segments) == 1:
+                    return v  # Ensured to be dict[str, Any]
+                elif isinstance(v.get("profiles"), dict):
+                    segments.pop(0)
+                    return self.find_profile(".".join(segments), v["profiles"])  # Recursive call
         return None
 
     def load_profile_properties(self, profile_name: str) -> dict[str, Any]:
@@ -427,7 +435,7 @@ class ConfigFile:
             if profile is not None:
                 props = {**profile.get("properties", {}), **props}
                 secure_fields.extend(profile.get("secure", []))  # Ensures secure_fields gets a list
-            else:
+            elif not self.__suppress_config_file_warnings:
                 self.__logger.warning(f"Profile {profile_name} not found")
                 warnings.warn(f"Profile {profile_name} not found", ProfileNotFoundWarning)
 
@@ -437,8 +445,6 @@ class ConfigFile:
 
     def __load_secure_properties(self) -> None:
         """Inject secure properties that have been loaded from the vault into the profiles object."""
-        if self.profiles is None:
-            return
         secure_props = CredentialManager.secure_props.get(self.filepath or "", {})
         for key, value in secure_props.items():
             segments = [name for i, name in enumerate(key.split(".")) if i % 2 == 1]
@@ -497,17 +503,14 @@ class ConfigFile:
         profile_data : dict[str, Any]
             The data to set in the specified profile.
         """
-        if self.profiles is None:
-            self.profiles = {}
         path = self.get_profile_path_from_name(profile_name)
         keys = path.split(".")[1:]
         nested_profiles = self.profiles
+        if not isinstance(nested_profiles, dict):
+            return
         for key in keys:
-            if not isinstance(nested_profiles, dict):
-                return
             nested_profiles = nested_profiles.setdefault(key, {})
-        if isinstance(nested_profiles, dict):
-            nested_profiles.update(profile_data)
+        nested_profiles.update(profile_data)
 
     def __is_secure(self, json_path: str, property_name: str) -> bool:
         """
@@ -525,8 +528,6 @@ class ConfigFile:
         bool
             True if the property is listed to be stored securely, False otherwise.
         """
-        if not isinstance(self.profiles, dict):
-            return False
         profile = self.find_profile(json_path, self.profiles)
         if profile and profile.get("secure"):
             return property_name in profile["secure"]
@@ -545,10 +546,8 @@ class ConfigFile:
         secure: Optional[bool]
             If True, the property will be stored securely. Default is None.
         """
-        if not isinstance(self.profiles, dict):
-            self.init_from_file()
         if self.profiles is None:
-            self.profiles = {}
+            self.init_from_file()
 
         # Checking whether the property should be stored securely or in plain text
         property_name = json_path.split(".")[-1]
@@ -591,7 +590,7 @@ class ConfigFile:
         if "secure" in profile_data:
             # Checking if the profile has a 'secure' field with values
             secure_fields = profile_data["secure"]
-            current_profile = self.find_profile(profile_name, self.profiles or {}) or {}
+            current_profile = self.find_profile(profile_name, self.profiles) or {}
             existing_secure_fields = current_profile.get("secure", [])
             new_secure_fields = [field for field in secure_fields if field not in existing_secure_fields]
 
@@ -618,15 +617,8 @@ class ConfigFile:
         ValueError
             Filepath must be set and valid.
         """
-        # Ensure profiles is initialized
-        if self.profiles is None:
-            self.profiles = {}
-
         if not isinstance(self.filepath, str):
             raise ValueError("Filepath is not set or invalid")
-
-        if not isinstance(self.jsonc, dict):
-            self.jsonc = {}
 
         # Updating the config file with any changes
         if not any(self.profiles.values()):
@@ -634,9 +626,6 @@ class ConfigFile:
 
         profiles_temp = deepcopy(self.profiles)
         secure_props = self.__extract_secure_properties(profiles_temp)
-
-        if CredentialManager.secure_props is None:
-            CredentialManager.secure_props = {}
 
         CredentialManager.secure_props[self.filepath] = secure_props
         with open(self.filepath, "w") as file:
@@ -678,3 +667,15 @@ class ConfigFile:
             Returns the full profile path
         """
         return re.sub(r"(^|\.)", r"\1profiles.", short_path)
+    
+    def suppress_config_warnings(self, value: bool) -> None:
+        """
+        Suppress warnings in config files.
+
+        Parameters
+        ----------
+        value: bool
+            Warnings are shown or not 
+        """
+        self.__suppress_config_file_warnings = value
+        
