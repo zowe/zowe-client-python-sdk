@@ -4,9 +4,9 @@ All notable changes to the Zowe Client Python SDK will be documented in this fil
 
 ## Recent Changes
 
-- Fixed missing and incorrect type annotations. [#321] (https://github.com/zowe/zowe-client-python-sdk/issues/321)
-
-- Updated parameter `suppress_config_file_warnings` to be instance attribute in `config_file`.
+- Fixed missing and incorrect type annotations. [#321](https://github.com/zowe/zowe-client-python-sdk/issues/321)
+- Removed he `suppress_config_file_warnings` parameter from individual functions. [#365](https://github.com/zowe/zowe-client-python-sdk/issues/365)
+- Introduced a new class-wide property `suppress_config_file_warnings` to control configuration file warnings. [#365](https://github.com/zowe/zowe-client-python-sdk/issues/365)
 
 ### Bug Fixes
 
