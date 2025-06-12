@@ -14,8 +14,6 @@ All notable changes to the Zowe Client Python SDK will be documented in this fil
 
 ## `1.0.0-dev22`
 
-## Recent Changes
-
 ### Enhancements
 
 - Turning off logger at the class-constructor level [#316](https://github.com/zowe/zowe-client-python-sdk/issues/316)
