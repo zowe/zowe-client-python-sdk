@@ -1,13 +1,12 @@
 """Integration tests for the Zowe Python SDK z/OSMF package."""
 
-import unittest
-
+from integration.conftest import TestIsolatedEnv
 from zowe.core_for_zowe_sdk import ProfileManager
 from zowe.zosmf_for_zowe_sdk import Zosmf
 from zowe.zosmf_for_zowe_sdk.response import ZosmfResponse
 
 
-class TestZosmfIntegration(unittest.TestCase):
+class TestZosmfIntegration(TestIsolatedEnv):
     """Zosmf class integration tests."""
 
     def setUp(self):

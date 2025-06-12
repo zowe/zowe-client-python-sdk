@@ -1,12 +1,11 @@
 """Integration tests for the Zowe Python SDK z/OS Console package."""
 
-import unittest
-
+from integration.conftest import TestIsolatedEnv
 from zowe.core_for_zowe_sdk import ProfileManager
 from zowe.zos_console_for_zowe_sdk import Console
 
 
-class TestConsoleIntegration(unittest.TestCase):
+class TestConsoleIntegration(TestIsolatedEnv):
     """Console class integration tests."""
 
     def setUp(self):
