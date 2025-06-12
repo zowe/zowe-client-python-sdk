@@ -11,7 +11,7 @@ Copyright Contributors to the Zowe Project.
 """
 
 from dataclasses import dataclass
-from typing import Any, List, Optional
+from typing import Any, Optional
 
 
 @dataclass
@@ -34,12 +34,12 @@ class USSResponse:
 
 @dataclass
 class USSListResponse:
-    items: Optional[List[dict]] = None
+    items: Optional[list[dict[str, Any]]] = None
     returnedRows: Optional[int] = None
     totalRows: Optional[int] = None
     JSONversion: Optional[int] = None
 
-    def __init__(self, response: dict) -> None:
+    def __init__(self, response: dict[str, Any]) -> None:
         for key, value in response.items():
             if key == "items":
                 value = [USSResponse(**x) for x in value]

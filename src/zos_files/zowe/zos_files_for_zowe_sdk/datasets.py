@@ -11,8 +11,9 @@ Copyright Contributors to the Zowe Project.
 """
 
 import os
-from dataclasses import dataclass
-from typing import Dict, List, Optional
+from typing import Optional, Any, Union
+
+from requests import Response
 
 from zowe.core_for_zowe_sdk import SdkApi
 from zowe.core_for_zowe_sdk.exceptions import FileNotFound
@@ -103,7 +104,7 @@ class DatasetOption:
         return self.__volser
 
     @volser.setter
-    def volser(self, volser: Optional[str]):
+    def volser(self, volser: Optional[str]) -> None:
         """Set the volume serial number."""
         self.__volser = volser
 
@@ -113,7 +114,7 @@ class DatasetOption:
         return self.__unit
 
     @unit.setter
-    def unit(self, unit: Optional[str]):
+    def unit(self, unit: Optional[str]) -> None:
         """Set the type of device."""
         self.__unit = unit
 
@@ -123,7 +124,7 @@ class DatasetOption:
         return self.__dsorg
 
     @dsorg.setter
-    def dsorg(self, dsorg: Optional[str]):
+    def dsorg(self, dsorg: Optional[str]) -> None:
         """Set the organization of the dataset."""
         if dsorg not in ("PO", "PS", None):
             raise ValueError("'dsorg' must be 'PO', 'PS', or None")
@@ -135,7 +136,7 @@ class DatasetOption:
         return self.__alcunit
 
     @alcunit.setter
-    def alcunit(self, alcunit: Optional[str]):
+    def alcunit(self, alcunit: Optional[str]) -> None:
         """Set the unit of space allocation."""
         if alcunit is None:
             if self.like is not None:
@@ -153,7 +154,7 @@ class DatasetOption:
         return self.__primary
 
     @primary.setter
-    def primary(self, primary: Optional[int]):
+    def primary(self, primary: Optional[int]) -> None:
         """Set the primary space allocation."""
         if primary is not None:
             if primary > 16777215:
@@ -166,7 +167,7 @@ class DatasetOption:
         return self.__secondary
 
     @secondary.setter
-    def secondary(self, secondary: Optional[int]):
+    def secondary(self, secondary: Optional[int]) -> None:
         """Set the secondary space allocation."""
         if self.primary is not None:
             secondary = secondary if secondary is not None else int(self.primary / 10)
@@ -180,7 +181,7 @@ class DatasetOption:
         return self.__dirblk
 
     @dirblk.setter
-    def dirblk(self, dirblk: Optional[int]):
+    def dirblk(self, dirblk: Optional[int]) -> None:
         """Set the number of directory blocks."""
         self.__dirblk = dirblk
 
@@ -190,7 +191,7 @@ class DatasetOption:
         return self.__avgblk
 
     @avgblk.setter
-    def avgblk(self, avgblk: Optional[int]):
+    def avgblk(self, avgblk: Optional[int]) -> None:
         """Set the average block size."""
         self.__avgblk = avgblk
 
@@ -200,7 +201,7 @@ class DatasetOption:
         return self.__recfm
 
     @recfm.setter
-    def recfm(self, recfm: Optional[str]):
+    def recfm(self, recfm: Optional[str]) -> None:
         """Set the record format."""
         if recfm is None:
             if self.like is not None:
@@ -220,7 +221,7 @@ class DatasetOption:
         return self.__blksize
 
     @blksize.setter
-    def blksize(self, blksize: Optional[int]):
+    def blksize(self, blksize: Optional[int]) -> None:
         """Set the physical block size."""
         if blksize is None:
             if self.like is not None:
@@ -237,7 +238,7 @@ class DatasetOption:
         return self.__lrecl
 
     @lrecl.setter
-    def lrecl(self, lrecl: Optional[int]):
+    def lrecl(self, lrecl: Optional[int]) -> None:
         """Set the length of logical records."""
         self.__lrecl = lrecl
 
@@ -247,7 +248,7 @@ class DatasetOption:
         return self.__storclass
 
     @storclass.setter
-    def storclass(self, storclass: Optional[str]):
+    def storclass(self, storclass: Optional[str]) -> None:
         """Set the storage class."""
         self.__storclass = storclass
 
@@ -257,7 +258,7 @@ class DatasetOption:
         return self.__mgmtclass
 
     @mgmtclass.setter
-    def mgmtclass(self, mgmtclass: Optional[str]):
+    def mgmtclass(self, mgmtclass: Optional[str]) -> None:
         """Set the management class."""
         self.__mgmtclass = mgmtclass
 
@@ -267,7 +268,7 @@ class DatasetOption:
         return self.__dataclass
 
     @dataclass.setter
-    def dataclass(self, dataclass: Optional[str]):
+    def dataclass(self, dataclass: Optional[str]) -> None:
         """Set the data class."""
         self.__dataclass = dataclass
 
@@ -277,7 +278,7 @@ class DatasetOption:
         return self.__dsntype
 
     @dsntype.setter
-    def dsntype(self, dsntype: Optional[str]):
+    def dsntype(self, dsntype: Optional[str]) -> None:
         """Set the type of dataset."""
         self.__dsntype = dsntype
 
@@ -286,12 +287,12 @@ class DatasetOption:
         """Get the dataset name to copy attributes from."""
         return self.__like
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict[str, Any]:
         """Return the DatasetOption as a dict."""
         return {key.replace("_DatasetOption__", ""): value for key, value in self.__dict__.items() if value is not None}
 
 
-class Datasets(SdkApi):
+class Datasets(SdkApi):  # type: ignore[misc]
     """
     Class used to represent the base z/OSMF Datasets API.
 
@@ -299,13 +300,14 @@ class Datasets(SdkApi):
 
     Parameters
     ----------
-    connection : dict
+    connection : dict[str, Any]
         A profile for connection in dict (json) format
     log : bool
         Flag to disable logger
     """
 
-    def __init__(self, connection: dict, log: bool = True):
+    def __init__(self, connection: dict[str, Any], log: bool = True) -> None:
+
         super().__init__(connection, "/zosmf/restfiles/", logger_name=__name__, log=log)
         self._default_headers["Accept-Encoding"] = "gzip"
 
@@ -387,7 +389,7 @@ class Datasets(SdkApi):
         to_member_name: Optional[str] = None,
         enq: Optional[str] = None,
         replace: bool = False,
-    ) -> dict:
+    ) -> None:
         """
         Copy a dataset or member to another dataset or member.
 
@@ -414,13 +416,8 @@ class Datasets(SdkApi):
         ------
         ValueError
             Thrown when enq has an invalid value
-
-        Returns
-        -------
-        dict
-            A JSON containing the result of the operation
         """
-        data = {
+        data: dict[str, Any] = {
             "request": "copy",
             "from-dataset": {"dsn": from_dataset_name.strip(), "member": from_member_name},
             "replace": replace,
@@ -441,10 +438,9 @@ class Datasets(SdkApi):
         custom_args = self._create_custom_request_arguments()
         custom_args["json"] = data
         custom_args["url"] = "{}ds/{}".format(self._request_endpoint, self._encode_uri_component(path_to_member))
-        response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[200])
-        return response_json
+        self.request_handler.perform_request("PUT", custom_args, expected_code=[200])
 
-    def create(self, dataset_name: str, options: Optional[DatasetOption] = None) -> dict:
+    def create(self, dataset_name: str, options: Optional[DatasetOption] = None) -> None:
         """
         Create a sequential or partitioned dataset.
 
@@ -459,11 +455,6 @@ class Datasets(SdkApi):
         ------
         ValueError
             Thrown when a parameter has an invalid value
-
-        Returns
-        -------
-        dict
-            A JSON containing the result of the operation
         """
         if not options:
             self.logger.error("You must specify dataset options when creating one.")
@@ -492,10 +483,9 @@ class Datasets(SdkApi):
         custom_args = self._create_custom_request_arguments()
         custom_args["url"] = "{}ds/{}".format(self._request_endpoint, self._encode_uri_component(dataset_name))
         custom_args["json"] = options.to_dict() if options else {}
-        response_json = self.request_handler.perform_request("POST", custom_args, expected_code=[201])
-        return response_json
+        self.request_handler.perform_request("POST", custom_args, expected_code=[201])
 
-    def create_default(self, dataset_name: str, default_type: str) -> dict:
+    def create_default(self, dataset_name: str, default_type: str) -> None:
         """
         Create a dataset with default options set.
 
@@ -512,11 +502,6 @@ class Datasets(SdkApi):
         ------
         ValueError
             Thrown when a parameter is invalid
-
-        Returns
-        -------
-        dict
-            A JSON containing the result of the operation
         """
         if default_type not in ("partitioned", "sequential", "classic", "c", "binary"):
             self.logger.error("Invalid type for default data set.")
@@ -575,10 +560,9 @@ class Datasets(SdkApi):
             }
 
         custom_args["url"] = "{}ds/{}".format(self._request_endpoint, self._encode_uri_component(dataset_name))
-        response_json = self.request_handler.perform_request("POST", custom_args, expected_code=[201])
-        return response_json
+        self.request_handler.perform_request("POST", custom_args, expected_code=[201])
 
-    def get_content(self, dataset_name: str, stream: bool = False) -> dict:
+    def get_content(self, dataset_name: str, stream: bool = False) -> Union[str, None, Response]:
         """
         Retrieve the contents of a given dataset.
 
@@ -591,15 +575,17 @@ class Datasets(SdkApi):
 
         Returns
         -------
-        dict
-            A JSON with the contents of a given dataset
+        Union[str, None, Response]
+            Contents of a given dataset in string, or None if the dataset is empty, or a requests.Response object if streaming.
         """
         custom_args = self._create_custom_request_arguments()
         custom_args["url"] = "{}ds/{}".format(self._request_endpoint, self._encode_uri_component(dataset_name))
-        response_json = self.request_handler.perform_request("GET", custom_args, stream=stream)
-        return response_json
+        response: Union[str, Response] = self.request_handler.perform_request("GET", custom_args, stream=stream)
+        return response
 
-    def get_binary_content(self, dataset_name: str, stream: bool = False, with_prefixes: bool = False) -> dict:
+    def get_binary_content(
+        self, dataset_name: str, stream: bool = False, with_prefixes: bool = False
+    ) -> Union[bytes, Response]:
         """
         Retrieve the contents of a given dataset as a binary bytes object.
 
@@ -614,8 +600,8 @@ class Datasets(SdkApi):
 
         Returns
         -------
-        dict
-            A JSON with the contents of a given dataset
+        Union[bytes, Response]
+            Contents of a given dataset in bytes or a requests.Response object if streaming.
         """
         custom_args = self._create_custom_request_arguments()
         custom_args["url"] = "{}ds/{}".format(self._request_endpoint, self._encode_uri_component(dataset_name))
@@ -624,10 +610,10 @@ class Datasets(SdkApi):
             custom_args["headers"]["X-IBM-Data-Type"] = "record"
         else:
             custom_args["headers"]["X-IBM-Data-Type"] = "binary"
-        response = self.request_handler.perform_request("GET", custom_args, stream=stream)
+        response: Union[bytes, Response] = self.request_handler.perform_request("GET", custom_args, stream=stream)
         return response
 
-    def write(self, dataset_name: str, data: str, encoding: str = _ZOWE_FILES_DEFAULT_ENCODING) -> dict:
+    def write(self, dataset_name: str, data: Union[str, bytes], encoding: str = _ZOWE_FILES_DEFAULT_ENCODING) -> None:
         """
         Write content to an existing dataset.
 
@@ -635,22 +621,34 @@ class Datasets(SdkApi):
         ----------
         dataset_name: str
             Name of the dataset to retrieve
-        data: str
+        data: Union[str, bytes]
             Content to be written
         encoding: str
-            Specifies encoding name (e.g. IBM-1047)
+            Specifies encoding name (e.g. IBM-1047) for text data
 
-        Returns
-        -------
-        dict
-            A JSON containing the result of the operation
+        Raises
+        ------
+        ValueError
+            Data must be either a string or bytes.
         """
         custom_args = self._create_custom_request_arguments()
         custom_args["url"] = "{}ds/{}".format(self._request_endpoint, self._encode_uri_component(dataset_name))
-        custom_args["data"] = data
-        custom_args["headers"]["Content-Type"] = "text/plain; charset={}".format(encoding)
-        response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[204, 201])
-        return response_json
+
+        # Check if the data is a string (text content)
+        if isinstance(data, str):
+            custom_args["data"] = data
+            custom_args["headers"]["Content-Type"] = "text/plain; charset={}".format(encoding)
+
+        # Check if the data is bytes (binary content)
+        elif isinstance(data, bytes):
+            custom_args["data"] = data
+            custom_args["headers"]["Content-Type"] = "application/octet-stream"
+
+        # Raise an error if data is neither str nor bytes
+        else:
+            raise ValueError("Data must be either a string or bytes.")
+
+        self.request_handler.perform_request("PUT", custom_args, expected_code=[204, 201])
 
     def download(self, dataset_name: str, output_file: str) -> None:
         """
@@ -711,15 +709,15 @@ class Datasets(SdkApi):
         if os.path.isfile(input_file):
             if binary:
                 with open(input_file, "rb") as in_file:
-                    response_json = self.write(dataset_name, in_file)
+                    self.write(dataset_name, in_file.read())
             else:
-                with open(input_file, "r") as in_file:
-                    response_json = self.write(dataset_name, in_file.read())
+                with open(input_file, "r", encoding=encoding) as in_file:
+                    self.write(dataset_name, in_file.read(), encoding=encoding)
         else:
             self.logger.error(f"File {input_file} not found.")
             raise FileNotFound(input_file)
 
-    def recall_migrated(self, dataset_name: str, wait: bool = False) -> dict:
+    def recall_migrated(self, dataset_name: str, wait: bool = False) -> None:
         """
         Recall a migrated data set.
 
@@ -729,11 +727,6 @@ class Datasets(SdkApi):
             Name of the data set
         wait: bool
             If true, the function waits for completion of the request, otherwise the request is queued
-
-        Returns
-        -------
-        dict
-            A JSON containing the result of the operation
         """
         data = {"request": "hrecall", "wait": wait}
 
@@ -741,10 +734,9 @@ class Datasets(SdkApi):
         custom_args["json"] = data
         custom_args["url"] = "{}ds/{}".format(self._request_endpoint, self._encode_uri_component(dataset_name))
 
-        response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[200])
-        return response_json
+        self.request_handler.perform_request("PUT", custom_args, expected_code=[200])
 
-    def delete_migrated(self, dataset_name: str, purge: bool = False, wait: bool = False) -> dict:
+    def delete_migrated(self, dataset_name: str, purge: bool = False, wait: bool = False) -> None:
         """
         Delete migrated data set.
 
@@ -756,11 +748,6 @@ class Datasets(SdkApi):
             If true, the function uses the PURGE=YES on ARCHDEL request, otherwise it uses the PURGE=NO.
         wait: bool
             If true, the function waits for completion of the request, otherwise the request is queued.
-
-        Returns
-        -------
-        dict
-            A JSON containing the result of the operation
         """
         data = {
             "request": "hdelete",
@@ -772,10 +759,9 @@ class Datasets(SdkApi):
         custom_args["json"] = data
         custom_args["url"] = "{}ds/{}".format(self._request_endpoint, self._encode_uri_component(dataset_name))
 
-        response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[200])
-        return response_json
+        self.request_handler.perform_request("PUT", custom_args, expected_code=[200])
 
-    def migrate(self, dataset_name: str, wait: bool = False) -> dict:
+    def migrate(self, dataset_name: str, wait: bool = False) -> None:
         """
         Migrate the data set.
 
@@ -785,11 +771,6 @@ class Datasets(SdkApi):
             Name of the data set
         wait: bool
             If true, the function waits for completion of the request, otherwise the request is queued.
-
-        Returns
-        -------
-        dict
-            A JSON containing the result of the operation
         """
         data = {"request": "hmigrate", "wait": wait}
 
@@ -797,10 +778,9 @@ class Datasets(SdkApi):
         custom_args["json"] = data
         custom_args["url"] = "{}ds/{}".format(self._request_endpoint, self._encode_uri_component(dataset_name))
 
-        response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[200])
-        return response_json
+        self.request_handler.perform_request("PUT", custom_args, expected_code=[200])
 
-    def rename(self, before_dataset_name: str, after_dataset_name: str) -> dict:
+    def rename(self, before_dataset_name: str, after_dataset_name: str) -> None:
         """
         Rename the data set.
 
@@ -811,11 +791,6 @@ class Datasets(SdkApi):
 
         after_dataset_name: str
             New name for the source data set.
-
-        Returns
-        -------
-        dict
-            A JSON containing the result of the operation
         """
         data = {"request": "rename", "from-dataset": {"dsn": before_dataset_name.strip()}}
 
@@ -825,10 +800,9 @@ class Datasets(SdkApi):
             self._request_endpoint, self._encode_uri_component(after_dataset_name).strip()
         )
 
-        response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[200])
-        return response_json
+        self.request_handler.perform_request("PUT", custom_args, expected_code=[200])
 
-    def rename_member(self, dataset_name: str, before_member_name: str, after_member_name: str, enq: str = "") -> dict:
+    def rename_member(self, dataset_name: str, before_member_name: str, after_member_name: str, enq: str = "") -> None:
         """
         Rename the data set member.
 
@@ -847,11 +821,6 @@ class Datasets(SdkApi):
         ------
         ValueError
             Thrown when a parameter is invalid
-
-        Returns
-        -------
-        dict
-            A JSON containing the result of the operation
         """
         data = {
             "request": "rename",
@@ -874,10 +843,9 @@ class Datasets(SdkApi):
         custom_args["json"] = data
         custom_args["url"] = "{}ds/{}".format(self._request_endpoint, self._encode_uri_component(path_to_member))
 
-        response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[200])
-        return response_json
+        self.request_handler.perform_request("PUT", custom_args, expected_code=[200])
 
-    def delete(self, dataset_name: str, volume: Optional[str] = None, member_name: Optional[str] = None) -> dict:
+    def delete(self, dataset_name: str, volume: Optional[str] = None, member_name: Optional[str] = None) -> None:
         """
         Delete a sequential or partitioned data.
 
@@ -889,11 +857,6 @@ class Datasets(SdkApi):
             The optional volume serial number
         member_name: Optional[str]
             The name of the member to be deleted
-
-        Returns
-        -------
-        dict
-            A JSON containing the result of the operation
         """
         custom_args = self._create_custom_request_arguments()
         if member_name is not None:
@@ -902,17 +865,16 @@ class Datasets(SdkApi):
         if volume is not None:
             url = "{}ds/-{}/{}".format(self._request_endpoint, volume, self._encode_uri_component(dataset_name))
         custom_args["url"] = url
-        response_json = self.request_handler.perform_request("DELETE", custom_args, expected_code=[200, 202, 204])
-        return response_json
+        self.request_handler.perform_request("DELETE", custom_args, expected_code=[200, 202, 204])
 
     def copy_uss_to_data_set(
         self,
         from_filename: str,
         to_dataset_name: str,
         to_member_name: Optional[str] = None,
-        type: str = FileType.TEXT,
+        type: FileType = FileType.TEXT,
         replace: bool = False,
-    ) -> dict:
+    ) -> None:
         """
         Copy a USS file to dataset.
 
@@ -924,15 +886,10 @@ class Datasets(SdkApi):
             Name of the dataset to copy to.
         to_member_name: Optional[str]
             Name of the member to copy to.
-        type: str
+        type: FileType
             Type of the file to copy from. Default is FileType.TEXT.
         replace: bool
             If true, members in the target dataset are replaced.
-
-        Returns
-        -------
-        dict
-            A JSON containing the result of the operation.
         """
         data = {
             "request": "copy",
@@ -944,5 +901,4 @@ class Datasets(SdkApi):
         custom_args = self._create_custom_request_arguments()
         custom_args["json"] = data
         custom_args["url"] = "{}ds/{}".format(self._request_endpoint, self._encode_uri_component(path_to_member))
-        response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[200])
-        return response_json
+        self.request_handler.perform_request("PUT", custom_args, expected_code=[200])

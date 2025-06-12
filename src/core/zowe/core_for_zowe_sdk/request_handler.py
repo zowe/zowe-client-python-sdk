@@ -10,7 +10,8 @@ SPDX-License-Identifier: EPL-2.0
 Copyright Contributors to the Zowe Project.
 """
 
-from typing import Union
+from typing import Union, Any
+from requests import Response
 
 import requests
 import urllib3
@@ -25,43 +26,43 @@ class RequestHandler:
 
     Parameters
     ----------
-    session_arguments: dict
+    session_arguments: dict[str, Any]
         Zowe SDK session arguments
     logger_name: str
         The logger name of the modules calling request handler
     """
 
-    def __init__(self, session_arguments: dict, logger_name: str = __name__):
+    def __init__(self, session_arguments: dict[str, Any], logger_name: str = __name__):
         self.session = requests.Session()
         self.session_arguments = session_arguments
         self.__valid_methods = ["GET", "POST", "PUT", "DELETE"]
         self.__handle_ssl_warnings()
         self.__logger = Log.register_logger(logger_name)
 
-    def __handle_ssl_warnings(self):
+    def __handle_ssl_warnings(self) -> None:
         """Turn off warnings if the SSL verification argument if off."""
         if not self.session_arguments["verify"]:
             urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
     def perform_request(
-        self, method: str, request_arguments: dict, expected_code: list = [200], stream: bool = False
-    ) -> Union[str, bytes, dict, None]:
+        self, method: str, request_arguments: dict[str, Any], expected_code: list[int] = [200], stream: bool = False
+    ) -> Union[str, bytes, Response, dict[str, Any], None]:
         """Execute an HTTP/HTTPS requests from given arguments and return validated response (JSON).
 
         Parameters
         ----------
         method: str
             The request method that should be used
-        request_arguments: dict
+        request_arguments: dict[str, Any]
             The dictionary containing the required arguments for the execution of the request
-        expected_code: list
+        expected_code: list[int]
             The list containing the acceptable response codes (default is [200])
         stream: bool
             The boolean value whether the request is stream
 
         Returns
         -------
-        Union[str, bytes, dict, None]
+        Union[str, bytes, Response, dict[str, Any], None]
             normalized request response in json (dictionary)
         """
         self.__method = method
@@ -75,9 +76,10 @@ class RequestHandler:
         self.__validate_response()
         if stream:
             return self.__response
-        return self.__normalize_response()
+        else:
+            return self.__normalize_response()
 
-    def __validate_method(self):
+    def __validate_method(self) -> None:
         """Check if the input request method for the request is supported.
 
         Raises
@@ -89,7 +91,7 @@ class RequestHandler:
             self.__logger.error(f"Invalid HTTP method input {self.__method}")
             raise InvalidRequestMethod(self.__method)
 
-    def __send_request(self, stream: bool = False):
+    def __send_request(self, stream: bool = False) -> None:
         """
         Build a custom session object, prepare it with a custom request and send it.
 
@@ -99,13 +101,14 @@ class RequestHandler:
             Flag indicates whether it is a streaming requests.
         """
         self.__response = self.session.request(
-            method=self.__method, stream=stream, **self.session_arguments, **self.__request_arguments)
+            method=self.__method, stream=stream, **self.session_arguments, **self.__request_arguments
+        )
 
-    def __del__(self):
+    def __del__(self) -> None:
         """Clean up the REST session object once it is no longer needed anymore."""
         self.session.close()
 
-    def __validate_response(self):
+    def __validate_response(self) -> None:
         """Validate if request response is acceptable based on expected code list.
 
         Raises
@@ -134,17 +137,18 @@ class RequestHandler:
             )
             raise RequestFailed(self.__response.status_code, output_str)
 
-    def __normalize_response(self) -> Union[str, bytes, dict, None]:
+    def __normalize_response(self) -> Union[str, bytes, dict[str, Any], None]:
         """
         Normalize the response object to a JSON format.
 
         Returns
         -------
-        Union[str, bytes, dict, None]
+        Union[str, bytes, dict[str, Any], None]
             Response object at the format based on Content-Type header:
             - `bytes` when the response is binary data
             - `str` when the response is plain text
-            - `dict` when the response is json
+            - `dict[str, Any]` when the response is json
+            - `None` when the response has empty text
         """
         content_type = self.__response.headers.get("Content-Type")
         if content_type == "application/octet-stream":

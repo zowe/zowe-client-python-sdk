@@ -9,4 +9,7 @@ SPDX-License-Identifier: EPL-2.0
 
 Copyright Contributors to the Zowe Project.
 """
+
 from .zosmf import ZosmfResponse
+
+__all__ = ["ZosmfResponse"]

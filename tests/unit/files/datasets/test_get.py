@@ -16,7 +16,7 @@ class TestGetClass(TestCase):
             "port": 443,
             "rejectUnauthorized": True,
         }
-    
+
     @mock.patch("requests.Session.send")
     def test_get(self, mock_send_request):
         """Test list members sends request"""
