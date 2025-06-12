@@ -387,7 +387,6 @@ class ConfigFile:
         for k, v in profiles.items():
             if not isinstance(v, dict):  # Ensure v is a dictionary
                 if not self.__suppress_config_file_warnings:
-                    if not self.__suppress_config_file_warnings:
                         self.__logger.warning("Invalid profile passed when schame validation is off")
                 continue  # Skip invalid entries
 
