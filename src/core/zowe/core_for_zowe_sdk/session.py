@@ -64,6 +64,7 @@ class Session:
             self.session.user = props.get("user")
             self.session.password = props.get("password")
             self.session.reject_unauthorized = props.get("rejectUnauthorized")
+            self.session.response_timeout = props.get("responseTimeout")
             self.session.type = session_constants.AUTH_TYPE_BASIC
         elif props.get("tokenType") is not None and props.get("tokenValue") is not None:
             self.session.token_type = props.get("tokenType")
@@ -79,6 +80,7 @@ class Session:
                 self.__logger.error("A certificate key file must be provided when certFile is specified")
                 raise Exception("A certificate key file must be provided when certFile is specified")
             self.session.reject_unauthorized = props.get("rejectUnauthorized")
+            self.session.response_timeout = props.get("responseTimeout")
             self.session.type = session_constants.AUTH_TYPE_CERT_PEM
         else:
             self.session.type = session_constants.AUTH_TYPE_NONE
