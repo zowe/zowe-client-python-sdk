@@ -10,26 +10,26 @@ SPDX-License-Identifier: EPL-2.0
 Copyright Contributors to the Zowe Project.
 """
 
-from typing import Optional
+from typing import Optional, Any
 
 from zowe.core_for_zowe_sdk import SdkApi
 
 from .response import ConsoleResponse, IssueCommandResponse
 
 
-class Console(SdkApi):
+class Console(SdkApi):  # type: ignore
     """
     Class used to represent the base z/OSMF Console API.
 
     Parameters
     ----------
-    connection : dict
+    connection : dict[str, Any]
        A profile in dict (json) format
     log : bool
         Flag to disable logger
     """
 
-    def __init__(self, connection: dict, log: bool = True):
+    def __init__(self, connection: dict[str, Any], log: bool = True):
         super().__init__(connection, "/zosmf/restconsoles/consoles/defcn", logger_name=__name__, log=log)
 
     def issue_command(self, command: str, console: Optional[str] = None) -> IssueCommandResponse:

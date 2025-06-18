@@ -19,7 +19,8 @@ def keyring_get_password(serviceName: str, username: str):
 
 def keyring_get_password_exception():
     raise Exception
-    
+
+
 class TestValidateConfigJsonClass(TestCase):
     """Testing the validate_config_json function"""
 

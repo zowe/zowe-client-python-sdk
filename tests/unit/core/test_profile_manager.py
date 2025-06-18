@@ -275,6 +275,7 @@ class TestZosmfProfileManager(TestCase):
         """
         with self.assertRaises(exceptions.ProfileNotFound):
             config_file = ConfigFile(name="name", type="team_config", defaults={}, profiles={"a": {"none": "none"}})
+            config_file.suppress_config_warnings(False)
             config_file.get_profilename_from_profiletype("test")
 
         mock_logger_warning.assert_any_call("Given profile type 'test' has no default profile name")
@@ -291,6 +292,7 @@ class TestZosmfProfileManager(TestCase):
         """
         with self.assertWarns(UserWarning):
             config_file = ConfigFile(name="name", type="team_config")
+            config_file.suppress_config_warnings(False)
             config_file.validate_schema()
         self.assertEqual(mock_logger_warning.call_args[0][0], "Could not find $schema property")
 
@@ -822,3 +824,20 @@ class TestZosmfProfileManager(TestCase):
         self.assertEqual(
             ["port"], list(config_file.jsonc["profiles"]["lpar1"]["profiles"]["zosmf"]["properties"].keys())
         )
+
+def test_find_profile_with_non_dict_value():
+    """Test what happens when a non-dict value is passed to find_profile."""
+    config_file = ConfigFile(type="Team Config", name="test")
+    
+    profiles = {
+        "my_profile": False, 
+        "valid_profile": {"type": "zosmf", "properties": {"host": "example.com"}}
+    }
+    
+    result = config_file.find_profile("my_profile", profiles)
+    
+    assert result is None
+    
+    valid_result = config_file.find_profile("valid_profile", profiles)
+    assert valid_result is not None
+    assert valid_result["type"] == "zosmf"

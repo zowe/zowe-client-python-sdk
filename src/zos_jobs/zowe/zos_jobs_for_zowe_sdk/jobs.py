@@ -11,14 +11,14 @@ Copyright Contributors to the Zowe Project.
 """
 
 import os
-from typing import List, Optional
+from typing import Optional, Any
 
 from zowe.core_for_zowe_sdk import SdkApi
 
 from .response import JobResponse, SpoolResponse, StatusResponse
 
 
-class Jobs(SdkApi):
+class Jobs(SdkApi):  # type: ignore
     """
     Class used to represent the base z/OSMF Jobs API.
 
@@ -26,13 +26,13 @@ class Jobs(SdkApi):
 
     Parameters
     ----------
-    connection : dict
+    connection : dict[str, Any]
         A profile for connection in dict (json) format
     log : bool
         Flag to disable logger
     """
 
-    def __init__(self, connection: dict, log: bool = True):
+    def __init__(self, connection: dict[str, Any], log: bool = True):
         super().__init__(connection, "/zosmf/restjobs/jobs/", logger_name=__name__, log=log)
 
     def get_job_status(self, jobname: str, jobid: str) -> JobResponse:
@@ -132,13 +132,13 @@ class Jobs(SdkApi):
         response_json = self.request_handler.perform_request("DELETE", custom_args, expected_code=[202, 200])
         return StatusResponse(response_json)
 
-    def _issue_job_request(self, req: dict, jobname: str, jobid: str, modify_version: str) -> StatusResponse:
+    def _issue_job_request(self, req: dict[str, Any], jobname: str, jobid: str, modify_version: str) -> StatusResponse:
         """
         Issue a job request.
 
         Parameters
         ----------
-        req: dict
+        req: dict[str, Any]
             A json representation of the request
         jobname: str
             The name of the job
@@ -267,7 +267,7 @@ class Jobs(SdkApi):
         prefix: str = "*",
         max_jobs: int = 1000,
         user_correlator: Optional[str] = None,
-    ) -> List[JobResponse]:
+    ) -> list[JobResponse]:
         """
         Retrieve list of jobs on JES based on the provided arguments.
 
@@ -284,7 +284,7 @@ class Jobs(SdkApi):
 
         Returns
         -------
-        List[JobResponse]
+        list[JobResponse]
             A list of jobs on JES queue based on the given parameters
         """
         custom_args = self._create_custom_request_arguments()
@@ -371,7 +371,7 @@ class Jobs(SdkApi):
         response_json = self.request_handler.perform_request("PUT", custom_args, expected_code=[201])
         return JobResponse(response_json)
 
-    def get_spool_files(self, correlator: str) -> List[SpoolResponse]:
+    def get_spool_files(self, correlator: str) -> list[SpoolResponse]:
         """
         Retrieve the spool files for a job identified by the correlator.
 
@@ -382,7 +382,7 @@ class Jobs(SdkApi):
 
         Returns
         -------
-        List[SpoolResponse]
+        list[SpoolResponse]
             A JSON object containing the result of the request execution
         """
         custom_args = self._create_custom_request_arguments()
@@ -413,7 +413,7 @@ class Jobs(SdkApi):
         job_url = "{}/files/JCL/records".format(correlator)
         request_url = "{}{}".format(self._request_endpoint, self._encode_uri_component(job_url))
         custom_args["url"] = request_url
-        response_json = self.request_handler.perform_request("GET", custom_args)
+        response_json: str = self.request_handler.perform_request("GET", custom_args)
         return response_json
 
     def get_spool_file_contents(self, correlator: str, id: str) -> str:
@@ -437,10 +437,10 @@ class Jobs(SdkApi):
         job_url = "{}/files/{}/records".format(correlator, id)
         request_url = "{}{}".format(self._request_endpoint, self._encode_uri_component(job_url))
         custom_args["url"] = request_url
-        response_json = self.request_handler.perform_request("GET", custom_args)
+        response_json: str = self.request_handler.perform_request("GET", custom_args)
         return response_json
 
-    def get_job_output_as_files(self, status: dict, output_dir: str):
+    def get_job_output_as_files(self, status: dict[str, Any], output_dir: str) -> None:
         """
         Get all spool files and submitted jcl text in separate files in the specified output directory.
 
@@ -460,7 +460,7 @@ class Jobs(SdkApi):
 
         Parameters
         ----------
-        status: dict
+        status: dict[str, Any]
             The response json describing the job to be used. (i.e. from the last get_status call)
         output_dir: str
             The output directory where the output files will be stored. The directory does not have to exist yet

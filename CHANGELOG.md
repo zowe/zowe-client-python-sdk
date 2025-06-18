@@ -4,6 +4,10 @@ All notable changes to the Zowe Client Python SDK will be documented in this fil
 
 ## Recent Changes
 
+- Fixed missing and incorrect type annotations. [#321](https://github.com/zowe/zowe-client-python-sdk/issues/321)
+- Removed the `suppress_config_file_warnings` parameter from individual functions. [#365](https://github.com/zowe/zowe-client-python-sdk/issues/365)
+- Introduced the class-wide property `suppress_config_file_warnings` to control configuration file warnings. [#365](https://github.com/zowe/zowe-client-python-sdk/issues/365)
+
 ### Bug Fixes
 
 - Updated the `pyo3` dependency of the Secrets SDK for technical currency. [#355](https://github.com/zowe/zowe-client-python-sdk/pull/355)
@@ -24,16 +28,13 @@ All notable changes to the Zowe Client Python SDK will be documented in this fil
 
 ### Bug Fixes
 
-- Fixed Core SDK package referencing a non-existent version of Secrets SDK.
+- Fixed Core SDK package referencing a non-existent version of Secrets SDK. 
 
 ## `1.0.0-dev20`
 
 ### Enhancements
 
 - *Breaking*: Update method return types to use custom classes for REST API responses [#89] (https://github.com/zowe/zowe-client-python-sdk/issues/89)
-
-### Bug Fixes
-
 
 ## `1.0.0-dev19`
 
