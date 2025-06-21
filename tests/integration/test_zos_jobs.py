@@ -2,8 +2,8 @@
 
 import json
 import os
-import unittest
 
+from integration.conftest import TestIsolatedEnv
 from zowe.core_for_zowe_sdk import ProfileManager
 from zowe.zos_jobs_for_zowe_sdk import Jobs
 
@@ -12,7 +12,7 @@ JOBS_FIXTURES_JSON_JSON_PATH = os.path.join(FIXTURES_PATH, "jobs.json")
 SAMPLE_JCL_FIXTURE_PATH = os.path.join(FIXTURES_PATH, "sample.jcl")
 
 
-class TestJobsIntegration(unittest.TestCase):
+class TestJobsIntegration(TestIsolatedEnv):
     """Jobs class integration tests."""
 
     def setUp(self):
