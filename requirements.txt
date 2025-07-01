@@ -25,3 +25,4 @@ wheel
 -e ./src/zos_jobs
 -e ./src/zos_tso
 -e ./src/zosmf
+-e ./src/zosmf_workflows
