@@ -10,7 +10,8 @@ SPDX-License-Identifier: EPL-2.0
 Copyright Contributors to the Zowe Project.
 """
 
-from typing import Optional, Any
+from __future__ import annotations
+from typing import Any
 
 from zowe.core_for_zowe_sdk import SdkApi
 from zowe.zos_files_for_zowe_sdk import constants
@@ -138,7 +139,7 @@ class FileSystems(SdkApi):  # type: ignore
         self.request_handler.perform_request("PUT", custom_args, expected_code=[204])
 
     def list(
-        self, file_path_name: Optional[str] = None, file_system_name: Optional[str] = None
+        self, file_path_name: str | None = None, file_system_name: str | None = None
     ) -> FileSystemListResponse:
         """
         List all mounted filesystems.
@@ -148,9 +149,9 @@ class FileSystems(SdkApi):  # type: ignore
 
         Parameters
         ----------
-        file_path_name: Optional[str]
+        file_path_name: str | None
             USS directory that contains the files and directories to be listed
-        file_system_name: Optional[str]
+        file_system_name: str | None
             Name of the file system to be listed
 
         Returns
