@@ -49,8 +49,9 @@ class SdkApi:
         self._default_headers = {
             "Content-Type": "application/json",
             "X-CSRF-ZOSMF-HEADER": "",
-            "X-IBM-Response-Timeout": self.session.response_timeout,
         }
+        if self.session.response_timeout is not None:
+            self._default_headers["X-IBM-Response-Timeout"] = self.session.response_timeout
 
         self._request_endpoint = session.host_url + self._default_service_url
 
