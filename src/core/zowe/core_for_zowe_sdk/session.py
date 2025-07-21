@@ -24,7 +24,6 @@ class ISession:
     host: str
     port: int = session_constants.DEFAULT_HTTPS_PORT
     reject_unauthorized: bool = True
-    response_timeout: Optional[str] = None
     user: Optional[str] = None
     password: Optional[str] = None
     protocol: str = session_constants.HTTPS_PROTOCOL
@@ -68,7 +67,6 @@ class Session:
             self.session.user = props.get("user")
             self.session.password = props.get("password")
             self.session.reject_unauthorized = bool(props.get("rejectUnauthorized"))
-            self.session.response_timeout = props.get("responseTimeout")
             self.session.type = session_constants.AUTH_TYPE_BASIC
         elif props.get("tokenType") is not None and props.get("tokenValue") is not None:
             self.session.token_type = props.get("tokenType")
@@ -84,7 +82,6 @@ class Session:
                 self.__logger.error("A certificate key file must be provided when certFile is specified")
                 raise ValueError("A certificate key file must be provided when certFile is specified")
             self.session.reject_unauthorized = bool(props.get("rejectUnauthorized"))
-            self.session.response_timeout = props.get("responseTimeout")
             self.session.type = session_constants.AUTH_TYPE_CERT_PEM
         else:
             self.session.type = session_constants.AUTH_TYPE_NONE

@@ -35,3 +35,26 @@ class TestZosmfClass(unittest.TestCase):
 
         Zosmf(self.connection_dict).list_systems()
         mock_send_request.assert_called_once()
+
+    @mock.patch("requests.Session.send")
+    def test_response_timeout_header_added(self, mock_send_request):
+        """Response timeout should add the X-IBM-Response-Timeout header to requests."""
+        connection_with_timeout = self.connection_dict.copy()
+        connection_with_timeout["responseTimeout"] = "5"
+
+        mock_response = mock.Mock()
+        mock_response.headers = {"Content-Type": "application/json"}
+        mock_response.status_code = 200
+        mock_response.json.return_value = {}
+        mock_send_request.return_value = mock_response
+
+        # Call a method that triggers a request
+        Zosmf(connection_with_timeout).list_systems()
+
+        # Verify the request was called and inspect the headers
+        mock_send_request.assert_called_once()
+        # Get the PreparedRequest object from the call args
+        prepared_request = mock_send_request.call_args[0][0]
+        self.assertIn("X-IBM-Response-Timeout", prepared_request.headers)
+        self.assertEqual(prepared_request.headers["X-IBM-Response-Timeout"], "5")
+
