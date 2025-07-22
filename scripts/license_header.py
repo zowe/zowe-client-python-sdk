@@ -12,7 +12,7 @@ https://www.eclipse.org/legal/epl-v20.html
 SPDX-License-Identifier: EPL-2.0
 
 Copyright Contributors to the Zowe Project.
-'''
+"""'''
 
 
 def check_and_add_license_header(file_path, write_header):
@@ -22,7 +22,7 @@ def check_and_add_license_header(file_path, write_header):
             if write_header:
                 print(f"Adding license header to: {file_path}")
                 file.seek(0, 0)
-                file.write(LICENSE_HEADER + '"""\n' + content)
+                file.write(LICENSE_HEADER + "\n" + content)
             return False
     return True
 

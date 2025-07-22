@@ -8,10 +8,6 @@ https://www.eclipse.org/legal/epl-v20.html
 SPDX-License-Identifier: EPL-2.0
 
 Copyright Contributors to the Zowe Project.
-
-Contributors:
-    Zowe Community
-    Uladzislau Kalesnikau
 """
 
 import sys
@@ -23,7 +19,7 @@ from _version import __version__
 from setup import resolve_sdk_dep
 
 setup(
-    name="zowe_zosmf_workflows_for_zowe_sdk",
+    name="zowe_workflows_for_zowe_sdk",
     version=__version__,
     description="Zowe Python SDK - z/OSMF Workflows package",
     long_description=open("README.md", "r").read(),

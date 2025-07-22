@@ -10,12 +10,12 @@ Examples
 
 ```
 from zowe.core_for_zowe_sdk import ProfileManager
-from zowe.zosmf_for_zowe_sdk import Zosmf
+from zowe.workflows_for_zowe_sdk import Workflows
 
 profile = ProfileManager().load(profile_type="zosmf")
-zosmf_workflows = Workflows(profile)
+workflows = Workflows(profile)
 
-created_workflow = zosmf_workflows.create_workflow(
+created_workflow = workflows.create_workflow(
   workflow_name="Installation Workflow",
   workflow_definition_file="/some/valid/path",
   system="MYSYS",
@@ -23,5 +23,5 @@ created_workflow = zosmf_workflows.create_workflow(
   variable_input_file="/some/valid/path",
   workflow_archive_safid="ZOSMFAD"
 )
-created_workflow_properties = zosmf_workflows.get_workflow_properties(created_workflow.workflowKey, True, True)
+created_workflow_properties = workflows.get_workflow_properties(created_workflow.workflowKey, True, True)
 ```

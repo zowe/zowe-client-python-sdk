@@ -17,4 +17,4 @@ For more information and syntax examples, refer to the readme file in each packa
 - [z/OS Jobs](zos_jobs/README.md): Work with batch jobs on z/OS.
 - [z/OS TSO](zos_tso/README.md): Interact with TSO/E adress spaces on z/OS.
 - [z/OSMF](zosmf/README.md): Query z/OSMF data (e.g.: connection status, list of available systems).
-- [z/OSMF Workflows](zosmf_workflows/README.md): Work with z/OSMF Workflows.
+- [z/OSMF Workflows](workflows/README.md): Work with z/OSMF Workflows.

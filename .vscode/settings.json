@@ -13,7 +13,7 @@
         "./src/zos_jobs",
         "./src/zos_tso",
         "./src/zosmf",
-        "./src/zosmf_workflows",
+        "./src/workflows",
     ],
     "python.testing.pytestArgs": ["tests"],
     "python.testing.pytestEnabled": true,

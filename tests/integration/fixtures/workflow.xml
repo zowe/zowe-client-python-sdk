@@ -59,7 +59,7 @@
         <prereqStep name="variables"/>
         <instructions substitution="false">Nothing special, just a fake JCL job run that will fail</instructions>
         <weight>1</weight>
-        <autoEnable>false</autoEnable>
+        <autoEnable>true</autoEnable>
         <canMarkAsFailed>false</canMarkAsFailed>
         <template>
             <inlineTemplate substitution="true">//ZOWETEST EXEC PGM=IEFBR14

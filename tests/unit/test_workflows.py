@@ -3,8 +3,8 @@
 import unittest
 from unittest import mock
 
-from zowe.zosmf_workflows_for_zowe_sdk import Workflows
-from zowe.zosmf_workflows_for_zowe_sdk.response import (
+from zowe.workflows_for_zowe_sdk import Workflows
+from zowe.workflows_for_zowe_sdk.response import (
     CreateWorkflowResponse,
     GetArchivedWorkflowPropertiesResponse,
     GetWorkflowDefinitionResponse,
