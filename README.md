@@ -149,6 +149,7 @@ Alternatively, you can use an existing Zowe CLI profile instead:
 
 Currently, the Zowe Python SDK supports the following interfaces:
 
+- z/OSMF Workflows
 - Console commands
 - z/OSMF Information retrieval
 - Submit job from a dataset

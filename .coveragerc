@@ -1,0 +1,8 @@
+[run]
+omit = 
+  .venv/*
+  tests/*
+
+
+[coverage:report]
+skip_empty = true

@@ -7,5 +7,7 @@
     "TEST2_ZFS": "TEST2.ZFS",
     "TEST_USS": "/tmp/zowe-test.txt",
     "TEST_USS_MOUNT": "/tmp/zowe/mount",
-    "TEST_USS_NEW": "/tmp/zowe-test-new.txt"
+    "TEST_USS_NEW": "/tmp/zowe-test-new.txt",
+    "TEST_USS_WORKFLOW": "/tmp/zowe_workflow.xml",
+    "TEST_USS_WORKFLOW_INPUT": "/tmp/zowe_workflow_input"
 }
