@@ -13,7 +13,7 @@ All notable changes to the Zowe Client Python SDK will be documented in this fil
 
 - Updated the `pyo3` dependency of the Secrets SDK for technical currency. [#355](https://github.com/zowe/zowe-client-python-sdk/pull/355)
 - Updated the `urllib3` dependency of the Core SDK for technical currency. [#370](https://github.com/zowe/zowe-client-python-sdk/pull/370)
-- Added `encoding` to `files.uss.write` in `files.uss.upload`. [#372](https://github.com/zowe/zowe-client-python-sdk/pull/372)
+- Added support for the `encoding` option to the `USSFiles.upload` function. [#372](https://github.com/zowe/zowe-client-python-sdk/pull/372)
 
 ## `1.0.0-dev22`
 
