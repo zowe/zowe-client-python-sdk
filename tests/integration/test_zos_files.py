@@ -2,9 +2,9 @@
 
 import json
 import os
-import unittest
 
 import urllib3
+from integration.conftest import TestIsolatedEnv
 from zowe.core_for_zowe_sdk import ProfileManager
 from zowe.zos_files_for_zowe_sdk import Files
 from zowe.zos_files_for_zowe_sdk.response.datasets import (
@@ -17,7 +17,7 @@ FILES_FIXTURES_PATH = os.path.join(FIXTURES_PATH, "files.json")
 SAMPLE_JCL_FIXTURE_PATH = os.path.join(FIXTURES_PATH, "sample.jcl")
 
 
-class TestFilesIntegration(unittest.TestCase):
+class TestFilesIntegration(TestIsolatedEnv):
     """Files class integration tests."""
 
     def setUp(self):
