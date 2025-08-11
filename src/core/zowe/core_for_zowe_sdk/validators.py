@@ -11,20 +11,20 @@ Copyright Contributors to the Zowe Project.
 """
 
 import os
-from typing import Union
+from typing import Union, Any
 
 import commentjson
 import requests
 from jsonschema import validate
 
 
-def validate_config_json(path_config_json: Union[str, dict], path_schema_json: str, cwd: str) -> None:
+def validate_config_json(path_config_json: Union[str, dict[str, Any]], path_schema_json: str, cwd: str) -> None:
     """
     Validate that zowe.config.json file matches zowe.schema.json.
 
     Parameters
     ----------
-    path_config_json: Union[str, dict]
+    path_config_json: Union[str, dict[str, Any]]
         Absolute path to zowe.config.json
     path_schema_json: str
         Absolute path to zowe.schema.json
@@ -56,4 +56,4 @@ def validate_config_json(path_config_json: Union[str, dict], path_schema_json: s
     else:
         config_json = path_config_json
 
-    return validate(instance=config_json, schema=schema_json)
+    validate(instance=config_json, schema=schema_json)

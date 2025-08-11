@@ -10,17 +10,17 @@ SPDX-License-Identifier: EPL-2.0
 Copyright Contributors to the Zowe Project.
 """
 
-from dataclasses import dataclass
-from typing import Any, Dict, List, Optional
+from dataclasses import dataclass, field
+from typing import Any, Optional
 
 
 @dataclass
 class StartResponse:
-    servletKey: Optional[str] = None
+    servletKey: str
     queueID: Optional[str] = None
     sessionID: Optional[str] = None
     ver: Optional[str] = None
-    tsoData: Optional[List[dict]] = None
+    tsoData: Optional[list[dict[str, str]]] = None
     reused: Optional[bool] = None
     timeout: Optional[bool] = None
 
@@ -33,12 +33,12 @@ class StartResponse:
 
 @dataclass
 class EndResponse:
-    servletKey: Optional[str] = None
+    servletKey: str
+    msgId: list[str] = field(default_factory=list)
     ver: Optional[str] = None
     reused: Optional[bool] = None
     timeout: Optional[bool] = None
     msgData: Optional[str] = None
-    msgId: Optional[List] = None
 
     def __getitem__(self, key: str) -> Any:
         return self.__dict__[key]
@@ -49,9 +49,9 @@ class EndResponse:
 
 @dataclass
 class SendResponse:
-    servletKey: Optional[str] = None
+    servletKey: str
+    tsoData: list[dict[str, Any]]
     ver: Optional[str] = None
-    tsoData: Optional[List[dict]] = None
     reused: Optional[bool] = None
     timeout: Optional[bool] = None
 
@@ -67,9 +67,9 @@ class IssueResponse:
     start_response: StartResponse
     send_response: SendResponse
     end_response: EndResponse
-    tso_messages: list
+    tso_messages: list[str]
 
-    def __init__(self, start, send, end, msg):
+    def __init__(self, start: StartResponse, send: SendResponse, end: EndResponse, msg: list[str]) -> None:
         self.start_response = start
         self.send_response = send
         self.end_response = end

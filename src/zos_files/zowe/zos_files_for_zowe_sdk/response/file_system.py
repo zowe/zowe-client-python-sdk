@@ -11,7 +11,7 @@ Copyright Contributors to the Zowe Project.
 """
 
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 
 @dataclass
@@ -20,7 +20,7 @@ class FileSystemResponse:
     mountpoint: Optional[str] = None
     fstname: Optional[str] = None
     status: Optional[str] = None
-    mode: Optional[List[str]] = None
+    mode: Optional[list[str]] = None
     dev: Optional[int] = None
     fstype: Optional[int] = None
     bsize: Optional[int] = None
@@ -41,12 +41,12 @@ class FileSystemResponse:
 
 @dataclass
 class FileSystemListResponse:
-    items: Optional[List[FileSystemResponse]] = None
+    items: Optional[list[FileSystemResponse]] = None
     returnedRows: Optional[int] = None
     totalRows: Optional[int] = None
     JSONversion: Optional[int] = None
 
-    def __init__(self, response: dict) -> None:
+    def __init__(self, response: dict[str, Any]) -> None:
         for key, value in response.items():
             if key == "items":
                 value = [FileSystemResponse(**x) for x in value]

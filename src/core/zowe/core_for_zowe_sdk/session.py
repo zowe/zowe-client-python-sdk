@@ -11,7 +11,7 @@ Copyright Contributors to the Zowe Project.
 """
 
 from dataclasses import dataclass
-from typing import Optional
+from typing import Optional, Any
 
 from . import session_constants
 from .logger import Log
@@ -31,7 +31,7 @@ class ISession:
     type: Optional[str] = None
     token_type: Optional[str] = None
     token_value: Optional[str] = None
-    cert: Optional[str] = None
+    cert: Optional[tuple[str, str]] = None
 
 
 class Session:
@@ -40,30 +40,33 @@ class Session:
 
     Parameters
     ----------
-    props : dict
+    props : dict[str, Any]
         Profile and properties
 
     Raises
     ------
-    Exception
+    ValueError
         Exception thrown when cert key is not provided
     """
 
-    def __init__(self, props: dict) -> None:
+    def __init__(self, props: dict[str, Any]) -> None:
         # set host and port
         self.__logger = Log.register_logger(__name__)
+        host = props.get("host")
+        cert_file = props.get("certFile")
+        cert_key_file = props.get("certKeyFile")
 
-        if props.get("host") is not None:
-            self.session: ISession = ISession(host=props.get("host"))
+        if isinstance(host, str):  # Ensure host is a string
+            self.session: ISession = ISession(host=host)
         else:
             self.__logger.error("Host not supplied")
-            raise Exception("Host must be supplied")
+            raise ValueError("Host must be supplied")
 
         # determine authentication type
         if props.get("user") is not None and props.get("password") is not None:
             self.session.user = props.get("user")
             self.session.password = props.get("password")
-            self.session.reject_unauthorized = props.get("rejectUnauthorized")
+            self.session.reject_unauthorized = bool(props.get("rejectUnauthorized"))
             self.session.type = session_constants.AUTH_TYPE_BASIC
         elif props.get("tokenType") is not None and props.get("tokenValue") is not None:
             self.session.token_type = props.get("tokenType")
@@ -73,12 +76,12 @@ class Session:
             self.session.token_value = props.get("tokenValue")
             self.session.type = session_constants.AUTH_TYPE_BEARER
         elif props.get("certFile") is not None:
-            if props.get("certKeyFile"):
-                self.session.cert = (props.get("certFile"), props.get("certKeyFile"))
+            if isinstance(cert_file, str) and isinstance(cert_key_file, str):
+                self.session.cert = (cert_file, cert_key_file)
             else:
                 self.__logger.error("A certificate key file must be provided when certFile is specified")
-                raise Exception("A certificate key file must be provided when certFile is specified")
-            self.session.reject_unauthorized = props.get("rejectUnauthorized")
+                raise ValueError("A certificate key file must be provided when certFile is specified")
+            self.session.reject_unauthorized = bool(props.get("rejectUnauthorized"))
             self.session.type = session_constants.AUTH_TYPE_CERT_PEM
         else:
             self.session.type = session_constants.AUTH_TYPE_NONE
