@@ -69,8 +69,7 @@ class GetWorkflowPropertiesResponse:
     workflowVersion: Optional[str]
         Version of the workflow definition file.
     workflowDefinitionFileMD5Value: Optional[str]
-        The 128-bit hash value that is associated with the workflow definition file that was used 
-        to create the workflow.
+        The 128-bit hash value that is associated with the workflow definition file that was used to create the workflow.
     vendor: Optional[str]
         Name of the vendor that provided the workflow definition file.
     owner: Optional[str]
@@ -78,8 +77,7 @@ class GetWorkflowPropertiesResponse:
     workflowArchiveSAFID: Optional[str]
         SAF ID who will own the archived workflow after a workflow is archived to a user specified directory.
     system: Optional[str]
-        Full name of the z/OS system on which the workflow is to be performed.
-        This value is in the format *sysplex.sysname*.
+        Full name of the z/OS system on which the workflow is to be performed. This value is in the format *sysplex.sysname*.
     jobsOutputDirectory: Optional[str]
         Name of the UNIX directory that is used for automatically saving job spool files from the workflow.
     category: Optional[Literal["general", "configuration", "provisioning"]]
@@ -95,25 +93,21 @@ class GetWorkflowPropertiesResponse:
     isCallable: Optional[bool]
         Indicates whether a workflow is eligible to be called by another workflow.
     containsParallelSteps: Optional[bool]
-        For a parallel-steps workflow, this property is true. 
-        If so, the automation ready steps can be run in parallel (concurrently), thus possibly completing more quickly.
+        For a parallel-steps workflow, this property is true. If so, the automation ready steps can be run in parallel (concurrently), thus possibly completing more quickly.
     scope: Optional[Literal["system", "sysplex", "none"]]
         Restricts a workflow to one instance only.
     statusName: Optional[Literal["in-progress", "complete", "automation-in-progress", "canceled"]]
         Indicates the current workflow status.
     deleteCompletedJobs: Optional[bool]
-        For a workflow that submits a job, this property specifies whether the job is deleted 
-        from the JES spool after it completes successfully.
+        For a workflow that submits a job, this property specifies whether the job is deleted from the JES spool after it completes successfully.
     automationStatus: Optional['WorkflowAutomationStatusResponse']
-        A WorkflowAutomationStatusResponse object that contains details about
-        the most recent start automation request for the workflow.
+        A WorkflowAutomationStatusResponse object that contains details about the most recent start automation request for the workflow.
     autoDeleteOnCompletion: Optional[bool]
         Specifies whether the workflow is automatically deleted from the system after it completes successfully.
     access: Optional[Literal["Public", "Restricted", "Private"]]
         Specifies the access type for the workflow.
     accountInfo: Optional[str]
-        For a workflow that submits a job, this property specifies the account information to use 
-        in the JCL JOB statement.
+        For a workflow that submits a job, this property specifies the account information to use in the JCL JOB statement.
     jobStatement: Optional[str]
         For a workflow that submits a job, this property specifies the JOB statement JCL that is used in the job.
     templateID: Optional[str]
@@ -137,11 +131,9 @@ class GetWorkflowPropertiesResponse:
     isInstanceVariableWithoutPrefix: Optional[bool]
         Indicates whether the simplified format is used for references to instance variables.
     steps: Optional[list['WorkflowStepResponse']]
-        Array of one or more WorkflowStepResponse objects 
-        that contain details about each of the steps in the workflow.
+        Array of one or more WorkflowStepResponse objects that contain details about each of the steps in the workflow.
     variables: Optional[list['WorkflowVariableResponse']]
-        Array of one or more WorkflowVariableResponse objects 
-        that contain details about each of the steps in the workflow.
+        Array of one or more WorkflowVariableResponse objects that contain details about each of the steps in the workflow.
     """
 
     workflowName: Optional[str] = None
@@ -275,17 +267,13 @@ class WorkflowStepResponse:
     assignees: Optional[list[str]]
         (Calling steps and template steps) One or more user IDs that are assigned to the step.
     autoEnable: Optional[bool]
-        (All step types) Indicates whether the step can be performed automatically when all prerequisite
-        steps are completed, and no user inputs are required.
+        (All step types) Indicates whether the step can be performed automatically when all prerequisite steps are completed, and no user inputs are required.
     calledInstanceKey: Optional[str]
-        (Calling steps only) For a step that calls another workflow for execution,
-        this property contains the key of the called workflow instance.
+        (Calling steps only) For a step that calls another workflow for execution, this property contains the key of the called workflow instance.
     calledInstanceScope: Optional[str]
-        (Calling steps only) For a step that calls another workflow for execution,
-        this property contains the scope of the called workflow instance.
+        (Calling steps only) For a step that calls another workflow for execution, this property contains the scope of the called workflow instance.
     calledInstanceURI: Optional[str]
-        (Calling steps only) For a step that calls another workflow for execution,
-        this property contains the URI path of the called workflow instance.
+        (Calling steps only) For a step that calls another workflow for execution, this property contains the URI path of the called workflow instance.
     calledWorkflowID: Optional[str]
         (Calling steps only) Specifies the workflow ID of a workflow definition file.
     calledWorkflowVersion: Optional[str]
@@ -295,8 +283,7 @@ class WorkflowStepResponse:
     calledWorkflowDescription: Optional[str]
         (Calling steps only) Describes the workflow to be called, from the point of view of the calling workflow.
     calledWorkflowDefinitionFile: Optional[str]
-        (Calling steps only) Specifies the name of the workflow definition file that is used to create a new workflow
-        if an existing instance is not found when this step is performed.
+        (Calling steps only) Specifies the name of the workflow definition file that is used to create a new workflow if an existing instance is not found when this step is performed.
     description: Optional[str]
         (All step types) Step description.
     expectedStatusCode: Optional[str]
@@ -318,21 +305,17 @@ class WorkflowStepResponse:
     isRestStep: Optional[bool]
         (All step types) Indicates whether this step is a REST API step.
     jobInfo: Optional['WorkflowJobInfoResponse']
-        (Template steps only) For a step that submits a job, this property contains the jobInfo object,
-        which contains details about the job.
+        (Template steps only) For a step that submits a job, this property contains the jobInfo object, which contains details about the job.
     maxLrecl: Optional[int]
-        (Template steps only) For a step that submits a job, this value specifies the maximum record length,
-        in bytes, for the input data for the job.
+        (Template steps only) For a step that submits a job, this value specifies the maximum record length, in bytes, for the input data for the job.
     optional: Optional[bool]
         (All step types) Indicates whether the step is optional.
     output: Optional[str]
-        (Template steps only) Indicates the name of the output file that is produced
-        by the step (a data set or UNIX file).
+        (Template steps only) Indicates the name of the output file that is produced by the step (a data set or UNIX file).
     outputSub: Optional[bool]
         (Template steps only) Indicates whether the output file name contains variable substitution.
     outputVariablesPrefix: Optional[str]
-        (Template steps only) For a step that creates a variable, this property contains a prefix
-        that identifies a string as a variable.
+        (Template steps only) For a step that creates a variable, this property contains a prefix that identifies a string as a variable.
     owner: Optional[str]
         (Calling steps and template steps) User ID of the step owner.
     port: Optional[str]
@@ -342,23 +325,19 @@ class WorkflowStepResponse:
     prereqStep: Optional[list[str]]
         (All step types) Lists the names of the steps that must be completed before this step can be performed.
     procName: Optional[str]
-        (Template steps only) For a step that runs a program under TSO/E, this property contains the name
-        of the logon procedure that is used to log into the TSO/E address space.
+        (Template steps only) For a step that runs a program under TSO/E, this property contains the name of the logon procedure that is used to log into the TSO/E address space.
     queryParameters: Optional[str]
-        (REST steps only) For a REST request that includes query parameters,
-        this property contains the query parameters.
+        (REST steps only) For a REST request that includes query parameters, this property contains the query parameters.
     queryParametersSub: Optional[bool]
         (REST steps only) Indicates whether the query parameters contain variable substitution.
     regionSize: Optional[str]
-        (Template steps only) For a step that runs a program under TSO/E,
-        this property contains the region size for the TSO/E address space.
+        (Template steps only) For a step that runs a program under TSO/E, this property contains the region size for the TSO/E address space.
     requestBody: Optional[str]
         (REST steps only) For a REST request that includes a request body, this property contains the request body.
     requestBodySub: Optional[bool]
         (REST steps only) Indicates whether the request body variable substitution.
     returnCode: Optional[str]
-        (Template steps only) For a step that submits a job to run,
-        this property indicates the return code that was returned when the job was submitted.
+        (Template steps only) For a step that submits a job to run, this property indicates the return code that was returned when the job was submitted.
     runAsUser: Optional[str]
         (All step types) The user ID under which the step is to be performed (the runAsUser ID).
     runAsUserDynamic: Optional[bool]
@@ -376,8 +355,7 @@ class WorkflowStepResponse:
     schemeNameSub: Optional[bool]
         (REST steps only) Indicates whether the scheme name contains variable substitution.
     scriptParameters: Optional[list[str]]
-        (Template steps only) For a step that runs a program,
-        this property contains the input parameters that can be set by the step owner.
+        (Template steps only) For a step that runs a program, this property contains the input parameters that can be set by the step owner.
     skills: Optional[str]
         (Calling steps and template steps) The type of skills that are required to perform the step.
     state: Optional[Literal["Unassigned", "Assigned", "Not Ready", "Ready", "In Progress", "Submitted", "Complete", "Skipped", "Complete (Override)", "Failed", "Conflicts", "Condition Not Satisfied"]]
@@ -391,14 +369,11 @@ class WorkflowStepResponse:
     successPattern: Optional[str]
         (Template steps only) Regular expression that is returned for a successful program execution.
     template: Optional[str]
-        (Template steps only) Indicates the template that is used to run a program
-        or batch job (inline or external file).
+        (Template steps only) Indicates the template that is used to run a program or batch job (inline or external file).
     templateSub: Optional[bool]
         (Template steps only) Indicates whether template contains variable substitution.
     timeout: Optional[str]
-        (Template steps only) For a step that runs a REXX exec or UNIX shell script,
-        this property contains the maximum amount of time that the program can run before
-        it is ended by a timeout condition.
+        (Template steps only) For a step that runs a REXX exec or UNIX shell script, this property contains the maximum amount of time that the program can run before it is ended by a timeout condition.
     title: Optional[str]
         (All step types) Step title.
     uriPath: Optional[str]
@@ -410,8 +385,7 @@ class WorkflowStepResponse:
     variable_references: Optional[list['WorkflowVariableReferenceResponse']]
         (Template steps only) An array of WorkflowVariableReferenceResponse objects
     weight: Optional[int]
-        (Calling steps and template steps) The relative difficulty of the step compared to other steps
-        within this workflow (an integer value 1 - 1000).
+        (Calling steps and template steps) The relative difficulty of the step compared to other steps within this workflow (an integer value 1 - 1000).
     """
 
     name: Optional[str] = None
@@ -510,8 +484,7 @@ class WorkflowJobInfoResponse:
     jobstatus: Optional['WorkflowJobStatusResponse']
         Contains the WorkflowJobStatusResponse object, which contains details about the job.
     jobfiles: Optional[list['WorkflowJobFileResponse']]
-        Contains an array of one or more objects that contain details
-        about each of the files that are created by the job.
+        Contains an array of one or more objects that contain details about each of the files that are created by the job.
     """
 
     jobstatus: Optional['WorkflowJobStatusResponse'] = None
@@ -722,8 +695,7 @@ class ListWorkflowsResponse:
     workflowVersion: Optional[str]
         Version of the workflow definition file.
     workflowDefinitionFileMD5Value: Optional[str]
-        The 128-bit hash value that is associated with the workflow definition file that was used 
-        to create the workflow.
+        The 128-bit hash value that is associated with the workflow definition file that was used to create the workflow.
     instanceURI: Optional[str]
         Workflow instance URI path, which you can use to retrieve information about the workflow.
     owner: Optional[str]
@@ -778,8 +750,7 @@ class GetWorkflowDefinitionResponse:
     isCallable: Optional[Literal["system", "sysplex"]]
         Indicates the callable scope for the workflow.
     containsParallelSteps: Optional[bool]
-    	For a workflow with automated steps, this property indicates whether the automated steps 
-        can be run in parallel (concurrently).
+    	For a workflow with automated steps, this property indicates whether the automated steps can be run in parallel (concurrently).
     scope: Optional[Literal["system", "sysplex", "none"]]
         Indicates the singleton scope for the workflow.
     jobsOutputDirectory: Optional[str]
@@ -787,8 +758,7 @@ class GetWorkflowDefinitionResponse:
     category: Optional[Literal["general", "configuration", "provisioning"]]
         Category of the workflow.
     productID: Optional[str]
-        Identifier of the product or component that is being configured through the workflow, 
-        such as the product identifier (PID) or function modification identifier (FMID).
+        Identifier of the product or component that is being configured through the workflow, such as the product identifier (PID) or function modification identifier (FMID).
     productName: Optional[str]
         Name of the product or component that is being configured through the workflow.
     productVersion: Optional[str]
@@ -798,11 +768,9 @@ class GetWorkflowDefinitionResponse:
     isInstanceVariableWithoutPrefix: Optional[bool]
         Indicates whether the simplified format is used for references to instance variables.
     steps: Optional[list['WorkflowDefinitionStepResponse']]
-        Array of one or more step-definition objects that contain details about each of the steps 
-        in the workflow definition file.
+        Array of one or more step-definition objects that contain details about each of the steps in the workflow definition file.
     variables: Optional[list['WorkflowDefinitionVariableResponse']]
-        Array of one or more variable-definition objects that contain details about the variables 
-        that are defined or referenced in the workflow definition file.
+        Array of one or more variable-definition objects that contain details about the variables that are defined or referenced in the workflow definition file.
     """
 
     workflowDefaultName: Optional[str] = None
@@ -868,16 +836,13 @@ class WorkflowDefinitionStepResponse:
     calledWorkflowMD5: Optional[str]
         (Calling steps only) Specifies the 128-bit hash value of a workflow definition file.
     calledWorkflowDefinitionFile: Optional[str]
-        (Calling steps only) Specifies the name of the workflow definition file that is used to create a new workflow
-        if an existing instance is not found when this step is performed.
+        (Calling steps only) Specifies the name of the workflow definition file that is used to create a new workflow if an existing instance is not found when this step is performed.
     calledWorkflowVersion: Optional[str]
         (Calling steps only) Specifies the workflow version of a workflow definition file.
     callingStepAutoEnable: Optional[bool]
-        (Calling steps only) Specifies whether the step is to be performed automatically 
-        when all prerequisite steps are completed, and no user inputs are required
+        (Calling steps only) Specifies whether the step is to be performed automatically when all prerequisite steps are completed, and no user inputs are required
     callingStepWeight: Optional[int]
-        (Calling steps only) Specifies the relative difficulty of the step compared to other steps 
-        within this workflow (an integer value 1 - 1000).
+        (Calling steps only) Specifies the relative difficulty of the step compared to other steps within this workflow (an integer value 1 - 1000).
     callingStepSkills: Optional[str]
         (Calling steps only) Specifies the type of skills that are required to perform the step.
     actualStatusCode: Optional[str]
@@ -885,8 +850,7 @@ class WorkflowDefinitionStepResponse:
     approvers: Optional[list['WorkflowDefinitionApproverResponse']]
         (All step types) An array of WorkflowDefinitionApproverResponse objects
     autoEnable: Optional[bool]
-        (All step types) Indicates whether the step can be performed automatically when all prerequisite
-        steps are completed, and no user inputs are required.
+        (All step types) Indicates whether the step can be performed automatically when all prerequisite steps are completed, and no user inputs are required.
     expectedStatusCode: Optional[str]
         (REST steps only) The expected HTTP status code from the REST API request.
     failedPattern: Optional[list[str]]
@@ -900,27 +864,21 @@ class WorkflowDefinitionStepResponse:
     isRestStep: Optional[bool]
         (All step types) Indicates whether this step is a REST API step.
     maxLrecl: Optional[int]
-        (Template steps only) For a step that submits a job, this value specifies the maximum record length,
-        in bytes, for the input data for the job.
+        (Template steps only) For a step that submits a job, this value specifies the maximum record length, in bytes, for the input data for the job.
     output: Optional[str]
-        (Template steps only) Indicates the name of the output file that is produced
-        by the step (a data set or UNIX file).
+        (Template steps only) Indicates the name of the output file that is produced by the step (a data set or UNIX file).
     outputVariablesPrefix: Optional[str]
-        (Template steps only) For a step that creates a variable, this property contains a prefix
-        that identifies a string as a variable.
+        (Template steps only) For a step that creates a variable, this property contains a prefix that identifies a string as a variable.
     port: Optional[str]
         (REST steps only) Port number that is associated with the REST request.
     procName: Optional[str]
-        (Template steps only) For a step that runs a program under TSO/E, this property contains the name
-        of the logon procedure that is used to log into the TSO/E address space.
+        (Template steps only) For a step that runs a program under TSO/E, this property contains the name of the logon procedure that is used to log into the TSO/E address space.
     propertyMappings: Optional[list['WorkflowPropertyMappingResponse']]
         (REST steps only) An array of WorkflowPropertyMappingResponse objects.
     queryParameters: Optional[str]
-        (REST steps only) For a REST request that includes query parameters,
-        this property contains the query parameters.
+        (REST steps only) For a REST request that includes query parameters, this property contains the query parameters.
     regionSize: Optional[str]
-        (Template steps only) For a step that runs a program under TSO/E,
-        this property contains the region size for the TSO/E address space.
+        (Template steps only) For a step that runs a program under TSO/E, this property contains the region size for the TSO/E address space.
     requestBody: Optional[str]
         (REST steps only) For a REST request that includes a request body, this property contains the request body.
     saveAsDataset: Optional[str]
@@ -930,8 +888,7 @@ class WorkflowDefinitionStepResponse:
     schemeName: Optional[str]
         (REST steps only) The scheme name that is used for the REST request. For example: http.
     scriptParameters: Optional[list[str]]
-        (Template steps only) For a step that runs a program,
-        this property contains the input parameters that can be set by the step owner.
+        (Template steps only) For a step that runs a program, this property contains the input parameters that can be set by the step owner.
     skills: Optional[str]
         (All step types) The type of skills that are required to perform the step.
     submitAs: Optional[Literal["JCL", "TSO-REXX", "shell-JCL", "TSO-REXX-JCL", "TSO-UNIX-REXX", "TSO-UNIX-shell"]]
@@ -939,19 +896,15 @@ class WorkflowDefinitionStepResponse:
     successPattern: Optional[str]
         (Template steps only) Regular expression that is returned for a successful program execution.
     template: Optional[str]
-        (Template steps only) Indicates the template that is used to run a program
-        or batch job (inline or external file).
+        (Template steps only) Indicates the template that is used to run a program or batch job (inline or external file).
     timeout: Optional[str]
-        (Template steps only) For a step that runs a REXX exec or UNIX shell script,
-        this property contains the maximum amount of time that the program can run before
-        it is ended by a timeout condition.
+        (Template steps only) For a step that runs a REXX exec or UNIX shell script, this property contains the maximum amount of time that the program can run before it is ended by a timeout condition.
     uriPath: Optional[str]
         (REST steps only) The URI path to use for the REST request.
     variable_specifications: Optional[list['WorkflowVariableSpecificationResponse']]
         (All step types) An array of WorkflowVariableSpecificationResponse objects
     weight: Optional[int]
-        (All step types) The relative difficulty of the step compared to other steps
-        within this workflow (an integer value 1 - 1000).
+        (All step types) The relative difficulty of the step compared to other steps within this workflow (an integer value 1 - 1000).
     """
 
     name: Optional[str] = None
@@ -1143,8 +1096,7 @@ class WorkflowDefinitionVariableResponse:
     promptAtCreate: Optional[bool]
     	Indicates whether the user is prompted to specify a value for the variable during the create workflow process.
     regularExpression: Optional[str]
-        Provides a standard regular expression that constrains the variable value, as an alternative 
-        to the available validation types. 
+        Provides a standard regular expression that constrains the variable value, as an alternative to the available validation types. 
     requiredAtCreate: Optional[bool]
         Indicates whether a value must be specified for the variable during the create workflow process.
     type: Optional[str]
@@ -1247,8 +1199,7 @@ class GetArchivedWorkflowPropertiesResponse:
     category: Optional[Literal["general", "configuration"]]
         Category of the workflow.
     productID: Optional[str]
-        Identifier of the product or component that is being configured through the workflow, 
-        such as the product identifier (PID) or function modification identifier (FMID).
+        Identifier of the product or component that is being configured through the workflow, such as the product identifier (PID) or function modification identifier (FMID).
     productName: Optional[str]
         Name of the product or component that is being configured through the workflow.
     productVersion: Optional[str]
@@ -1258,18 +1209,15 @@ class GetArchivedWorkflowPropertiesResponse:
     isCallable: Optional[bool]
         Indicates whether a workflow is eligible to be called by another workflow.
     containsParallelSteps: Optional[bool]
-    	For a workflow with automated steps, this property indicates whether the automated steps 
-        can be run in parallel (concurrently).
+    	For a workflow with automated steps, this property indicates whether the automated steps can be run in parallel (concurrently).
     scope: Optional[Literal["system", "sysplex", "none"]]
         Indicates the singleton scope for the workflow.
     statusName: Optional[Literal["in-progress", "complete", "automation-in-progress", "cancelled"]]
         Indicates the current workflow status.
     deleteCompletedJobs: Optional[bool]
-        For a workflow that submits a job, this property specifies whether the job is deleted 
-        from the JES spool after it completes successfully.
+        For a workflow that submits a job, this property specifies whether the job is deleted from the JES spool after it completes successfully.
     automationStatus: Optional[WorkflowAutomationStatusResponse]
-        A WorkflowAutomationStatusResponse object that contains details about
-        the most recent start automation request for the workflow.
+        A WorkflowAutomationStatusResponse object that contains details about the most recent start automation request for the workflow.
     jobsOutputDirectory: Optional[str]
         Name of the UNIX directory that is used for automatically saving job spool files from the workflow.
     autoDeleteOnCompletion: Optional[bool]
@@ -1279,16 +1227,13 @@ class GetArchivedWorkflowPropertiesResponse:
     archivedTime: Optional[str]
         Date and time on the system when the workflow was archived.
     accountInfo: Optional[str]
-        For a workflow that submits a job, this property specifies the account information to use 
-        in the JCL JOB statement.
+        For a workflow that submits a job, this property specifies the account information to use in the JCL JOB statement.
     jobStatement: Optional[str]
         For a workflow that submits a job, this property specifies the JOB statement JCL that is used in the job.
     steps: Optional[list['ArchivedWorkflowStepResponse']]
-        Array of one or more ArchivedWorkflowStepResponse objects 
-        that contain details about each of the steps in the workflow.
+        Array of one or more ArchivedWorkflowStepResponse objects that contain details about each of the steps in the workflow.
     variables: Optional[list[WorkflowVariableResponse]]
-        Array of one or more ArchivedWorkflowVariableResponse objects 
-        that contain details about each of the steps in the workflow.
+        Array of one or more ArchivedWorkflowVariableResponse objects that contain details about each of the steps in the workflow.
     """
 
     workflowName: Optional[str] = None
@@ -1353,11 +1298,9 @@ class ArchivedWorkflowStepResponse:
     assignees: Optional[list[str]]
         (Calling steps and template steps) One or more user IDs that are assigned to the step.
     autoEnable: Optional[bool]
-        (All step types) Indicates whether the step can be performed automatically when all prerequisite
-        steps are completed, and no user inputs are required.
+        (All step types) Indicates whether the step can be performed automatically when all prerequisite steps are completed, and no user inputs are required.
     calledInstanceURI: Optional[str]
-        (Calling steps only) For a step that calls another workflow for execution,
-        this property contains the URI path of the called workflow instance.
+        (Calling steps only) For a step that calls another workflow for execution, this property contains the URI path of the called workflow instance.
     calledWorkflowID: Optional[str]
         (Calling steps only) Specifies the workflow ID of a workflow definition file.
     calledWorkflowVersion: Optional[str]
@@ -1367,8 +1310,7 @@ class ArchivedWorkflowStepResponse:
     calledWorkflowDescription: Optional[str]
         (Calling steps only) Describes the workflow to be called, from the point of view of the calling workflow.
     calledWorkflowDefinitionFile: Optional[str]
-        (Calling steps only) Specifies the name of the workflow definition file that is used to create a new workflow
-        if an existing instance is not found when this step is performed.
+        (Calling steps only) Specifies the name of the workflow definition file that is used to create a new workflow if an existing instance is not found when this step is performed.
     description: Optional[str]
         (All step types) Step description.
     expectedStatusCode: Optional[str]
@@ -1390,18 +1332,15 @@ class ArchivedWorkflowStepResponse:
     isRestStep: Optional[bool]
         (All step types) Indicates whether this step is a REST API step.
     maxLrecl: Optional[int]
-        (Template steps only) For a step that submits a job, this value specifies the maximum record length,
-        in bytes, for the input data for the job.
+        (Template steps only) For a step that submits a job, this value specifies the maximum record length, in bytes, for the input data for the job.
     optional: Optional[bool]
         (All step types) Indicates whether the step is optional.
     output: Optional[str]
-        (Template steps only) Indicates the name of the output file that is produced
-        by the step (a data set or UNIX file).
+        (Template steps only) Indicates the name of the output file that is produced by the step (a data set or UNIX file).
     outputSub: Optional[bool]
         (Template steps only) Indicates whether the output file name contains variable substitution.
     outputVariablesPrefix: Optional[str]
-        (Template steps only) For a step that creates a variable, this property contains a prefix
-        that identifies a string as a variable.
+        (Template steps only) For a step that creates a variable, this property contains a prefix that identifies a string as a variable.
     owner: Optional[str]
         (Calling steps and template steps) User ID of the step owner.
     port: Optional[str]
@@ -1411,23 +1350,19 @@ class ArchivedWorkflowStepResponse:
     prereqStep: Optional[list[str]]
         (All step types) Lists the names of the steps that must be completed before this step can be performed.
     procName: Optional[str]
-        (Template steps only) For a step that runs a program under TSO/E, this property contains the name
-        of the logon procedure that is used to log into the TSO/E address space.
+        (Template steps only) For a step that runs a program under TSO/E, this property contains the name of the logon procedure that is used to log into the TSO/E address space.
     queryParameters: Optional[str]
-        (REST steps only) For a REST request that includes query parameters,
-        this property contains the query parameters.
+        (REST steps only) For a REST request that includes query parameters, this property contains the query parameters.
     queryParametersSub: Optional[bool]
         (REST steps only) Indicates whether the query parameters contain variable substitution.
     regionSize: Optional[str]
-        (Template steps only) For a step that runs a program under TSO/E,
-        this property contains the region size for the TSO/E address space.
+        (Template steps only) For a step that runs a program under TSO/E, this property contains the region size for the TSO/E address space.
     requestBody: Optional[str]
         (REST steps only) For a REST request that includes a request body, this property contains the request body.
     requestBodySub: Optional[bool]
         (REST steps only) Indicates whether the request body variable substitution.
     returnCode: Optional[str]
-        (Template steps only) For a step that submits a job to run,
-        this property indicates the return code that was returned when the job was submitted.
+        (Template steps only) For a step that submits a job to run, this property indicates the return code that was returned when the job was submitted.
     saveAsDataset: Optional[str]
         (Template steps only) Data set name (fully qualified, no quotation marks) that contains the saved JCL.
     saveAsDatasetSub: Optional[bool]
@@ -1441,8 +1376,7 @@ class ArchivedWorkflowStepResponse:
     schemeNameSub: Optional[bool]
         (REST steps only) Indicates whether the scheme name contains variable substitution.
     scriptParameters: Optional[list[str]]
-        (Template steps only) For a step that runs a program,
-        this property contains the input parameters that can be set by the step owner.
+        (Template steps only) For a step that runs a program, this property contains the input parameters that can be set by the step owner.
     skills: Optional[str]
         (Calling steps and template steps) The type of skills that are required to perform the step.
     state: Optional[Literal["Unassigned", "Assigned", "Not Ready", "Ready", "In Progress", "Submitted", "Complete", "Skipped", "Complete (Override)", "Failed", "Conflicts", "Condition Not Satisfied"]]
@@ -1456,14 +1390,11 @@ class ArchivedWorkflowStepResponse:
     successPattern: Optional[str]
         (Template steps only) Regular expression that is returned for a successful program execution.
     template: Optional[str]
-        (Template steps only) Indicates the template that is used to run a program
-        or batch job (inline or external file).
+        (Template steps only) Indicates the template that is used to run a program or batch job (inline or external file).
     templateSub: Optional[bool]
         (Template steps only) Indicates whether template contains variable substitution.
     timeout: Optional[str]
-        (Template steps only) For a step that runs a REXX exec or UNIX shell script,
-        this property contains the maximum amount of time that the program can run before
-        it is ended by a timeout condition.
+        (Template steps only) For a step that runs a REXX exec or UNIX shell script, this property contains the maximum amount of time that the program can run before it is ended by a timeout condition.
     title: Optional[str]
         (All step types) Step title.
     uriPath: Optional[str]
@@ -1475,8 +1406,7 @@ class ArchivedWorkflowStepResponse:
     variable_references: Optional[list[WorkflowVariableReferenceResponse]]
         (Template steps only) An array of WorkflowVariableReferenceResponse objects
     weight: Optional[int]
-        (Calling steps and template steps) The relative difficulty of the step compared to other steps
-        within this workflow (an integer value 1 - 1000).
+        (Calling steps and template steps) The relative difficulty of the step compared to other steps within this workflow (an integer value 1 - 1000).
     """
 
     name: Optional[str] = None

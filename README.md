@@ -149,7 +149,6 @@ Alternatively, you can use an existing Zowe CLI profile instead:
 
 Currently, the Zowe Python SDK supports the following interfaces:
 
-- z/OSMF Workflows
 - Console commands
 - z/OSMF Information retrieval
 - Submit job from a dataset
@@ -160,6 +159,7 @@ Currently, the Zowe Python SDK supports the following interfaces:
 - Start/End TSO address space
 - Ping TSO address space
 - Issue TSO command
+- z/OSMF Workflows
 
 **Important**: Notice that the below examples assume that you have already created
 an object for the sub-package of your preference just like in the quickstart example.

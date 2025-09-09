@@ -17,7 +17,7 @@ from zowe.zos_files_for_zowe_sdk import Files
 
 FIXTURES_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fixtures")
 FILES_FIXTURES_PATH = os.path.join(FIXTURES_PATH, "files.json")
-ENV_FIXTURE_PATH = os.path.join(FIXTURES_PATH, "env.yml")
+ENV_FIXTURE_PATH = os.path.join(FIXTURES_PATH, "env.example.yml")
 SAMPLE_WORKFLOW_FIXTURE_PATH = os.path.join(FIXTURES_PATH, "workflow.xml")
 SAMPLE_WORKFLOW_INPUT_FIXTURE_PATH = os.path.join(FIXTURES_PATH, "workflow_input")
 

@@ -2,18 +2,28 @@
 
 All notable changes to the Zowe Client Python SDK will be documented in this file.
 
+## Recent Changes
+
+### Enhancements
+
+- Added z/OSMF Workflows functionality. [#372](https://github.com/zowe/zowe-client-python-sdk/pull/372)
+
+### Bug Fixes
+
+- Added support for the `encoding` option to the `USSFiles.upload` function. [#372](https://github.com/zowe/zowe-client-python-sdk/pull/372)
+
 ## `1.0.0-dev23`
+
+### Enhancements
 
 - Fixed missing and incorrect type annotations. [#321](https://github.com/zowe/zowe-client-python-sdk/issues/321)
 - Removed the `suppress_config_file_warnings` parameter from individual functions. [#365](https://github.com/zowe/zowe-client-python-sdk/issues/365)
 - Introduced the class-wide property `suppress_config_file_warnings` to control configuration file warnings. [#365](https://github.com/zowe/zowe-client-python-sdk/issues/365)
-- Added z/OSMF Workflows functionality. [#372](https://github.com/zowe/zowe-client-python-sdk/pull/372)
 
 ### Bug Fixes
 
 - Updated the `pyo3` dependency of the Secrets SDK for technical currency. [#355](https://github.com/zowe/zowe-client-python-sdk/pull/355)
 - Updated the `urllib3` dependency of the Core SDK for technical currency. [#370](https://github.com/zowe/zowe-client-python-sdk/pull/370)
-- Added support for the `encoding` option to the `USSFiles.upload` function. [#372](https://github.com/zowe/zowe-client-python-sdk/pull/372)
 
 ## `1.0.0-dev22`
 
