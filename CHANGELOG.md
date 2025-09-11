@@ -2,7 +2,7 @@
 
 All notable changes to the Zowe Client Python SDK will be documented in this file.
 
-## Recent Changes
+## `1.0.0-dev23`
 
 - Fixed missing and incorrect type annotations. [#321](https://github.com/zowe/zowe-client-python-sdk/issues/321)
 - Removed the `suppress_config_file_warnings` parameter from individual functions. [#365](https://github.com/zowe/zowe-client-python-sdk/issues/365)
@@ -11,6 +11,7 @@ All notable changes to the Zowe Client Python SDK will be documented in this fil
 ### Bug Fixes
 
 - Updated the `pyo3` dependency of the Secrets SDK for technical currency. [#355](https://github.com/zowe/zowe-client-python-sdk/pull/355)
+- Updated the `urllib3` dependency of the Core SDK for technical currency. [#370](https://github.com/zowe/zowe-client-python-sdk/pull/370)
 
 ## `1.0.0-dev22`
 
