@@ -14,7 +14,7 @@ import base64
 import sys
 from typing import Optional, Any
 
-import commentjson
+import json5
 
 from .constants import constants
 from .exceptions import SecureProfileLoadFailed
@@ -63,7 +63,7 @@ class CredentialManager:
 
         secure_config: bytes
         secure_config = secret_value.encode()
-        secure_config_json = commentjson.loads(base64.b64decode(secure_config).decode())
+        secure_config_json = json5.loads(base64.b64decode(secure_config).decode())
         # update the secure props
         CredentialManager.secure_props = secure_config_json
 
@@ -76,7 +76,7 @@ class CredentialManager:
         credential = CredentialManager.secure_props
         # Check if credential is a non-empty string
         if credential:
-            encoded_credential = base64.b64encode(commentjson.dumps(credential).encode()).decode()
+            encoded_credential = base64.b64encode(json5.dumps(credential).encode()).decode()
             if sys.platform == "win32":
                 # Delete the existing credential
                 CredentialManager._delete_credential(

@@ -13,7 +13,7 @@ Copyright Contributors to the Zowe Project.
 import os
 from typing import Union, Any
 
-import commentjson
+import json5
 import requests
 from jsonschema import validate
 
@@ -38,13 +38,12 @@ def validate_config_json(path_config_json: Union[str, dict[str, Any]], path_sche
     # checks if the path_schema_json is a file
     elif os.path.isfile(path_schema_json) or path_schema_json.startswith("file://"):
         with open(path_schema_json.replace("file://", "")) as file:
-            schema_json = commentjson.load(file)
-
+            schema_json = json5.load(file)
     # checks if the path_schema_json is absolute
     elif not os.path.isabs(path_schema_json):
         path_schema_json = os.path.join(cwd, path_schema_json)
         with open(path_schema_json) as file:
-            schema_json = commentjson.load(file)
+            schema_json = json5.load(file)
 
     # if there is no path_schema_json it will return None
     else:
@@ -52,7 +51,7 @@ def validate_config_json(path_config_json: Union[str, dict[str, Any]], path_sche
 
     if isinstance(path_config_json, str):
         with open(path_config_json) as file:
-            config_json = commentjson.load(file)
+            config_json = json5.load(file)
     else:
         config_json = path_config_json
 

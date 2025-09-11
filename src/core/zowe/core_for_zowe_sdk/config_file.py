@@ -18,7 +18,7 @@ from copy import deepcopy
 from dataclasses import dataclass, field
 from typing import NamedTuple, Optional, Any, Union
 
-import commentjson
+import json5
 import requests
 
 from .credential_manager import CredentialManager
@@ -136,7 +136,7 @@ class ConfigFile:
             return
 
         with open(self.filepath, encoding="UTF-8", mode="r") as fileobj:
-            profile_jsonc = commentjson.load(fileobj)
+            profile_jsonc = json5.load(fileobj)
 
         self.profiles = profile_jsonc.get("profiles", {}) if profile_jsonc.get("profiles", {}) is not None else []
         self.schema_property = profile_jsonc.get("$schema", None)
@@ -629,7 +629,7 @@ class ConfigFile:
         CredentialManager.secure_props[self.filepath] = secure_props
         with open(self.filepath, "w") as file:
             self.jsonc["profiles"] = profiles_temp
-            commentjson.dump(self.jsonc, file, indent=4)
+            json5.dump(self.jsonc, file, indent=4)
         if update_secure_props:
             CredentialManager.save_secure_props()
 
