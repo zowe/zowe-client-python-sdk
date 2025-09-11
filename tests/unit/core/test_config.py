@@ -1,7 +1,7 @@
 import importlib.util
 import os
 
-import commentjson
+import json5
 from jsonschema import ValidationError, validate
 from pyfakefs.fake_filesystem_unittest import TestCase
 from zowe.core_for_zowe_sdk.validators import validate_config_json
@@ -36,8 +36,8 @@ class TestValidateConfigJsonClass(TestCase):
 
     def test_validate_config_json_valid(self):
         """Test validate_config_json with valid config.json matching schema.json"""
-        config_json = commentjson.load(open(self.original_file_path))
-        schema_json = commentjson.load(open(self.original_schema_file_path))
+        config_json = json5.load(open(self.original_file_path))
+        schema_json = json5.load(open(self.original_schema_file_path))
 
         expected = validate(config_json, schema_json)
         result = validate_config_json(self.original_file_path, self.original_schema_file_path, cwd=FIXTURES_PATH)
@@ -51,17 +51,17 @@ class TestValidateConfigJsonClass(TestCase):
         path_to_invalid_schema = os.path.join(custom_dir, "invalid.zowe.schema.json")
 
         with open(self.original_file_path, "r") as f:
-            original_config = commentjson.load(f)
+            original_config = json5.load(f)
         original_config["$schema"] = "invalid.zowe.schema.json"
         original_config["profiles"]["zosmf"]["properties"]["port"] = "10443"
         with open(path_to_invalid_config, "w") as f:
-            commentjson.dump(original_config, f)
+            json5.dump(original_config, f)
         with open(self.original_schema_file_path, "r") as f:
-            original_schema = commentjson.load(f)
+            original_schema = json5.load(f)
         with open(path_to_invalid_schema, "w") as f:
-            commentjson.dump(original_schema, f)
-        invalid_config_json = commentjson.load(open(path_to_invalid_config))
-        invalid_schema_json = commentjson.load(open(path_to_invalid_schema))
+            json5.dump(original_schema, f)
+        invalid_config_json = json5.load(open(path_to_invalid_config))
+        invalid_schema_json = json5.load(open(path_to_invalid_schema))
 
         with self.assertRaises(ValidationError) as expected_info:
             validate(invalid_config_json, invalid_schema_json)

@@ -8,7 +8,7 @@ import os
 import shutil
 from unittest import mock
 
-import commentjson
+import json5
 from jsonschema import SchemaError, ValidationError
 from pyfakefs.fake_filesystem_unittest import TestCase
 from zowe.core_for_zowe_sdk import (
@@ -348,7 +348,7 @@ class TestZosmfProfileManager(TestCase):
             cwd_up_file_path: {"profiles.base.properties.user": "user", "profiles.base.properties.password": "password"}
         }
         self.setUpCreds(cwd_up_file_path, credential)
-        encoded_credential = base64.b64encode(commentjson.dumps(credential).encode()).decode()
+        encoded_credential = base64.b64encode(json5.dumps(credential).encode()).decode()
         retrieve_cred_func.return_value = encoded_credential
 
         # call the load_secure_props method
@@ -524,15 +524,15 @@ class TestZosmfProfileManager(TestCase):
         with self.assertRaises(ValidationError):
             custom_file_path = os.path.join(self.custom_dir, "zowe.config.json")
             with open(self.original_file_path, "r") as f:
-                original_config = commentjson.load(f)
+                original_config = json5.load(f)
             original_config["$schema"] = "invalid.zowe.schema.json"
             original_config["profiles"]["zosmf"]["properties"]["port"] = "10443"
             with open(os.path.join(self.custom_dir, "invalid.zowe.config.json"), "w") as f:
-                commentjson.dump(original_config, f)
+                json5.dump(original_config, f)
             with open(self.original_schema_file_path, "r") as f:
-                original_schema = commentjson.load(f)
+                original_schema = json5.load(f)
             with open(os.path.join(self.custom_dir, "invalid.zowe.schema.json"), "w") as f:
-                commentjson.dump(original_schema, f)
+                json5.dump(original_schema, f)
             self.setUpCreds(
                 custom_file_path,
                 {
@@ -555,15 +555,15 @@ class TestZosmfProfileManager(TestCase):
         with self.assertRaises(SchemaError):
             custom_file_path = os.path.join(self.custom_dir, "zowe.config.json")
             with open(self.original_file_path, "r") as f:
-                original_config = commentjson.load(f)
+                original_config = json5.load(f)
             original_config["$schema"] = "invalidUri.zowe.schema.json"
             with open(os.path.join(self.custom_dir, "invalidUri.zowe.config.json"), "w") as f:
-                commentjson.dump(original_config, f)
+                json5.dump(original_config, f)
             with open(self.original_schema_file_path, "r") as f:
-                original_schema = commentjson.load(f)
+                original_schema = json5.load(f)
             original_schema["type"] = "invalid"
             with open(os.path.join(self.custom_dir, "invalidUri.zowe.schema.json"), "w") as f:
-                commentjson.dump(original_schema, f)
+                json5.dump(original_schema, f)
 
             self.setUpCreds(
                 custom_file_path,
