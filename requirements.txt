@@ -16,6 +16,7 @@ pyfakefs
 pylint
 pytest
 wheel
+python-dotenv
 
 # Local deps
 -e ./src/core[secrets]

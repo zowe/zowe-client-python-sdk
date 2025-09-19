@@ -5,7 +5,7 @@ import os
 import time
 import unittest
 
-import yaml
+from dotenv import load_dotenv
 from zowe.core_for_zowe_sdk import ProfileManager
 from zowe.workflows_for_zowe_sdk import Workflows
 from zowe.workflows_for_zowe_sdk.response import (
@@ -17,7 +17,6 @@ from zowe.zos_files_for_zowe_sdk import Files
 
 FIXTURES_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fixtures")
 FILES_FIXTURES_PATH = os.path.join(FIXTURES_PATH, "files.json")
-ENV_FIXTURE_PATH = os.path.join(FIXTURES_PATH, "env.example.yml")
 SAMPLE_WORKFLOW_FIXTURE_PATH = os.path.join(FIXTURES_PATH, "workflow.xml")
 SAMPLE_WORKFLOW_INPUT_FIXTURE_PATH = os.path.join(FIXTURES_PATH, "workflow_input")
 
@@ -36,11 +35,10 @@ class TestZosmfWorkflowsIntegration(unittest.TestCase):
         self.addCleanup(lambda: self.files.__exit__(None, None, None))
         with open(FILES_FIXTURES_PATH, "r") as fixtures_json:
             self.files_fixtures = json.load(fixtures_json)
-        with open(ENV_FIXTURE_PATH, "r") as env_yml:
-            env_parsed = yaml.safe_load(env_yml)
-            self.ZOS_WORKFLOWS_SYSTEM = env_parsed["ZOS_WORKFLOWS_SYSTEM"]
-            self.ZOS_WORKFLOWS_OWNER = env_parsed["ZOS_WORKFLOWS_OWNER"]
-            self.ZOS_WORKFLOWS_SAF_ID = env_parsed["ZOS_WORKFLOWS_SAF_ID"]
+        load_dotenv()
+        self.ZOS_WORKFLOWS_SYSTEM = os.getenv["ZOS_WORKFLOWS_SYSTEM"]
+        self.ZOS_WORKFLOWS_OWNER = os.getenv["ZOS_WORKFLOWS_OWNER"]
+        self.ZOS_WORKFLOWS_SAF_ID = os.getenv["ZOS_WORKFLOWS_SAF_ID"]
         self.test_uss_workflow = self.files_fixtures["TEST_USS_WORKFLOW"]
         self.test_uss_workflow_input = self.files_fixtures["TEST_USS_WORKFLOW_INPUT"]
 
