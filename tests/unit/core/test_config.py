@@ -70,3 +70,72 @@ class TestValidateConfigJsonClass(TestCase):
             validate_config_json(path_to_invalid_config, path_to_invalid_schema, cwd=FIXTURES_PATH)
 
         self.assertEqual(str(actual_info.exception), str(expected_info.exception))
+
+    def test_validate_config_json_with_block_comments(self):
+        """Config with /* block comments */ should load and validate."""
+        custom_dir = os.path.dirname(FIXTURES_PATH)
+        commented_config_path = os.path.join(custom_dir, "commented.zowe.config.json")
+        commented_schema_path = os.path.join(custom_dir, "commented.zowe.schema.json")
+
+        schema_text = """
+        {
+          /* Top-level block comment in schema */
+          "$schema": "http://json-schema.org/draft-07/schema#",
+          "type": "object",
+          "properties": {
+            "$schema": { "type": "string" },
+            "profiles": {
+              "type": "object",
+              "properties": {
+                "zosmf": {
+                  "type": "object",
+                  "properties": {
+                    "properties": {
+                      "type": "object",
+                      "properties": {
+                        "host": { "type": "string" },
+                        "port": { "type": "integer" }
+                      },
+                      "required": ["host", "port"]
+                    }
+                  },
+                  "required": ["properties"]
+                }
+              },
+              "required": ["zosmf"]
+            }
+          },
+          "required": ["$schema", "profiles"]
+        }
+        """
+
+        config_text = """
+        {
+          /* Block comment before schema reference */
+          "$schema": "commented.zowe.schema.json",
+          "profiles": {
+            /* Block comment inside profiles */
+            "zosmf": {
+              "properties": {
+                "host": "localhost",
+                /* Inline block comment between fields */ 
+                "port": 10443, /* trailing comma tolerated by JSON5 */
+              },
+            },
+          }
+        }
+        """
+
+        # Write files to the fake FS
+        with open(commented_schema_path, "w", encoding="utf-8") as f:
+            f.write(schema_text)
+        with open(commented_config_path, "w", encoding="utf-8") as f:
+            f.write(config_text)
+
+        loaded_config = json5.load(open(commented_config_path, encoding="utf-8"))
+        loaded_schema = json5.load(open(commented_schema_path, encoding="utf-8"))
+
+        expected = validate(loaded_config, loaded_schema)
+        result = validate_config_json(commented_config_path, commented_schema_path, cwd=os.path.dirname(commented_config_path))
+
+        self.assertEqual(result, expected)
