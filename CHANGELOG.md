@@ -7,7 +7,7 @@ All notable changes to the Zowe Client Python SDK will be documented in this fil
 ### Enhancements
 
 - Added z/OSMF Workflows functionality. [#372](https://github.com/zowe/zowe-client-python-sdk/pull/372)
-- Replaced `commentjson` with `json5` to support block comments.  [#374](https://github.com/zowe/zowe-client-python-sdk/pull/374)
+- Replaced the `commentjson` package with the `json5` package to support block comments.  [#374](https://github.com/zowe/zowe-client-python-sdk/pull/374)
 
 ### Bug Fixes
 
