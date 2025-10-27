@@ -16,6 +16,7 @@ pyfakefs
 pylint==3
 pytest
 wheel
+python-dotenv
 
 # Local deps
 -e ./src/core[secrets]
@@ -25,3 +26,4 @@ wheel
 -e ./src/zos_jobs
 -e ./src/zos_tso
 -e ./src/zosmf
+-e ./src/workflows

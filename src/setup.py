@@ -53,6 +53,7 @@ if __name__ == "__main__":
             resolve_sdk_dep("zos_tso", "==" + __version__),
             resolve_sdk_dep("zos_jobs", "==" + __version__),
             resolve_sdk_dep("zosmf", "==" + __version__),
+            resolve_sdk_dep("workflows", "==" + __version__),
         ],
         py_modules=[],
     )

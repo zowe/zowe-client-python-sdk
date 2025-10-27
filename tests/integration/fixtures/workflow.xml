@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<workflow>
+    <autoTakeOwnership>false</autoTakeOwnership>
+    <workflowInfo>
+        <workflowID scope="none" isCallable="system">zowe-test-1</workflowID>
+        <workflowDefaultName>Zowe Test Workflow</workflowDefaultName>
+        <workflowDescription>Zowe Integration Test Workflow</workflowDescription>
+        <workflowVersion>1.0</workflowVersion>
+        <vendor>Zowe</vendor>
+        <General/>
+    </workflowInfo>
+    <variable name="ZOWE_TEST_VAR_1" scope="instance" visibility="private">
+        <label>Zowe Test Var 1</label>
+        <abstract>Some test DSN var</abstract>
+        <description>Nothing special, just a DSN var</description>
+        <category>General</category>
+        <string valueMustBeChoice="false" multiLine="false">
+            <regularExpression>(?=^.{0,15}$)(^[A-Z#$@][A-Z0-9#$@-]{0,7}([.][A-Z#$@][A-Z0-9#$@-]{0,7}){0,21}$)</regularExpression>
+            <errorMessage>The value must contain a valid uppercase data set name. Maximum length allowed is 15 characters.</errorMessage>
+            <default>ZOWE.TEST</default>
+        </string>
+    </variable>
+    <variable name="ZOWE_TEST_VAR_2" scope="instance" visibility="public">
+        <label>Zowe Test Var 2</label>
+        <abstract>Some test USS var</abstract>
+        <description>Nothing special, just a USS var</description>
+        <category>General</category>
+        <string valueMustBeChoice="false" multiLine="false">
+            <regularExpression>^[\/]{1}.{0,1022}[^\/]$</regularExpression>
+            <default>/usr/lpp/zosmf</default>
+        </string>
+    </variable>
+    <variable name="ZOWE_TEST_VAR_3" scope="instance" visibility="public">
+        <label>Zowe Test Var 3</label>
+        <abstract>Some test merged var</abstract>
+        <description>Nothing special, just a merged var</description>
+        <category>General</category>
+        <string valueMustBeChoice="false" multiLine="false">
+            <default>NONE</default>
+        </string>
+    </variable>
+    <step name="variables" optional="false">
+        <title>Zowe test step 1</title>
+        <description>
+            &lt;center&gt;THIS IS A TEST&lt;br&gt;
+        </description>
+        <instructions substitution="true">
+            ${instance-ZOWE_TEST_VAR_1}
+            ${instance-ZOWE_TEST_VAR_2}
+        </instructions>
+        <weight>1</weight>
+        <autoEnable>true</autoEnable>
+        <canMarkAsFailed>false</canMarkAsFailed>
+        <setVariable name="ZOWE_TEST_VAR_3" scope="instance" substitution="true">${instance-ZOWE_TEST_VAR_1}+${instance-ZOWE_TEST_VAR_2}</setVariable>
+    </step>
+    <step name="fake-check" optional="true">
+        <title>Zowe test step 2</title>
+        <description>Fake JCL job run try</description>
+        <prereqStep name="variables"/>
+        <instructions substitution="false">Nothing special, just a fake JCL job run that will fail</instructions>
+        <weight>1</weight>
+        <autoEnable>true</autoEnable>
+        <canMarkAsFailed>false</canMarkAsFailed>
+        <template>
+            <inlineTemplate substitution="true">//ZOWETEST EXEC PGM=IEFBR14
+//ABRAKADABRA</inlineTemplate>
+            <submitAs maxRc="0">JCL</submitAs>
+            <maxLrecl>80</maxLrecl>
+        </template>
+    </step>
+</workflow>

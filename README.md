@@ -159,6 +159,7 @@ Currently, the Zowe Python SDK supports the following interfaces:
 - Start/End TSO address space
 - Ping TSO address space
 - Issue TSO command
+- z/OSMF Workflows
 
 **Important**: Notice that the below examples assume that you have already created
 an object for the sub-package of your preference just like in the quickstart example.
