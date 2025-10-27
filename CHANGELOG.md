@@ -2,20 +2,24 @@
 
 All notable changes to the Zowe Client Python SDK will be documented in this file.
 
+## Recent Changes
+
+### Enhancements
+
+- Replaced `commentjson` with `json5` to support block comments.  [#374](https://github.com/zowe/zowe-client-python-sdk/pull/374)
+
 ## `1.0.0-dev23`
 
-- Fixed missing and incorrect type annotations. [#321](https://github.com/zowe/zowe-client-python-sdk/issues/321)
+### Enhancements
+
 - Removed the `suppress_config_file_warnings` parameter from individual functions. [#365](https://github.com/zowe/zowe-client-python-sdk/issues/365)
 - Introduced the class-wide property `suppress_config_file_warnings` to control configuration file warnings. [#365](https://github.com/zowe/zowe-client-python-sdk/issues/365)
 
 ### Bug Fixes
 
+- Fixed missing and incorrect type annotations. [#321](https://github.com/zowe/zowe-client-python-sdk/issues/321)
 - Updated the `pyo3` dependency of the Secrets SDK for technical currency. [#355](https://github.com/zowe/zowe-client-python-sdk/pull/355)
 - Updated the `urllib3` dependency of the Core SDK for technical currency. [#370](https://github.com/zowe/zowe-client-python-sdk/pull/370)
-
-### Enhancements
-
-- Replaced commentjson with json5 to support block comments.  [#374](https://github.com/zowe/zowe-client-python-sdk/pull/374)
 
 ## `1.0.0-dev22`
 
