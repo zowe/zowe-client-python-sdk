@@ -36,9 +36,9 @@ class TestZosmfWorkflowsIntegration(unittest.TestCase):
         with open(FILES_FIXTURES_PATH, "r") as fixtures_json:
             self.files_fixtures = json.load(fixtures_json)
         load_dotenv()
-        self.ZOS_WORKFLOWS_SYSTEM = os.getenv["ZOS_WORKFLOWS_SYSTEM"]
-        self.ZOS_WORKFLOWS_OWNER = os.getenv["ZOS_WORKFLOWS_OWNER"]
-        self.ZOS_WORKFLOWS_SAF_ID = os.getenv["ZOS_WORKFLOWS_SAF_ID"]
+        self.ZOS_WORKFLOWS_SYSTEM = os.getenv("ZOS_WORKFLOWS_SYSTEM")
+        self.ZOS_WORKFLOWS_OWNER = os.getenv("ZOS_WORKFLOWS_OWNER")
+        self.ZOS_WORKFLOWS_SAF_ID = os.getenv("ZOS_WORKFLOWS_SAF_ID")
         self.test_uss_workflow = self.files_fixtures["TEST_USS_WORKFLOW"]
         self.test_uss_workflow_input = self.files_fixtures["TEST_USS_WORKFLOW_INPUT"]
 
