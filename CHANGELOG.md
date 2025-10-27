@@ -6,7 +6,12 @@ All notable changes to the Zowe Client Python SDK will be documented in this fil
 
 ### Enhancements
 
+- Added z/OSMF Workflows functionality. [#372](https://github.com/zowe/zowe-client-python-sdk/pull/372)
 - Replaced `commentjson` with `json5` to support block comments.  [#374](https://github.com/zowe/zowe-client-python-sdk/pull/374)
+
+### Bug Fixes
+
+- Added support for the `encoding` option to the `USSFiles.upload` function. [#372](https://github.com/zowe/zowe-client-python-sdk/pull/372)
 
 ## `1.0.0-dev23`
 
