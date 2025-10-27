@@ -48,7 +48,7 @@ For more information on the available sub-packages click [HERE](https://zowe-cli
 The Zowe core package has dependencies on the packages listed below:
 
 ```
-commentjson
+json5
 deepmerge
 jsonschema
 pyyaml

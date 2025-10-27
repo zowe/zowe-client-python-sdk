@@ -1,4 +1,4 @@
-commentjson==0.9.0
+json5==0.12.1
 deepmerge==1.1.0
 jsonschema==4.17.3
 PyYAML==6.0.1
