@@ -13,7 +13,7 @@ maturin
 pydoclint
 pydocstyle
 pyfakefs
-pylint
+pylint==3
 pytest
 wheel
 python-dotenv
