@@ -19,28 +19,20 @@ from _version import __version__
 from setup import resolve_sdk_dep
 
 setup(
-    name="zowe_core_for_zowe_sdk",
+    name="zowe_workflows_for_zowe_sdk",
     version=__version__,
-    description="Zowe Python SDK - Core package",
+    description="Zowe Python SDK - z/OSMF Workflows package",
     long_description=open("README.md", "r").read(),
     long_description_content_type="text/markdown",
     url="https://github.com/zowe/zowe-client-python-sdk",
-    author="Guilherme Cartier",
-    author_email="gcartier94@gmail.com",
+    author="Zowe",
+    author_email="zowe.robot@gmail.com",
     license="EPL-2.0",
     classifiers=[
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.9",
         "License :: OSI Approved :: Eclipse Public License 2.0 (EPL-2.0)",
     ],
-    install_requires=[
-        "json5~=0.12.1",
-        "deepmerge~=1.1.0",
-        "jsonschema~=4.17.3",
-        "pyyaml~=6.0.1",
-        "requests~=2.32.0",
-        "urllib3~=2.5.0",
-    ],
-    extras_require={"secrets": [resolve_sdk_dep("secrets", "~=1.0.0.dev")]},
+    install_requires=[resolve_sdk_dep("core", "~=" + __version__)],
     packages=find_namespace_packages(include=["zowe.*"]),
 )

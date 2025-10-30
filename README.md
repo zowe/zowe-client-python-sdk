@@ -48,7 +48,7 @@ For more information on the available sub-packages click [HERE](https://zowe-cli
 The Zowe core package has dependencies on the packages listed below:
 
 ```
-commentjson
+json5
 deepmerge
 jsonschema
 pyyaml
@@ -159,6 +159,7 @@ Currently, the Zowe Python SDK supports the following interfaces:
 - Start/End TSO address space
 - Ping TSO address space
 - Issue TSO command
+- z/OSMF Workflows
 
 **Important**: Notice that the below examples assume that you have already created
 an object for the sub-package of your preference just like in the quickstart example.

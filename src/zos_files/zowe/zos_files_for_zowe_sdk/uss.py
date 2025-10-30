@@ -11,10 +11,9 @@ Copyright Contributors to the Zowe Project.
 """
 
 import os
-from typing import Optional, Any, Union
+from typing import Any, Optional, Union
+
 import requests
-
-
 from zowe.core_for_zowe_sdk import SdkApi
 from zowe.core_for_zowe_sdk.exceptions import FileNotFound
 from zowe.zos_files_for_zowe_sdk.constants import zos_file_constants
@@ -197,7 +196,7 @@ class USSFiles(SdkApi):  # type: ignore
         filepath_name: str
             Path of the file where it will be created
         encoding: str
-            Specifies encoding schema
+            Specifies encoding schema of the uploaded file
 
         Raises
         ------
@@ -206,7 +205,7 @@ class USSFiles(SdkApi):  # type: ignore
         """
         if os.path.isfile(input_file):
             with open(input_file, "r", encoding="utf-8") as in_file:
-                self.write(filepath_name, in_file.read())
+                self.write(filepath_name, in_file.read(), encoding=encoding)
         else:
             self.logger.error(f"File {input_file} not found.")
             raise FileNotFound(input_file)

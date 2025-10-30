@@ -1,4 +1,4 @@
-commentjson==0.9.0
+json5==0.12.1
 deepmerge==1.1.0
 jsonschema==4.17.3
 PyYAML==6.0.1
@@ -16,6 +16,7 @@ pyfakefs
 pylint==3
 pytest
 wheel
+python-dotenv
 
 # Local deps
 -e ./src/core[secrets]
@@ -25,3 +26,4 @@ wheel
 -e ./src/zos_jobs
 -e ./src/zos_tso
 -e ./src/zosmf
+-e ./src/workflows
