@@ -61,3 +61,74 @@ class Zosmf(SdkApi):  # type: ignore
         custom_args["url"] = "{}/systems".format(self._request_endpoint)
         response_json = self.request_handler.perform_request("GET", custom_args, expected_code=[200])
         return ZosmfResponse(response_json)
+
+        @mock.patch("requests.Session.send")
+    def test_response_timeout_header_added_in_range(self, mock_send_request):
+        """responseTimeout in profile should set X-IBM-Response-Timeout header (5-600)."""
+        # Arrange
+        profile = dict(self.test_profile)
+        profile["responseTimeout"] = 120  # valid range
+        mock_response = mock.Mock()
+        mock_response.headers = {"Content-Type": "application/json"}
+        mock_response.status_code = 200
+        mock_response.json.return_value = {}
+        mock_send_request.return_value = mock_response
+
+        # Act: call any API that triggers a request; list_unix_file_systems is convenient
+        Files(profile).list_unix_file_systems()
+
+        # Assert
+        self.assertTrue(mock_send_request.called)
+        prepared_request = mock_send_request.call_args[0][0]  # PreparedRequest
+        self.assertEqual(prepared_request.headers.get("X-IBM-Response-Timeout"), "120")
+
+    @mock.patch("requests.Session.send")
+    def test_response_timeout_header_clamped_low(self, mock_send_request):
+        """responseTimeout below 5 should be clamped to 5."""
+        profile = dict(self.test_profile)
+        profile["responseTimeout"] = 1  # below lower bound
+        mock_response = mock.Mock()
+        mock_response.headers = {"Content-Type": "application/json"}
+        mock_response.status_code = 200
+        mock_response.json.return_value = {}
+        mock_send_request.return_value = mock_response
+
+        Files(profile).list_unix_file_systems()
+
+        prepared_request = mock_send_request.call_args[0][0]
+        self.assertEqual(prepared_request.headers.get("X-IBM-Response-Timeout"), "5")
+
+    @mock.patch("requests.Session.send")
+    def test_response_timeout_header_clamped_high(self, mock_send_request):
+        """responseTimeout above 600 should be clamped to 600."""
+        profile = dict(self.test_profile)
+        profile["responseTimeout"] = 1000  # above upper bound
+        mock_response = mock.Mock()
+        mock_response.headers = {"Content-Type": "application/json"}
+        mock_response.status_code = 200
+        mock_response.json.return_value = {}
+        mock_send_request.return_value = mock_response
+
+        Files(profile).list_unix_file_systems()
+
+        prepared_request = mock_send_request.call_args[0][0]
+        self.assertEqual(prepared_request.headers.get("X-IBM-Response-Timeout"), "600")
+
+    @mock.patch("requests.Session.send")
+    def test_response_timeout_header_ignored_when_async_threshold_present(self, mock_send_request):
+        """If async threshold is provided, omit X-IBM-Response-Timeout since z/OSMF ignores it."""
+        profile = dict(self.test_profile)
+        profile["responseTimeout"] = 120
+        # Either key should trigger the ignore path; cover both via the canonical header name
+        profile["X-IBM-Async-Threshold"] = 10
+        mock_response = mock.Mock()
+        mock_response.headers = {"Content-Type": "application/json"}
+        mock_response.status_code = 200
+        mock_response.json.return_value = {}
+        mock_send_request.return_value = mock_response
+
+        Files(profile).list_unix_file_systems()
+
+        prepared_request = mock_send_request.call_args[0][0]
+        self.assertIsNone(prepared_request.headers.get("X-IBM-Response-Timeout"))
+
