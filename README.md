@@ -48,8 +48,8 @@ For more information on the available sub-packages click [HERE](https://zowe-cli
 The Zowe core package has dependencies on the packages listed below:
 
 ```
-json5
 deepmerge
+json5
 jsonschema
 pyyaml
 requests>=2.22

@@ -1,6 +1,6 @@
-json5==0.12.1
 deepmerge==1.1.0
-jsonschema==4.17.3
+json5==0.12.1
+jsonschema==4.25.1
 PyYAML==6.0.1
 requests==2.32.4
 

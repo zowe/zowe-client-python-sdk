@@ -34,9 +34,9 @@ setup(
         "License :: OSI Approved :: Eclipse Public License 2.0 (EPL-2.0)",
     ],
     install_requires=[
-        "json5~=0.12.1",
         "deepmerge~=1.1.0",
-        "jsonschema~=4.17.3",
+        "json5~=0.12.1",
+        "jsonschema~=4.25.1",
         "pyyaml~=6.0.1",
         "requests~=2.32.0",
         "urllib3~=2.5.0",
