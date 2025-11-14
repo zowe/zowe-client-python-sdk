@@ -66,7 +66,7 @@ pip install -U --pre zowe.core-for-zowe-sdk[secrets]
 
 Ensure the following prerequisites are installed and on your PATH:
 
-- Python >= 3.9 and `pip`
+- Python >= 3.10 and `pip`
 - Cargo >= 1.72 (to build Rust bindings for Secrets SDK)
 - Visual Studio Build Tools >= 2015 (Windows only)
 
