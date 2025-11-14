@@ -9,6 +9,9 @@ def doc_open():
     path = "docs/build/html/index.html"
     print(f"Opening {path} in web browser...")
     abs_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), path)
+    if not os.path.exists(abs_path):
+        print(f"Error: {path} does not exist. Please run 'npm run doc:build' first.")
+        sys.exit(1)
     webbrowser.open("file://" + abs_path.replace("\\", "/"))
 
 
@@ -21,8 +24,13 @@ def env_active():
 def env_delete():
     """Deletes the 'env' directory."""
     print("Deleting virtual environment 'env'...")
-    shutil.rmtree("env", ignore_errors=True)
-    print("'env' deleted.")
+    try:
+        shutil.rmtree("env")
+        print("'env' deleted.")
+    except FileNotFoundError:
+        print("Virtual environment 'env' does not exist.")
+    except Exception as e:
+        print(f"Failed to delete 'env': {e}")
 
 
 if __name__ == "__main__":
