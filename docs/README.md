@@ -15,9 +15,7 @@ This document is intended to help you build the documentation that will eventual
 
 These steps should help you to build the documentation
 
-0. Clone the repository, open a terminal, and `cd` into the repository directory
-1. Install project dependencies:
-    - `npm install`
+1. Clone the repository, open a terminal, and `cd` into the repository directory
 2. Create a virtual environment:
     - `npm run env:create`
 3. Activate the virtual environment:
