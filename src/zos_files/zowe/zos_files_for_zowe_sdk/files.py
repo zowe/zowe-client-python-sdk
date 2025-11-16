@@ -26,8 +26,8 @@ from .uss import USSFiles
 
 _ZOWE_FILES_DEFAULT_ENCODING = zos_file_constants["ZoweFilesDefaultEncoding"]
 
-_MIN_TIMEOUT = 5
-_MAX_TIMEOUT = 600
+_MIN_TIMEOUT = zos_file_constants["min_timeout"]
+_MAX_TIMEOUT = zos_file_constants["max_timeout"]
 
 class Files(SdkApi):  # type: ignore
     """
