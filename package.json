@@ -21,12 +21,10 @@
     "doc:dev": "npm run doc:clean && npm run doc:build && npm run doc:open",
     "doc:build": "cd docs && make html",
     "doc:clean": "cd docs && make clean",
-    "doc:open": "opener docs/build/html/index.html",
+    "doc:open": "python scripts/tasks.py doc-open",
     "env:create": "python -m venv env",
-    "env:active": "run-script-os",
-    "env:active:win32": "echo 'To activate, run the following command:\n\nenv\\Scripts\\activate\n\nTo deactivate, simply run:\n\ndeactivate\n'",
-    "env:active:default": "echo 'To activate, run the following command:\n\nsource env/bin/activate\n\nTo deactivate, simply run:\n\ndeactivate\n'",
-    "env:delete": "rimraf env"
+    "env:active": "python scripts/tasks.py env-active",
+    "env:delete": "python scripts/tasks.py env-delete"
   },
   "repository": {
     "type": "git",
@@ -42,10 +40,5 @@
   "bugs": {
     "url": "https://github.com/zowe/zowe-client-python-sdk/issues"
   },
-  "homepage": "https://github.com/zowe/zowe-client-python-sdk#readme",
-  "devDependencies": {
-    "opener": "^1.5.2",
-    "rimraf": "^6.0.1",
-    "run-script-os": "^1.1.6"
-  }
+  "homepage": "https://github.com/zowe/zowe-client-python-sdk#readme"
 }
