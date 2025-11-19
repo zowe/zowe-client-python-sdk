@@ -67,7 +67,8 @@ class Files(SdkApi):  # type: ignore
                     clamped = max(_MIN_TIMEOUT, min(_MAX_TIMEOUT, resp_to_int))
                     if clamped != resp_to_int and hasattr(self, "logger"):
                         self.logger.warning(
-                            f"responseTimeout {resp_to_int} out of range; clamped to {clamped} (allowed {_MIN_TIMEOUT}-{_MAX_TIMEOUT})"
+                            f"responseTimeout {resp_to_int} out of range; clamped to {clamped} "
+                            f"(allowed {_MIN_TIMEOUT}-{_MAX_TIMEOUT})"
                         )
                     self._default_headers["X-IBM-Response-Timeout"] = str(clamped)
                 except (TypeError, ValueError):
