@@ -258,7 +258,7 @@ class USSFiles(SdkApi):  # type: ignore
 
         Returns
         -------
-        Optional[str]
+        USSFileTag
             Tag info of a given file.
         """
         custom_args = self._create_custom_request_arguments()
