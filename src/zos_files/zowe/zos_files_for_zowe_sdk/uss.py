@@ -11,14 +11,14 @@ Copyright Contributors to the Zowe Project.
 """
 
 import os
-from typing import Any, Optional, Union
+from typing import Any, Optional
 
 import requests
 from zowe.core_for_zowe_sdk import SdkApi
 from zowe.core_for_zowe_sdk.exceptions import FileNotFound
 from zowe.zos_files_for_zowe_sdk.constants import zos_file_constants
 
-from .response import USSListResponse
+from .response import USSFileTag, USSListResponse
 
 _ZOWE_FILES_DEFAULT_ENCODING = zos_file_constants["ZoweFilesDefaultEncoding"]
 
@@ -118,7 +118,7 @@ class USSFiles(SdkApi):  # type: ignore
         custom_args["headers"]["Content-Type"] = "text/plain; charset={}".format(encoding)
         self.request_handler.perform_request("PUT", custom_args, expected_code=[204, 201])
 
-    def get_content(self, filepath_name: str) -> Optional[str]:
+    def get_content(self, filepath_name: str, file_encoding: str = "IBM-1047", receive_encoding: str = "ISO8859-1") -> Optional[str]:
         """
         Retrieve the content of a filename. The complete path must be specified.
 
@@ -126,6 +126,10 @@ class USSFiles(SdkApi):  # type: ignore
         ----------
         filepath_name: str
             Path of the file
+        file_encoding: str
+            Encoding file content originally in (to convert from; by default, it is always being converted from "IBM-1047")
+        receive_encoding: str
+            Encoding to convert file content to (to convert to; by default, it is always being converted to "ISO-8859-1")
 
         Returns
         -------
@@ -134,10 +138,18 @@ class USSFiles(SdkApi):  # type: ignore
         """
         custom_args = self._create_custom_request_arguments()
         custom_args["url"] = "{}fs{}".format(self._request_endpoint, filepath_name)
+        custom_args["headers"]["X-IBM-Data-Type"] = "text;fileEncoding={}".format(file_encoding)
+        custom_args["headers"]["Content-Type"] = "text/plain; charset={}".format(receive_encoding)
         response_json = self.request_handler.perform_request("GET", custom_args)
         return response_json
 
-    def get_content_streamed(self, file_path: str, binary: bool = False) -> requests.Response:
+    def get_content_streamed(
+        self,
+        file_path: str,
+        binary: bool = False,
+        file_encoding: str = "IBM-1047",
+        receive_encoding: str = "ISO8859-1"
+    ) -> requests.Response:
         """
         Retrieve the contents of a given USS file streamed.
 
@@ -147,6 +159,11 @@ class USSFiles(SdkApi):  # type: ignore
             Path of the file
         binary: bool
             Specifies whether the contents are binary
+        file_encoding: str
+            Encoding file content originally in (to convert from; by default, it is always being converted from "IBM-1047")
+        receive_encoding: str
+            Encoding to convert file content to (to convert to; by default, it is always being converted to "ISO-8859-1").
+            Ignored when "binary" is True
 
         Returns
         -------
@@ -157,10 +174,20 @@ class USSFiles(SdkApi):  # type: ignore
         custom_args["url"] = "{}fs/{}".format(self._request_endpoint, self._encode_uri_component(file_path.lstrip("/")))
         if binary:
             custom_args["headers"]["X-IBM-Data-Type"] = "binary"
+        else:
+            custom_args["headers"]["X-IBM-Data-Type"] = "text;fileEncoding={}".format(file_encoding)
+            custom_args["headers"]["Content-Type"] = "text/plain; charset={}".format(receive_encoding)
         response = self.request_handler.perform_request("GET", custom_args, stream=True)
         return response
 
-    def download(self, file_path: str, output_file: str, binary: bool = False) -> None:
+    def download(
+        self,
+        file_path: str,
+        output_file: str,
+        binary: bool = False,
+        file_encoding: str = "IBM-1047",
+        receive_encoding: str = "UTF-8"
+    ) -> None:
         """
         Retrieve the contents of a USS file and saves it to a local file.
 
@@ -172,16 +199,21 @@ class USSFiles(SdkApi):  # type: ignore
             Name of the file to be saved locally
         binary: bool
             Specifies whether the contents are binary
+        file_encoding: str
+            Encoding file content originally in (to convert from; by default, it is always being converted from "IBM-1047")
+        receive_encoding: str
+            Encoding to convert file content to (to convert to; by default, it is always being converted to "UTF-8" during download).
+            Ignored when "binary" is True
 
         Raises
         ------
         TypeError
             Thrown when the `get_content_streamed` request does not return a valid Response object.
         """
-        response = self.get_content_streamed(file_path, binary)
+        response = self.get_content_streamed(file_path, binary, file_encoding, receive_encoding)
         if not isinstance(response, requests.Response):
             raise TypeError(f"Expected requests.Response, got {type(response)}")
-        with open(output_file, "wb" if binary else "w", encoding="utf-8") as f:
+        with open(output_file, "wb" if binary else "w", encoding=receive_encoding) as f:
             for chunk in response.iter_content(chunk_size=4096, decode_unicode=not binary):
                 f.write(chunk)
 
@@ -209,3 +241,24 @@ class USSFiles(SdkApi):  # type: ignore
         else:
             self.logger.error(f"File {input_file} not found.")
             raise FileNotFound(input_file)
+
+    def get_file_tag(self, filepath_name: str) -> USSFileTag:
+        """
+        Retrieve the file tag if specified for the filename.
+        Raises exception if it is impossible to identify the tag info.
+
+        Parameters
+        ----------
+        filepath_name: str
+            Path of the file
+
+        Returns
+        -------
+        Optional[str]
+            Tag info of a given file.
+        """
+        custom_args = self._create_custom_request_arguments()
+        custom_args["url"] = "{}fs{}".format(self._request_endpoint, filepath_name)
+        custom_args["json"] = { "request": "chtag", "action": "list" }
+        response_json = self.request_handler.perform_request("PUT", custom_args)
+        return USSFileTag(response_json)
