@@ -118,7 +118,12 @@ class USSFiles(SdkApi):  # type: ignore
         custom_args["headers"]["Content-Type"] = "text/plain; charset={}".format(encoding)
         self.request_handler.perform_request("PUT", custom_args, expected_code=[204, 201])
 
-    def get_content(self, filepath_name: str, file_encoding: str = "IBM-1047", receive_encoding: str = "ISO8859-1") -> Optional[str]:
+    def get_content(
+        self, 
+        filepath_name: str,
+        file_encoding: str = "IBM-1047",
+        receive_encoding: str = "ISO8859-1"
+    ) -> Optional[str]:
         """
         Retrieve the content of a filename. The complete path must be specified.
 
@@ -202,8 +207,8 @@ class USSFiles(SdkApi):  # type: ignore
         file_encoding: str
             Encoding file content originally in (to convert from; by default, it is always being converted from "IBM-1047")
         receive_encoding: str
-            Encoding to convert file content to (to convert to; by default, it is always being converted to "UTF-8" during download).
-            Ignored when "binary" is True
+            Encoding to convert file content to (to convert to; by default,
+            it is always being converted to "UTF-8" during download). Ignored when "binary" is True
 
         Raises
         ------
@@ -244,8 +249,7 @@ class USSFiles(SdkApi):  # type: ignore
 
     def get_file_tag(self, filepath_name: str) -> USSFileTag:
         """
-        Retrieve the file tag if specified for the filename.
-        Raises exception if it is impossible to identify the tag info.
+        Retrieve the file tag if specified for the filename. Raises exception if it is impossible to identify the tag info.
 
         Parameters
         ----------
