@@ -6,8 +6,11 @@ All notable changes to the Zowe Client Python SDK will be documented in this fil
 
 ### Enhancements
 
+- Added `USSFiles.get_file_tag` function. [#380](https://github.com/zowe/zowe-client-python-sdk/pull/380)
+
 ### Bug Fixes
 
+- Added support for the `file_encoding` and `receive_encoding` to the `USSFiles.get_content`, `USSFiles.get_content_streamed`, and `USSFiles.download` functions. [#375](https://github.com/zowe/zowe-client-python-sdk/issues/375), [#380](https://github.com/zowe/zowe-client-python-sdk/pull/380)
 - Updated the `urllib3` dependency of the Core SDK for technical currency. [#381](https://github.com/zowe/zowe-client-python-sdk/pull/381)
 - Fixed bug where `Tso.issue_command` method sometimes returned "READY" message without command output. [#386](https://github.com/zowe/zowe-client-python-sdk/pull/386)
 
