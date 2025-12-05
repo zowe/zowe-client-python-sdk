@@ -32,6 +32,10 @@ class Zosmf(SdkApi):  # type: ignore
     def __init__(self, connection: dict[str, Any], log: bool = True):
         super().__init__(connection, "/zosmf/info", logger_name=__name__, log=log)
 
+        response_timeout = connection.get("responseTimeout")
+        if response_timeout:
+            self._default_headers["X-IBM-Response-Timeout"] = response_timeout
+
     def get_info(self) -> ZosmfResponse:
         """
         Return a JSON response from the GET request to z/OSMF info endpoint.
@@ -57,3 +61,4 @@ class Zosmf(SdkApi):  # type: ignore
         custom_args["url"] = "{}/systems".format(self._request_endpoint)
         response_json = self.request_handler.perform_request("GET", custom_args, expected_code=[200])
         return ZosmfResponse(response_json)
+
