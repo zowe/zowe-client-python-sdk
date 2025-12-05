@@ -1,13 +1,12 @@
 """Integration tests for the Zowe Python SDK z/OS Tso package."""
 
-import unittest
-
+from integration.conftest import TestIsolatedEnv
 from zowe.core_for_zowe_sdk import ProfileManager
 from zowe.zos_tso_for_zowe_sdk import Tso
 from zowe.zos_tso_for_zowe_sdk.response import IssueResponse
 
 
-class TestTsoIntegration(unittest.TestCase):
+class TestTsoIntegration(TestIsolatedEnv):
     """Tso class integration tests."""
 
     def setUp(self):
