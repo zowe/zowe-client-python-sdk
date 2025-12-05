@@ -6,11 +6,13 @@ All notable changes to the Zowe Client Python SDK will be documented in this fil
 
 ### Enhancements
 
+- Added `USSFiles.get_file_tag` function. [#380](https://github.com/zowe/zowe-client-python-sdk/pull/380)
 - Added z/OSMF Workflows functionality. [#372](https://github.com/zowe/zowe-client-python-sdk/pull/372)
 - Replaced the `commentjson` package with the `json5` package to support block comments.  [#374](https://github.com/zowe/zowe-client-python-sdk/pull/374)
 
 ### Bug Fixes
 
+- Added support for the `file_encoding` and `receive_encoding` to the `USSFiles.get_content`, `USSFiles.get_content_streamed`, and `USSFiles.download` functions. [#375](https://github.com/zowe/zowe-client-python-sdk/issues/375), [#380](https://github.com/zowe/zowe-client-python-sdk/pull/380)
 - Added support for the `encoding` option to the `USSFiles.upload` function. [#372](https://github.com/zowe/zowe-client-python-sdk/pull/372)
 
 ## `1.0.0-dev23`
