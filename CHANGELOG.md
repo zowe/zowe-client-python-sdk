@@ -2,6 +2,10 @@
 
 All notable changes to the Zowe Client Python SDK will be documented in this file.
 
+## Recent Changes
+
+- Updated the `urllib3` dependency of the Core SDK for technical currency. [#381](https://github.com/zowe/zowe-client-python-sdk/pull/381)
+
 ## `1.0.0-dev24`
 
 ### Enhancements
