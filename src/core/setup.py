@@ -39,7 +39,7 @@ setup(
         "jsonschema~=4.25.1",
         "pyyaml~=6.0.1",
         "requests~=2.32.0",
-        "urllib3~=2.5.0",
+        "urllib3>=1.21.1,<3",  # Same version range that `requests` uses
     ],
     extras_require={"secrets": [resolve_sdk_dep("secrets", "~=1.0.0.dev")]},
     packages=find_namespace_packages(include=["zowe.*"]),
