@@ -14,8 +14,8 @@ import os
 from typing import Any, Optional, Union
 
 import requests
-from zowe.core_for_zowe_sdk import SdkApi
 from zowe.core_for_zowe_sdk.exceptions import FileNotFound
+from zowe.zos_files_for_zowe_sdk.api import BaseFilesApi
 from zowe.zos_files_for_zowe_sdk.constants import zos_file_constants
 
 from .response import USSListResponse
@@ -23,7 +23,7 @@ from .response import USSListResponse
 _ZOWE_FILES_DEFAULT_ENCODING = zos_file_constants["ZoweFilesDefaultEncoding"]
 
 
-class USSFiles(SdkApi):  # type: ignore
+class USSFiles(BaseFilesApi):  # type: ignore
     """
     Class used to represent the base z/OSMF USSFiles API.
 
@@ -38,8 +38,7 @@ class USSFiles(SdkApi):  # type: ignore
     """
 
     def __init__(self, connection: dict[str, Any], log: bool = True):
-        super().__init__(connection, "/zosmf/restfiles/", logger_name=__name__, log=log)
-        self._default_headers["Accept-Encoding"] = "gzip"
+        super().__init__(connection, log=log)
 
     def list(self, path: str) -> USSListResponse:
         """

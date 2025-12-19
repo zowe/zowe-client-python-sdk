@@ -1,10 +1,9 @@
-import re
 from unittest import TestCase, mock
 
-from zowe.zos_files_for_zowe_sdk import Datasets, Files, exceptions
+from zowe.zos_files_for_zowe_sdk import Files
 
 
-class TestCreateClass(TestCase):
+class TestMigrateClass(TestCase):
     """File class unit tests."""
 
     def setUp(self):
@@ -43,7 +42,7 @@ class TestCreateClass(TestCase):
             data = {"request": "hrecall", "wait": test_case[1]}
 
             files_test_profile.recall_migrated_data_set(test_case[0], test_case[1])
-            custom_args = files_test_profile._create_custom_request_arguments()
+            custom_args = files_test_profile.ds._create_custom_request_arguments()
             custom_args["json"] = data
             custom_args["url"] = "https://mock-url.com:443/zosmf/restfiles/ds/{}".format(test_case[0])
             files_test_profile.ds.request_handler.perform_request.assert_called_once_with(
@@ -82,7 +81,7 @@ class TestCreateClass(TestCase):
             }
 
             files_test_profile.delete_migrated_data_set(test_case[0], test_case[1], test_case[2])
-            custom_args = files_test_profile._create_custom_request_arguments()
+            custom_args = files_test_profile.ds._create_custom_request_arguments()
             custom_args["json"] = data
             custom_args["url"] = "https://mock-url.com:443/zosmf/restfiles/ds/{}".format(test_case[0])
             files_test_profile.ds.request_handler.perform_request.assert_called_once_with(
@@ -119,7 +118,7 @@ class TestCreateClass(TestCase):
 
             files_test_profile.migrate_data_set(test_case[0], test_case[1])
 
-            custom_args = files_test_profile._create_custom_request_arguments()
+            custom_args = files_test_profile.ds._create_custom_request_arguments()
             custom_args["json"] = data
             custom_args["url"] = "https://mock-url.com:443/zosmf/restfiles/ds/{}".format(test_case[0])
             files_test_profile.ds.request_handler.perform_request.assert_called_once_with(

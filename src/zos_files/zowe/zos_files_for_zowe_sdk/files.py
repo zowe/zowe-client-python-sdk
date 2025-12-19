@@ -26,8 +26,6 @@ from .uss import USSFiles
 
 _ZOWE_FILES_DEFAULT_ENCODING = zos_file_constants["ZoweFilesDefaultEncoding"]
 
-_MIN_TIMEOUT = zos_file_constants["min_timeout"]
-_MAX_TIMEOUT = zos_file_constants["max_timeout"]
 
 class Files(SdkApi):  # type: ignore
     """
@@ -56,31 +54,10 @@ class Files(SdkApi):  # type: ignore
 
     def __init__(self, connection: dict[str, Any], log: bool = True):
         super().__init__(connection, "/zosmf/restfiles/", logger_name=__name__, log=log)
-        self._default_headers["Accept-Encoding"] = "gzip"
 
-        async_threshold = connection.get("asyncThreshold") or connection.get("X-IBM-Async-Threshold")
-        if not async_threshold:
-            resp_to = connection.get("responseTimeout")
-            if resp_to is not None:
-                try:
-                    resp_to_int = int(resp_to)
-                    clamped = max(_MIN_TIMEOUT, min(_MAX_TIMEOUT, resp_to_int))
-                    if clamped != resp_to_int and hasattr(self, "logger"):
-                        self.logger.warning(
-                            f"responseTimeout {resp_to_int} out of range; clamped to {clamped} "
-                            f"(allowed {_MIN_TIMEOUT}-{_MAX_TIMEOUT})"
-                        )
-                    self._default_headers["X-IBM-Response-Timeout"] = str(clamped)
-                except (TypeError, ValueError):
-                    if hasattr(self, "logger"):
-                        self.logger.warning("responseTimeout must be an integer between 5 and 600; header not set")
-        else:
-            if hasattr(self, "logger"):
-                self.logger.info("X-IBM-Async-Threshold present; X-IBM-Response-Timeout will be ignored by z/OSMF")
-
-        self.ds = Datasets(connection)
-        self.uss = USSFiles(connection)
-        self.fs = FileSystems(connection)
+        self.ds = Datasets(connection, log)
+        self.uss = USSFiles(connection, log)
+        self.fs = FileSystems(connection, log)
 
     def list_files(self, path: str) -> Any:
         """Use uss.list() instead of this deprecated function."""

@@ -1,7 +1,6 @@
-import re
 from unittest import TestCase, mock
 
-from zowe.zos_files_for_zowe_sdk import Files, exceptions, Datasets
+from zowe.zos_files_for_zowe_sdk import Files
 
 
 class TestGetClass(TestCase):
