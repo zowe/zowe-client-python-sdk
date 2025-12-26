@@ -37,7 +37,6 @@ class BaseFilesApi(SdkApi):
         self._set_response_timeout(profile)
 
     def _set_response_timeout(self, profile: dict[str, Any]):
-        async_threshold = profile.get("asyncThreshold") or profile.get("X-IBM-Async-Threshold")
         resp_to = profile.get("responseTimeout")
         if resp_to is not None:
             try:
