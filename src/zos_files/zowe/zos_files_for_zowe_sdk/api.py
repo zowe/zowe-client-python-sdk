@@ -20,15 +20,26 @@ _MAX_TIMEOUT = zos_file_constants["max_timeout"]
 
 
 class BaseFilesApi(SdkApi):
-    def __init__(self, connection: dict[str, Any], log: bool = True):
-        super().__init__(connection, "/zosmf/restfiles/", logger_name=__name__, log=log)
-        self._default_headers["Accept-Encoding"] = "gzip"
-        self._set_response_timeout(connection)
+    """
+    Extends the SdkApi class to support headers specific to z/OSMF Files APIs.
 
-    def _set_response_timeout(self, connection: dict[str, Any]):
-        async_threshold = connection.get("asyncThreshold") or connection.get("X-IBM-Async-Threshold")
+    Parameters
+    ----------
+    profile : dict[str, Any]
+        Profile information in json (dict) format
+    log : bool
+        Flag to disable logger
+    """
+
+    def __init__(self, profile: dict[str, Any], log: bool = True):
+        super().__init__(profile, "/zosmf/restfiles/", logger_name=__name__, log=log)
+        self._default_headers["Accept-Encoding"] = "gzip"
+        self._set_response_timeout(profile)
+
+    def _set_response_timeout(self, profile: dict[str, Any]):
+        async_threshold = profile.get("asyncThreshold") or profile.get("X-IBM-Async-Threshold")
         if not async_threshold:
-            resp_to = connection.get("responseTimeout")
+            resp_to = profile.get("responseTimeout")
             if resp_to is not None:
                 try:
                     resp_to_int = int(resp_to)
