@@ -38,21 +38,20 @@ class BaseFilesApi(SdkApi):
 
     def _set_response_timeout(self, profile: dict[str, Any]):
         async_threshold = profile.get("asyncThreshold") or profile.get("X-IBM-Async-Threshold")
-        if not async_threshold:
-            resp_to = profile.get("responseTimeout")
-            if resp_to is not None:
-                try:
-                    resp_to_int = int(resp_to)
-                    clamped = max(_MIN_TIMEOUT, min(_MAX_TIMEOUT, resp_to_int))
-                    if clamped != resp_to_int and hasattr(self, "logger"):
-                        self.logger.warning(
-                            f"responseTimeout {resp_to_int} out of range; clamped to {clamped} "
-                            f"(allowed {_MIN_TIMEOUT}-{_MAX_TIMEOUT})"
-                        )
-                    self._default_headers["X-IBM-Response-Timeout"] = str(clamped)
-                except (TypeError, ValueError):
-                    if hasattr(self, "logger"):
-                        self.logger.warning("responseTimeout must be an integer between 5 and 600; header not set")
+        resp_to = profile.get("responseTimeout")
+        if resp_to is not None:
+            try:
+                resp_to_int = int(resp_to)
+                clamped = max(_MIN_TIMEOUT, min(_MAX_TIMEOUT, resp_to_int))
+                if clamped != resp_to_int and hasattr(self, "logger"):
+                    self.logger.warning(
+                        f"responseTimeout {resp_to_int} out of range; clamped to {clamped} "
+                        f"(allowed {_MIN_TIMEOUT}-{_MAX_TIMEOUT})"
+                    )
+                self._default_headers["X-IBM-Response-Timeout"] = str(clamped)
+            except (TypeError, ValueError):
+                if hasattr(self, "logger"):
+                    self.logger.warning("responseTimeout must be an integer between 5 and 600; header not set")
         else:
             if hasattr(self, "logger"):
                 self.logger.info("X-IBM-Async-Threshold present; X-IBM-Response-Timeout will be ignored by z/OSMF")
