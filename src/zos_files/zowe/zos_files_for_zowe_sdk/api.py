@@ -51,6 +51,3 @@ class BaseFilesApi(SdkApi):
             except (TypeError, ValueError):
                 if hasattr(self, "logger"):
                     self.logger.warning("responseTimeout must be an integer between 5 and 600; header not set")
-        else:
-            if hasattr(self, "logger"):
-                self.logger.info("X-IBM-Async-Threshold present; X-IBM-Response-Timeout will be ignored by z/OSMF")
