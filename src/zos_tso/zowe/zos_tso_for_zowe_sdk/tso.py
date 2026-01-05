@@ -167,7 +167,7 @@ class Tso(SdkApi):  # type: ignore
         list[dict[str, Any]]
             A non-normalized list from TSO containing the result from the command
         """
-        return list(self.send(session_key, message).tsoData)
+        return list(self.send(session_key, message).tsoData or [])
 
     def send(self, session_key: str, message: str, read_reply: bool = True) -> SendResponse:
         """
