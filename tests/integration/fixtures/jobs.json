@@ -4,7 +4,7 @@
     "TEST_JCL_CLASS": "B",
     "TEST_JCL_CODE": [
         "//IEFBR14T JOB (AUTOMATION),CLASS=A,MSGCLASS=0,",
-        "//             MSGLEVEL=(1,1),REGION=0M,NOTIFY=&SYSUID",
+        "//             MSGLEVEL=(1,1),REGION=0M",
         "//STEP1    EXEC PGM=IEFBR14"
     ]
 }

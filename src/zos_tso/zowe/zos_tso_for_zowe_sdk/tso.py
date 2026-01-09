@@ -11,7 +11,7 @@ Copyright Contributors to the Zowe Project.
 """
 
 import json
-from typing import Optional, Any
+from typing import Any, Optional
 
 from zowe.core_for_zowe_sdk import SdkApi, constants
 
@@ -56,9 +56,11 @@ class Tso(SdkApi):  # type: ignore
         """
         start_response = self.start()
         session_key = start_response.servletKey
-        send_response = self.send(session_key, command)
-        command_output = send_response.tsoData
-        tso_messages = self.retrieve_tso_messages(command_output)
+        # Fetch startup messages and suppress from command output
+        self.__get_tso_data(session_key)
+        send_response = self.send(session_key, command, False)
+        command_output = ""
+        tso_messages = []
         while not any("TSO PROMPT" in message for message in command_output) or not tso_messages:
             command_output = self.__get_tso_data(session_key)
             tso_messages += self.retrieve_tso_messages(command_output)
@@ -165,9 +167,9 @@ class Tso(SdkApi):  # type: ignore
         list[dict[str, Any]]
             A non-normalized list from TSO containing the result from the command
         """
-        return list(self.send(session_key, message).tsoData)
+        return list(self.send(session_key, message).tsoData or [])
 
-    def send(self, session_key: str, message: str) -> SendResponse:
+    def send(self, session_key: str, message: str, read_reply: bool = True) -> SendResponse:
         """
         Send a command to an existing TSO session.
 
@@ -177,6 +179,8 @@ class Tso(SdkApi):  # type: ignore
             The session key of an existing TSO session
         message: str
             The message/command to be sent to the TSO session
+        read_reply: bool
+            Whether to read the reply from the TSO session
 
         Returns
         -------
@@ -188,6 +192,8 @@ class Tso(SdkApi):  # type: ignore
         # z/OSMF TSO API requires json to be formatted in specific way without spaces
         request_json = {"TSO RESPONSE": {"VERSION": "0100", "DATA": str(message)}}
         custom_args["data"] = json.dumps(request_json, separators=(",", ":"))
+        if not read_reply:
+            custom_args["params"] = {"readreply": "false"}
         response_json = self.request_handler.perform_request("PUT", custom_args)
         return SendResponse(**response_json)
 

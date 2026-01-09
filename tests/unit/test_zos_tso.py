@@ -33,7 +33,17 @@ class TestTsoClass(TestCase):
             mock.Mock(
                 headers={"Content-Type": "application/json"},
                 status_code=200,
+                json=lambda: {"servletKey": None},
+            ),
+            mock.Mock(
+                headers={"Content-Type": "application/json"},
+                status_code=200,
                 json=lambda: {"servletKey": None, "tsoData": [message]},
+            ),
+            mock.Mock(
+                headers={"Content-Type": "application/json"},
+                status_code=200,
+                json=lambda: {"servletKey": None},
             ),
             mock.Mock(
                 headers={"Content-Type": "application/json"},
@@ -61,4 +71,4 @@ class TestTsoClass(TestCase):
 
         result = Tso(self.test_profile).issue_command("TIME").tso_messages
         self.assertEqual(result, expected)
-        self.assertEqual(mock_send_request.call_count, 5)
+        self.assertEqual(mock_send_request.call_count, len(fake_responses))
