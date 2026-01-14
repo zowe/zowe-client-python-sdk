@@ -134,7 +134,7 @@ class USSFiles(SdkApi):  # type: ignore
         file_encoding: str
             Encoding file content originally in (to convert from; by default, it is always being converted from "IBM-1047")
         receive_encoding: str
-            Encoding to convert file content to (to convert to; by default, it is always being converted to "ISO-8859-1")
+            Encoding to convert file content to (to convert to; by default, it is always being converted to "ISO8859-1")
 
         Returns
         -------
@@ -167,7 +167,7 @@ class USSFiles(SdkApi):  # type: ignore
         file_encoding: str
             Encoding file content originally in (to convert from; by default, it is always being converted from "IBM-1047")
         receive_encoding: str
-            Encoding to convert file content to (to convert to; by default, it is always being converted to "ISO-8859-1").
+            Encoding to convert file content to (to convert to; by default, it is always being converted to "ISO8859-1").
             Ignored when "binary" is True
 
         Returns
