@@ -50,7 +50,7 @@ class EndResponse:
 @dataclass
 class SendResponse:
     servletKey: str
-    tsoData: list[dict[str, Any]]
+    tsoData: Optional[list[dict[str, Any]]] = None
     ver: Optional[str] = None
     reused: Optional[bool] = None
     timeout: Optional[bool] = None
