@@ -4,7 +4,12 @@ All notable changes to the Zowe Client Python SDK will be documented in this fil
 
 ## Recent Changes
 
+### Enhancements
+
+### Bug Fixes
+
 - Updated the `urllib3` dependency of the Core SDK for technical currency. [#381](https://github.com/zowe/zowe-client-python-sdk/pull/381)
+- Fixed bug where `Tso.issue_command` method sometimes returned "READY" message without command output. [#386](https://github.com/zowe/zowe-client-python-sdk/pull/386)
 
 ## `1.0.0-dev24`
 
