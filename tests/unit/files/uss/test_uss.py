@@ -6,6 +6,7 @@ import pytest
 import requests
 from zowe.core_for_zowe_sdk.exceptions import FileNotFound
 from zowe.zos_files_for_zowe_sdk import Files
+from zowe.zos_files_for_zowe_sdk.constants import ContentType
 from zowe.zos_files_for_zowe_sdk.response.uss import USSFileTagType
 
 
@@ -35,7 +36,7 @@ class TestFilesClass(TestCase):
         """Test get USS file content sends request"""
         mock_send_request.return_value = mock.Mock(headers={"Content-Type": "application/json"}, status_code=200)
 
-        Files(self.test_profile).get_file_content("uss_name")
+        Files(self.test_profile).uss.get_content("uss_name")
         mock_send_request.assert_called_once()
         prepared_request = mock_send_request.call_args[0][0]
         self.assertEqual(prepared_request.method, "GET")
@@ -45,7 +46,11 @@ class TestFilesClass(TestCase):
         """Test get USS file content with the specified encoding"""
         mock_send_request.return_value = mock.Mock(headers={"Content-Type": "text/plain"}, status_code=200, text="हैलो वर्ल्ड")
 
-        result = Files(self.test_profile).uss.get_content("/some/test/path", file_encoding="UTF-8", receive_encoding="UTF-8")
+        result = Files(self.test_profile).uss.retrieve_content(
+            "/some/test/path",
+            remote_file_encoding="UTF-8",
+            receive_in_encoding="UTF-8"
+        )
         mock_send_request.assert_called_once()
         prepared_request = mock_send_request.call_args[0][0]
         self.assertEqual(prepared_request.method, "GET")
@@ -58,7 +63,7 @@ class TestFilesClass(TestCase):
         """Test get USS file content streamed sends request"""
         mock_send_request.return_value = mock.Mock(headers={"Content-Type": "application/json"}, status_code=200)
 
-        Files(self.test_profile).get_file_content_streamed("uss_name", binary=True)
+        Files(self.test_profile).uss.retrieve_content("uss_name", content_type=ContentType.BINARY, as_stream=True)
         mock_send_request.assert_called_once()
         prepared_request = mock_send_request.call_args[0][0]
         self.assertEqual(prepared_request.method, "GET")
@@ -69,15 +74,15 @@ class TestFilesClass(TestCase):
         """Test get response with content in the specified encoding"""
         mock_send_request.return_value = mock.Mock(
             headers={"Content-Type": "application/octet-stream"}, 
-            status_code=200, 
+            status_code=200,
             content="हैलो वर्ल्ड".encode()
         )
 
-        result = Files(self.test_profile).uss.get_content_streamed(
+        result = Files(self.test_profile).uss.retrieve_content(
             "/some/test/path", 
-            binary=False, 
-            file_encoding="UTF-8",
-            receive_encoding="UTF-8"
+            remote_file_encoding="UTF-8",
+            receive_in_encoding="UTF-8",
+            as_stream=True
         )
         mock_send_request.assert_called_once()
         prepared_request = mock_send_request.call_args[0][0]
@@ -134,7 +139,11 @@ class TestFilesClass(TestCase):
         mock_response.iter_content = mock.Mock(return_value=[bytes("हैलो", "UTF-8"), bytes("वर्ल्ड", "UTF-8")])
         mock_send_request.return_value = mock_response
 
-        Files(self.test_profile).uss.download("/some/test/path", "/some/test/file", binary=True)
+        Files(self.test_profile).uss.perform_download(
+            "/some/test/path",
+            "/some/test/file",
+            content_type=ContentType.BINARY
+        )
         mock_send_request.assert_called_once()
         prepared_request = mock_send_request.call_args[0][0]
         self.assertEqual(prepared_request.method, "GET")
@@ -154,12 +163,11 @@ class TestFilesClass(TestCase):
         mock_response.iter_content = mock.Mock(return_value=[bytes("हैलो", "UTF-8"), bytes("वर्ल्ड", "UTF-8")])
         mock_send_request.return_value = mock_response
 
-        Files(self.test_profile).uss.download(
+        Files(self.test_profile).uss.perform_download(
             "/some/test/path", 
             "/some/test/file", 
-            binary=False, 
-            file_encoding="UTF-8", 
-            receive_encoding="UTF-8"
+            remote_file_encoding="UTF-8", 
+            receive_in_encoding="UTF-8"
         )
         mock_send_request.assert_called_once()
         prepared_request = mock_send_request.call_args[0][0]
@@ -175,15 +183,14 @@ class TestFilesClass(TestCase):
         mock_send_request.return_value = mock.Mock(headers={"Content-Type": "text/plain"}, status_code=200)
 
         with pytest.raises(TypeError) as e:
-            Files(self.test_profile).uss.download(
+            Files(self.test_profile).uss.perform_download(
                 "/some/test/path",
                 "/some/test/file",
-                binary=False,
-                file_encoding="UTF-8",
-                receive_encoding="UTF-8"
+                remote_file_encoding="UTF-8",
+                receive_in_encoding="UTF-8"
             )
 
-        self.assertIn("Expected requests.Response, got", str(e.value))
+        self.assertIn("Expected Response, got", str(e.value))
         mock_send_request.assert_called_once()
         prepared_request = mock_send_request.call_args[0][0]
         self.assertEqual(prepared_request.method, "GET")
@@ -197,7 +204,7 @@ class TestFilesClass(TestCase):
         """Test upload a text USS file"""
         mock_send_request.return_value = mock.Mock(headers={"Content-Type": "application/json"}, status_code=201)
 
-        Files(self.test_profile).uss.upload("/some/test/file", "/some/test/path")
+        Files(self.test_profile).uss.perform_upload("/some/test/file", "/some/test/path")
         mock_send_request.assert_called_once()
         prepared_request = mock_send_request.call_args[0][0]
         self.assertEqual(prepared_request.method, "PUT")
@@ -217,13 +224,17 @@ class TestFilesClass(TestCase):
         binary_data = b"Hello world!"
         mock_file.return_value.read.return_value = binary_data
 
-        Files(self.test_profile).uss.upload("/some/test/file", "/some/test/path", binary=True)
+        Files(self.test_profile).uss.perform_upload(
+            "/some/test/file",
+            "/some/test/path",
+            content_type=ContentType.BINARY
+        )
         mock_send_request.assert_called_once()
         prepared_request = mock_send_request.call_args[0][0]
         self.assertEqual(prepared_request.method, "PUT")
         self.assertEqual(prepared_request.headers["Content-Type"], "application/octet-stream")
         mock_is_file.assert_called_once()
-        mock_file.assert_called_once_with('/some/test/file', 'rb')
+        mock_file.assert_called_once_with('/some/test/file', 'rb', encoding=None)
 
     @mock.patch("requests.Session.send")
     @mock.patch("os.path.isfile", return_value=False)
@@ -232,7 +243,7 @@ class TestFilesClass(TestCase):
         mock_send_request.return_value = mock.Mock(headers={"Content-Type": "application/json"}, status_code=201)
 
         with self.assertRaises(FileNotFound):
-            Files(self.test_profile).uss.upload("/some/test/file", "/some/test/path")
+            Files(self.test_profile).uss.perform_upload("/some/test/file", "/some/test/path")
         mock_send_request.assert_not_called()
         mock_is_file.assert_called_once()
         mock_is_file.assert_called_once()
