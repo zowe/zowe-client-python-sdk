@@ -234,7 +234,7 @@ class USSFiles(SdkApi):  # type: ignore
         response = self.get_content_streamed(file_path, binary, file_encoding, receive_encoding)
         if not isinstance(response, requests.Response):
             raise TypeError(f"Expected requests.Response, got {type(response)}")
-        with open(output_file, "wb" if binary else "w", encoding=receive_encoding) as f:
+        with open(output_file, "wb" if binary else "w", encoding=receive_encoding if not binary else None) as f:
             for chunk in response.iter_content(chunk_size=4096, decode_unicode=not binary):
                 f.write(chunk)
 

@@ -139,7 +139,7 @@ class TestFilesClass(TestCase):
         prepared_request = mock_send_request.call_args[0][0]
         self.assertEqual(prepared_request.method, "GET")
         self.assertEqual(prepared_request.headers["X-IBM-Data-Type"], "binary")
-        mock_file.assert_called_once_with('/some/test/file', 'wb', encoding='UTF-8')
+        mock_file.assert_called_once_with('/some/test/file', 'wb', encoding=None)
         mock_file().write.assert_has_calls([mock.call(bytes("हैलो", "UTF-8")), mock.call(bytes("वर्ल्ड", "UTF-8"))])
 
     @mock.patch("requests.Session.send")
