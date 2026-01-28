@@ -4,6 +4,7 @@ from unittest import TestCase, mock
 
 import pytest
 import requests
+from zowe.core_for_zowe_sdk.exceptions import FileNotFound
 from zowe.zos_files_for_zowe_sdk import Files
 from zowe.zos_files_for_zowe_sdk.response.uss import USSFileTagType
 
@@ -86,14 +87,28 @@ class TestFilesClass(TestCase):
         self.assertEqual(result.content.decode(), "हैलो वर्ल्ड")
 
     @mock.patch("requests.Session.send")
-    def test_write(self, mock_send_request):
-        """Test write USS file sends request"""
+    def test_write_text(self, mock_send_request):
+        """Test write USS text file sends correct request"""
         mock_send_request.return_value = mock.Mock(headers={"Content-Type": "application/json"}, status_code=201)
 
-        Files(self.test_profile).write_to_uss(filepath_name="test", data="test")
+        Files(self.test_profile).uss.write("test", "test")
         mock_send_request.assert_called_once()
         prepared_request = mock_send_request.call_args[0][0]
         self.assertEqual(prepared_request.method, "PUT")
+        self.assertEqual(prepared_request.headers["Content-Type"], "text/plain; charset=utf-8")
+
+    @mock.patch("requests.Session.send")
+    def test_write_binary(self, mock_send_request):
+        """Test write USS binary file sends correct request"""
+        mock_send_request.return_value = mock.Mock(
+            headers={"Content-Type": "application/octet-stream", "X-IBM-Data-Type": "binary"}, status_code=204
+        )
+
+        Files(self.test_profile).uss.write(filepath_name="test", data="Hello world!".encode())
+        mock_send_request.assert_called_once()
+        prepared_request = mock_send_request.call_args[0][0]
+        self.assertEqual(prepared_request.method, "PUT")
+        self.assertEqual(prepared_request.headers["Content-Type"], "application/octet-stream")
 
     @mock.patch("requests.Session.send")
     def test_list_uss(self, mock_send_request):
@@ -174,6 +189,53 @@ class TestFilesClass(TestCase):
         self.assertEqual(prepared_request.method, "GET")
         self.assertEqual(prepared_request.headers["X-IBM-Data-Type"], "text;fileEncoding=UTF-8")
         self.assertEqual(prepared_request.headers["Content-Type"], "text/plain; charset=UTF-8")
+
+    @mock.patch("requests.Session.send")
+    @mock.patch("builtins.open", new_callable=mock.mock_open)
+    @mock.patch("os.path.isfile", return_value=True)
+    def test_upload_text(self, mock_is_file, mock_file, mock_send_request):
+        """Test upload a text USS file"""
+        mock_send_request.return_value = mock.Mock(headers={"Content-Type": "application/json"}, status_code=201)
+
+        Files(self.test_profile).uss.upload("/some/test/file", "/some/test/path")
+        mock_send_request.assert_called_once()
+        prepared_request = mock_send_request.call_args[0][0]
+        self.assertEqual(prepared_request.method, "PUT")
+        self.assertEqual(prepared_request.headers["Content-Type"], "text/plain; charset=utf-8")
+        mock_is_file.assert_called_once()
+        mock_file.assert_called_once_with('/some/test/file', 'r', encoding='utf-8')
+
+    @mock.patch("requests.Session.send")
+    @mock.patch("builtins.open", new_callable=mock.mock_open)
+    @mock.patch("os.path.isfile", return_value=True)
+    def test_upload_binary(self, mock_is_file, mock_file, mock_send_request):
+        """Test upload a binary USS file"""
+        mock_send_request.return_value = mock.Mock(
+            headers={"Content-Type": "application/octet-stream", "X-IBM-Data-Type": "binary"}, status_code=204
+        )
+
+        binary_data = b"Hello world!"
+        mock_file.return_value.read.return_value = binary_data
+
+        Files(self.test_profile).uss.upload("/some/test/file", "/some/test/path", binary=True)
+        mock_send_request.assert_called_once()
+        prepared_request = mock_send_request.call_args[0][0]
+        self.assertEqual(prepared_request.method, "PUT")
+        self.assertEqual(prepared_request.headers["Content-Type"], "application/octet-stream")
+        mock_is_file.assert_called_once()
+        mock_file.assert_called_once_with('/some/test/file', 'rb')
+
+    @mock.patch("requests.Session.send")
+    @mock.patch("os.path.isfile", return_value=False)
+    def test_upload_fail_file_not_found(self, mock_is_file, mock_send_request):
+        """Test upload a binary USS file"""
+        mock_send_request.return_value = mock.Mock(headers={"Content-Type": "application/json"}, status_code=201)
+
+        with self.assertRaises(FileNotFound):
+            Files(self.test_profile).uss.upload("/some/test/file", "/some/test/path")
+        mock_send_request.assert_not_called()
+        mock_is_file.assert_called_once()
+        mock_is_file.assert_called_once()
 
     @mock.patch("requests.Session.send")
     def test_get_file_tag(self, mock_send_request):

@@ -6,6 +6,7 @@ All notable changes to the Zowe Client Python SDK will be documented in this fil
 
 ### Enhancements
 
+- Added binary USS files upload and write. [#380](https://github.com/zowe/zowe-client-python-sdk/pull/380)
 - Added `USSFiles.get_file_tag` function. [#380](https://github.com/zowe/zowe-client-python-sdk/pull/380)
 
 ### Bug Fixes

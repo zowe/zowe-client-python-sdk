@@ -11,7 +11,7 @@ Copyright Contributors to the Zowe Project.
 """
 
 import os
-from typing import Any, Optional
+from typing import Any, Optional, Union
 
 import requests
 from zowe.core_for_zowe_sdk import SdkApi
@@ -99,23 +99,39 @@ class USSFiles(SdkApi):  # type: ignore
         custom_args["url"] = "{}fs/{}".format(self._request_endpoint, file_path.lstrip("/"))
         self.request_handler.perform_request("POST", custom_args, expected_code=[201])
 
-    def write(self, filepath_name: str, data: str, encoding: str = _ZOWE_FILES_DEFAULT_ENCODING) -> None:
+    def write(self, filepath_name: str, data: Union[str, bytes], encoding: str = _ZOWE_FILES_DEFAULT_ENCODING) -> None:
         """
-        Write content to an existing UNIX file.
+        Write content to a UNIX file or create it with the content if it does not exist.
 
         Parameters
         ----------
         filepath_name: str
             Path of the file
-        data: str
+        data: Union[str, bytes]
             Contents to be written
         encoding: str
             Specifies the encoding name (e.g. IBM-1047)
+
+        Raises
+        ------
+        ValueError
+            Data must be either a string or bytes.
         """
         custom_args = self._create_custom_request_arguments()
         custom_args["url"] = "{}fs/{}".format(self._request_endpoint, filepath_name.lstrip("/"))
         custom_args["data"] = data
-        custom_args["headers"]["Content-Type"] = "text/plain; charset={}".format(encoding)
+
+        # Check if the data is a string (text content)
+        if isinstance(data, str):
+            custom_args["headers"]["Content-Type"] = "text/plain; charset={}".format(encoding)
+        # Check if the data is bytes (binary content)
+        elif isinstance(data, bytes):
+            custom_args["headers"]["Content-Type"] = "application/octet-stream"
+            custom_args["headers"]["X-IBM-Data-Type"] = "binary"
+        # Raise an error if data is neither str nor bytes
+        else:
+            raise ValueError("Data must be either a string or bytes.")
+
         self.request_handler.perform_request("PUT", custom_args, expected_code=[204, 201])
 
     def get_content(
@@ -222,7 +238,9 @@ class USSFiles(SdkApi):  # type: ignore
             for chunk in response.iter_content(chunk_size=4096, decode_unicode=not binary):
                 f.write(chunk)
 
-    def upload(self, input_file: str, filepath_name: str, encoding: str = _ZOWE_FILES_DEFAULT_ENCODING) -> None:
+    def upload(
+        self, input_file: str, filepath_name: str, encoding: str = _ZOWE_FILES_DEFAULT_ENCODING, binary: bool = False
+    ) -> None:
         """
         Upload contents of a given file and saves it to a file at the given USS path.
 
@@ -234,6 +252,8 @@ class USSFiles(SdkApi):  # type: ignore
             Path of the file where it will be created
         encoding: str
             Specifies encoding schema of the uploaded file
+        binary: bool
+            Specifies whether the file is binary
 
         Raises
         ------
@@ -241,8 +261,12 @@ class USSFiles(SdkApi):  # type: ignore
             Thrown when specific file is not found.
         """
         if os.path.isfile(input_file):
-            with open(input_file, "r", encoding="utf-8") as in_file:
-                self.write(filepath_name, in_file.read(), encoding=encoding)
+            if binary:
+                with open(input_file, "rb") as in_file:
+                    self.write(filepath_name, in_file.read())
+            else:
+                with open(input_file, "r", encoding="utf-8") as in_file:
+                    self.write(filepath_name, in_file.read(), encoding=encoding)
         else:
             self.logger.error(f"File {input_file} not found.")
             raise FileNotFound(input_file)
