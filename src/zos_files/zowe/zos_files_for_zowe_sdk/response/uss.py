@@ -35,7 +35,7 @@ class USSResponse:
 
 @dataclass
 class USSListResponse:
-    items: Optional[list[dict[str, Any]]] = None
+    items: Optional[list[USSResponse]] = None
     returnedRows: Optional[int] = None
     totalRows: Optional[int] = None
     JSONversion: Optional[int] = None
