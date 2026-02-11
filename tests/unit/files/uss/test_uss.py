@@ -10,7 +10,7 @@ from zowe.zos_files_for_zowe_sdk.constants import ContentType
 from zowe.zos_files_for_zowe_sdk.response.uss import USSFileTagType
 
 
-class TestFilesClass(TestCase):
+class TestUssClass(TestCase):
     """File class unit tests."""
 
     def setUp(self):

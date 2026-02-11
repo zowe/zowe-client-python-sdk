@@ -16,6 +16,7 @@ from typing import Any, Optional, Union
 from requests import Response
 from zowe.core_for_zowe_sdk import SdkApi
 from zowe.core_for_zowe_sdk.exceptions import FileNotFound
+from zowe.zos_files_for_zowe_sdk.api import BaseFilesApi
 from zowe.zos_files_for_zowe_sdk.constants import (
     ContentType,
     FileType,
@@ -295,7 +296,7 @@ class DatasetOption:
         return {key.replace("_DatasetOption__", ""): value for key, value in self.__dict__.items() if value is not None}
 
 
-class Datasets(SdkApi):  # type: ignore[misc]
+class Datasets(BaseFilesApi):  # type: ignore[misc]
     """
     Class used to represent the base z/OSMF Datasets API.
 
@@ -310,9 +311,7 @@ class Datasets(SdkApi):  # type: ignore[misc]
     """
 
     def __init__(self, connection: dict[str, Any], log: bool = True) -> None:
-
-        super().__init__(connection, "/zosmf/restfiles/", logger_name=__name__, log=log)
-        self._default_headers["Accept-Encoding"] = "gzip"
+        super().__init__(connection, log=log)
 
     def list(self, name_pattern: str, return_attributes: bool = False) -> DatasetListResponse:
         """
