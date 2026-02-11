@@ -16,7 +16,7 @@ from typing import Any, Optional
 
 @dataclass
 class DatasetListResponse:
-    items: Optional[list[dict[str, Any]]] = None
+    items: Optional[list["DatasetResponse"] | list["SimpleDatasetResponse"]] = None
     returnedRows: Optional[int] = None
     totalRows: Optional[int] = None
     JSONversion: Optional[int] = None

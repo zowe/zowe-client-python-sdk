@@ -25,3 +25,11 @@ class FileType(Enum):
     BINARY = "binary"
     EXECUTABLE = "executable"
     TEXT = "text"
+
+
+class ContentType(Enum):
+    """Represents a content type to fetch or upload."""
+
+    BINARY = "binary"
+    TEXT = "text"
+    RECORD = "record"
