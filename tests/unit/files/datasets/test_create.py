@@ -1,7 +1,6 @@
-import re
 from unittest import TestCase, mock
 
-from zowe.zos_files_for_zowe_sdk import DatasetOption, Files, exceptions
+from zowe.zos_files_for_zowe_sdk import DatasetOption, Files
 
 
 class TestCreateClass(TestCase):
@@ -123,7 +122,7 @@ class TestCreateClass(TestCase):
 
             if test_case[1]:
                 files_test_profile.create_data_set("DSN", test_case[0])
-                custom_args = files_test_profile._create_custom_request_arguments()
+                custom_args = files_test_profile.ds._create_custom_request_arguments()
                 custom_args["json"] = test_case[0].to_dict()
                 custom_args["url"] = "https://mock-url.com:443/zosmf/restfiles/ds/{}".format("DSN")
                 files_test_profile.ds.request_handler.perform_request.assert_called_once_with(
@@ -209,7 +208,7 @@ class TestCreateClass(TestCase):
 
             if test_case[1]:
                 files_test_profile.create_default_data_set(*test_case[0])
-                custom_args = files_test_profile._create_custom_request_arguments()
+                custom_args = files_test_profile.ds._create_custom_request_arguments()
                 custom_args["json"] = options.get(test_case[0][1])
                 custom_args["url"] = "https://mock-url.com:443/zosmf/restfiles/ds/{}".format(test_case[0][0])
                 files_test_profile.ds.request_handler.perform_request.assert_called_once_with(

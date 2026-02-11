@@ -54,10 +54,10 @@ class Files(SdkApi):  # type: ignore
 
     def __init__(self, connection: dict[str, Any], log: bool = True):
         super().__init__(connection, "/zosmf/restfiles/", logger_name=__name__, log=log)
-        self._default_headers["Accept-Encoding"] = "gzip"
-        self.ds = Datasets(connection)
-        self.uss = USSFiles(connection)
-        self.fs = FileSystems(connection)
+
+        self.ds = Datasets(connection, log)
+        self.uss = USSFiles(connection, log)
+        self.fs = FileSystems(connection, log)
 
     def list_files(self, path: str) -> Any:
         """Use uss.list() instead of this deprecated function."""

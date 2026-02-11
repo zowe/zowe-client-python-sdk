@@ -4,6 +4,8 @@ All notable changes to the Zowe Client Python SDK will be documented in this fil
 
 ## Recent Changes
 
+- Support responseTimeout profile property for z/OSMF operations. [#369](https://github.com/zowe/zowe-client-python-sdk/pull/369)
+
 ### Enhancements
 
 ### Bug Fixes

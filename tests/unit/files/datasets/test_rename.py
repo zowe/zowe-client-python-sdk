@@ -1,10 +1,10 @@
 import re
 from unittest import TestCase, mock
 
-from zowe.zos_files_for_zowe_sdk import Datasets, Files, exceptions
+from zowe.zos_files_for_zowe_sdk import Files
 
 
-class TestCreateClass(TestCase):
+class TestRenameClass(TestCase):
     """File class unit tests."""
 
     def setUp(self):
@@ -47,7 +47,7 @@ class TestCreateClass(TestCase):
 
             files_test_profile.rename_data_set(test_case[0][0], test_case[0][1])
 
-            custom_args = files_test_profile._create_custom_request_arguments()
+            custom_args = files_test_profile.ds._create_custom_request_arguments()
             custom_args["json"] = data
             custom_args["url"] = "https://mock-url.com:443/zosmf/restfiles/ds/{}".format(test_case[0][1])
             files_test_profile.ds.request_handler.perform_request.assert_called_once_with(
@@ -95,7 +95,7 @@ class TestCreateClass(TestCase):
                 data["enq"] = test_case[0][3].strip()
             if test_case[1]:
                 files_test_profile.rename_data_set_member(*test_case[0])
-                custom_args = files_test_profile._create_custom_request_arguments()
+                custom_args = files_test_profile.ds._create_custom_request_arguments()
                 custom_args["json"] = data
                 ds_path = "{}({})".format(test_case[0][0], test_case[0][2])
                 ds_path_adjusted = files_test_profile._encode_uri_component(ds_path)

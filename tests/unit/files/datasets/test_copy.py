@@ -3,7 +3,7 @@ from unittest import TestCase, mock
 from zowe.zos_files_for_zowe_sdk import Files
 
 
-class TestCreateClass(TestCase):
+class TestCopyClass(TestCase):
     """File class unit tests."""
 
     def setUp(self):

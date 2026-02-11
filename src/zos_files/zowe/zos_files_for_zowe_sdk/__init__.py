@@ -11,6 +11,7 @@ Copyright Contributors to the Zowe Project.
 """
 
 from . import constants, exceptions
+from .api import BaseFilesApi
 from .datasets import DatasetOption, Datasets
 from .file_system import FileSystems
 from .files import Files
