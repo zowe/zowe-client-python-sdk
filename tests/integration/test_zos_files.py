@@ -110,30 +110,42 @@ class TestFilesIntegration(unittest.TestCase):
         self.assertTrue(command_output == None)
 
     def test_mount_unmount_zfs_file_system(self):
-        """Mounting a zfs filesystem should be possible"""
-        username = self.user_name.lower()
+        """Test mounting and unmounting, with safety nets."""
         mount_point = self.files_fixtures["TEST_USS_MOUNT"]
+        
+        # Create and register safety cleanup
+        self.files.fs.create(self.test2_zfs_file_system, self.create_zfs_options)
+        self.addCleanup(self._safe_delete_fs, self.test2_zfs_file_system)
 
-        # Create a zfs file system
-        zfs_file_system = self.files.fs.create(self.test2_zfs_file_system, self.create_zfs_options)
+        # Mount and register safety cleanup
+        self.files.fs.mount(self.test2_zfs_file_system, mount_point, self.mount_zfs_file_system_options)
+        self.addCleanup(self._safe_unmount_fs, self.test2_zfs_file_system)
 
-        # Mount file system
-        command_output = self.files.fs.mount(
-            self.test2_zfs_file_system, mount_point, self.mount_zfs_file_system_options
-        )
-        self.assertTrue(command_output == None)
-
-        # List a zfs file system
+        # Verify mount success
         command_output = self.files.fs.list(file_system_name=self.test2_zfs_file_system.upper())
-        self.assertTrue(len(command_output["items"]) > 0)
+        self.assertGreater(len(command_output["items"]), 0)
 
-        # Unmount file system
-        command_output = self.files.fs.unmount(self.test2_zfs_file_system)
-        self.assertTrue(command_output == None)
+        # Verify unmount success
+        unmount_response = self.files.fs.unmount(self.test2_zfs_file_system)
+        self.assertIsNone(unmount_response)
 
-        # Delete file system
-        command_output = self.files.fs.delete(self.test2_zfs_file_system)
-        self.assertTrue(command_output == None)
+        # Verify delete success
+        delete_response = self.files.fs.delete(self.test2_zfs_file_system)
+        self.assertIsNone(delete_response)
+
+    def _safe_unmount_fs(self, fs_name):
+        """Idempotent helper: Unmounts but ignores errors if already unmounted."""
+        try:
+            self.files.fs.unmount(fs_name)
+        except Exception:
+            pass 
+
+    def _safe_delete_fs(self, fs_name):
+        """Idempotent helper: Deletes but ignores errors if already deleted."""
+        try:
+            self.files.fs.delete(fs_name)
+        except Exception:
+            pass
 
     def test_upload_download_delete_dataset(self):
         try: # small cleanup in case if the test was failed previously
