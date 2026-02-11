@@ -57,3 +57,4 @@ class Zosmf(SdkApi):  # type: ignore
         custom_args["url"] = "{}/systems".format(self._request_endpoint)
         response_json = self.request_handler.perform_request("GET", custom_args, expected_code=[200])
         return ZosmfResponse(response_json)
+

@@ -1,12 +1,11 @@
 """Unit tests for the Zowe Python SDK z/OS Files package."""
 
-import re
 from unittest import TestCase, mock
 
-from zowe.zos_files_for_zowe_sdk import Datasets, Files, exceptions
+from zowe.zos_files_for_zowe_sdk import Files, exceptions
 
 
-class TestFilesClass(TestCase):
+class TestFileSystemsClass(TestCase):
     """File class unit tests."""
 
     def setUp(self):

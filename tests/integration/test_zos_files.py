@@ -32,6 +32,7 @@ class TestFilesIntegration(unittest.TestCase):
         self.test_member_generic = f'{self.files_fixtures["TEST_PDS"]}(TEST)'
         self.test_ds_upload = f'{self.files_fixtures["TEST_PDS"]}({self.files_fixtures["TEST_MEMBER_NEW"]})'
         self.test_uss_upload = self.files_fixtures["TEST_USS_NEW"]
+        self.test_uss_create = self.files_fixtures["TEST_USS_NEW_CREATE"]
         self.test1_zfs_file_system = f'{self.user_name}.{self.files_fixtures["TEST1_ZFS"]}'
         self.test2_zfs_file_system = f'{self.user_name}.{self.files_fixtures["TEST2_ZFS"]}'
         self.create_zfs_options = {"perms": 755, "cylsPri": 10, "cylsSec": 2, "timeout": 20}
@@ -147,6 +148,12 @@ class TestFilesIntegration(unittest.TestCase):
             pass
 
     def test_upload_download_delete_dataset(self):
+        try: # small cleanup in case if the test was failed previously
+            self.files.ds.delete(self.files_fixtures["TEST_PDS"], member_name=self.files_fixtures["TEST_MEMBER_NEW"])
+            os.unlink(SAMPLE_JCL_FIXTURE_PATH + ".tmp")
+        except Exception:
+            pass
+
         self.files.ds.upload_file(SAMPLE_JCL_FIXTURE_PATH, self.test_ds_upload)
         self.files.ds.download(self.test_ds_upload, SAMPLE_JCL_FIXTURE_PATH + ".tmp")
 
@@ -160,6 +167,12 @@ class TestFilesIntegration(unittest.TestCase):
         os.unlink(SAMPLE_JCL_FIXTURE_PATH + ".tmp")
 
     def test_upload_download_delete_uss(self):
+        try: # small cleanup in case if the test was failed previously
+            self.files.uss.delete(self.test_uss_upload)
+            os.unlink(SAMPLE_JCL_FIXTURE_PATH + ".tmp")
+        except Exception:
+            pass
+
         self.files.uss.upload(SAMPLE_JCL_FIXTURE_PATH, self.test_uss_upload)
         self.files.uss.download(self.test_uss_upload, SAMPLE_JCL_FIXTURE_PATH + ".tmp")
         with open(SAMPLE_JCL_FIXTURE_PATH, "r") as in_file:
@@ -170,3 +183,15 @@ class TestFilesIntegration(unittest.TestCase):
 
         self.files.uss.delete(self.test_uss_upload)
         os.unlink(SAMPLE_JCL_FIXTURE_PATH + ".tmp")
+
+    def test_create_write_get_content_delete_uss(self):
+        try: # small cleanup in case if the test was failed previously
+            self.files.uss.delete(self.test_uss_create)
+        except Exception:
+            pass
+
+        self.files.uss.create(self.test_uss_create, "file")
+        self.files.uss.write(self.test_uss_create, "हैलो वर्ल्ड", encoding="IBM-1047")
+        curr_content = self.files.uss.get_content(self.test_uss_create, file_encoding="UTF-8", receive_encoding="UTF-8")
+        self.assertEqual(curr_content, "हैलो वर्ल्ड")
+        self.files.uss.delete(self.test_uss_create)

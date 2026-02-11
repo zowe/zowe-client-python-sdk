@@ -11,13 +11,17 @@ Copyright Contributors to the Zowe Project.
 """
 
 import os
-from typing import Optional, Any, Union
+from typing import Any, Optional, Union
 
 from requests import Response
-
 from zowe.core_for_zowe_sdk import SdkApi
 from zowe.core_for_zowe_sdk.exceptions import FileNotFound
-from zowe.zos_files_for_zowe_sdk.constants import FileType, zos_file_constants
+from zowe.zos_files_for_zowe_sdk.api import BaseFilesApi
+from zowe.zos_files_for_zowe_sdk.constants import (
+    ContentType,
+    FileType,
+    zos_file_constants,
+)
 from zowe.zos_files_for_zowe_sdk.response import DatasetListResponse, MemberListResponse
 
 _ZOWE_FILES_DEFAULT_ENCODING = zos_file_constants["ZoweFilesDefaultEncoding"]
@@ -292,7 +296,7 @@ class DatasetOption:
         return {key.replace("_DatasetOption__", ""): value for key, value in self.__dict__.items() if value is not None}
 
 
-class Datasets(SdkApi):  # type: ignore[misc]
+class Datasets(BaseFilesApi):  # type: ignore[misc]
     """
     Class used to represent the base z/OSMF Datasets API.
 
@@ -307,9 +311,7 @@ class Datasets(SdkApi):  # type: ignore[misc]
     """
 
     def __init__(self, connection: dict[str, Any], log: bool = True) -> None:
-
-        super().__init__(connection, "/zosmf/restfiles/", logger_name=__name__, log=log)
-        self._default_headers["Accept-Encoding"] = "gzip"
+        super().__init__(connection, log=log)
 
     def list(self, name_pattern: str, return_attributes: bool = False) -> DatasetListResponse:
         """
@@ -562,7 +564,12 @@ class Datasets(SdkApi):  # type: ignore[misc]
         custom_args["url"] = "{}ds/{}".format(self._request_endpoint, self._encode_uri_component(dataset_name))
         self.request_handler.perform_request("POST", custom_args, expected_code=[201])
 
-    def get_content(self, dataset_name: str, stream: bool = False) -> Union[str, None, Response]:
+    def retrieve_content(
+        self,
+        dataset_name: str,
+        content_type: ContentType = ContentType.TEXT,
+        as_stream: bool = False
+    ) -> Union[str, None, Response]:
         """
         Retrieve the contents of a given dataset.
 
@@ -570,14 +577,28 @@ class Datasets(SdkApi):  # type: ignore[misc]
         ----------
         dataset_name: str
             The name of the dataset
-        stream: bool
+        content_type: ContentType, optional
+            The content type to receive
+            ("text", "binary" or "record" (include a 4 byte big endian record len prefix), "text" by default)
+        as_stream: bool, optional
             Specifies whether the response is streamed. Default: False
 
         Returns
         -------
         Union[str, None, Response]
-            Contents of a given dataset in string, or None if the dataset is empty, or a requests.Response object if streaming.
+            Contents of a given dataset in string, or None if the dataset is empty,
+            or a Response object with content of the file if `as_stream == True`
         """
+        custom_args = self._create_custom_request_arguments()
+        custom_args["url"] = "{}ds/{}".format(self._request_endpoint, self._encode_uri_component(dataset_name))
+        custom_args["headers"]["X-IBM-Data-Type"] = content_type.value
+        if content_type == ContentType.RECORD or content_type == ContentType.BINARY:
+            custom_args["headers"]["Accept"] = "application/octet-stream"
+        response = self.request_handler.perform_request("GET", custom_args, stream=as_stream)
+        return response
+
+    def get_content(self, dataset_name: str, stream: bool = False) -> Union[str, None, Response]:
+        """Use `retrieve_content()` instead of this deprecated function."""
         custom_args = self._create_custom_request_arguments()
         custom_args["url"] = "{}ds/{}".format(self._request_endpoint, self._encode_uri_component(dataset_name))
         response: Union[str, Response] = self.request_handler.perform_request("GET", custom_args, stream=stream)
@@ -586,23 +607,7 @@ class Datasets(SdkApi):  # type: ignore[misc]
     def get_binary_content(
         self, dataset_name: str, stream: bool = False, with_prefixes: bool = False
     ) -> Union[bytes, Response]:
-        """
-        Retrieve the contents of a given dataset as a binary bytes object.
-
-        Parameters
-        ----------
-        dataset_name: str
-            Name of the dataset to retrieve
-        stream: bool
-            Specifies whether the request is streaming
-        with_prefixes: bool
-            If True include a 4 byte big endian record len prefix. Default: False
-
-        Returns
-        -------
-        Union[bytes, Response]
-            Contents of a given dataset in bytes or a requests.Response object if streaming.
-        """
+        """Use `retrieve_content(content_type=ContentType.BINARY)` instead of this deprecated function."""
         custom_args = self._create_custom_request_arguments()
         custom_args["url"] = "{}ds/{}".format(self._request_endpoint, self._encode_uri_component(dataset_name))
         custom_args["headers"]["Accept"] = "application/octet-stream"
@@ -650,62 +655,93 @@ class Datasets(SdkApi):  # type: ignore[misc]
 
         self.request_handler.perform_request("PUT", custom_args, expected_code=[204, 201])
 
-    def download(self, dataset_name: str, output_file: str) -> None:
+    def perform_download(
+        self, dataset_name: str, local_file_path: str, content_type: ContentType = ContentType.TEXT
+    ) -> None:
         """
-        Retrieve the contents of a dataset and saves it to a given file.
+        Retrieve the contents of a data set and save it to a local file.
 
         Parameters
         ----------
         dataset_name: str
             Name of the dataset to be downloaded
-        output_file: str
+        local_file_path: str
             Name of the file to be saved locally
+        content_type: ContentType, optional
+            The content type to receive
+            ("text", "binary" or "record" (include a 4 byte big endian record len prefix), "text" by default)
+
+        Raises
+        ------
+        TypeError
+            Thrown when the `retrieve_content` request does not return a valid Response object.
         """
+        response = self.retrieve_content(dataset_name, content_type=content_type, as_stream=True)
+        if not isinstance(response, Response):
+            raise TypeError(f"Expected Response, got {type(response)}")
+        (write_mode, write_in_encoding, decode_unicode) = (
+            ("w", "utf-8", True)
+            if content_type == ContentType.TEXT
+            else ("wb", None, False)
+        )
+        with open(local_file_path, write_mode, encoding=write_in_encoding) as f:
+            for chunk in response.iter_content(chunk_size=4096, decode_unicode=decode_unicode):
+                f.write(chunk)
+
+
+    def download(self, dataset_name: str, output_file: str) -> None:
+        """Use `perform_download(content_type=ContenType.TEXT)` instead of this deprecated function."""
         response = self.get_content(dataset_name, stream=True)
         with open(output_file, "w", encoding="utf-8") as f:
             for chunk in response.iter_content(chunk_size=4096, decode_unicode=True):
                 f.write(chunk)
 
     def download_binary(self, dataset_name: str, output_file: str, with_prefixes: bool = False) -> None:
-        """
-        Retrieve the contents of a binary dataset and saves it to a given file.
-
-        Parameters
-        ----------
-        dataset_name : str
-            Name of the dataset to download
-        output_file : str
-            Name of the local file to create
-        with_prefixes : bool
-            If true, include a four big endian bytes record length prefix. Default: False
-        """
+        """Use `perform_download()` instead of this deprecated function."""
         response = self.get_binary_content(dataset_name, with_prefixes=with_prefixes, stream=True)
         with open(output_file, "wb") as f:
             for chunk in response.iter_content(chunk_size=4096):
                 f.write(chunk)
 
-    def upload_file(
-        self, input_file: str, dataset_name: str, encoding: str = _ZOWE_FILES_DEFAULT_ENCODING, binary: bool = False
+    def perform_upload(
+        self,
+        local_file_path: str,
+        dataset_name: str,
+        content_type: ContentType = ContentType.TEXT,
+        upload_in_encoding: str = _ZOWE_FILES_DEFAULT_ENCODING
     ) -> None:
         """
-        Upload contents of a given file and uploads it to a dataset.
+        Upload contents of a local file to a data set.
 
         Parameters
         ----------
-        input_file: str
+        local_file_path: str
             Name of the file to be uploaded
         dataset_name: str
             Name of the dataset to be created
-        encoding: str
-            Specifies the encoding name (e.g. IBM-1047)
-        binary: bool
-            specifies whether the file is binary
+        content_type: ContentType, optional
+            The content type to receive
+            ("text", "binary" or "record" (include a 4 byte big endian record len prefix), "text" by default)
+        upload_in_encoding: str, optional
+            Specifies the encoding to upload the content in (e.g. IBM-1047, "utf-8" by default)
 
         Raises
         ------
         FileNotFound
             Thrown when a file is not found at provided location
         """
+        if os.path.isfile(local_file_path):
+            (read_mode, read_in_encoding) = ("r", "utf-8") if content_type == ContentType.TEXT else ("rb", None)
+            with open(local_file_path, read_mode, encoding=read_in_encoding) as in_file:
+                self.write(dataset_name, in_file.read(), encoding=upload_in_encoding)
+        else:
+            self.logger.error(f"File {local_file_path} not found.")
+            raise FileNotFound(local_file_path)
+
+    def upload_file(
+        self, input_file: str, dataset_name: str, encoding: str = _ZOWE_FILES_DEFAULT_ENCODING, binary: bool = False
+    ) -> None:
+        """Use `perform_upload()` instead of this deprecated function."""
         if os.path.isfile(input_file):
             if binary:
                 with open(input_file, "rb") as in_file:

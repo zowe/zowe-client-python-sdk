@@ -13,6 +13,8 @@ Copyright Contributors to the Zowe Project.
 zos_file_constants = {
     "MaxAllocationQuantity": 16777215,
     "ZoweFilesDefaultEncoding": "utf-8",
+    "min_timeout": 5,
+    "max_timeout": 600,
 }
 from enum import Enum
 
@@ -23,3 +25,11 @@ class FileType(Enum):
     BINARY = "binary"
     EXECUTABLE = "executable"
     TEXT = "text"
+
+
+class ContentType(Enum):
+    """Represents a content type to fetch or upload."""
+
+    BINARY = "binary"
+    TEXT = "text"
+    RECORD = "record"

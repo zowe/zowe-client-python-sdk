@@ -13,17 +13,18 @@ Copyright Contributors to the Zowe Project.
 import os
 from typing import Any, Optional, Union
 
-import requests
+from requests import Response
 from zowe.core_for_zowe_sdk import SdkApi
 from zowe.core_for_zowe_sdk.exceptions import FileNotFound
-from zowe.zos_files_for_zowe_sdk.constants import zos_file_constants
+from zowe.zos_files_for_zowe_sdk.constants import ContentType, zos_file_constants
+from zowe.zos_files_for_zowe_sdk.api import BaseFilesApi
 
-from .response import USSListResponse
+from .response import USSFileTag, USSListResponse
 
 _ZOWE_FILES_DEFAULT_ENCODING = zos_file_constants["ZoweFilesDefaultEncoding"]
 
 
-class USSFiles(SdkApi):  # type: ignore
+class USSFiles(BaseFilesApi):  # type: ignore
     """
     Class used to represent the base z/OSMF USSFiles API.
 
@@ -38,8 +39,7 @@ class USSFiles(SdkApi):  # type: ignore
     """
 
     def __init__(self, connection: dict[str, Any], log: bool = True):
-        super().__init__(connection, "/zosmf/restfiles/", logger_name=__name__, log=log)
-        self._default_headers["Accept-Encoding"] = "gzip"
+        super().__init__(connection, log=log)
 
     def list(self, path: str) -> USSListResponse:
         """
@@ -99,113 +99,280 @@ class USSFiles(SdkApi):  # type: ignore
         custom_args["url"] = "{}fs/{}".format(self._request_endpoint, file_path.lstrip("/"))
         self.request_handler.perform_request("POST", custom_args, expected_code=[201])
 
-    def write(self, filepath_name: str, data: str, encoding: str = _ZOWE_FILES_DEFAULT_ENCODING) -> None:
+    def write(self, filepath_name: str, data: Union[str, bytes], encoding: str = _ZOWE_FILES_DEFAULT_ENCODING) -> None:
         """
-        Write content to an existing UNIX file.
+        Write content to a UNIX file or create it with the content if it does not exist.
 
         Parameters
         ----------
         filepath_name: str
             Path of the file
-        data: str
+        data: Union[str, bytes]
             Contents to be written
         encoding: str
             Specifies the encoding name (e.g. IBM-1047)
+
+        Raises
+        ------
+        ValueError
+            Data must be either a string or bytes.
         """
         custom_args = self._create_custom_request_arguments()
         custom_args["url"] = "{}fs/{}".format(self._request_endpoint, filepath_name.lstrip("/"))
         custom_args["data"] = data
-        custom_args["headers"]["Content-Type"] = "text/plain; charset={}".format(encoding)
+
+        # Check if the data is a string (text content)
+        if isinstance(data, str):
+            custom_args["headers"]["Content-Type"] = "text/plain; charset={}".format(encoding)
+        # Check if the data is bytes (binary content)
+        elif isinstance(data, bytes):
+            custom_args["headers"]["Content-Type"] = "application/octet-stream"
+            custom_args["headers"]["X-IBM-Data-Type"] = "binary"
+        # Raise an error if data is neither str nor bytes
+        else:
+            raise ValueError("Data must be either a string or bytes.")
+
         self.request_handler.perform_request("PUT", custom_args, expected_code=[204, 201])
 
-    def get_content(self, filepath_name: str) -> Optional[str]:
+    def retrieve_content(
+        self,
+        file_path: str,
+        content_type: ContentType = ContentType.TEXT,
+        remote_file_encoding: str = "IBM-1047",
+        receive_in_encoding: str = "ISO8859-1",
+        as_stream: bool = False
+    ) -> Union[str, None, Response]:
         """
         Retrieve the content of a filename. The complete path must be specified.
 
         Parameters
         ----------
-        filepath_name: str
+        file_path: str
             Path of the file
+        content_type: ContentType, optional
+            The content type to receive ("text" or "binary", "text" by default)
+        remote_file_encoding: str, optional
+            Encoding file content originally in (to convert from; by default, it is always being converted from "IBM-1047")
+        receive_in_encoding: str, optional
+            Encoding to convert file content to (to convert to; by default, it is always being converted to "ISO8859-1")
+        as_stream: bool, optional
+            Specifies whether the response is streamed. Default: False
 
         Returns
         -------
-        Optional[str]
-            Contents of a given dataset in string, or None if the dataset is empty
+        Union[str, None, Response]
+            Contents of a given USS file in string, or None if the file is empty,
+            or a Response object with content of the file if `as_stream == True`
+
+        Raises
+        ------
+        ValueError
+            Content type must be either ContenType.TEXT or ContentType.BINARY.
         """
         custom_args = self._create_custom_request_arguments()
+        custom_args["url"] = "{}fs/{}".format(
+            self._request_endpoint,
+            self._encode_uri_component(file_path.lstrip("/"))
+        )
+        if content_type == ContentType.BINARY:
+            custom_args["headers"]["X-IBM-Data-Type"] = "binary"
+        elif content_type == ContentType.TEXT:
+            custom_args["headers"]["X-IBM-Data-Type"] = "text;fileEncoding={}".format(remote_file_encoding)
+            custom_args["headers"]["Content-Type"] = "text/plain; charset={}".format(receive_in_encoding)
+        else:
+            error_str = "Content type must be either \"{}\" or \"{}\".".format(
+                ContentType.TEXT.value,
+                ContentType.BINARY.value
+            )
+            raise ValueError(error_str)
+        response = self.request_handler.perform_request("GET", custom_args, stream=as_stream)
+        return response
+
+    def get_content(
+        self, 
+        filepath_name: str,
+        file_encoding: str = "IBM-1047",
+        receive_encoding: str = "ISO8859-1"
+    ) -> Optional[str]:
+        """Use `retrieve_content()` instead of this deprecated function."""
+        custom_args = self._create_custom_request_arguments()
         custom_args["url"] = "{}fs{}".format(self._request_endpoint, filepath_name)
+        custom_args["headers"]["X-IBM-Data-Type"] = "text;fileEncoding={}".format(file_encoding)
+        custom_args["headers"]["Content-Type"] = "text/plain; charset={}".format(receive_encoding)
         response_json = self.request_handler.perform_request("GET", custom_args)
         return response_json
 
-    def get_content_streamed(self, file_path: str, binary: bool = False) -> requests.Response:
-        """
-        Retrieve the contents of a given USS file streamed.
-
-        Parameters
-        ----------
-        file_path: str
-            Path of the file
-        binary: bool
-            Specifies whether the contents are binary
-
-        Returns
-        -------
-        requests.Response
-            A requests.Response object with content of the file
-        """
+    def get_content_streamed(
+        self,
+        file_path: str,
+        binary: bool = False,
+        file_encoding: str = "IBM-1047",
+        receive_encoding: str = "ISO8859-1"
+    ) -> Response:
+        """Use `retrieve_content(as_stream=True)` instead of this deprecated function."""
         custom_args = self._create_custom_request_arguments()
         custom_args["url"] = "{}fs/{}".format(self._request_endpoint, self._encode_uri_component(file_path.lstrip("/")))
         if binary:
             custom_args["headers"]["X-IBM-Data-Type"] = "binary"
+        else:
+            custom_args["headers"]["X-IBM-Data-Type"] = "text;fileEncoding={}".format(file_encoding)
+            custom_args["headers"]["Content-Type"] = "text/plain; charset={}".format(receive_encoding)
         response = self.request_handler.perform_request("GET", custom_args, stream=True)
         return response
-
-    def download(self, file_path: str, output_file: str, binary: bool = False) -> None:
+    
+    def perform_download(
+        self,
+        remote_file_path: str,
+        local_file_path: str,
+        content_type: ContentType = ContentType.TEXT,
+        remote_file_encoding: str = "IBM-1047",
+        receive_in_encoding: str = "UTF-8"
+    ) -> None:
         """
-        Retrieve the contents of a USS file and saves it to a local file.
+        Retrieve the contents of a USS file and save it to a local file.
 
         Parameters
         ----------
-        file_path: str
+        remote_file_path: str
             Path of the file to be downloaded
-        output_file: str
+        local_file_path: str
             Name of the file to be saved locally
-        binary: bool
-            Specifies whether the contents are binary
+        content_type: ContentType, optional
+            Specifies the content type to fetch ("text" or "binary", "text" by default)
+        remote_file_encoding: str, optional
+            Encoding file content originally in (to convert from; by default, it is always being converted from "IBM-1047")
+        receive_in_encoding: str, optional
+            Encoding to convert file content to (to convert to; by default,
+            it is always being converted to "UTF-8" during download). Ignored when "binary" is True
 
         Raises
         ------
         TypeError
-            Thrown when the `get_content_streamed` request does not return a valid Response object.
+            Thrown when the `retrieve_content` request does not return a valid Response object.
+        ValueError
+            Content type must be either ContenType.TEXT or ContentType.BINARY.
         """
-        response = self.get_content_streamed(file_path, binary)
-        if not isinstance(response, requests.Response):
-            raise TypeError(f"Expected requests.Response, got {type(response)}")
-        with open(output_file, "wb" if binary else "w", encoding="utf-8") as f:
+        response = self.retrieve_content(
+            remote_file_path,
+            content_type=content_type,
+            remote_file_encoding=remote_file_encoding,
+            receive_in_encoding=receive_in_encoding,
+            as_stream=True
+        )
+        if not isinstance(response, Response):
+            raise TypeError(f"Expected Response, got {type(response)}")
+        if content_type == ContentType.BINARY:
+            write_mode = "wb"
+            write_in_encoding = None
+            decode_unicode = False
+        elif content_type == ContentType.TEXT:
+            write_mode = "w"
+            write_in_encoding = receive_in_encoding
+            decode_unicode = True
+        else:
+            error_str = "Content type must be either \"{}\" or \"{}\".".format(
+                ContentType.TEXT.value,
+                ContentType.BINARY.value
+            )
+            raise ValueError(error_str)
+        with open(local_file_path, write_mode, encoding=write_in_encoding) as f:
+            for chunk in response.iter_content(chunk_size=4096, decode_unicode=decode_unicode):
+                f.write(chunk)
+
+    def download(
+        self,
+        file_path: str,
+        output_file: str,
+        binary: bool = False,
+        file_encoding: str = "IBM-1047",
+        receive_encoding: str = "UTF-8"
+    ) -> None:
+        """Use `perform_download` instead of this deprecated function."""
+        response = self.get_content_streamed(file_path, binary, file_encoding, receive_encoding)
+        if not isinstance(response, Response):
+            raise TypeError(f"Expected Response, got {type(response)}")
+        with open(output_file, "wb" if binary else "w", encoding=receive_encoding if not binary else None) as f:
             for chunk in response.iter_content(chunk_size=4096, decode_unicode=not binary):
                 f.write(chunk)
 
-    def upload(self, input_file: str, filepath_name: str, encoding: str = _ZOWE_FILES_DEFAULT_ENCODING) -> None:
+    def perform_upload(
+        self,
+        local_file_path: str,
+        remote_file_path: str,
+        content_type: ContentType = ContentType.TEXT,
+        upload_in_encoding: str = _ZOWE_FILES_DEFAULT_ENCODING
+    ) -> None:
         """
-        Upload contents of a given file and saves it to a file at the given USS path.
+        Upload contents of a given file and save it to a file at the given USS path.
 
         Parameters
         ----------
-        input_file: str
+        local_file_path: str
             Name of the file to be uploaded
-        filepath_name: str
+        remote_file_path: str
             Path of the file where it will be created
-        encoding: str
+        content_type: ContentType, optional
+            Specifies the content type to fetch ("text" or "binary", "text" by default)
+        upload_in_encoding: str
             Specifies encoding schema of the uploaded file
 
         Raises
         ------
         FileNotFound
             Thrown when specific file is not found.
+        ValueError
+            Content type must be either ContenType.TEXT or ContentType.BINARY.
         """
+        if os.path.isfile(local_file_path):
+            if content_type == ContentType.BINARY:
+                read_mode = "rb"
+                read_in_encoding = None
+            elif content_type == ContentType.TEXT:
+                read_mode = "r"
+                read_in_encoding = "utf-8"
+            else:
+                error_str = "Content type must be either \"{}\" or \"{}\".".format(
+                    ContentType.TEXT.value,
+                    ContentType.BINARY.value
+                )
+                raise ValueError(error_str)
+            with open(local_file_path, read_mode, encoding=read_in_encoding) as in_file:
+                self.write(remote_file_path, in_file.read(), encoding=upload_in_encoding)
+        else:
+            self.logger.error(f"File {local_file_path} not found.")
+            raise FileNotFound(local_file_path)
+
+    def upload(
+        self, input_file: str, filepath_name: str, encoding: str = _ZOWE_FILES_DEFAULT_ENCODING, binary: bool = False
+    ) -> None:
+        """Use `perform_upload()` instead of this deprecated function."""
         if os.path.isfile(input_file):
-            with open(input_file, "r", encoding="utf-8") as in_file:
-                self.write(filepath_name, in_file.read(), encoding=encoding)
+            if binary:
+                with open(input_file, "rb") as in_file:
+                    self.write(filepath_name, in_file.read())
+            else:
+                with open(input_file, "r", encoding="utf-8") as in_file:
+                    self.write(filepath_name, in_file.read(), encoding=encoding)
         else:
             self.logger.error(f"File {input_file} not found.")
             raise FileNotFound(input_file)
+
+    def get_file_tag(self, filepath_name: str) -> USSFileTag:
+        """
+        Retrieve the file tag if specified for the filename. Raises exception if it is impossible to identify the tag info.
+
+        Parameters
+        ----------
+        filepath_name: str
+            Path of the file
+
+        Returns
+        -------
+        USSFileTag
+            Tag info of a given file.
+        """
+        custom_args = self._create_custom_request_arguments()
+        custom_args["url"] = "{}fs{}".format(self._request_endpoint, filepath_name)
+        custom_args["json"] = { "request": "chtag", "action": "list" }
+        response_json = self.request_handler.perform_request("PUT", custom_args)
+        return USSFileTag(response_json)

@@ -10,15 +10,13 @@ SPDX-License-Identifier: EPL-2.0
 Copyright Contributors to the Zowe Project.
 """
 
-from typing import Optional, Any, Union
+from typing import Any, Optional, Union
 
 from requests import Response
-
 from zowe.core_for_zowe_sdk import SdkApi
 from zowe.zos_files_for_zowe_sdk.constants import FileType, zos_file_constants
 from zowe.zos_files_for_zowe_sdk.response import DatasetListResponse, MemberListResponse
 from zowe.zos_files_for_zowe_sdk.response.file_system import FileSystemListResponse
-
 
 from .datasets import DatasetOption, Datasets
 from .file_system import FileSystems
@@ -54,21 +52,21 @@ class Files(SdkApi):  # type: ignore
 
     def __init__(self, connection: dict[str, Any], log: bool = True):
         super().__init__(connection, "/zosmf/restfiles/", logger_name=__name__, log=log)
-        self._default_headers["Accept-Encoding"] = "gzip"
-        self.ds = Datasets(connection)
-        self.uss = USSFiles(connection)
-        self.fs = FileSystems(connection)
+
+        self.ds = Datasets(connection, log)
+        self.uss = USSFiles(connection, log)
+        self.fs = FileSystems(connection, log)
 
     def list_files(self, path: str) -> Any:
         """Use uss.list() instead of this deprecated function."""
         return self.uss.list(path)
 
     def get_file_content_streamed(self, file_path: str, binary: bool = False) -> Response:
-        """Use uss.get_content_streamed() instead of this deprecated function."""
+        """Use `uss.retrieve_content(as_stream=True)` instead of this deprecated function."""
         return self.uss.get_content_streamed(file_path, binary)
 
     def get_file_content(self, filepath_name: str) -> Optional[str]:
-        """Use uss.get_content() instead of this deprecated function."""
+        """Use `uss.retrieve_content()` instead of this deprecated function."""
         return self.uss.get_content(filepath_name)
 
     def delete_uss(self, filepath_name: str, recursive: bool = False) -> None:
@@ -134,15 +132,20 @@ class Files(SdkApi):  # type: ignore
         return self.uss.create(file_path, file_type, mode)
 
     def get_dsn_content_streamed(self, dataset_name: str) -> Response:
-        """Use ds.get_content() instead of this deprecated function."""
+        """Use `ds.retrieve_content(as_stream=True)` instead of this deprecated function."""
         return self.ds.get_content(dataset_name, stream=True)
 
     def get_dsn_binary_content(self, dataset_name: str, with_prefixes: bool = False) -> bytes:
-        """Use ds.get_binary_content() instead of this deprecated function."""
+        """Use `ds.retrieve_content(content_type=ContentType.BINARY)` instead of this deprecated function."""
         return self.ds.get_binary_content(dataset_name, with_prefixes)
 
     def get_dsn_binary_content_streamed(self, dataset_name: str, with_prefixes: bool = False) -> Response:
-        """Use ds.get_binary_content() instead of this deprecated function."""
+        """
+        Get binary content from the provided data set as a streamed Response.
+
+        This function is deprecated.
+        Use `ds.retrieve_content(content_type=ContentType.BINARY, as_stream=True)` instead.
+        """
         return self.ds.get_binary_content(dataset_name, stream=True, with_prefixes=with_prefixes)
 
     def write_to_dsn(
@@ -152,16 +155,17 @@ class Files(SdkApi):  # type: ignore
         return self.ds.write(dataset_name, data, encoding)
 
     def download_dsn(self, dataset_name: str, output_file: str) -> None:
-        """Use ds.download() instead of this deprecated function."""
+        """Use `ds.perform_download()` instead of this deprecated function."""
         return self.ds.download(dataset_name, output_file)
 
     def download_binary_dsn(self, dataset_name: str, output_file: str, with_prefixes: bool = False) -> None:
-        """Use ds.download_binary() instead of this deprecated function."""
+        """Use `ds.perform_download(content_type=ContentType.BINARY)` instead of this deprecated function."""
         return self.ds.download_binary(dataset_name, output_file, with_prefixes)
 
     def upload_file_to_dsn(
         self, input_file: str, dataset_name: str, encoding: str = _ZOWE_FILES_DEFAULT_ENCODING, binary: bool = False
     ) -> None:
+        """Use `ds.perform_upload()` instead of this deprecated function."""
         """Use ds.upload_file() instead of this deprecated function."""
         return self.ds.upload_file(input_file, dataset_name, encoding, binary)
 
@@ -172,11 +176,11 @@ class Files(SdkApi):  # type: ignore
     def upload_file_to_uss(
         self, input_file: str, filepath_name: str, encoding: str = _ZOWE_FILES_DEFAULT_ENCODING
     ) -> None:
-        """Use uss.upload() instead of this deprecated function."""
+        """Use `uss.perform_upload()` instead of this deprecated function."""
         return self.uss.upload(input_file, filepath_name, encoding)
 
     def download_uss(self, file_path: str, output_file: str, binary: bool = False) -> None:
-        """Use uss.download() instead of this deprecated function."""
+        """Use `uss.perform_download()` instead of this deprecated function."""
         return self.uss.download(file_path, output_file, binary)
 
     def delete_data_set(
