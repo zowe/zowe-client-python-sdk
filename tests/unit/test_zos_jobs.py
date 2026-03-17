@@ -1,8 +1,10 @@
 """Unit tests for the Zowe Python SDK z/OS Jobs package."""
 
+from datetime import datetime
 from unittest import TestCase, mock
 
 from zowe.zos_jobs_for_zowe_sdk import Jobs
+from zowe.zos_jobs_for_zowe_sdk.response.jobs import JobResponse
 
 
 class TestJobsClass(TestCase):
@@ -78,6 +80,71 @@ class TestJobsClass(TestCase):
 
         Jobs(self.test_profile).release_job("TESTJOB2", "JOB00084")
         mock_send_request.assert_called_once()
+
+    @mock.patch("requests.Session.send")
+    def test_list_jobs(self, mock_send_request):
+        """Test list jobs sends request"""
+        mock_response = mock.Mock()
+        mock_response.headers = {"Content-Type": "application/json"}
+        mock_response.status_code = 200
+        mock_response.json.return_value = [
+            {
+                "class": "T",
+                "files-url": "https://tsthost:443/zosmf/restjobs/jobs/TESTJI1XCFPLX01E1BE8B01.......%3A/files",
+                "job-correlator": "TESTJI1XCFPLX01E1BE8B01.......:",
+                "jobid": "TESTJI1",
+                "jobname": "TESTJN1",
+                "owner": "TSTUSR",
+                "phase": 0,
+                "phasename": "Job is on the hard copy queue",
+                "retcode": "CC 0000",
+                "status": "OUTPUT",
+                "subsystem": "JES2",
+                "type": "JOB",
+                "url": "https://tsthost:443/zosmf/restjobs/jobs/TESTJI1XCFPLX01E1BE8B01.......%3A"
+            }
+        ]
+        mock_send_request.return_value = mock_response
+        result = Jobs(self.test_profile).list_jobs()
+        assert len(result) == 1
+        assert isinstance(result[0], JobResponse)
+        self.assertEqual(mock_send_request.call_count, 1)
+
+    @mock.patch("requests.Session.send")
+    def test_list_jobs_ext(self, mock_send_request):
+        """Test list jobs sends request with exec-data fetched"""
+        mock_response = mock.Mock()
+        mock_response.headers = {"Content-Type": "application/json"}
+        mock_response.status_code = 200
+        mock_response.json.return_value = [
+            {
+                "class": "T",
+                "files-url": "https://tsthost:443/zosmf/restjobs/jobs/TESTJI2XCFPLX01E1BE8B01.......%3A/files",
+                "job-correlator": "TESTJI2XCFPLX01E1BE8B01.......:",
+                "jobid": "TESTJI2",
+                "jobname": "TSTPREF",
+                "owner": "TSTOWR",
+                "phase": 0,
+                "phasename": "Job is actively executing",
+                "retcode": "CC 0000",
+                "status": "ACTIVE",
+                "subsystem": "JES2",
+                "type": "JOB",
+                "url": "https://tsthost:443/zosmf/restjobs/jobs/TESTJI2XCFPLX01E1BE8B01.......%3A",
+                "exec-ended": "2025-11-05T13:52:21.920Z",
+                "exec-member": "SMFT",
+                "exec-started": "2025-11-05T13:52:21.310Z",
+                "exec-submitted": "2025-11-05T13:52:21.290Z",
+                "exec-system": "SYST"
+            }
+        ]
+        mock_send_request.return_value = mock_response
+        result = Jobs(self.test_profile).list_jobs("TSTOWR", "TSTPREF", 100, "SOME-USER-COR", True, 'ACTIVE')
+        assert len(result) == 1
+        assert isinstance(result[0], JobResponse)
+        assert result[0].exec_system is not None
+        assert isinstance(result[0].exec_submitted, datetime)
+        self.assertEqual(mock_send_request.call_count, 1)
 
     @mock.patch("requests.Session.send")
     def test_change_job_class(self, mock_send_request):

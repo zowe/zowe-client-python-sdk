@@ -11,7 +11,7 @@ Copyright Contributors to the Zowe Project.
 """
 
 import os
-from typing import Any, Optional, Union
+from typing import Any, Literal, Optional, Union
 
 from requests import Response
 from zowe.core_for_zowe_sdk import SdkApi
@@ -205,19 +205,16 @@ class DatasetOption:
         return self.__recfm
 
     @recfm.setter
-    def recfm(self, recfm: Optional[str]) -> None:
+    def recfm(self, recfm: Optional[Literal["F", "FB", "V", "VB", "U", "FBA", "FBM", "VBA", "VBM"]]) -> None:
         """Set the record format."""
-        if recfm is None:
-            if self.like is not None:
-                self.__recfm = None
-            else:
-                self.__recfm = "F"
-        elif recfm not in ("F", "FB", "V", "VB", "U", "FBA", "FBM", "VBA", "VBM"):
-            raise KeyError(
-                "'recfm' must be one of the following: 'F', 'FB', 'V', 'VB', 'U', 'FBA', 'FBM', 'VBA', 'VBM'"
-            )
-        else:
+        if recfm is not None:
+            if recfm not in ("F", "FB", "V", "VB", "U", "FBA", "FBM", "VBA", "VBM"):
+                raise KeyError(
+                    "'recfm' must be one of the following: 'F', 'FB', 'V', 'VB', 'U', 'FBA', 'FBM', 'VBA', 'VBM'"
+                )
             self.__recfm = recfm
+        else:
+            self.__recfm = None if self.like is not None else "F"
 
     @property
     def blksize(self) -> Optional[int]:
@@ -345,7 +342,7 @@ class Datasets(BaseFilesApi):  # type: ignore[misc]
         member_pattern: Optional[str] = None,
         member_start: Optional[str] = None,
         limit: int = 1000,
-        attributes: str = "member",
+        attributes: Literal["member", "base", "member,total", "base,total"] = "member",
     ) -> MemberListResponse:
         """
         Retrieve the list of members on a given PDS/PDSE.
@@ -360,8 +357,8 @@ class Datasets(BaseFilesApi):  # type: ignore[misc]
             The starting point for listing members
         limit: int
             The maximum number of members returned
-        attributes: str
-            The member attributes to retrieve
+        attributes: Literal['member', 'base', 'member,total', 'base,total'], optional
+            The member attributes to retrieve ("member" by default which means that only member names to be returned)
 
         Returns
         -------
@@ -379,7 +376,7 @@ class Datasets(BaseFilesApi):  # type: ignore[misc]
         custom_args["headers"]["X-IBM-Max-Items"] = "{}".format(limit)
         custom_args["headers"]["X-IBM-Attributes"] = attributes
         response_json = self.request_handler.perform_request("GET", custom_args)
-        return MemberListResponse(response_json, (attributes == "base"))
+        return MemberListResponse(response_json, "base" in attributes)
 
     def copy_data_set_or_member(
         self,
@@ -476,11 +473,18 @@ class Datasets(BaseFilesApi):  # type: ignore[misc]
                         self.logger.error("Can't allocate empty directory blocks.")
                         raise ValueError
         else:
-            dsn_attr = self.list(options.like, return_attributes=True)["items"]
-            for dsn in dsn_attr:
-                if dsn["dsname"] == options.like.upper():
-                    options.blksize = int(dsn["blksz"])
-                    break
+            ds_items = self.list(options.like, return_attributes=True).items
+            if ds_items is not None:
+                if len(ds_items) > 0:
+                    dsn_attr = next((ds_item for ds_item in ds_items if ds_item.dsname.upper() == options.like.upper()), None)
+                    if dsn_attr is not None:
+                        options.blksize = int(dsn_attr.blksz)
+                    else:
+                        raise ValueError(f"Model dataset {options.like.upper()} is not found.")
+                else:
+                    raise ValueError(f"Model dataset {options.like.upper()} is not found.")
+            else:
+                raise ValueError("Could not fetch data set attributes of the model data set.")
 
         custom_args = self._create_custom_request_arguments()
         custom_args["url"] = "{}ds/{}".format(self._request_endpoint, self._encode_uri_component(dataset_name))

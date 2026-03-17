@@ -11,7 +11,7 @@ Copyright Contributors to the Zowe Project.
 """
 
 import os
-from typing import Optional, Any
+from typing import Any, Literal, Optional
 
 from zowe.core_for_zowe_sdk import SdkApi
 
@@ -267,6 +267,8 @@ class Jobs(SdkApi):  # type: ignore
         prefix: str = "*",
         max_jobs: int = 1000,
         user_correlator: Optional[str] = None,
+        fetch_exec_data: bool = False,
+        status: Literal["ACTIVE", "INACTIVE", "ALL"] = "ALL"
     ) -> list[JobResponse]:
         """
         Retrieve list of jobs on JES based on the provided arguments.
@@ -281,6 +283,10 @@ class Jobs(SdkApi):  # type: ignore
             The maximum number of jobs in the output (default is 1000)
         user_correlator: Optional[str]
             The z/OSMF user correlator attribute (default is None)
+        fetch_exec_data: bool, optional
+            The flag to indicate whether 'exec-data' is to be returned for the jobs (default is False)
+        status: Literal['ACTIVE', 'INACTIVE', 'ALL'], optional
+            The status of the jobs to be listed (default is "ALL", which means to fetch both active and inactive jobs)
 
         Returns
         -------
@@ -293,6 +299,10 @@ class Jobs(SdkApi):  # type: ignore
             params["owner"] = owner
         if user_correlator:
             params["user-correlator"] = user_correlator
+        if fetch_exec_data:
+            params["exec-data"] = "Y"
+        if status != "ALL":
+            params["status"] = status
         custom_args["params"] = params
         response_json = self.request_handler.perform_request("GET", custom_args)
         response = []

@@ -46,6 +46,18 @@ class TestRequestHandlerClass(unittest.TestCase):
             mock_logger_error.assert_called_once()
             self.assertIn("The status code", mock_logger_error.call_args[0][0])
 
+    @mock.patch("logging.Logger.warning")
+    @mock.patch("requests.Session.request")
+    def test_logger_unmatched_status_code_ok(self, mock_send_request, mock_logger_warning: mock.MagicMock):
+        """Test logger with unexpected status code, but the code is OK"""
+        mock_send_request.return_value = mock.Mock(ok=True, status_code=210)
+        request_handler = RequestHandler(self.session_arguments)
+        try:
+            request_handler.perform_request("GET", {"url": "https://www.zowe.org"}, stream=True)
+        except exceptions.UnexpectedStatus:
+            mock_logger_warning.assert_called_once()
+            self.assertIn("The status code", mock_logger_warning.call_args[0][0])
+
     @mock.patch("logging.Logger.error")
     def test_logger_perform_request_invalid_method(self, mock_logger_error: mock.MagicMock):
         """Test logger with invalid request method"""
@@ -57,15 +69,15 @@ class TestRequestHandlerClass(unittest.TestCase):
             self.assertIn("Invalid HTTP method input", mock_logger_error.call_args[0][0])
 
     @mock.patch("logging.Logger.error")
-    @mock.patch("requests.Session.send")
+    @mock.patch("requests.Session.request")
     def test_logger_invalid_status_code(self, mock_send_request, mock_logger_error: mock.MagicMock):
-        mock_send_request.return_value = mock.Mock(ok=False)
+        mock_send_request.return_value = mock.Mock(ok=True, status_code=12345)
         request_handler = RequestHandler(self.session_arguments)
         try:
             request_handler.perform_request("GET", {"url": "https://www.zowe.org"}, stream=True)
-        except exceptions.RequestFailed:
+        except exceptions.UnexpectedStatus:
             mock_logger_error.assert_called_once()
-            self.assertIn("HTTP Request has failed", mock_logger_error.call_args[0][0])
+            self.assertIn("The status code", mock_logger_error.call_args[0][0])
         mock_logger_error.assert_called_once
 
     @mock.patch("requests.Session.send")
