@@ -36,7 +36,7 @@ setup(
     install_requires=[
         "deepmerge~=1.1.0",
         "json5~=0.12.1",
-        "jsonschema~=4.25.1",
+        "jsonschema~=4.17.3",
         "pyyaml~=6.0.1",
         "requests~=2.32.0",
         "urllib3>=1.21.1,<3",  # Same version range that `requests` uses
