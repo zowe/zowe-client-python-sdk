@@ -36,10 +36,13 @@ setup(
     install_requires=[
         "deepmerge~=1.1.0",
         "json5~=0.12.1",
-        "jsonschema~=4.25.1",
+        # Prefer older version of jsonschema without Rust dependency
+        "jsonschema~=4.17.3; python_version<'3.14'",
+        "jsonschema~=4.25.1; python_version>='3.14'",
         "pyyaml~=6.0.1",
-        "requests~=2.32.0",
-        "urllib3>=1.21.1,<3",  # Same version range that `requests` uses
+        "requests~=2.33.0",
+        # Pin urllib3 to the same version range that `requests` uses
+        "urllib3>=1.26,<3",
     ],
     extras_require={"secrets": [resolve_sdk_dep("secrets", "~=1.0.0.dev")]},
     packages=find_namespace_packages(include=["zowe.*"]),

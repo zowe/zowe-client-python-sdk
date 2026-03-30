@@ -2,6 +2,13 @@
 
 All notable changes to the Zowe Client Python SDK will be documented in this file.
 
+## Recent Changes
+
+### Bug Fixes
+
+- Downgraded the `jsonschema` dependency of the Core SDK for Python versions older than 3.14 to remove Rust dependency. [#390](https://github.com/zowe/zowe-client-python-sdk/pull/390)
+- Updated the `requests` dependency of the Core SDK for technical currency. [#390](https://github.com/zowe/zowe-client-python-sdk/pull/390)
+
 ## `1.0.0-dev25`
 
 - Support responseTimeout profile property for z/OSMF operations. [#369](https://github.com/zowe/zowe-client-python-sdk/pull/369)

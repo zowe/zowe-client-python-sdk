@@ -12,6 +12,9 @@ that can interact with z/OS components.
 
 ## Installation
 
+> [!WARNING]
+> On z/OS USS, Python 3.14 and newer versions are not supported due to missing Rust build tools. For details, see [#388](https://github.com/zowe/zowe-client-python-sdk/issues/388).
+
 When installing the Zowe Client Python SDK, you have two options:
 
 - Install all the Zowe packages
