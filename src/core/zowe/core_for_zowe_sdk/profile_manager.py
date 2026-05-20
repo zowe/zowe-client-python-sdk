@@ -338,7 +338,8 @@ class ProfileManager:
         profile_type: Optional[str] = None,
         check_missing_props: bool = True,
         validate_schema: Optional[bool] = True,
-        override_with_env: Optional[bool] = False
+        validate_only_project_config: Optional[bool] = False,
+        override_with_env: Optional[bool] = False,
     ) -> dict[str, Any]:
         """
         Load connection details from a team config profile.
@@ -405,10 +406,20 @@ class ProfileManager:
             self.__global_config,
         ):
             if cfg_layer.profiles is None:
+
+                layer_validate_schema = validate_schema
+
+                if validate_only_project_config:
+                    layer_validate_schema = cfg_layer == self.__project_config
+
                 try:
-                    cfg_layer.init_from_file(validate_schema)
+                    cfg_layer.init_from_file(layer_validate_schema)
+
                 except SecureProfileLoadFailed:
-                    self.__logger.warning(f"Could not load secure properties for {cfg_layer.filepath}")
+                    self.__logger.warning(
+                        f"Could not load secure properties for {cfg_layer.filepath}"
+                    )
+
                     warnings.warn(
                         f"Could not load secure properties for {cfg_layer.filepath}",
                         SecurePropsNotFoundWarning,
@@ -452,7 +463,13 @@ class ProfileManager:
 
         if profile_type != BASE_PROFILE:
             profile_props = {
-                **self.load(profile_type=BASE_PROFILE, check_missing_props=False),
+                **self.load(
+                    profile_type=BASE_PROFILE,
+                    check_missing_props=False,
+                    validate_schema=validate_schema,
+                    validate_only_project_config=validate_only_project_config,
+                    override_with_env=override_with_env,
+                ),
                 **profile_props,
             }
 

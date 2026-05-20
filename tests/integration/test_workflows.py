@@ -28,7 +28,10 @@ class TestZosmfWorkflowsIntegration(unittest.TestCase):
 
     def setUp(self):
         """Setup fixtures for Zosmf class."""
-        test_profile = ProfileManager(show_warnings=False).load(profile_type="zosmf")
+        test_profile = ProfileManager(show_warnings=False).load(
+            profile_type="zosmf",
+            validate_only_project_config=True,
+        )
         self.workflows = Workflows(test_profile)
         self.files = Files(test_profile)
         self.addCleanup(lambda: self.workflows.__exit__(None, None, None))
