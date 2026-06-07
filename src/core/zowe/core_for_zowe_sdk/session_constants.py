@@ -35,3 +35,7 @@ AUTH_TYPE_CERT_PEM = "cert-pem"
 # https protocol defaults
 DEFAULT_HTTPS_PORT = 443
 HTTPS_PROTOCOL = "https"
+
+
+# Default timeout in seconds for HTTP requests (None means no timeout)
+DEFAULT_TIMEOUT = None
