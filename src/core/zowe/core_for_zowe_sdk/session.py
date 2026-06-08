@@ -32,6 +32,7 @@ class ISession:
     token_type: Optional[str] = None
     token_value: Optional[str] = None
     cert: Optional[tuple[str, str]] = None
+    timeout: Optional[int] = None  # in seconds, None means no timeout (default)
 
 
 class Session:
