@@ -59,7 +59,7 @@ class SdkApi:
         }
         self.__session_arguments: dict[str, Any] = {
             "verify": self.session.reject_unauthorized,
-            "timeout": 30,
+            "timeout": None,
         }
         self.request_handler = RequestHandler(self.__session_arguments, logger_name=logger_name)
 
