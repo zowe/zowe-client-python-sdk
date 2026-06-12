@@ -32,6 +32,7 @@ class ISession:
     token_type: Optional[str] = None
     token_value: Optional[str] = None
     cert: Optional[tuple[str, str]] = None
+    timeout: Optional[int] = None  # None means no timeout (allows long transfers)
 
 
 class Session:
