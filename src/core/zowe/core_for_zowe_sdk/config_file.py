@@ -74,7 +74,7 @@ class ConfigFile:
     jsonc: Optional[dict[str, Any]] = None
     _missing_secure_props: list[str] = field(default_factory=list)
 
-    __suppress_config_file_warnings: Optional[bool] = (True,)
+    __suppress_config_file_warnings: Optional[bool] = True
     __logger = Log.register_logger(__name__)
 
     @property
