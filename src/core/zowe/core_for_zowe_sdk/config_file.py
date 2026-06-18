@@ -16,7 +16,7 @@ import re
 import warnings
 from copy import deepcopy
 from dataclasses import dataclass, field
-from typing import NamedTuple, Optional, Any, Union
+from typing import Any, NamedTuple, Optional, Union
 
 import json5
 import requests
@@ -50,12 +50,11 @@ class ConfigFile:
     """
     Class used to represent a single config file.
 
-    Mainly it will have the following details :
+    Mainly it will have the following details:
         1. Type ("User Config" or "Team Config")
-            -------
-            User Configs override Team Configs.
-            User Configs are used to have personalised config details
-            that the user don't want to have in the Team Config.
+            - User Configs override Team Configs.
+            - User Configs are used to have personalised config details
+            - that the user don't want to have in the Team Config.
         2. Directory in which the file is located.
         3. Name (excluding .config.json or .config.user.json)
         4. Contents of the file.
@@ -75,7 +74,7 @@ class ConfigFile:
     jsonc: Optional[dict[str, Any]] = None
     _missing_secure_props: list[str] = field(default_factory=list)
 
-    __suppress_config_file_warnings: Optional[bool] = True,
+    __suppress_config_file_warnings: Optional[bool] = (True,)
     __logger = Log.register_logger(__name__)
 
     @property
@@ -111,10 +110,7 @@ class ConfigFile:
             self.__logger.error(f"given path {dirname} is not valid")
             raise FileNotFoundError(f"given path {dirname} is not valid")
 
-    def init_from_file(
-        self,
-        validate_schema: Optional[bool] = True
-    ) -> None:
+    def init_from_file(self, validate_schema: Optional[bool] = True) -> None:
         """
         Initialize the class variable after setting filepath (or if not set, autodiscover the file).
 
@@ -276,7 +272,7 @@ class ConfigFile:
 
         if profile_name is None:
             profile_name = self.get_profilename_from_profiletype(profile_type=profile_type or "")
-        
+
         props: dict[str, Any] = self.load_profile_properties(profile_name=profile_name)
 
         return Profile(props, profile_name, self._missing_secure_props)
@@ -387,7 +383,7 @@ class ConfigFile:
         for k, v in profiles.items():
             if not isinstance(v, dict):  # Ensure v is a dictionary
                 if not self.__suppress_config_file_warnings:
-                        self.__logger.warning("Invalid profile passed when schame validation is off")
+                    self.__logger.warning("Invalid profile passed when schame validation is off")
                 continue  # Skip invalid entries
 
             if segments[0] == k:
@@ -666,7 +662,7 @@ class ConfigFile:
             Returns the full profile path
         """
         return re.sub(r"(^|\.)", r"\1profiles.", short_path)
-    
+
     def suppress_config_warnings(self, value: bool) -> None:
         """
         Suppress warnings in config files.
@@ -674,7 +670,6 @@ class ConfigFile:
         Parameters
         ----------
         value: bool
-            Warnings are shown or not 
+            Warnings are shown or not
         """
         self.__suppress_config_file_warnings = value
-        
