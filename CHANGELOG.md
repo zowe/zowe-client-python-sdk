@@ -2,6 +2,14 @@
 
 All notable changes to the Zowe Client Python SDK will be documented in this file.
 
+## Recent Changes
+
+### Enhancements
+
+### Bug Fixes
+
+- Updated the `pyo3` dependency of the Secrets SDK for technical currency. [#399](https://github.com/zowe/zowe-client-python-sdk/pull/399)
+
 ## `1.0.0-dev26`
 
 ### Bug Fixes
