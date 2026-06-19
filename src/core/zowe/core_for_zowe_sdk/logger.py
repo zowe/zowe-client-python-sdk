@@ -19,7 +19,7 @@ class Log:
     """
     Class used to represent a logger.
 
-    Attributes
+    Parameters
     ----------
     dirname: str
         Path where the log file is saved
