@@ -56,21 +56,23 @@ class test_logger_setLoggerLevel(TestCase):
     def test_console_handler(self):
         Log.close_console_output()
         test = Log.register_logger("test")
-        self.assertEqual(test.handlers[0], Log.file_handler)
+        self.assertIn(Log.file_handler, test.handlers)
+        self.assertNotIn(Log.console_handler, test.handlers)
 
         Log.open_console_output()
-        self.assertEqual(test.handlers[1], Log.console_handler)
+        self.assertIn(Log.console_handler, test.handlers)
 
         Log.set_console_output_level(logging.ERROR)
-        self.assertEqual(logging.ERROR, test.handlers[1].level)
+        self.assertEqual(logging.ERROR, Log.console_handler.level)
 
     def test_file_handler(self):
         Log.close_file_output()
         test = Log.register_logger("test")
-        self.assertEqual(test.handlers[0], Log.console_handler)
+        self.assertIn(Log.console_handler, test.handlers)
+        self.assertNotIn(Log.file_handler, test.handlers)
 
         Log.open_file_output()
-        self.assertEqual(test.handlers[1], Log.file_handler)
+        self.assertIn(Log.file_handler, test.handlers)
 
         Log.set_file_output_level(logging.ERROR)
-        self.assertEqual(logging.ERROR, test.handlers[1].level)
+        self.assertEqual(logging.ERROR, Log.file_handler.level)

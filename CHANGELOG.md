@@ -5,9 +5,14 @@ All notable changes to the Zowe Client Python SDK will be documented in this fil
 ## Recent Changes
 
 ### Enhancements
+
 - Added get_log_messages console REST API function. [#391](https://github.com/zowe/zowe-client-python-sdk/pull/391)
 - Added exec-data and status query parameters to list_jobs. [#391](https://github.com/zowe/zowe-client-python-sdk/pull/391)
 - Corrected members parsing, list_members enhancement. [#391](https://github.com/zowe/zowe-client-python-sdk/pull/391)
+
+### Bug Fixes
+
+- Updated the `pyo3` dependency of the Secrets SDK for technical currency. [#399](https://github.com/zowe/zowe-client-python-sdk/pull/399)
 
 ## `1.0.0-dev26`
 
