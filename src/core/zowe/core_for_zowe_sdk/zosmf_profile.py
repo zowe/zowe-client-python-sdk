@@ -12,7 +12,7 @@ Copyright Contributors to the Zowe Project.
 
 import base64
 import os.path
-from typing import Tuple, Optional
+from typing import Optional, Tuple
 
 import yaml
 
@@ -32,8 +32,6 @@ class ZosmfProfile:
     """
     Class used to represent a Zowe z/OSMF profile.
 
-    Description
-    -----------
     This class is only used when there is already a Zowe z/OSMF profile created
     and the user opted to use the profile instead of passing the credentials directly
     in the object constructor.
