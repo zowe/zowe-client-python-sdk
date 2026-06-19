@@ -16,6 +16,8 @@ from typing import Any, Optional
 
 @dataclass
 class StartResponse:
+    """TSO start response dataclass."""
+
     servletKey: str
     queueID: Optional[str] = None
     sessionID: Optional[str] = None
@@ -25,14 +27,18 @@ class StartResponse:
     timeout: Optional[bool] = None
 
     def __getitem__(self, key: str) -> Any:
+        """Get item by key."""
         return self.__dict__[key]
 
     def __setitem__(self, key: str, value: Any) -> None:
+        """Set item by key."""
         self.__dict__[key] = value
 
 
 @dataclass
 class EndResponse:
+    """TSO end response dataclass."""
+
     servletKey: str
     msgId: list[str] = field(default_factory=list)
     ver: Optional[str] = None
@@ -41,14 +47,18 @@ class EndResponse:
     msgData: Optional[str] = None
 
     def __getitem__(self, key: str) -> Any:
+        """Get item by key."""
         return self.__dict__[key]
 
     def __setitem__(self, key: str, value: Any) -> None:
+        """Set item by key."""
         self.__dict__[key] = value
 
 
 @dataclass
 class SendResponse:
+    """TSO send response dataclass."""
+
     servletKey: str
     tsoData: Optional[list[dict[str, Any]]] = None
     ver: Optional[str] = None
@@ -56,14 +66,18 @@ class SendResponse:
     timeout: Optional[bool] = None
 
     def __getitem__(self, key: str) -> Any:
+        """Get item by key."""
         return self.__dict__[key]
 
     def __setitem__(self, key: str, value: Any) -> None:
+        """Set item by key."""
         self.__dict__[key] = value
 
 
 @dataclass
 class IssueResponse:
+    """TSO issue response dataclass."""
+
     start_response: StartResponse
     send_response: SendResponse
     end_response: EndResponse
