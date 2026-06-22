@@ -365,7 +365,12 @@ class ProfileManager:
         validate_schema : Optional[bool]
             Whether to validate the loaded profile against the schema defined in the configuration.
         override_with_env : Optional[bool]
-            If True, overrides profile properties with values from environment variables.
+       validate_schema : Optional[bool]
+           Whether to validate the loaded profile against the schema defined in the configuration.
+       validate_only_project_config : Optional[bool]
+            Whether to only load from project-level configs (project and project user), ignoring global configs.
+       override_with_env : Optional[bool]
+           If True, overrides profile properties with values from environment variables.
 
         Raises
         ------
