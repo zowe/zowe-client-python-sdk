@@ -16,6 +16,8 @@ from typing import Any, Optional
 
 @dataclass
 class DatasetListResponse:
+    """Dataset list response dataclass."""
+
     items: Optional[list["DatasetResponse"] | list["SimpleDatasetResponse"]] = None
     returnedRows: Optional[int] = None
     totalRows: Optional[int] = None
@@ -30,25 +32,33 @@ class DatasetListResponse:
             super().__setattr__(key, value)
 
     def __getitem__(self, key: str) -> Any:
+        """Get item by key."""
         return self.__dict__[key]
 
     def __setitem__(self, key: str, value: Any) -> None:
+        """Set item by key."""
         self.__dict__[key] = value
 
 
 @dataclass
 class SimpleDatasetResponse:
+    """Simple dataset response dataclass."""
+
     dsname: Optional[str] = None
 
     def __getitem__(self, key: str) -> Any:
+        """Get item by key."""
         return self.__dict__[key]
 
     def __setitem__(self, key: str, value: Any) -> None:
+        """Set item by key."""
         self.__dict__[key] = value
 
 
 @dataclass
 class DatasetResponse:
+    """Dataset response dataclass."""
+
     dsname: Optional[str] = None
     blksz: Optional[str] = None
     catnm: Optional[str] = None
@@ -71,14 +81,18 @@ class DatasetResponse:
     dsntp: Optional[str] = None
 
     def __getitem__(self, key: str) -> Any:
+        """Get item by key."""
         return self.__dict__[key]
 
     def __setitem__(self, key: str, value: Any) -> None:
+        """Set item by key."""
         self.__dict__[key] = value
 
 
 @dataclass
 class MemberListResponse:
+    """Member list response dataclass."""
+
     items: Optional[list[dict[str, Any]]] = None
     totalRows: Optional[int] = None
     JSONversion: Optional[int] = None
@@ -92,25 +106,33 @@ class MemberListResponse:
             super().__setattr__(key, value)
 
     def __getitem__(self, key: str) -> Any:
+        """Get item by key."""
         return self.__dict__[key]
 
     def __setitem__(self, key: str, value: Any) -> None:
+        """Set item by key."""
         self.__dict__[key] = value
 
 
 @dataclass
 class SimpleMemberResponse:
+    """Simple member response dataclass."""
+
     member: Optional[str] = None
 
     def __getitem__(self, key: str) -> Any:
+        """Get item by key."""
         return self.__dict__[key]
 
     def __setitem__(self, key: str, value: Any) -> None:
+        """Set item by key."""
         self.__dict__[key] = value
 
 
 @dataclass
 class MemberResponse:
+    """Member response dataclass."""
+
     member: Optional[str] = None
     vers: Optional[int] = None
     mod: Optional[int] = None
@@ -125,7 +147,9 @@ class MemberResponse:
     sclm: Optional[str] = None
 
     def __getitem__(self, key: str) -> Any:
+        """Get item by key."""
         return self.__dict__[key]
 
     def __setitem__(self, key: str, value: Any) -> None:
+        """Set item by key."""
         self.__dict__[key] = value

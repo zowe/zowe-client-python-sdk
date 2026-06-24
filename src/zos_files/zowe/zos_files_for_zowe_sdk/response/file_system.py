@@ -16,6 +16,8 @@ from typing import Any, Optional
 
 @dataclass
 class FileSystemResponse:
+    """File system response dataclass."""
+
     name: Optional[str] = None
     mountpoint: Optional[str] = None
     fstname: Optional[str] = None
@@ -33,14 +35,18 @@ class FileSystemResponse:
     mountparm: Optional[str] = None
 
     def __getitem__(self, key: str) -> Any:
+        """Get item by key."""
         return self.__dict__[key]
 
     def __setitem__(self, key: str, value: Any) -> None:
+        """Set item by key."""
         self.__dict__[key] = value
 
 
 @dataclass
 class FileSystemListResponse:
+    """File system list response dataclass."""
+
     items: Optional[list[FileSystemResponse]] = None
     returnedRows: Optional[int] = None
     totalRows: Optional[int] = None
@@ -53,7 +59,9 @@ class FileSystemListResponse:
             super().__setattr__(key, value)
 
     def __getitem__(self, key: str) -> Any:
+        """Get item by key."""
         return self.__dict__[key]
 
     def __setitem__(self, key: str, value: Any) -> None:
+        """Set item by key."""
         self.__dict__[key] = value
