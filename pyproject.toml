@@ -13,3 +13,4 @@ style = "numpy"
 check-arg-order = false
 require-return-section-when-returning-nothing = false
 quiet = true
+exclude = "build|response"

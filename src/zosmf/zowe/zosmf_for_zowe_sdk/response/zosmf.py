@@ -16,19 +16,25 @@ from typing import Any, Optional
 
 @dataclass
 class Plugin:
+    """z/OSMF plugin dataclass."""
+
     pluginVersion: Optional[str] = None
     pluginDefaultName: Optional[str] = None
     pluginStatus: Optional[str] = None
 
     def __getitem__(self, key: str) -> Any:
+        """Get item by key."""
         return self.__dict__[key]
 
     def __setitem__(self, key: str, value: Any) -> None:
+        """Set item by key."""
         self.__dict__[key] = value
 
 
 @dataclass
 class ZosmfResponse:
+    """z/OSMF response dataclass."""
+
     zos_version: Optional[str] = None
     zosmf_port: Optional[str] = None
     zosmf_version: Optional[str] = None
@@ -46,7 +52,9 @@ class ZosmfResponse:
             super().__setattr__(key, value)
 
     def __getitem__(self, key: str) -> Any:
+        """Get item by key."""
         return self.__dict__[key.replace("-", "_")]
 
     def __setitem__(self, key: str, value: Any) -> None:
+        """Set item by key."""
         self.__dict__[key.replace("-", "_")] = value
