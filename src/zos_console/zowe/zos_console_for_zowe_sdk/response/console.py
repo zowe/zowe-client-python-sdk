@@ -199,7 +199,7 @@ class UnsuccessfulGetLogMessagesResponse:
     def __init__(self, response: dict[str, Any]) -> None:
         for raw_key, value in response.items():
             key = to_snake_case(raw_key)
-        super().__setattr__(key, value)
+            super().__setattr__(key, value)
 
     def __getitem__(self, key):
         return self.__dict__[to_snake_case(key)]

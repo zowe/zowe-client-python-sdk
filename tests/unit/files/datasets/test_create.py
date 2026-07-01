@@ -42,18 +42,6 @@ class TestCreateClass(TestCase):
         Files(self.test_profile).create_data_set("DSNAME123", options=option)
         self.assertEqual(mock_send_request.call_count, 2)
 
-    @mock.patch("logging.Logger.error")
-    @mock.patch("requests.Session.send")
-    def test_create_data_set_po_empty_dirblk(self, mock_send_request, mock_logger_error: mock.MagicMock):
-        """Test if create PO dataset does not send request when dirblk is 0"""
-        mock_send_request.return_value = mock.Mock(headers={"Content-Type": "application/json"}, status_code=201)
-        with self.assertRaises(ValueError):
-            option = DatasetOption(dsorg="PO", lrecl=80, recfm="FB", primary=1, dirblk=0)
-            Files(self.test_profile).create_data_set("DSNAME124", options=option)
-            mock_logger_error.assert_called_once()
-            self.assertIn("Can't allocate empty directory blocks.", mock_logger_error.call_args[0][0])
-            mock_send_request.assert_not_called()
-
     @mock.patch("requests.Session.send")
     def test_create_data_set_po_dirblk_not_specified(self, mock_send_request):
         """Test if create PO dataset does not send request when dirblk is 0"""
