@@ -100,10 +100,25 @@ class MemberListResponse:
     def __init__(self, response: dict[str, Any], attributes: bool) -> None:
         for key, value in response.items():
             if key == "items":
-                value = (
-                    [MemberResponse(**x) for x in value] if attributes else [SimpleMemberResponse(**x) for x in value]
-                )
-            super().__setattr__(key, value)
+                raw_members_list: list[dict[str, Any]] = value
+                if not attributes:
+                    members_list = [SimpleMemberResponse(**raw_mem_props) for raw_mem_props in raw_members_list]
+                elif len(raw_members_list) != 0:
+                    has_undef_recfm_members = False
+                    for next_member in raw_members_list:
+                        if "ac" in next_member.keys():
+                            has_undef_recfm_members = True
+                            break
+                    members_list = (
+                        [UndefRecfmMemberResponse(raw_mem_props) for raw_mem_props in raw_members_list]
+                        if has_undef_recfm_members
+                        else [MemberResponse(**raw_mem_props) for raw_mem_props in raw_members_list]
+                    )
+                else:
+                    members_list = []
+                super().__setattr__(key, members_list)
+            else:
+                super().__setattr__(key, value)
 
     def __getitem__(self, key: str) -> Any:
         """Get item by key."""
@@ -153,3 +168,27 @@ class MemberResponse:
     def __setitem__(self, key: str, value: Any) -> None:
         """Set item by key."""
         self.__dict__[key] = value
+
+
+@dataclass
+class UndefRecfmMemberResponse:
+    """https://www.ibm.com/docs/en/zos/3.2.0?topic=zdsfri-json-document-specifications-zos-data-set-file-rest-interface-requests#RESTFILES_JSONDocumentSpecifications__pdsUkeypairs"""
+    member: Optional[str] = None
+    ac: Optional[str] = None
+    alias_of: Optional[str] = None
+    amode: Optional[str] = None
+    rmode: Optional[str] = None
+    size: Optional[str] = None
+    ttr: Optional[str] = None
+    ssi: Optional[str] = None
+
+    def __init__(self, member_props: dict[str, Any]) -> None:
+        for k, value in member_props.items():
+            key = k.replace("-", "_")
+            super().__setattr__(key, value)
+
+    def __getitem__(self, key: str) -> Any:
+        return self.__dict__[key.replace("-", "_")]
+
+    def __setitem__(self, key: str, value: Any) -> None:
+        self.__dict__[key.replace("-", "_")] = value

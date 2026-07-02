@@ -42,6 +42,98 @@ class TestCreateClass(TestCase):
         Files(self.test_profile).create_data_set("DSNAME123", options=option)
         self.assertEqual(mock_send_request.call_count, 2)
 
+    @mock.patch("requests.Session.send")
+    def test_create_data_set_po_dirblk_not_specified(self, mock_send_request):
+        """Test if create PO dataset does not send request when dirblk is 0"""
+        mock_send_request.return_value = mock.Mock(headers={"Content-Type": "application/json"}, status_code=201)
+        option = DatasetOption(dsorg="PO", lrecl=80, recfm="FB", primary=1)
+        Files(self.test_profile).create_data_set("DSNAME125", options=option)
+        mock_send_request.assert_called()
+
+    @mock.patch("logging.Logger.error")
+    @mock.patch("requests.Session.send")
+    def test_create_data_set_po_empty_dirblk(self, mock_send_request, mock_logger_error: mock.MagicMock):
+        """Test if create PO dataset sends request when dirblk is not specified"""
+        mock_send_request.return_value = mock.Mock(headers={"Content-Type": "application/json"}, status_code=201)
+        with self.assertRaises(ValueError):
+            option = DatasetOption(dsorg="PO", lrecl=80, recfm="FB", primary=1, dirblk=0)
+            Files(self.test_profile).create_data_set("DSNAME126", options=option)
+            mock_logger_error.assert_called_once()
+            self.assertIn("Can't allocate empty directory blocks.", mock_logger_error.call_args[0][0])
+            mock_send_request.assert_not_called()
+
+    @mock.patch("logging.Logger.error")
+    @mock.patch("requests.Session.send")
+    def test_create_data_set_ps_dirblk_specified(self, mock_send_request, mock_logger_error: mock.MagicMock):
+        """Test if create PS dataset does not send request when dirblk is specified and not 0"""
+        mock_send_request.return_value = mock.Mock(headers={"Content-Type": "application/json"}, status_code=201)
+        with self.assertRaises(ValueError):
+            option = DatasetOption(dsorg="PS", lrecl=80, recfm="FB", primary=1, dirblk=1)
+            Files(self.test_profile).create_data_set("DSNAME123", options=option)
+            mock_logger_error.assert_called_once()
+            self.assertIn("Can't allocate directory blocks for files.", mock_logger_error.call_args[0][0])
+            mock_send_request.assert_not_called()
+
+    @mock.patch("requests.Session.send")
+    def test_create_data_set_with_like_not_found(self, mock_send_request: mock.Mock):
+        """Test if create dataset does not send request to create from a model dataset when the model is not found"""
+
+        ds_name = "test"
+
+        response1 = mock.Mock(
+            headers={"Content-Type": "application/octet-stream"},
+            status_code=200,
+            content={"items": []},
+        )
+        response2 = mock.Mock(headers={"Content-Type": "application/json"}, status_code=201)
+        mock_send_request.side_effect = [response1, response2]
+
+        with self.assertRaises(ValueError) as e_info:
+            option = DatasetOption(like=ds_name)
+            Files(self.test_profile).create_data_set("DSNAME123", options=option)
+            self.assertEqual(mock_send_request.call_count, 1)
+            self.assertEqual(str(e_info.exception), f"Model dataset {ds_name.upper()} is not found.")
+
+    @mock.patch("requests.Session.send")
+    def test_create_data_set_with_like_not_returned(self, mock_send_request: mock.Mock):
+        """Test if create dataset does not send request to create from a model dataset when the model is not found, but the list of similar datasets is returned"""
+
+        ds_name = "test"
+
+        response1 = mock.Mock(
+            headers={"Content-Type": "application/octet-stream"},
+            status_code=200,
+            content={"items": [{"dsname": "test1", "blksz": 123}]},
+        )
+        response2 = mock.Mock(headers={"Content-Type": "application/json"}, status_code=201)
+        mock_send_request.side_effect = [response1, response2]
+
+        with self.assertRaises(ValueError) as e_info:
+            option = DatasetOption(like=ds_name)
+            Files(self.test_profile).create_data_set("DSNAME123", options=option)
+            self.assertEqual(mock_send_request.call_count, 1)
+            self.assertEqual(str(e_info.exception), f"Model dataset {ds_name.upper()} is not found.")
+
+    @mock.patch("requests.Session.send")
+    def test_create_data_set_with_like_items_none(self, mock_send_request: mock.Mock):
+        """Test if create dataset does not send request to create from a model dataset when the list returns incorrect response"""
+
+        ds_name = "test"
+
+        response1 = mock.Mock(
+            headers={"Content-Type": "application/octet-stream"},
+            status_code=200,
+            content={"some_attr":"test"},
+        )
+        response2 = mock.Mock(headers={"Content-Type": "application/json"}, status_code=201)
+        mock_send_request.side_effect = [response1, response2]
+
+        with self.assertRaises(ValueError) as e_info:
+            option = DatasetOption(like=ds_name)
+            Files(self.test_profile).create_data_set("DSNAME123", options=option)
+            self.assertEqual(mock_send_request.call_count, 1)
+            self.assertEqual(str(e_info.exception), f"Could not fetch data set attributes of the model data set.")
+
     def test_create_data_set_does_not_accept_invalid_recfm(self):
         """Test if create dataset raises an error for invalid record formats"""
         with self.assertRaises(KeyError):

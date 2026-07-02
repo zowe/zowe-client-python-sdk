@@ -10,11 +10,11 @@ SPDX-License-Identifier: EPL-2.0
 Copyright Contributors to the Zowe Project.
 """
 
-from typing import Union, Any
-from requests import Response
+from typing import Any, Union
 
 import requests
 import urllib3
+from requests import Response
 
 from .exceptions import InvalidRequestMethod, RequestFailed, UnexpectedStatus
 from .logger import Log
@@ -115,27 +115,23 @@ class RequestHandler:
         ------
         UnexpectedStatus
             If the response status code is not in the expected code list
-        RequestFailed
-            If the HTTP/HTTPS request fails
         """
-        # Automatically checks if status code is between 200 and 400
-        if self.__response.ok:
-            if self.__response.status_code not in self.__expected_code:
-                self.__logger.error(
-                    f"The status code from z/OSMF was: {self.__expected_code}\n"
-                    f"Expected: {self.__response.status_code}\n"
-                    f"Request output: {self.__response.text}"
-                )
-                raise UnexpectedStatus(self.__expected_code, self.__response.status_code, self.__response.text)
+        if self.__response.status_code in self.__expected_code:
+            return
         else:
-            output_str = str(self.__response.request.url)
-            output_str += "\n" + str(self.__response.request.headers)
-            output_str += "\n" + str(self.__response.request.body)
-            output_str += "\n" + str(self.__response.text)
-            self.__logger.error(
-                f"HTTP Request has failed with status code {self.__response.status_code}. \n {output_str}"
+            diagnostics = (
+                f"The status code from z/OSMF was: {self.__response.status_code}\n"
+                f"Expected: {self.__expected_code}\n"
+                f"Request URL: {self.__response.request.url}\n"
+                f"Request headers: {self.__response.request.headers}\n"
+                f"Request body: {self.__response.request.body}\n"
+                f"Request output: {self.__response.text}"
             )
-            raise RequestFailed(self.__response.status_code, output_str)
+            if self.__response.ok:
+                self.__logger.warning(diagnostics)
+            else:
+                self.__logger.error(diagnostics)
+                raise UnexpectedStatus(self.__expected_code, self.__response.status_code, self.__response.text)     
 
     def __normalize_response(self) -> Union[str, bytes, dict[str, Any], None]:
         """

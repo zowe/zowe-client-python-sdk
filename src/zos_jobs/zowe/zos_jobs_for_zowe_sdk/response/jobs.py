@@ -11,6 +11,7 @@ Copyright Contributors to the Zowe Project.
 """
 
 from dataclasses import dataclass
+from datetime import datetime
 from typing import Any, Optional
 
 
@@ -31,13 +32,25 @@ class JobResponse:
     jobname: Optional[str] = None
     status: Optional[str] = None
     retcode: Optional[str] = None
+    exec_system: Optional[str] = None
+    exec_member: Optional[str] = None
+    exec_submitted: Optional[datetime] = None
+    exec_started: Optional[datetime] = None
+    exec_ended: Optional[datetime] = None
 
     def __init__(self, response: dict[str, Any]) -> None:
         for k, value in response.items():
             key = k.replace("-", "_")
             if key == "class":
                 key = "job_class"
-            super().__setattr__(key, value)
+            if key in ["exec_submitted", "exec_started", "exec_ended"]:
+                try:
+                    date_and_time = datetime.fromisoformat(value.replace("Z", "+00:00"))
+                except (ValueError, AttributeError):
+                    date_and_time = None
+                super().__setattr__(key, date_and_time)
+            else:
+                super().__setattr__(key, value)
 
     def __getitem__(self, key: str) -> Any:
         """Get item by key."""
