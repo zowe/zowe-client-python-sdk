@@ -362,12 +362,12 @@ class ProfileManager:
             The type of the profile to load, e.g., 'zosmf', 'zftp'. If None, profiles are loaded based only on name.
         check_missing_props : bool
             Flag to indicate whether to check for missing secure properties.
-       validate_schema : Optional[bool]
-           Whether to validate the loaded profile against the schema defined in the configuration.
-       validate_only_project_config : Optional[bool]
-           Whether to only load from project-level configs (project and project user), ignoring global configs.
-       override_with_env : Optional[bool]
-           If True, overrides profile properties with values from environment variables.
+        validate_schema : Optional[bool]
+            Whether to validate the loaded profile against the schema defined in the configuration.
+        validate_only_project_config : Optional[bool]
+            Whether to only load from project-level configs (project and project user), ignoring global configs.
+        override_with_env : Optional[bool]
+            If True, overrides profile properties with values from environment variables.
 
         Raises
         ------

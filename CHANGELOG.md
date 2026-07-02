@@ -6,6 +6,8 @@ All notable changes to the Zowe Client Python SDK will be documented in this fil
 
 ### Enhancements
 
+- Allowed the profile manager to only validate schemas at the project level with the new `validate_only_project_config` parameter. [#393](https://github.com/zowe/zowe-client-python-sdk/pull/393)
+
 ### Bug Fixes
 
 - Updated the `pyo3` dependency of the Secrets SDK for technical currency. [#399](https://github.com/zowe/zowe-client-python-sdk/pull/399)
