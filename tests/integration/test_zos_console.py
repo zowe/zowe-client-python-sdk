@@ -11,7 +11,10 @@ class TestConsoleIntegration(unittest.TestCase):
 
     def setUp(self):
         """Setup fixtures for Console class."""
-        test_profile = ProfileManager(show_warnings=False).load(profile_type="zosmf")
+        test_profile = ProfileManager(show_warnings=False).load(
+            profile_type="zosmf",
+            validate_only_project_config=True,
+        )
         self.console = Console(test_profile)
         self.addCleanup(lambda: self.console.__exit__(None, None, None))
 

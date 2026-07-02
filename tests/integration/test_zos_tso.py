@@ -12,7 +12,10 @@ class TestTsoIntegration(unittest.TestCase):
 
     def setUp(self):
         """Setup fixtures for Tso class."""
-        test_profile = ProfileManager(show_warnings=False).load(profile_type="zosmf")
+        test_profile = ProfileManager(show_warnings=False).load(
+            profile_type="zosmf",
+            validate_only_project_config=True,
+        )
         self.tso = Tso(test_profile, {"account": "IZUACCT"})
         self.addCleanup(lambda: self.tso.__exit__(None, None, None))
 
