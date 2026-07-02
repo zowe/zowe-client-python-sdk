@@ -9,11 +9,11 @@ Fixes #(issue_number) -->
 
 **Review Checklist**
 I certify that I have:
-- [ ] tested my changes
-- [ ] added/updated automated tests
 - [ ] updated the changelog
+- [ ] manually tested my changes
+- [ ] added/updated automated unit/integration tests
+- [ ] created/ran system tests (provide build number if applicable)
 - [ ] followed the [contribution guidelines](https://github.com/zowe/zowe-cli/blob/master/CONTRIBUTING.md)
-
 
 **Additional Comments**
 <!-- Anything else noteworthy about this pull request. This section is optional. -->
