@@ -38,6 +38,8 @@ def to_snake_case(src_str: str) -> str:
 
 @dataclass
 class IssueCommandResponse:
+    """Issue command response dataclass."""
+
     cmd_response_key: Optional[str] = None
     cmd_response_url: Optional[str] = None
     cmd_response_uri: Optional[str] = None
@@ -49,14 +51,18 @@ class IssueCommandResponse:
             super().__setattr__(key, value)
 
     def __getitem__(self, key: str) -> str:
+        """Get item by key."""
         return str(self.__dict__[key.replace("-", "_")])
 
     def __setitem__(self, key: str, value: str) -> None:
+        """Set item by key."""
         self.__dict__[key.replace("-", "_")] = value
 
 
 @dataclass
 class ConsoleResponse:
+    """Console response dataclass."""
+
     cmd_response: Optional[str] = None
     sol_key_detected: Optional[bool] = None
 
@@ -66,9 +72,11 @@ class ConsoleResponse:
             super().__setattr__(key, value)
 
     def __getitem__(self, key: str) -> Any:
+        """Get item by key."""
         return self.__dict__[key.replace("-", "_")]
 
     def __setitem__(self, key: str, value: Any) -> None:
+        """Set item by key."""
         self.__dict__[key.replace("-", "_")] = value
 
 

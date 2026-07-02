@@ -17,6 +17,8 @@ from typing import Any, Optional
 
 @dataclass
 class USSResponse:
+    """USS response dataclass."""
+
     name: Optional[str] = None
     mode: Optional[str] = None
     size: Optional[int] = None
@@ -27,14 +29,18 @@ class USSResponse:
     mtime: Optional[str] = None
 
     def __getitem__(self, key: str) -> Any:
+        """Get item by key."""
         return self.__dict__[key]
 
     def __setitem__(self, key: str, value: Any) -> None:
+        """Set item by key."""
         self.__dict__[key] = value
 
 
 @dataclass
 class USSListResponse:
+    """USS list response dataclass."""
+
     items: Optional[list[USSResponse]] = None
     returnedRows: Optional[int] = None
     totalRows: Optional[int] = None
@@ -47,20 +53,24 @@ class USSListResponse:
             super().__setattr__(key, value)
 
     def __getitem__(self, key: str) -> Any:
+        """Get item by key."""
         return self.__dict__[key]
 
     def __setitem__(self, key: str, value: Any) -> None:
+        """Set item by key."""
         self.__dict__[key] = value
 
 
 class USSFileTagType(Enum):
+    """USS file tag type enumeration."""
+
     TEXT = "t"
     BINARY = "b"
     MIXED = "m"
 
     @classmethod
     def from_string(cls, value: str) -> Optional['USSFileTagType']:
-        """Convert string to enum, return None if not valid"""
+        """Convert string to enum, return None if not valid."""
         for tag_type in cls:
             if tag_type.value == value:
                 return tag_type
@@ -69,6 +79,8 @@ class USSFileTagType(Enum):
 
 @dataclass
 class USSFileTag:
+    """USS file tag dataclass."""
+
     tag_type: Optional['USSFileTagType'] = None
     charset: Optional[str] = None
     is_conversion_enabled: Optional[bool] = None
@@ -92,7 +104,9 @@ class USSFileTag:
             raise Exception("Unknown response from 'chtag list': {}".format(response))
 
     def __getitem__(self, key: str) -> Any:
+        """Get item by key."""
         return self.__dict__[key]
 
     def __setitem__(self, key: str, value: Any) -> None:
+        """Set item by key."""
         self.__dict__[key] = value

@@ -9,6 +9,7 @@ All notable changes to the Zowe Client Python SDK will be documented in this fil
 - Added get_log_messages console REST API function. [#391](https://github.com/zowe/zowe-client-python-sdk/pull/391)
 - Added exec-data and status query parameters to list_jobs. [#391](https://github.com/zowe/zowe-client-python-sdk/pull/391)
 - Corrected members parsing, list_members enhancement. [#391](https://github.com/zowe/zowe-client-python-sdk/pull/391)
+- Allowed the profile manager to only validate schemas at the project level with the new `validate_only_project_config` parameter. [#393](https://github.com/zowe/zowe-client-python-sdk/pull/393)
 
 ### Bug Fixes
 

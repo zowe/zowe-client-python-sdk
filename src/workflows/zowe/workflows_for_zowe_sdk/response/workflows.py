@@ -18,6 +18,7 @@ from typing import Any, Literal, Optional
 class CreateWorkflowResponse:
     """
     Workflow definition, returned by z/OSMF on a "create workflow" request.
+
     See more at: [Create a workflow: Response from a create workflow request](https://www.ibm.com/docs/en/zos/3.1.0?topic=services-create-workflow#POSTMethodCreateAWorkflow__CreateWorkflowResponse)
 
     Parameters
@@ -45,15 +46,18 @@ class CreateWorkflowResponse:
             super().__setattr__(key, value)
 
     def __getitem__(self, key: str) -> Any:
+        """Get item by key."""
         return self.__dict__[key]
 
     def __setitem__(self, key: str, value: Any) -> None:
+        """Set item by key."""
         self.__dict__[key] = value
 
 @dataclass
 class GetWorkflowPropertiesResponse:
     """
     Workflow definition, returned by z/OSMF on "get workflow properties" request.
+
     See more at: [Get the properties of a workflow: JSON object that is returned to a get workflow properties request](https://www.ibm.com/docs/en/zos/3.1.0?topic=services-get-properties-workflow#GETMethodRetrieveInformationAboutWF__ResponseBodyGetProperties)
 
     Parameters
@@ -187,15 +191,18 @@ class GetWorkflowPropertiesResponse:
             super().__setattr__(key, value)
 
     def __getitem__(self, key: str) -> Any:
+        """Get item by key."""
         return self.__dict__[key.replace("-", "_")]
 
     def __setitem__(self, key: str, value: Any) -> None:
+        """Set item by key."""
         self.__dict__[key.replace("-", "_")] = value
 
 @dataclass
 class WorkflowAutomationStatusResponse:
     """
     An automation-info object that contains details about the most recent start automation request for the workflow.
+
     The content of this property depends on the following factors:
     - If no automation was performed for the workflow, this property is null.
     - If automation processing is still in progress, this property indicates the step that is being processed.
@@ -244,9 +251,11 @@ class WorkflowAutomationStatusResponse:
             super().__setattr__(key, value)
 
     def __getitem__(self, key: str) -> Any:
+        """Get item by key."""
         return self.__dict__[key]
 
     def __setitem__(self, key: str, value: Any) -> None:
+        """Set item by key."""
         self.__dict__[key] = value
 
 @dataclass
@@ -466,9 +475,11 @@ class WorkflowStepResponse:
             super().__setattr__(key, value)
 
     def __getitem__(self, key: str) -> Any:
+        """Get item by key."""
         return self.__dict__[key.replace("-", "_")]
 
     def __setitem__(self, key: str, value: Any) -> None:
+        """Set item by key."""
         self.__dict__[key.replace("-", "_")] = value
 
 @dataclass
@@ -499,15 +510,18 @@ class WorkflowJobInfoResponse:
             super().__setattr__(key, value)
 
     def __getitem__(self, key: str) -> Any:
+        """Get item by key."""
         return self.__dict__[key]
 
     def __setitem__(self, key: str, value: Any) -> None:
+        """Set item by key."""
         self.__dict__[key] = value
 
 @dataclass
 class WorkflowJobStatusResponse:
     """
     TODO: this class is very similar to the JobResponse class from zos_jobs_for_zowe_sdk.
+
     It is better to consider their merging.
 
     Contains details about the job.
@@ -551,11 +565,13 @@ class WorkflowJobStatusResponse:
             super().__setattr__(key, value)
 
     def __getitem__(self, key: str) -> Any:
+        """Get item by key."""
         if key == "class":
             key = "job_class"
         return self.__dict__[key]
 
     def __setitem__(self, key: str, value: Any) -> None:
+        """Set item by key."""
         if key == "class":
             key = "job_class"
         self.__dict__[key] = value
@@ -602,11 +618,13 @@ class WorkflowJobFileResponse:
             super().__setattr__(key, value)
 
     def __getitem__(self, key: str) -> Any:
+        """Get item by key."""
         if key == "class":
             key = "job_class"
         return self.__dict__[key.replace("-", "_")]
 
     def __setitem__(self, key: str, value: Any) -> None:
+        """Set item by key."""
         if key == "class":
             key = "job_class"
         self.__dict__[key.replace("-", "_")] = value
@@ -614,6 +632,8 @@ class WorkflowJobFileResponse:
 @dataclass
 class WorkflowVariableReferenceResponse:
     """
+    Variable-reference object returned by z/OSMF.
+
     For more information:
     - [Get Workflow Properties request: Format of the variable-reference object](https://www.ibm.com/docs/en/zos/3.1.0?topic=services-get-properties-workflow#GETMethodRetrieveInformationAboutWF__ResponseBodyGetPropertiesVarRef)
 
@@ -633,9 +653,11 @@ class WorkflowVariableReferenceResponse:
             super().__setattr__(key, value)
 
     def __getitem__(self, key: str) -> Any:
+        """Get item by key."""
         return self.__dict__[key]
 
     def __setitem__(self, key: str, value: Any) -> None:
+        """Set item by key."""
         self.__dict__[key] = value
 
 @dataclass
@@ -671,15 +693,18 @@ class WorkflowVariableResponse:
             super().__setattr__(key, value)
 
     def __getitem__(self, key: str) -> Any:
+        """Get item by key."""
         return self.__dict__[key]
 
     def __setitem__(self, key: str, value: Any) -> None:
+        """Set item by key."""
         self.__dict__[key] = value
 
 @dataclass
 class ListWorkflowsResponse:
     """
     Workflow definition, returned by z/OSMF on "list workflows" request.
+
     See more at: [List workflows request: Format of the workflow-info object](https://www.ibm.com/docs/en/zos/3.1.0?topic=services-list-workflows-system-sysplex#GETMethodListWorkflows__ResponseBodyListWorkflows)
 
     Parameters
@@ -722,15 +747,18 @@ class ListWorkflowsResponse:
             super().__setattr__(key, value)
 
     def __getitem__(self, key: str) -> Any:
+        """Get item by key."""
         return self.__dict__[key]
 
     def __setitem__(self, key: str, value: Any) -> None:
+        """Set item by key."""
         self.__dict__[key] = value
 
 @dataclass
 class GetWorkflowDefinitionResponse:
     """
     Workflow definition, returned by z/OSMF on "list workflows" request.
+
     See more at: [Retrieve a workflow definition: JSON object that is returned to a retrieve a workflow definition request](https://www.ibm.com/docs/en/zos/3.1.0?topic=services-retrieve-workflow-definition#GETMethodRetrieveWorkflowDefinition__ResponseBodyGetTemplate)
 
     Parameters
@@ -750,7 +778,7 @@ class GetWorkflowDefinitionResponse:
     isCallable: Optional[Literal["system", "sysplex"]]
         Indicates the callable scope for the workflow.
     containsParallelSteps: Optional[bool]
-    	For a workflow with automated steps, this property indicates whether the automated steps can be run in parallel (concurrently).
+        For a workflow with automated steps, this property indicates whether the automated steps can be run in parallel (concurrently).
     scope: Optional[Literal["system", "sysplex", "none"]]
         Indicates the singleton scope for the workflow.
     jobsOutputDirectory: Optional[str]
@@ -764,7 +792,7 @@ class GetWorkflowDefinitionResponse:
     productVersion: Optional[str]
         Version and release of the product or component that is configured through the workflow.
     globalVariableGroup: Optional[str]
-    	Global variable group for the workflow.
+        Global variable group for the workflow.
     isInstanceVariableWithoutPrefix: Optional[bool]
         Indicates whether the simplified format is used for references to instance variables.
     steps: Optional[list['WorkflowDefinitionStepResponse']]
@@ -801,9 +829,11 @@ class GetWorkflowDefinitionResponse:
             super().__setattr__(key, value)
 
     def __getitem__(self, key: str) -> Any:
+        """Get item by key."""
         return self.__dict__[key]
 
     def __setitem__(self, key: str, value: Any) -> None:
+        """Set item by key."""
         self.__dict__[key] = value
 
 @dataclass
@@ -966,9 +996,11 @@ class WorkflowDefinitionStepResponse:
             super().__setattr__(key, value)
 
     def __getitem__(self, key: str) -> Any:
+        """Get item by key."""
         return self.__dict__[key.replace("-", "_")]
 
     def __setitem__(self, key: str, value: Any) -> None:
+        """Set item by key."""
         self.__dict__[key.replace("-", "_")] = value
 
 @dataclass
@@ -994,9 +1026,11 @@ class WorkflowDefinitionApproverResponse:
             super().__setattr__(key, value)
 
     def __getitem__(self, key: str) -> Any:
+        """Get item by key."""
         return self.__dict__[key]
 
     def __setitem__(self, key: str, value: Any) -> None:
+        """Set item by key."""
         self.__dict__[key] = value
 
 @dataclass
@@ -1020,9 +1054,11 @@ class WorkflowPropertyMappingResponse:
             super().__setattr__(key, value)
 
     def __getitem__(self, key: str) -> Any:
+        """Get item by key."""
         return self.__dict__[key]
 
     def __setitem__(self, key: str, value: Any) -> None:
+        """Set item by key."""
         self.__dict__[key] = value
 
 @dataclass
@@ -1052,9 +1088,11 @@ class WorkflowVariableSpecificationResponse:
             super().__setattr__(key, value)
 
     def __getitem__(self, key: str) -> Any:
+        """Get item by key."""
         return self.__dict__[key]
 
     def __setitem__(self, key: str, value: Any) -> None:
+        """Set item by key."""
         self.__dict__[key] = value
 
 @dataclass
@@ -1088,13 +1126,13 @@ class WorkflowDefinitionVariableResponse:
     maxLength: Optional[int]
         Maximum length of the variable value.
     maxValue: Optional[str]
-    	Maximum value of the variable.
+        Maximum value of the variable.
     minLength: Optional[int]
         Minimum length of the variable value.
     minValue: Optional[str]
-    	Minimum value of the variable.
+        Minimum value of the variable.
     promptAtCreate: Optional[bool]
-    	Indicates whether the user is prompted to specify a value for the variable during the create workflow process.
+        Indicates whether the user is prompted to specify a value for the variable during the create workflow process.
     regularExpression: Optional[str]
         Provides a standard regular expression that constrains the variable value, as an alternative to the available validation types. 
     requiredAtCreate: Optional[bool]
@@ -1135,15 +1173,18 @@ class WorkflowDefinitionVariableResponse:
             super().__setattr__(key, value)
 
     def __getitem__(self, key: str) -> Any:
+        """Get item by key."""
         return self.__dict__[key]
 
     def __setitem__(self, key: str, value: Any) -> None:
+        """Set item by key."""
         self.__dict__[key] = value
 
 @dataclass
 class ListArchivedWorkflowsResponse:
     """
     Workflow definition, returned by z/OSMF on "list archived workflows" request.
+
     See more at: [List archived workflows request: Format of the workflow-info object](https://www.ibm.com/docs/en/zos/3.1.0?topic=services-list-archived-workflows-system#GETMethodListArchivedWorkflows__ResponseBodyListWorkflows)
 
     Parameters
@@ -1165,15 +1206,18 @@ class ListArchivedWorkflowsResponse:
             super().__setattr__(key, value)
 
     def __getitem__(self, key: str) -> Any:
+        """Get item by key."""
         return self.__dict__[key]
 
     def __setitem__(self, key: str, value: Any) -> None:
+        """Set item by key."""
         self.__dict__[key] = value
 
 @dataclass
 class GetArchivedWorkflowPropertiesResponse:
     """
     Workflow definition, returned by z/OSMF on "get archived workflow properties" request.
+
     See more at: [Get the properties of an archived workflow: JSON object that is returned to a get archived workflow properties request](https://www.ibm.com/docs/en/zos/3.1.0?topic=services-get-properties-archived-workflow#GETMethodRetrieveInformationArchived__ResponseBodyGetArchivedProperties)
 
     Parameters
@@ -1209,7 +1253,7 @@ class GetArchivedWorkflowPropertiesResponse:
     isCallable: Optional[bool]
         Indicates whether a workflow is eligible to be called by another workflow.
     containsParallelSteps: Optional[bool]
-    	For a workflow with automated steps, this property indicates whether the automated steps can be run in parallel (concurrently).
+        For a workflow with automated steps, this property indicates whether the automated steps can be run in parallel (concurrently).
     scope: Optional[Literal["system", "sysplex", "none"]]
         Indicates the singleton scope for the workflow.
     statusName: Optional[Literal["in-progress", "complete", "automation-in-progress", "cancelled"]]
@@ -1276,9 +1320,11 @@ class GetArchivedWorkflowPropertiesResponse:
             super().__setattr__(key, value)
 
     def __getitem__(self, key: str) -> Any:
+        """Get item by key."""
         return self.__dict__[key]
 
     def __setitem__(self, key: str, value: Any) -> None:
+        """Set item by key."""
         self.__dict__[key] = value
 
 @dataclass
@@ -1480,7 +1526,9 @@ class ArchivedWorkflowStepResponse:
             super().__setattr__(key, value)
 
     def __getitem__(self, key: str) -> Any:
+        """Get item by key."""
         return self.__dict__[key.replace("-", "_")]
 
     def __setitem__(self, key: str, value: Any) -> None:
+        """Set item by key."""
         self.__dict__[key.replace("-", "_")] = value

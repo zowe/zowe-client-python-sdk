@@ -22,7 +22,10 @@ class TestFilesIntegration(unittest.TestCase):
 
     def setUp(self):
         """Setup fixtures for Files class."""
-        test_profile = ProfileManager(show_warnings=False).load(profile_type="zosmf")
+        test_profile = ProfileManager(show_warnings=False).load(
+            profile_type="zosmf",
+            validate_only_project_config=True,
+        )
         self.user_name = test_profile["user"]
         with open(FILES_FIXTURES_PATH, "r") as fixtures_json:
             self.files_fixtures = json.load(fixtures_json)
@@ -82,7 +85,11 @@ class TestFilesIntegration(unittest.TestCase):
 
     def test_get_file_content_streamed_should_return_response_content(self):
         """Executing get_content_streamed should return response object from the server."""
-        command_output = self.files.uss.get_content_streamed(self.files_fixtures["TEST_USS"])
+        test_uss = self.files_fixtures["TEST_USS"]
+        self.files.uss.create(test_uss, "file")
+        self.addCleanup(self._safe_delete_uss, test_uss)
+        self.files.uss.write(test_uss, "test content")
+        command_output = self.files.uss.get_content_streamed(test_uss)
         self.assertIsInstance(command_output.raw, urllib3.response.HTTPResponse)
 
     def test_write_should_be_possible(self):
@@ -92,8 +99,12 @@ class TestFilesIntegration(unittest.TestCase):
 
     def test_copy_uss_to_data_set_should_be_possible(self):
         """Executing copy_uss_to_data_set should be possible."""
+        test_uss = self.files_fixtures["TEST_USS"]
+        self.files.uss.create(test_uss, "file")
+        self.addCleanup(self._safe_delete_uss, test_uss)
+        self.files.uss.write(test_uss, "test content")
         command_output = self.files.ds.copy_uss_to_data_set(
-            self.files_fixtures["TEST_USS"], self.files_fixtures["TEST_PDS"] + "(TEST2)", replace=True
+            test_uss, self.files_fixtures["TEST_PDS"] + "(TEST2)", replace=True
         )
         self.assertTrue(command_output == None)
 
@@ -112,7 +123,17 @@ class TestFilesIntegration(unittest.TestCase):
     def test_mount_unmount_zfs_file_system(self):
         """Test mounting and unmounting, with safety nets."""
         mount_point = self.files_fixtures["TEST_USS_MOUNT"]
-        
+
+        # Ensure the mount point directory exists (create parent if needed)
+        mount_point_parent = "/".join(mount_point.rstrip("/").split("/")[:-1])
+        try:
+            self.files.uss.create(mount_point_parent, "dir")
+            self.addCleanup(self._safe_delete_uss, mount_point_parent)
+        except Exception:
+            pass
+        self.files.uss.create(mount_point, "dir")
+        self.addCleanup(self._safe_delete_uss, mount_point)
+
         # Create and register safety cleanup
         self.files.fs.create(self.test2_zfs_file_system, self.create_zfs_options)
         self.addCleanup(self._safe_delete_fs, self.test2_zfs_file_system)
@@ -138,12 +159,19 @@ class TestFilesIntegration(unittest.TestCase):
         try:
             self.files.fs.unmount(fs_name)
         except Exception:
-            pass 
+            pass
 
     def _safe_delete_fs(self, fs_name):
         """Idempotent helper: Deletes but ignores errors if already deleted."""
         try:
             self.files.fs.delete(fs_name)
+        except Exception:
+            pass
+
+    def _safe_delete_uss(self, uss_path):
+        """Idempotent helper: Deletes a USS file/dir but ignores errors if already gone."""
+        try:
+            self.files.uss.delete(uss_path, recursive=True)
         except Exception:
             pass
 

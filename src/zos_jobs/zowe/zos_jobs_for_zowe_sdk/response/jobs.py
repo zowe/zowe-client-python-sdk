@@ -17,6 +17,8 @@ from typing import Any, Optional
 
 @dataclass
 class JobResponse:
+    """Job response dataclass."""
+
     owner: Optional[str] = None
     phase: Optional[int] = None
     subsystem: Optional[str] = None
@@ -51,11 +53,13 @@ class JobResponse:
                 super().__setattr__(key, value)
 
     def __getitem__(self, key: str) -> Any:
+        """Get item by key."""
         if key == "class":
             key = "job_class"
         return self.__dict__[key.replace("-", "_")]
 
     def __setitem__(self, key: str, value: Any) -> None:
+        """Set item by key."""
         if key == "class":
             key = "job_class"
         self.__dict__[key.replace("-", "_")] = value
@@ -63,6 +67,8 @@ class JobResponse:
 
 @dataclass
 class StatusResponse:
+    """Job status response dataclass."""
+
     owner: Optional[str] = None
     jobid: Optional[str] = None
     job_correlator: Optional[str] = None
@@ -77,14 +83,18 @@ class StatusResponse:
             super().__setattr__(key, value)
 
     def __getitem__(self, key: str) -> Any:
+        """Get item by key."""
         return self.__dict__[key.replace("-", "_")]
 
     def __setitem__(self, key: str, value: Any) -> None:
+        """Set item by key."""
         self.__dict__[key.replace("-", "_")] = value
 
 
 @dataclass
 class SpoolResponse:
+    """Spool file response dataclass."""
+
     recfm: Optional[str] = None
     records_url: Optional[str] = None
     stepname: Optional[str] = None
@@ -108,11 +118,13 @@ class SpoolResponse:
             super().__setattr__(key, value)
 
     def __getitem__(self, key: str) -> Any:
+        """Get item by key."""
         if key == "class":
             key = "job_class"
         return self.__dict__[key.replace("-", "_")]
 
     def __setitem__(self, key: str, value: Any) -> None:
+        """Set item by key."""
         if key == "class":
             key = "job_class"
         self.__dict__[key.replace("-", "_")] = value
