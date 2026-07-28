@@ -149,13 +149,13 @@ class USSFiles(BaseFilesApi):  # type: ignore
         ----------
         file_path: str
             Path of the file
-        content_type: ContentType, optional
+        content_type: ContentType
             The content type to receive ("text" or "binary", "text" by default)
-        remote_file_encoding: str, optional
+        remote_file_encoding: str
             Encoding file content originally in (to convert from; by default, it is always being converted from "IBM-1047")
-        receive_in_encoding: str, optional
+        receive_in_encoding: str
             Encoding to convert file content to (to convert to; by default, it is always being converted to "ISO8859-1")
-        as_stream: bool, optional
+        as_stream: bool
             Specifies whether the response is streamed. Default: False
 
         Returns
@@ -237,11 +237,11 @@ class USSFiles(BaseFilesApi):  # type: ignore
             Path of the file to be downloaded
         local_file_path: str
             Name of the file to be saved locally
-        content_type: ContentType, optional
+        content_type: ContentType
             Specifies the content type to fetch ("text" or "binary", "text" by default)
-        remote_file_encoding: str, optional
+        remote_file_encoding: str
             Encoding file content originally in (to convert from; by default, it is always being converted from "IBM-1047")
-        receive_in_encoding: str, optional
+        receive_in_encoding: str
             Encoding to convert file content to (to convert to; by default,
             it is always being converted to "UTF-8" during download). Ignored when "binary" is True
 
@@ -311,7 +311,7 @@ class USSFiles(BaseFilesApi):  # type: ignore
             Name of the file to be uploaded
         remote_file_path: str
             Path of the file where it will be created
-        content_type: ContentType, optional
+        content_type: ContentType
             Specifies the content type to fetch ("text" or "binary", "text" by default)
         upload_in_encoding: str
             Specifies encoding schema of the uploaded file
