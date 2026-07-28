@@ -183,3 +183,15 @@ class TestJobsClass(TestCase):
         with self.assertRaises(ValueError):
             jobs.get_job_output_as_files(status, out_dir)
         self.assertFalse(os.path.exists(os.path.join(out_dir, "..", "..", "evil", "X")))
+
+    def test_get_job_output_as_files_rejects_absolute_child(self):
+        """An absolute leaf ddname is not honored even though join would drop the parent."""
+        out_dir = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, out_dir, ignore_errors=True)
+        abs_ddname = os.path.join(os.sep, "etc", "cron.d", "evil")
+        jobs = self._mock_jobs_for_output([{"stepname": "STEP1", "ddname": abs_ddname, "id": "7"}])
+        status = {"jobname": "MYJOB", "jobid": "JOB004", "job-correlator": "C4"}
+
+        with self.assertRaises(ValueError):
+            jobs.get_job_output_as_files(status, out_dir)
+        self.assertFalse(os.path.exists(abs_ddname))
