@@ -1,5 +1,8 @@
 """Unit tests for the Zowe Python SDK z/OS Jobs package."""
 
+import os
+import shutil
+import tempfile
 from unittest import TestCase, mock
 
 from zowe.zos_jobs_for_zowe_sdk import Jobs
@@ -134,3 +137,49 @@ class TestJobsClass(TestCase):
                 with self.assertRaises(ValueError) as e_info:
                     jobs_test_object.cancel_job(*test_case[0])
                 self.assertEqual(str(e_info.exception), 'Accepted values for modify_version: "1.0" or "2.0"')
+
+    def _mock_jobs_for_output(self, spool_files):
+        """Build a Jobs object with the spool-fetching methods stubbed out."""
+        jobs = Jobs(self.test_profile)
+        jobs.get_jcl_text = mock.Mock(return_value="//JOBCARD JOB\n")
+        jobs.get_spool_files = mock.Mock(return_value=spool_files)
+        jobs.get_spool_file_contents = mock.Mock(side_effect=lambda c, sid: "content-{}\n".format(sid))
+        return jobs
+
+    def test_get_job_output_as_files_writes_expected_files(self):
+        """Spool files and jcl.txt are written under output_dir/jobname/jobid."""
+        out_dir = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, out_dir, ignore_errors=True)
+        jobs = self._mock_jobs_for_output([{"stepname": "STEP1", "ddname": "JESMSGLG", "id": "1"}])
+        status = {"jobname": "MYJOB", "jobid": "JOB001", "job-correlator": "C1"}
+
+        jobs.get_job_output_as_files(status, out_dir)
+
+        jcl_file = os.path.join(out_dir, "MYJOB", "JOB001", "jcl.txt")
+        spool_file = os.path.join(out_dir, "MYJOB", "JOB001", "STEP1", "JESMSGLG")
+        self.assertTrue(os.path.isfile(jcl_file))
+        self.assertTrue(os.path.isfile(spool_file))
+        with open(spool_file, encoding="utf-8") as f:
+            self.assertEqual(f.read(), "content-1\n")
+
+    def test_get_job_output_as_files_rejects_absolute_component(self):
+        """An absolute jobid must not escape output_dir and raises ValueError."""
+        out_dir = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, out_dir, ignore_errors=True)
+        jobs = self._mock_jobs_for_output([])
+        status = {"jobname": "MYJOB", "jobid": os.path.join(os.sep, "tmp", "pwn"), "job-correlator": "C2"}
+
+        with self.assertRaises(ValueError):
+            jobs.get_job_output_as_files(status, out_dir)
+
+    def test_get_job_output_as_files_rejects_backtrack_component(self):
+        """A stepname containing '..' must not escape output_dir and raises ValueError."""
+        out_dir = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, out_dir, ignore_errors=True)
+        escaped = os.path.join("..", "..", "evil")
+        jobs = self._mock_jobs_for_output([{"stepname": escaped, "ddname": "X", "id": "9"}])
+        status = {"jobname": "MYJOB", "jobid": "JOB003", "job-correlator": "C3"}
+
+        with self.assertRaises(ValueError):
+            jobs.get_job_output_as_files(status, out_dir)
+        self.assertFalse(os.path.exists(os.path.join(out_dir, "..", "..", "evil", "X")))
