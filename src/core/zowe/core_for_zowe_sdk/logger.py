@@ -39,8 +39,7 @@ class Log:
     os.makedirs(dirname, mode=0o700, exist_ok=True)
     os.chmod(dirname, 0o700)
     __log_filename: str = os.path.join(dirname, "python_sdk_logs.log")
-    # Ensure the log file is created with owner-only permissions before any content is written to it,
-    # since it may contain sensitive request/response details.
+
     __log_fd = os.open(__log_filename, os.O_CREAT | os.O_APPEND, 0o600)
     os.close(__log_fd)
     os.chmod(__log_filename, 0o600)
