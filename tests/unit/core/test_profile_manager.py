@@ -113,6 +113,30 @@ class TestZosmfProfileManager(TestCase):
         }
         self.assertEqual(props, expected_props)
 
+    def test_autodiscover_config_dir_untrusted_directory(self):
+        """Test that autodiscover_config_dir raises PermissionError when the directory is not owned by the current user."""
+        cwd_up_dir_path = os.path.dirname(CWD)
+        cwd_up_file_path = os.path.join(cwd_up_dir_path, "zowe.config.json")
+        shutil.copy(self.original_file_path, cwd_up_file_path)
+
+        config_file = ConfigFile(type="team_config", name="zowe")
+        with mock.patch("os.getuid", return_value=os.getuid() + 1):
+            with self.assertRaises(PermissionError):
+                config_file.autodiscover_config_dir()
+
+    def test_autodiscover_config_dir_untrusted_directory_bypassed(self):
+        """Test that trust_all_directories(True) allows loading a config from a directory not owned by the current user."""
+        cwd_up_dir_path = os.path.dirname(CWD)
+        cwd_up_file_path = os.path.join(cwd_up_dir_path, "zowe.config.json")
+        shutil.copy(self.original_file_path, cwd_up_file_path)
+
+        config_file = ConfigFile(type="team_config", name="zowe")
+        config_file.trust_all_directories(True)
+        with mock.patch("os.getuid", return_value=os.getuid() + 1):
+            config_file.autodiscover_config_dir()
+
+        self.assertEqual(config_file.location, cwd_up_dir_path)
+
     @mock.patch("zowe.secrets_for_zowe_sdk.keyring.get_password", side_effect=keyring_get_password)
     def test_custom_file_and_custom_profile_loading(self, get_pass_func):
         """
@@ -825,19 +849,17 @@ class TestZosmfProfileManager(TestCase):
             ["port"], list(config_file.jsonc["profiles"]["lpar1"]["profiles"]["zosmf"]["properties"].keys())
         )
 
+
 def test_find_profile_with_non_dict_value():
     """Test what happens when a non-dict value is passed to find_profile."""
     config_file = ConfigFile(type="Team Config", name="test")
-    
-    profiles = {
-        "my_profile": False, 
-        "valid_profile": {"type": "zosmf", "properties": {"host": "example.com"}}
-    }
-    
+
+    profiles = {"my_profile": False, "valid_profile": {"type": "zosmf", "properties": {"host": "example.com"}}}
+
     result = config_file.find_profile("my_profile", profiles)
-    
+
     assert result is None
-    
+
     valid_result = config_file.find_profile("valid_profile", profiles)
     assert valid_result is not None
     assert valid_result["type"] == "zosmf"
