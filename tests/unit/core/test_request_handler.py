@@ -76,3 +76,44 @@ class TestRequestHandlerClass(unittest.TestCase):
         request_handler = RequestHandler(self.session_arguments)
         response = request_handler.perform_request("GET", {"url": "https://www.zowe.org"})
         self.assertTrue(response == None)
+
+    @mock.patch("logging.Logger.debug")
+    @mock.patch("requests.Session.send")
+    def test_debug_log_redacts_credentials(self, mock_send_request, mock_logger_debug: mock.MagicMock):
+        """The DEBUG request-arguments dump should never contain raw auth or header secrets."""
+        mock_send_request.return_value = mock.Mock(status_code=200)
+        request_handler = RequestHandler(self.session_arguments)
+        request_handler.perform_request(
+            "GET",
+            {
+                "url": "https://www.zowe.org",
+                "auth": ("user", "super-secret-password"),
+                "headers": {"Authorization": "Bearer super-secret-token", "Cookie": "LtpaToken2=super-secret-cookie"},
+                "json": {"password": "super-secret-password"},
+            },
+            stream=True,
+        )
+        debug_message = mock_logger_debug.call_args[0][0]
+        self.assertNotIn("super-secret-password", debug_message)
+        self.assertNotIn("super-secret-token", debug_message)
+        self.assertNotIn("super-secret-cookie", debug_message)
+
+    @mock.patch("logging.Logger.error")
+    @mock.patch("requests.Session.send")
+    def test_error_log_and_exception_redact_credentials(self, mock_send_request, mock_logger_error: mock.MagicMock):
+        """A failed request should not leak the Authorization/Cookie headers or body into logs or the raised exception."""
+        mock_request = mock.Mock(
+            url="https://www.zowe.org",
+            headers={"Authorization": "Basic super-secret-basic-auth", "Cookie": "LtpaToken2=super-secret-cookie"},
+            body="super-secret-body-content",
+        )
+        mock_send_request.return_value = mock.Mock(ok=False, status_code=500, text="failure", request=mock_request)
+        request_handler = RequestHandler(self.session_arguments)
+        with self.assertRaises(exceptions.RequestFailed) as ctx:
+            request_handler.perform_request("GET", {"url": "https://www.zowe.org"}, stream=True)
+
+        error_message = mock_logger_error.call_args[0][0]
+        exception_message = str(ctx.exception)
+        for secret in ("super-secret-basic-auth", "super-secret-cookie", "super-secret-body-content"):
+            self.assertNotIn(secret, error_message)
+            self.assertNotIn(secret, exception_message)

@@ -2,6 +2,8 @@
 
 # Including necessary paths
 import logging
+import os
+import stat
 
 from pyfakefs.fake_filesystem_unittest import TestCase
 from zowe.core_for_zowe_sdk.logger import Log
@@ -76,3 +78,13 @@ class test_logger_setLoggerLevel(TestCase):
 
         Log.set_file_output_level(logging.ERROR)
         self.assertEqual(logging.ERROR, Log.file_handler.level)
+
+    def test_log_directory_and_file_are_owner_only(self):
+        """The log directory and file should not be readable/writable by group or others, since log
+        content may include request/response details."""
+        dir_mode = stat.S_IMODE(os.stat(Log.dirname).st_mode)
+        self.assertEqual(dir_mode, 0o700)
+
+        log_file = os.path.join(Log.dirname, "python_sdk_logs.log")
+        file_mode = stat.S_IMODE(os.stat(log_file).st_mode)
+        self.assertEqual(file_mode, 0o600)
