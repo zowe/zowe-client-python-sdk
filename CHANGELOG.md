@@ -11,6 +11,8 @@ All notable changes to the Zowe Client Python SDK will be documented in this fil
 ### Bug Fixes
 
 - Updated the `pyo3` dependency of the Secrets SDK for technical currency. [#399](https://github.com/zowe/zowe-client-python-sdk/pull/399)
+- Fixed USS file paths, file system names, data set volume serials, and console names not being URI encoded, which caused requests to fail when those values contained special characters.
+- Fixed `Console.issue_command` and `Console.get_response` building their request URL by substring replacement, which corrupted the URL when the host or base path contained `defcn`.
 
 ## `1.0.0-dev26`
 
