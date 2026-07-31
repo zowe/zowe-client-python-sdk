@@ -577,10 +577,10 @@ class Datasets(BaseFilesApi):  # type: ignore[misc]
         ----------
         dataset_name: str
             The name of the dataset
-        content_type: ContentType
+        content_type: ContentType, optional
             The content type to receive
             ("text", "binary" or "record" (include a 4 byte big endian record len prefix), "text" by default)
-        as_stream: bool
+        as_stream: bool, optional
             Specifies whether the response is streamed. Default: False
 
         Returns
@@ -667,7 +667,7 @@ class Datasets(BaseFilesApi):  # type: ignore[misc]
             Name of the dataset to be downloaded
         local_file_path: str
             Name of the file to be saved locally
-        content_type: ContentType
+        content_type: ContentType, optional
             The content type to receive
             ("text", "binary" or "record" (include a 4 byte big endian record len prefix), "text" by default)
 
@@ -719,10 +719,10 @@ class Datasets(BaseFilesApi):  # type: ignore[misc]
             Name of the file to be uploaded
         dataset_name: str
             Name of the dataset to be created
-        content_type: ContentType
+        content_type: ContentType, optional
             The content type to receive
             ("text", "binary" or "record" (include a 4 byte big endian record len prefix), "text" by default)
-        upload_in_encoding: str
+        upload_in_encoding: str, optional
             Specifies the encoding to upload the content in (e.g. IBM-1047, "utf-8" by default)
 
         Raises
