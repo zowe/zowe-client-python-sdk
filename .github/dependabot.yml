@@ -1,0 +1,12 @@
+version: 2
+updates:
+  # The Secrets SDK depends on secrets_core from the zowe-cli repository.
+  # Pinned dependencies do not update themselves, so watch for new releases.
+  - package-ecosystem: "cargo"
+    directory: "/src/secrets"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "chore"
+    labels:
+      - "dependencies"
