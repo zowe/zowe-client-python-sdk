@@ -11,7 +11,7 @@ All notable changes to the Zowe Client Python SDK will be documented in this fil
 ### Bug Fixes
 
 - Updated the `pyo3` dependency of the Secrets SDK for technical currency. [#399](https://github.com/zowe/zowe-client-python-sdk/pull/399)
-- Pinned the `secrets_core` dependency of the Secrets SDK to a fixed commit instead of the `master` branch so wheel builds are reproducible, and updated it to Zowe CLI 8.35.1. [#407](https://github.com/zowe/zowe-client-python-sdk/pull/407)
+- Pinned the `secrets_core` dependency of the Secrets SDK to a fixed commit instead of the `master` branch so wheel builds are reproducible.
 
 ## `1.0.0-dev26`
 
