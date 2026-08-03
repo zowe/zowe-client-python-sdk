@@ -56,3 +56,69 @@ def validate_config_json(path_config_json: Union[str, dict[str, Any]], path_sche
         config_json = path_config_json
 
     validate(instance=config_json, schema=schema_json)
+
+
+def reject_unsafe_component(component: str) -> None:
+    """
+    Validate that a server-supplied name is usable as a single path segment.
+
+    Parameters
+    ----------
+    component: str
+        The name to be used as one segment of a generated path
+
+    Raises
+    ------
+    ValueError
+        When the name is an absolute path or contains a ".." segment
+    """
+    normalized = str(component).replace("\\", "/")
+    if os.path.isabs(component) or ".." in normalized.split("/"):
+        raise ValueError("Invalid path component: {}".format(component))
+
+
+def is_sub_path(parent: str, child: str) -> bool:
+    """
+    Check whether a path resolves to a location inside another path.
+
+    Parameters
+    ----------
+    parent: str
+        The directory that is expected to contain the child
+    child: str
+        The path to be checked
+
+    Returns
+    -------
+    bool
+        True only when child resolves to a location inside parent
+    """
+    try:
+        relative_path = os.path.relpath(os.path.realpath(child), os.path.realpath(parent))
+    except ValueError:
+        # Raised on Windows when the paths live on different drives
+        return False
+    segments = relative_path.split(os.sep) if relative_path else []
+    if not segments or ".." in segments or os.path.isabs(relative_path):
+        return False
+    return True
+
+
+def reject_unsafe_path(base_dir: str, target: str) -> None:
+    """
+    Validate that a generated path stays inside a base directory.
+
+    Parameters
+    ----------
+    base_dir: str
+        The directory that every generated path must stay within
+    target: str
+        The generated path to be checked
+
+    Raises
+    ------
+    ValueError
+        When the target resolves outside of base_dir
+    """
+    if not is_sub_path(base_dir, target):
+        raise ValueError("The generated file path is outside the output directory: {}".format(target))
