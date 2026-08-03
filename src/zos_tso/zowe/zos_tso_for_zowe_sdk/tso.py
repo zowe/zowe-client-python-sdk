@@ -71,14 +71,16 @@ class Tso(SdkApi):  # type: ignore
         command_output = ""
         tso_messages = []
         deadline = time.monotonic() + command_timeout
-        while not any("TSO PROMPT" in message for message in command_output) or not tso_messages:
-            if time.monotonic() > deadline:
-                raise TimeoutError(
-                    f"Timed out after {command_timeout} seconds waiting for TSO PROMPT for command: {command}"
-                )
-            command_output = self.__get_tso_data(session_key)
-            tso_messages += self.retrieve_tso_messages(command_output)
-        end_response = self.end(session_key)
+        try:
+            while not any("TSO PROMPT" in message for message in command_output) or not tso_messages:
+                if time.monotonic() > deadline:
+                    raise TimeoutError(
+                        f"Timed out after {command_timeout} seconds waiting for TSO PROMPT for command: {command}"
+                    )
+                command_output = self.__get_tso_data(session_key)
+                tso_messages += self.retrieve_tso_messages(command_output)
+        finally:
+            end_response = self.end(session_key)
         return IssueResponse(start_response, send_response, end_response, tso_messages)
 
     def start_tso_session(
