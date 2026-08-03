@@ -11,6 +11,7 @@ All notable changes to the Zowe Client Python SDK will be documented in this fil
 ### Bug Fixes
 
 - Updated the `pyo3` dependency of the Secrets SDK for technical currency. [#399](https://github.com/zowe/zowe-client-python-sdk/pull/399)
+- Updated `Tso.issue_command` to accept a `command_timeout` parameter and raise a `TimeoutError` if the "TSO PROMPT" message is not received within that time, preventing the method from looping indefinitely. [#406](https://github.com/zowe/zowe-client-python-sdk/pull/406)
 
 ## `1.0.0-dev26`
 
