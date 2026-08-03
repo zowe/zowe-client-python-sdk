@@ -10,6 +10,7 @@ All notable changes to the Zowe Client Python SDK will be documented in this fil
 
 ### Bug Fixes
 
+- Fixed `Jobs.get_job_output_as_files` writing to a directory it never created, and made job output paths stay within the target directory. [#403](https://github.com/zowe/zowe-client-python-sdk/pull/403)
 - Updated the `pyo3` dependency of the Secrets SDK for technical currency. [#399](https://github.com/zowe/zowe-client-python-sdk/pull/399)
 - Pinned the `secrets_core` dependency of the Secrets SDK to the Zowe CLI 8.35.1 release tag instead of the `master` branch so wheel builds are reproducible. [#407](https://github.com/zowe/zowe-client-python-sdk/pull/407)
 
