@@ -14,6 +14,7 @@ import os
 from typing import Optional, Any
 
 from zowe.core_for_zowe_sdk import SdkApi
+from zowe.core_for_zowe_sdk.validators import reject_unsafe_component, reject_unsafe_path
 
 from .response import JobResponse, SpoolResponse, StatusResponse
 
@@ -440,32 +441,6 @@ class Jobs(SdkApi):  # type: ignore
         response_json: str = self.request_handler.perform_request("GET", custom_args)
         return response_json
 
-    @classmethod
-    def _reject_unsafe_component(cls, component: str) -> None:
-        # A JES-supplied name must be a single segment, never a ".." step or an absolute path
-        normalized = str(component).replace("\\", "/")
-        if os.path.isabs(component) or ".." in normalized.split("/"):
-            raise ValueError("Invalid job output path component: {}".format(component))
-
-    @staticmethod
-    def _is_sub_path(parent: str, child: str) -> bool:
-        # True only when child resolves to a location inside parent, mirrors IO.isSubPath in the Node SDK
-        try:
-            relative_path = os.path.relpath(os.path.realpath(child), os.path.realpath(parent))
-        except ValueError:
-            # Raised on Windows when the paths live on different drives
-            return False
-        segments = relative_path.split(os.sep) if relative_path else []
-        if not segments or ".." in segments or os.path.isabs(relative_path):
-            return False
-        return True
-
-    @classmethod
-    def _reject_unsafe_path(cls, base_dir: str, target: str) -> None:
-        # Final guard that the generated path stays inside base_dir before any file is written
-        if not cls._is_sub_path(base_dir, target):
-            raise ValueError("The generated file path is outside the output directory: {}".format(target))
-
     def get_job_output_as_files(self, status: dict[str, Any], output_dir: str) -> None:
         """
         Get all spool files and submitted jcl text in separate files in the specified output directory.
@@ -498,13 +473,13 @@ class Jobs(SdkApi):  # type: ignore
         # Fixed root that every generated path must stay within
         base_dir = os.path.realpath(output_dir)
 
-        self._reject_unsafe_component(job_name)
-        self._reject_unsafe_component(job_id)
+        reject_unsafe_component(job_name)
+        reject_unsafe_component(job_id)
         job_dir = os.path.join(output_dir, job_name, job_id)
-        self._reject_unsafe_path(base_dir, job_dir)
+        reject_unsafe_path(base_dir, job_dir)
         os.makedirs(job_dir, exist_ok=True)
         output_file = os.path.join(job_dir, "jcl.txt")
-        self._reject_unsafe_path(base_dir, output_file)
+        reject_unsafe_path(base_dir, output_file)
         data_spool_file = self.get_jcl_text(job_correlator)
         dataset_content = data_spool_file
         with open(output_file, "w", encoding="utf-8") as out_file:
@@ -515,14 +490,14 @@ class Jobs(SdkApi):  # type: ignore
             stepname = spool_file["stepname"]
             ddname = spool_file["ddname"]
             spoolfile_id = spool_file["id"]
-            self._reject_unsafe_component(stepname)
-            self._reject_unsafe_component(ddname)
+            reject_unsafe_component(stepname)
+            reject_unsafe_component(ddname)
             step_dir = os.path.join(job_dir, stepname)
-            self._reject_unsafe_path(base_dir, step_dir)
+            reject_unsafe_path(base_dir, step_dir)
             os.makedirs(step_dir, exist_ok=True)
 
             output_file = os.path.join(step_dir, ddname)
-            self._reject_unsafe_path(base_dir, output_file)
+            reject_unsafe_path(base_dir, output_file)
             data_spool_file = self.get_spool_file_contents(job_correlator, spoolfile_id)
             dataset_content = data_spool_file
             with open(output_file, "w", encoding="utf-8") as out_file:
