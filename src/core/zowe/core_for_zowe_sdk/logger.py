@@ -37,7 +37,7 @@ class Log:
 
     dirname: str = os.path.join(os.path.expanduser("~"), ".zowe/logs")
     os.makedirs(dirname, mode=0o700, exist_ok=True)
-    os.chmod(dirname, 0o700)
+    os.chmod(dirname, 0o70, follow_symlinks=False)
     __log_filename: str = os.path.join(dirname, "python_sdk_logs.log")
 
     __log_fd = os.open(__log_filename, os.O_CREAT | os.O_APPEND, 0o600)

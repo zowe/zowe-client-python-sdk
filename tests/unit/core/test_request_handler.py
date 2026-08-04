@@ -88,15 +88,15 @@ class TestRequestHandlerClass(unittest.TestCase):
             {
                 "url": "https://www.zowe.org",
                 "auth": ("user", "super-secret-password"),
-                "headers": {"Authorization": "Bearer super-secret-token", "Cookie": "LtpaToken2=super-secret-cookie"},
+                "headers": {"Authorization": "Bearer token", "Cookie": "test-cookie"},
                 "json": {"password": "super-secret-password"},
             },
             stream=True,
         )
         debug_message = mock_logger_debug.call_args[0][0]
         self.assertNotIn("super-secret-password", debug_message)
-        self.assertNotIn("super-secret-token", debug_message)
-        self.assertNotIn("super-secret-cookie", debug_message)
+        self.assertNotIn("token", debug_message)
+        self.assertNotIn("test-cookie", debug_message)
 
     @mock.patch("logging.Logger.error")
     @mock.patch("requests.Session.send")
@@ -104,7 +104,7 @@ class TestRequestHandlerClass(unittest.TestCase):
         """A failed request should not leak the Authorization/Cookie headers or body into logs or the raised exception."""
         mock_request = mock.Mock(
             url="https://www.zowe.org",
-            headers={"Authorization": "Basic super-secret-basic-auth", "Cookie": "LtpaToken2=super-secret-cookie"},
+            headers={"Authorization": "Basic basic", "Cookie": "test-cookie"},
             body="super-secret-body-content",
         )
         mock_send_request.return_value = mock.Mock(ok=False, status_code=500, text="failure", request=mock_request)
@@ -114,6 +114,6 @@ class TestRequestHandlerClass(unittest.TestCase):
 
         error_message = mock_logger_error.call_args[0][0]
         exception_message = str(ctx.exception)
-        for secret in ("super-secret-basic-auth", "super-secret-cookie", "super-secret-body-content"):
+        for secret in ("basic", "test-cookie", "super-secret-body-content"):
             self.assertNotIn(secret, error_message)
             self.assertNotIn(secret, exception_message)

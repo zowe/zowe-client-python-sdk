@@ -20,14 +20,14 @@ import urllib3
 from .exceptions import InvalidRequestMethod, RequestFailed, UnexpectedStatus
 from .logger import Log
 
-SENSITIVE_HEADERS = {"authorization", "cookie", "x-csrf-zosmf-header"}
-REDACTED = "<redacted>"
+SENSITIVE_HEADERS = {"authorization", "cookie", "proxy-authorization"}
+REDACTED = "****"
 
 
 def _redact_headers(headers: Any) -> dict[str, Any]:
     """Return a copy of the given headers with sensitive values redacted."""
     if not headers:
-        return dict(headers) if headers else {}
+        return {}
     return {key: (REDACTED if key.lower() in SENSITIVE_HEADERS else value) for key, value in headers.items()}
 
 
