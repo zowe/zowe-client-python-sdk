@@ -16,6 +16,8 @@ from zowe.core_for_zowe_sdk import SdkApi
 
 from .response import ConsoleResponse, IssueCommandResponse
 
+_DEFAULT_CONSOLE_NAME = "defcn"
+
 
 class Console(SdkApi):  # type: ignore
     """
@@ -30,7 +32,7 @@ class Console(SdkApi):  # type: ignore
     """
 
     def __init__(self, connection: dict[str, Any], log: bool = True):
-        super().__init__(connection, "/zosmf/restconsoles/consoles/defcn", logger_name=__name__, log=log)
+        super().__init__(connection, "/zosmf/restconsoles/consoles", logger_name=__name__, log=log)
 
     def issue_command(self, command: str, console: Optional[str] = None) -> IssueCommandResponse:
         """Issues a command on z/OS Console.
@@ -48,7 +50,9 @@ class Console(SdkApi):  # type: ignore
             A JSON containing the response from the console command
         """
         custom_args = self._create_custom_request_arguments()
-        custom_args["url"] = self._request_endpoint.replace("defcn", console or "defcn")
+        custom_args["url"] = "{}/{}".format(
+            self._request_endpoint, self._encode_uri_component(console or _DEFAULT_CONSOLE_NAME)
+        )
         request_body = {"cmd": command}
         custom_args["json"] = request_body
         response_json = self.request_handler.perform_request("PUT", custom_args)
@@ -71,7 +75,10 @@ class Console(SdkApi):  # type: ignore
             A JSON containing the response to the command
         """
         custom_args = self._create_custom_request_arguments()
-        request_url = "{}/solmsgs/{}".format(console or "defcn", response_key)
-        custom_args["url"] = self._request_endpoint.replace("defcn", request_url)
+        custom_args["url"] = "{}/{}/solmsgs/{}".format(
+            self._request_endpoint,
+            self._encode_uri_component(console or _DEFAULT_CONSOLE_NAME),
+            self._encode_uri_component(response_key),
+        )
         response_json = self.request_handler.perform_request("GET", custom_args)
         return ConsoleResponse(response_json)

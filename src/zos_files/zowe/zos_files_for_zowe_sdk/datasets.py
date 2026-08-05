@@ -899,7 +899,11 @@ class Datasets(BaseFilesApi):  # type: ignore[misc]
             dataset_name = f"{dataset_name}({member_name})"
         url = "{}ds/{}".format(self._request_endpoint, self._encode_uri_component(dataset_name))
         if volume is not None:
-            url = "{}ds/-{}/{}".format(self._request_endpoint, volume, self._encode_uri_component(dataset_name))
+            url = "{}ds/-{}/{}".format(
+                self._request_endpoint,
+                self._encode_uri_component(str(volume)),
+                self._encode_uri_component(dataset_name),
+            )
         custom_args["url"] = url
         self.request_handler.perform_request("DELETE", custom_args, expected_code=[200, 202, 204])
 
