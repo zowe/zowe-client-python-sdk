@@ -59,7 +59,9 @@ class TestRequestHandlerClass(unittest.TestCase):
     @mock.patch("logging.Logger.error")
     @mock.patch("requests.Session.send")
     def test_logger_invalid_status_code(self, mock_send_request, mock_logger_error: mock.MagicMock):
-        mock_send_request.return_value = mock.Mock(ok=False)
+        mock_send_request.return_value = mock.Mock(
+            ok=False, request=mock.Mock(headers={}, body=None, url="https://www.zowe.org")
+        )
         request_handler = RequestHandler(self.session_arguments)
         try:
             request_handler.perform_request("GET", {"url": "https://www.zowe.org"}, stream=True)
