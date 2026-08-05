@@ -4,9 +4,12 @@
 import logging
 import os
 import stat
+import sys
+import unittest
+from unittest import mock
 
 from pyfakefs.fake_filesystem_unittest import TestCase
-from zowe.core_for_zowe_sdk.logger import Log
+from zowe.core_for_zowe_sdk.logger import Log, restrict_to_owner
 
 
 class test_logger_setLoggerLevel(TestCase):
@@ -79,6 +82,11 @@ class test_logger_setLoggerLevel(TestCase):
         Log.set_file_output_level(logging.ERROR)
         self.assertEqual(logging.ERROR, Log.file_handler.level)
 
+    @unittest.skipIf(
+        sys.platform == "win32",
+        "os.stat().st_mode permission bits don't reflect NTFS ACLs; owner-only "
+        "restriction on Windows is enforced via icacls instead, not POSIX mode bits.",
+    )
     def test_log_directory_and_file_are_owner_only(self):
         """The log directory and file should not be readable/writable by group or others, since log
         content may include request/response details."""
@@ -88,3 +96,27 @@ class test_logger_setLoggerLevel(TestCase):
         log_file = os.path.join(Log.dirname, "python_sdk_logs.log")
         file_mode = stat.S_IMODE(os.stat(log_file).st_mode)
         self.assertEqual(file_mode, 0o600)
+
+    @mock.patch("zowe.core_for_zowe_sdk.logger.subprocess.run")
+    @mock.patch("zowe.core_for_zowe_sdk.logger.getpass.getuser", return_value="testuser")
+    @mock.patch("zowe.core_for_zowe_sdk.logger.sys.platform", "win32")
+    def test_restrict_to_owner_uses_icacls_on_windows(self, mock_getuser, mock_run):
+        """On Windows, restrict_to_owner should rewrite the ACL via icacls instead of chmod,
+        since os.chmod() there only toggles the read-only attribute."""
+        restrict_to_owner("C:\\fake\\path", 0o700)
+
+        mock_run.assert_called_once_with(
+            ["icacls", "C:\\fake\\path", "/inheritance:r", "/grant:r", "testuser:F"],
+            check=False,
+            capture_output=True,
+        )
+
+    @mock.patch("zowe.core_for_zowe_sdk.logger.os.chmod")
+    @mock.patch("zowe.core_for_zowe_sdk.logger.subprocess.run")
+    @mock.patch("zowe.core_for_zowe_sdk.logger.sys.platform", "linux")
+    def test_restrict_to_owner_uses_chmod_on_posix(self, mock_run, mock_chmod):
+        """On non-Windows platforms, restrict_to_owner should use chmod and never shell out."""
+        restrict_to_owner("/fake/path", 0o700)
+
+        mock_chmod.assert_called_once_with("/fake/path", 0o700)
+        mock_run.assert_not_called()
