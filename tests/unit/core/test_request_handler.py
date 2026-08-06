@@ -59,7 +59,9 @@ class TestRequestHandlerClass(unittest.TestCase):
     @mock.patch("logging.Logger.error")
     @mock.patch("requests.Session.send")
     def test_logger_invalid_status_code(self, mock_send_request, mock_logger_error: mock.MagicMock):
-        mock_send_request.return_value = mock.Mock(ok=False)
+        mock_send_request.return_value = mock.Mock(
+            ok=False, request=mock.Mock(headers={}, body=None, url="https://www.zowe.org")
+        )
         request_handler = RequestHandler(self.session_arguments)
         try:
             request_handler.perform_request("GET", {"url": "https://www.zowe.org"}, stream=True)
@@ -76,3 +78,44 @@ class TestRequestHandlerClass(unittest.TestCase):
         request_handler = RequestHandler(self.session_arguments)
         response = request_handler.perform_request("GET", {"url": "https://www.zowe.org"})
         self.assertTrue(response == None)
+
+    @mock.patch("logging.Logger.debug")
+    @mock.patch("requests.Session.send")
+    def test_debug_log_redacts_credentials(self, mock_send_request, mock_logger_debug: mock.MagicMock):
+        """The DEBUG request-arguments dump should never contain raw auth or header secrets."""
+        mock_send_request.return_value = mock.Mock(status_code=200)
+        request_handler = RequestHandler(self.session_arguments)
+        request_handler.perform_request(
+            "GET",
+            {
+                "url": "https://www.zowe.org",
+                "auth": ("user", "super-secret-password"),
+                "headers": {"Authorization": "Bearer token", "Cookie": "test-cookie"},
+                "json": {"password": "super-secret-password"},
+            },
+            stream=True,
+        )
+        debug_message = mock_logger_debug.call_args[0][0]
+        self.assertNotIn("super-secret-password", debug_message)
+        self.assertNotIn("token", debug_message)
+        self.assertNotIn("test-cookie", debug_message)
+
+    @mock.patch("logging.Logger.error")
+    @mock.patch("requests.Session.send")
+    def test_error_log_and_exception_redact_credentials(self, mock_send_request, mock_logger_error: mock.MagicMock):
+        """A failed request should not leak the Authorization/Cookie headers or body into logs or the raised exception."""
+        mock_request = mock.Mock(
+            url="https://www.zowe.org",
+            headers={"Authorization": "Basic basic", "Cookie": "test-cookie"},
+            body="super-secret-body-content",
+        )
+        mock_send_request.return_value = mock.Mock(ok=False, status_code=500, text="failure", request=mock_request)
+        request_handler = RequestHandler(self.session_arguments)
+        with self.assertRaises(exceptions.RequestFailed) as ctx:
+            request_handler.perform_request("GET", {"url": "https://www.zowe.org"}, stream=True)
+
+        error_message = mock_logger_error.call_args[0][0]
+        exception_message = str(ctx.exception)
+        for secret in ("basic", "test-cookie", "super-secret-body-content"):
+            self.assertNotIn(secret, error_message)
+            self.assertNotIn(secret, exception_message)

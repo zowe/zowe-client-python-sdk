@@ -12,7 +12,34 @@ Copyright Contributors to the Zowe Project.
 
 import logging
 import os
+import subprocess
+import sys
+import getpass
 from typing import Any
+
+
+def restrict_to_owner(path: str, mode: int) -> None:
+    """
+    Restrict a file or directory to owner-only access, across platforms.
+
+    Parameters
+    ----------
+    path: str
+        The file or directory to restrict
+    mode: int
+        The POSIX permission bits to apply on non-Windows platforms (e.g. 0o700 for a
+        directory, 0o600 for a file)
+    """
+    if sys.platform == "win32":
+        username = getpass.getuser()
+        if username:
+            subprocess.run(
+                ["icacls", path, "/inheritance:r", "/grant:r", "{}:F".format(username)],
+                check=False,
+                capture_output=True,
+            )
+    else:
+        os.chmod(path, mode)
 
 
 class Log:
@@ -36,8 +63,14 @@ class Log:
     """
 
     dirname: str = os.path.join(os.path.expanduser("~"), ".zowe/logs")
-    os.makedirs(dirname, exist_ok=True)
-    file_handler: logging.FileHandler = logging.FileHandler(os.path.join(dirname, "python_sdk_logs.log"))
+    os.makedirs(dirname, mode=0o700, exist_ok=True)
+    restrict_to_owner(dirname, 0o700)
+    __log_filename: str = os.path.join(dirname, "python_sdk_logs.log")
+
+    __log_fd = os.open(__log_filename, os.O_CREAT | os.O_APPEND, 0o600)
+    os.close(__log_fd)
+    restrict_to_owner(__log_filename, 0o600)
+    file_handler: logging.FileHandler = logging.FileHandler(__log_filename)
     file_handler.setLevel(logging.INFO)
     file_handler.setFormatter(
         logging.Formatter("[%(asctime)s] [%(levelname)s] [%(name)s] - %(message)s", "%m/%d/%Y %I:%M:%S %p")
