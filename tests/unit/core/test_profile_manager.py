@@ -296,6 +296,19 @@ class TestZosmfProfileManager(TestCase):
             config_file.validate_schema()
         self.assertEqual(mock_logger_warning.call_args[0][0], "Could not find $schema property")
 
+    def test_schema_list_rejects_remote_schema(self):
+        """Test that schema_list does not fetch a remote schema URL and returns an empty list instead."""
+        with mock.patch("requests.get") as mock_get:
+            config_file = ConfigFile(
+                name="zowe_abcd", type="User Config", schema_property="https://example.com/zowe.schema.json"
+            )
+            config_file.suppress_config_warnings(False)
+            with self.assertWarns(UserWarning):
+                result = config_file.schema_list()
+
+        mock_get.assert_not_called()
+        self.assertEqual(result, [])
+
     @mock.patch("zowe.secrets_for_zowe_sdk.keyring.get_password", side_effect=keyring_get_password_exception)
     def test_secure_props_loading_warning(self, get_pass_func):
         """

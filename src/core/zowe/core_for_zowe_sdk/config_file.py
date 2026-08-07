@@ -19,7 +19,6 @@ from dataclasses import dataclass, field
 from typing import Any, NamedTuple, Optional, Union
 
 import json5
-import requests
 
 from .credential_manager import CredentialManager
 from .custom_warnings import ProfileNotFoundWarning, ProfileParsingWarning
@@ -180,15 +179,11 @@ class ConfigFile:
         schema_json: dict[str, Any] = {}
 
         if schema.startswith(("https://", "http://")):
-            try:
-                response = requests.get(schema)
-                response.raise_for_status()  # Ensure it's a valid response
-                schema_json = response.json()
-            except requests.RequestException as e:
-                if not self.__suppress_config_file_warnings:
-                    warnings.warn(f"Invalid schema request: {e}")
-                    self.__logger.warning(f"Invalid schema request: {e}")
-                return []
+            # remote schema loading is not supported
+            if not self.__suppress_config_file_warnings:
+                warnings.warn(f"Loading a JSON schema from a remote URL is not supported: {schema}")
+                self.__logger.warning(f"Loading a JSON schema from a remote URL is not supported: {schema}")
+            return []
 
         elif schema.startswith("file://") or os.path.isfile(schema):
             try:

@@ -14,7 +14,6 @@ import os
 from typing import Union, Any
 
 import json5
-import requests
 from jsonschema import validate
 
 
@@ -30,10 +29,18 @@ def validate_config_json(path_config_json: Union[str, dict[str, Any]], path_sche
         Absolute path to zowe.schema.json
     cwd: str
         Path of the current working directory
+
+    Raises
+    ------
+    ValueError
+        When path_schema_json is a remote URL, which is not supported
     """
-    # checks if the path_schema_json point to an internet URI and download the schema using the URI
+    # remote ($schema pointing to an http(s):// URL) schema loading is not supported; only local files may be used
     if path_schema_json.startswith("https://") or path_schema_json.startswith("http://"):
-        schema_json = requests.get(path_schema_json).json()
+        raise ValueError(
+            f"Loading a JSON schema from a remote URL is not supported: {path_schema_json}. "
+            "Use a local file path for the $schema property instead."
+        )
 
     # checks if the path_schema_json is a file
     elif os.path.isfile(path_schema_json) or path_schema_json.startswith("file://"):
