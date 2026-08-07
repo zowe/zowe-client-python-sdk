@@ -455,8 +455,6 @@ class ConfigFile:
                     if i == len(segments) - 1:
                         profiles_obj.setdefault("properties", {})
                         profiles_obj["properties"][property_name] = value
-                    else:
-                        profiles_obj = profiles_obj.get("profiles", {})
                 else:
                     break
 
