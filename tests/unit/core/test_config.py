@@ -1,5 +1,6 @@
 import importlib.util
 import os
+from unittest import mock
 
 import json5
 from jsonschema import ValidationError, validate
@@ -136,6 +137,18 @@ class TestValidateConfigJsonClass(TestCase):
         loaded_schema = json5.load(open(commented_schema_path, encoding="utf-8"))
 
         expected = validate(loaded_config, loaded_schema)
-        result = validate_config_json(commented_config_path, commented_schema_path, cwd=os.path.dirname(commented_config_path))
+        result = validate_config_json(
+            commented_config_path, commented_schema_path, cwd=os.path.dirname(commented_config_path)
+        )
 
         self.assertEqual(result, expected)
+
+    def test_validate_config_json_rejects_remote_schema(self):
+        """Test validate_config_json rejects http(s):// schema URLs without making a network request."""
+        with mock.patch("requests.get") as mock_get:
+            with self.assertRaises(ValueError):
+                validate_config_json(self.original_file_path, "https://example.com/zowe.schema.json", cwd=FIXTURES_PATH)
+            with self.assertRaises(ValueError):
+                validate_config_json(self.original_file_path, "http://example.com/zowe.schema.json", cwd=FIXTURES_PATH)
+
+        mock_get.assert_not_called()
