@@ -183,6 +183,58 @@ class TestZosmfProfileManager(TestCase):
         self.assertEqual(props, expected_props)
 
     @mock.patch("zowe.secrets_for_zowe_sdk.keyring.get_password", side_effect=keyring_get_password)
+    def test_nested_profile_with_secure_properties_on_child(self, get_pass_func):
+        """
+        Test that secure properties declared on a child profile nested under a
+        parent (e.g. mainframe.zosmf) are correctly loaded from the vault.
+
+        Regression test: __load_secure_properties previously looked for the
+        child profile name as a direct key of the parent profile dict, but
+        nested profiles actually live one level deeper under the parent's
+        own "profiles" key, so secure user/password values were silently
+        never injected for any profile nested more than one level deep.
+        """
+        custom_file_path = os.path.join(self.custom_dir, self.custom_filename)
+        config_contents = {
+            "$schema": "./zowe.schema.json",
+            "profiles": {
+                "mainframe": {
+                    "properties": {"host": "example.com"},
+                    "profiles": {
+                        "zosmf": {
+                            "type": "zosmf",
+                            "properties": {"port": 1443},
+                            "secure": ["user", "password"],
+                        }
+                    },
+                }
+            },
+            "defaults": {"zosmf": "mainframe.zosmf"},
+        }
+        with open(custom_file_path, "w") as f:
+            json.dump(config_contents, f)
+
+        self.setUpCreds(
+            custom_file_path,
+            {
+                "profiles.mainframe.profiles.zosmf.properties.user": "admin",
+                "profiles.mainframe.profiles.zosmf.properties.password": "secret",
+            },
+        )
+
+        prof_manager = ProfileManager(appname=self.custom_appname)
+        prof_manager.config_dir = self.custom_dir
+        props: dict = prof_manager.load(profile_name="mainframe.zosmf", validate_schema=False)
+
+        expected_props = {
+            "host": "example.com",
+            "port": 1443,
+            "user": "admin",
+            "password": "secret",
+        }
+        self.assertEqual(props, expected_props)
+
+    @mock.patch("zowe.secrets_for_zowe_sdk.keyring.get_password", side_effect=keyring_get_password)
     def test_profile_loading_with_user_overridden_properties(self, get_pass_func):
         """
         Test overriding of properties from user config,
