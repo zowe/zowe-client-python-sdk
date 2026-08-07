@@ -145,6 +145,28 @@ class SdkApi:
             return True
         return self.session.base_path is not None
 
+    def _encode_uri_path_for_zos(self, zos_uri_path: str) -> str:
+        """
+        Encode a z/OS resource (dataset, job, or volser) path for the path component of a URI.
+
+        None of the documented z/OS resource naming special characters require encoding
+        to be processed successfully by z/OSMF. API-ML rejects a literal "#" with an
+        HTTP 400 error unless it is encoded, so it is the only character adjusted here.
+
+        Parameters
+        ----------
+        zos_uri_path : str
+            The URI path to encode
+
+        Returns
+        -------
+        str
+            The path, with "#" encoded when the session is routed through API-ML
+        """
+        if self._is_using_apiml():
+            return zos_uri_path.replace("#", "%23")
+        return zos_uri_path
+
     def _encode_uri_path_for_uss(self, uss_uri_path: str) -> str:
         """
         Encode a USS file path for the path component of a URI.

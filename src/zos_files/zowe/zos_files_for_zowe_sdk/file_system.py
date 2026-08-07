@@ -69,7 +69,7 @@ class FileSystems(BaseFilesApi):  # type: ignore
 
         custom_args = self._create_custom_request_arguments()
         custom_args["url"] = "{}mfs/zfs/{}".format(
-            self._request_endpoint, self._encode_uri_component(file_system_name)
+            self._request_endpoint, self._encode_uri_path_for_zos(file_system_name)
         )
         custom_args["json"] = options
         self.request_handler.perform_request("POST", custom_args, expected_code=[201])
@@ -85,7 +85,7 @@ class FileSystems(BaseFilesApi):  # type: ignore
         """
         custom_args = self._create_custom_request_arguments()
         custom_args["url"] = "{}mfs/zfs/{}".format(
-            self._request_endpoint, self._encode_uri_component(file_system_name)
+            self._request_endpoint, self._encode_uri_path_for_zos(file_system_name)
         )
         self.request_handler.perform_request("DELETE", custom_args, expected_code=[204])
 
@@ -113,7 +113,7 @@ class FileSystems(BaseFilesApi):  # type: ignore
         options["action"] = "mount"
         options["mount-point"] = mount_point
         custom_args = self._create_custom_request_arguments()
-        custom_args["url"] = "{}mfs/{}".format(self._request_endpoint, self._encode_uri_component(file_system_name))
+        custom_args["url"] = "{}mfs/{}".format(self._request_endpoint, self._encode_uri_path_for_zos(file_system_name))
         custom_args["json"] = options
         custom_args["headers"]["Content-Type"] = "text/plain; charset={}".format(encoding)
         self.request_handler.perform_request("PUT", custom_args, expected_code=[204])
@@ -135,7 +135,7 @@ class FileSystems(BaseFilesApi):  # type: ignore
         """
         options["action"] = "unmount"
         custom_args = self._create_custom_request_arguments()
-        custom_args["url"] = "{}mfs/{}".format(self._request_endpoint, self._encode_uri_component(file_system_name))
+        custom_args["url"] = "{}mfs/{}".format(self._request_endpoint, self._encode_uri_path_for_zos(file_system_name))
         custom_args["json"] = options
         custom_args["headers"]["Content-Type"] = "text/plain; charset={}".format(encoding)
         self.request_handler.perform_request("PUT", custom_args, expected_code=[204])

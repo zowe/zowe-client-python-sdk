@@ -127,8 +127,8 @@ class TestJobsClass(TestCase):
                     "version": test_case[0][2],
                 }
                 job_url = "{}/{}".format(test_case[0][0], test_case[0][1])
-                job_url_adjusted = jobs_test_object._encode_uri_component(job_url)
-                self.assertNotRegex(job_url_adjusted, r"\$")
+                job_url_adjusted = jobs_test_object._encode_uri_path_for_zos(job_url)
+                self.assertEqual(job_url_adjusted, job_url)
                 custom_args["url"] = "https://mock-url.com:443/zosmf/restjobs/jobs/{}".format(job_url_adjusted)
                 jobs_test_object.request_handler.perform_request.assert_called_once_with(
                     "PUT", custom_args, expected_code=[202, 200]
