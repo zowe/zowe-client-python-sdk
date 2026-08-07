@@ -39,6 +39,69 @@ class TestJobsClass(TestCase):
         mock_send_request.assert_called_once()
 
     @mock.patch("requests.Session.send")
+    def test_get_job_status(self, mock_send_request):
+        """Test getting job status sends a request"""
+        mock_response = mock.Mock()
+        mock_response.headers = {"Content-Type": "application/json"}
+        mock_response.status_code = 200
+        mock_response.json.return_value = {"jobname": "TESTJOB2", "jobid": "JOB00084"}
+        mock_send_request.return_value = mock_response
+
+        Jobs(self.test_profile).get_job_status("TESTJOB2", "JOB00084")
+        mock_send_request.assert_called_once()
+
+    @mock.patch("requests.Session.send")
+    def test_delete_job(self, mock_send_request):
+        """Test deleting a job sends a request"""
+        mock_response = mock.Mock()
+        mock_response.headers = {"Content-Type": "application/json"}
+        mock_response.status_code = 202
+        mock_response.json.return_value = {}
+        mock_send_request.return_value = mock_response
+
+        Jobs(self.test_profile).delete_job("TESTJOB2", "JOB00084")
+        mock_send_request.assert_called_once()
+
+    @mock.patch("requests.Session.send")
+    def test_get_spool_files(self, mock_send_request):
+        """Test retrieving spool files sends a request"""
+        mock_response = mock.Mock()
+        mock_response.headers = {"Content-Type": "application/json"}
+        mock_response.status_code = 200
+        mock_response.json.return_value = [{"id": 1, "ddname": "JESMSGLG"}]
+        mock_send_request.return_value = mock_response
+
+        result = Jobs(self.test_profile).get_spool_files("J0000001")
+        mock_send_request.assert_called_once()
+        self.assertEqual(len(result), 1)
+
+    @mock.patch("requests.Session.send")
+    def test_get_jcl_text(self, mock_send_request):
+        """Test retrieving JCL text sends a request"""
+        mock_response = mock.Mock()
+        mock_response.headers = {"Content-Type": "text/plain"}
+        mock_response.status_code = 200
+        mock_response.text = "//JOBCARD JOB\n"
+        mock_send_request.return_value = mock_response
+
+        result = Jobs(self.test_profile).get_jcl_text("J0000001")
+        mock_send_request.assert_called_once()
+        self.assertEqual(result, "//JOBCARD JOB\n")
+
+    @mock.patch("requests.Session.send")
+    def test_get_spool_file_contents(self, mock_send_request):
+        """Test retrieving spool file contents sends a request"""
+        mock_response = mock.Mock()
+        mock_response.headers = {"Content-Type": "text/plain"}
+        mock_response.status_code = 200
+        mock_response.text = "spool content"
+        mock_send_request.return_value = mock_response
+
+        result = Jobs(self.test_profile).get_spool_file_contents("J0000001", "2")
+        mock_send_request.assert_called_once()
+        self.assertEqual(result, "spool content")
+
+    @mock.patch("requests.Session.send")
     def test_hold_job(self, mock_send_request):
         """Test holding a job sends a request"""
         mock_response = mock.Mock()
