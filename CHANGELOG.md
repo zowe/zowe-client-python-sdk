@@ -10,6 +10,7 @@ All notable changes to the Zowe Client Python SDK will be documented in this fil
 
 ### Bug Fixes
 
+- Fixed secure `user`/`password` properties not being loaded for team-config profiles nested more than one level deep which caused 401 errors. [#411](https://github.com/zowe/zowe-client-python-sdk/pull/411)
 - Redacted request headers and restricted log directory/file to owner-only access. [#404](https://github.com/zowe/zowe-client-python-sdk/pull/404)
 - Fixed `Jobs.get_job_output_as_files` writing to a directory it never created, and made job output paths stay within the target directory. [#403](https://github.com/zowe/zowe-client-python-sdk/pull/403)
 - Updated the `pyo3` dependency of the Secrets SDK for technical currency. [#399](https://github.com/zowe/zowe-client-python-sdk/pull/399)
