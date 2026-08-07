@@ -32,6 +32,10 @@ AUTH_TYPE_TOKEN = "token"
 AUTH_TYPE_CERT_PEM = "cert-pem"
 
 
+# Token type property value for an API-ML authentication token
+TOKEN_TYPE_APIML = "apimlAuthenticationToken"
+
+
 # https protocol defaults
 DEFAULT_HTTPS_PORT = 443
 HTTPS_PROTOCOL = "https"

@@ -110,3 +110,70 @@ class TestSdkApiClass(TestCase):
         actual_none = sdk_api._encode_uri_component(None)
         expected_none = None
         self.assertEqual(actual_none, expected_none)
+
+    def test_is_using_apiml(self):
+        """Session should be detected as API-ML from a base path or an API-ML token."""
+        sdk_api = SdkApi(self.basic_props, self.default_url)
+        self.assertFalse(sdk_api._is_using_apiml())
+
+        base_path_api = SdkApi({**self.basic_props, "basePath": "/api/v1"}, self.default_url)
+        self.assertTrue(base_path_api._is_using_apiml())
+
+        token_props = {**self.token_props, "tokenType": session_constants.TOKEN_TYPE_APIML}
+        self.assertTrue(SdkApi(token_props, self.default_url)._is_using_apiml())
+
+    def test_encode_uri_path_for_zos_leaves_zosmf_path_unchanged(self):
+        """None of the documented z/OS resource special characters require encoding for z/OSMF."""
+        sdk_api = SdkApi(self.basic_props, self.default_url)
+
+        self.assertEqual(sdk_api._encode_uri_path_for_zos("MY.DS#NAME$HERE"), "MY.DS#NAME$HERE")
+        self.assertEqual(sdk_api._encode_uri_path_for_zos("JOB$0010/JOB00010"), "JOB$0010/JOB00010")
+
+    def test_encode_uri_path_for_zos_encodes_hash_for_apiml(self):
+        """API-ML rejects a literal '#' with an HTTP 400 error unless it is encoded."""
+        sdk_api = SdkApi({**self.basic_props, "basePath": "/api/v1"}, self.default_url)
+
+        self.assertEqual(sdk_api._encode_uri_path_for_zos("MY.DS#NAME$HERE"), "MY.DS%23NAME$HERE")
+
+    def test_encode_uri_path_for_uss_normalizes_path(self):
+        """USS paths should be normalized and stripped of their leading slash."""
+        sdk_api = SdkApi(self.basic_props, self.default_url)
+
+        self.assertEqual(sdk_api._encode_uri_path_for_uss("/u/user/file"), "u/user/file")
+        self.assertEqual(sdk_api._encode_uri_path_for_uss("u/user/file"), "u/user/file")
+        self.assertEqual(sdk_api._encode_uri_path_for_uss("/u/user//file"), "u/user/file")
+        self.assertEqual(sdk_api._encode_uri_path_for_uss("/u/user/../other"), "u/other")
+        # Normalizing against root means .. cannot climb past the service path
+        self.assertEqual(sdk_api._encode_uri_path_for_uss("/u/a/../../../../etc/passwd"), "etc/passwd")
+
+    def test_encode_uri_path_for_uss_encodes_special_characters(self):
+        """Characters that z/OSMF rejects should be encoded, and slashes should be preserved."""
+        sdk_api = SdkApi(self.basic_props, self.default_url)
+
+        self.assertEqual(sdk_api._encode_uri_path_for_uss("/u/my file.txt"), "u/my%20file.txt")
+        self.assertEqual(sdk_api._encode_uri_path_for_uss("/u/a%b"), "u/a%25b")
+        self.assertEqual(sdk_api._encode_uri_path_for_uss("/u/a+b"), "u/a%2Bb")
+        self.assertEqual(sdk_api._encode_uri_path_for_uss("/u/f?x=1"), "u/f%3Fx=1")
+        # API-ML characters stay unencoded on a direct z/OSMF connection
+        self.assertEqual(sdk_api._encode_uri_path_for_uss("/u/a#b;c"), "u/a#b;c")
+
+    def test_encode_uri_path_for_uss_encodes_apiml_characters(self):
+        """API-ML rejects these characters with an HTTP 400 unless they are encoded."""
+        sdk_api = SdkApi({**self.basic_props, "basePath": "/api/v1"}, self.default_url)
+
+        self.assertEqual(
+            sdk_api._encode_uri_path_for_uss("/u/a#b;c<d>[e]^{f}|g"),
+            "u/a%23b%3Bc%3Cd%3E%5Be%5D%5E%7Bf%7D%7Cg",
+        )
+
+    def test_encode_uri_path_for_uss_rejects_unusable_characters(self):
+        """Backslashes and double-quotes fail server side either way, so the request is not sent."""
+        sdk_api = SdkApi(self.basic_props, self.default_url)
+
+        with self.assertRaises(ValueError) as backslash:
+            sdk_api._encode_uri_path_for_uss("/u/a\\b")
+        self.assertIn("backslash", str(backslash.exception))
+
+        with self.assertRaises(ValueError) as double_quote:
+            sdk_api._encode_uri_path_for_uss('/u/a"b')
+        self.assertIn("double-quote", str(double_quote.exception))

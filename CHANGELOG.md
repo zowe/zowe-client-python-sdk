@@ -15,6 +15,7 @@ All notable changes to the Zowe Client Python SDK will be documented in this fil
 - Updated the `pyo3` dependency of the Secrets SDK for technical currency. [#399](https://github.com/zowe/zowe-client-python-sdk/pull/399)
 - Updated the `secrets_core` dependency of the Secrets SDK to Zowe CLI 8.35.1 and pinned it to a commit for reproducible builds. [#407](https://github.com/zowe/zowe-client-python-sdk/pull/407)
 - Updated the `Tso.issue_command` SDK method to accept a `command_timeout` parameter and raise a `TimeoutError` if the "TSO PROMPT" message is not received within that time, preventing the method from looping indefinitely. [#406](https://github.com/zowe/zowe-client-python-sdk/pull/406)
+- Fixed URI-encoding of USS paths, dataset/job names, and zFS file system names to match what z/OSMF and API-ML actually require. Also fixed `Console.issue_command`/`get_response` corrupting URLs when the host or base path contains `defcn`. [#408](https://github.com/zowe/zowe-client-python-sdk/pull/408)
 
 ## `1.0.0-dev26`
 
