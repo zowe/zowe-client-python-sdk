@@ -7,6 +7,7 @@ All notable changes to the Zowe Client Python SDK will be documented in this fil
 ### Enhancements
 
 - Allowed the profile manager to only validate schemas at the project level with the new `validate_only_project_config` parameter. [#393](https://github.com/zowe/zowe-client-python-sdk/pull/393)
+- Updated the `ConfigFile.autodiscover_config_dir` method to refuse loading a potentially untrusted config file whose parent directory is not owned by the current user. This check can be disabled by calling `trust_all_directories(True)`.
 
 ### Bug Fixes
 
