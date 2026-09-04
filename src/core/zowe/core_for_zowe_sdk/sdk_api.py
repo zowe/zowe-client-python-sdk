@@ -12,6 +12,7 @@ Copyright Contributors to the Zowe Project.
 
 import copy
 import posixpath
+import re
 import urllib
 
 from . import session_constants
@@ -20,7 +21,8 @@ from .request_handler import RequestHandler
 from .session import ISession, Session
 from typing import Any, Optional, Type
 
-# Characters that fail against both z/OSMF and API-ML unless they are encoded.
+_PERCENT_ENCODED_PATTERN = re.compile(r"%[0-9A-Fa-f]{2}")
+
 _USS_CHARS_TO_ENCODE = {" ": "%20", "%": "%25", "+": "%2B", "?": "%3F"}
 
 # Characters that API-ML rejects with an HTTP 400 unless they are encoded.
@@ -145,6 +147,26 @@ class SdkApi:
             return True
         return self.session.base_path is not None
 
+    def _is_uri_encoded(self, uri_path: str) -> bool:
+        """
+        Determine whether a path is already percent-encoded.
+
+        A path is treated as encoded when it contains at least one percent-encoded sequence.
+        A literal percent sign that is not followed by two hex digits, such as the one in the
+        USS file name "100% done", is not an encoded sequence and does not make a path encoded.
+
+        Parameters
+        ----------
+        uri_path : str
+            The path to inspect
+
+        Returns
+        -------
+        bool
+            True if the path contains a percent-encoded sequence, False otherwise
+        """
+        return bool(_PERCENT_ENCODED_PATTERN.search(uri_path))
+
     def _encode_uri_path_for_zos(self, zos_uri_path: str) -> str:
         """
         Encode a z/OS resource (dataset, job, or volser) path for the path component of a URI.
@@ -157,10 +179,13 @@ class SdkApi:
         successfully by z/OSMF. API-ML rejects a literal "#" with an HTTP 400 error unless it is
         encoded, so it is also adjusted here when routed through API-ML.
 
+        A path that is already percent-encoded is normalized but not encoded a second time, so
+        that a caller-encoded "%23" is not turned into "%2523".
+
         Parameters
         ----------
         zos_uri_path : str
-            The URI path to encode
+            The URI path to encode, either unencoded or already percent-encoded
 
         Returns
         -------
@@ -170,6 +195,8 @@ class SdkApi:
         """
         # Normalizing against root collapses ".." segments without escaping the service path
         normalized = posixpath.normpath("/" + zos_uri_path).lstrip("/")
+        if self._is_uri_encoded(normalized):
+            return normalized
         encoded = normalized.replace("?", "%3F")
         if self._is_using_apiml():
             encoded = encoded.replace("#", "%23")
@@ -183,10 +210,15 @@ class SdkApi:
         unless they are encoded. Forward slashes are preserved rather than encoded
         as %2F, since encoded slashes are expected to be rejected in future.
 
+        A path that is already percent-encoded is normalized and validated but not encoded a
+        second time, so that a caller-encoded "%20" is not turned into "%2520". A file name
+        containing a literal percent sign followed by two hex digits is indistinguishable from
+        an encoded path, so such a name must be passed already encoded.
+
         Parameters
         ----------
         uss_uri_path : str
-            The USS path to encode
+            The USS path to encode, either unencoded or already percent-encoded
 
         Returns
         -------
@@ -200,26 +232,29 @@ class SdkApi:
         """
         # Normalizing against root collapses // and resolves /../ without escaping the service path
         normalized = posixpath.normpath("/" + uss_uri_path).lstrip("/")
-        encode_for_apiml = self._is_using_apiml()
 
+        if "\\" in normalized:
+            # Both encoded and unencoded backslashes fail in REST requests
+            self.logger.error(f"The USS path '{uss_uri_path}' contains a backslash character.")
+            raise ValueError(
+                f"The supplied USS path '{uss_uri_path}' contains a backslash \\ character. "
+                "When a backslash is present, z/OSMF and API-ML servers fail with an HTTP 400 "
+                "or 500 error code, or the backslash is ignored. This request was not sent."
+            )
+        if '"' in normalized:
+            # Both encoded and unencoded double-quotes fail in REST requests
+            self.logger.error(f"The USS path '{uss_uri_path}' contains a double-quote character.")
+            raise ValueError(
+                f"The supplied USS path '{uss_uri_path}' contains a double-quote \" character. "
+                "When a double-quote is present, z/OSMF and API-ML servers fail with an HTTP 400 "
+                "or 500 error code. This request was not sent."
+            )
+        if self._is_uri_encoded(normalized):
+            return normalized
+
+        encode_for_apiml = self._is_using_apiml()
         encoded_path = []
         for next_char in normalized:
-            if next_char == "\\":
-                # Both encoded and unencoded backslashes fail in REST requests
-                self.logger.error(f"The USS path '{uss_uri_path}' contains a backslash character.")
-                raise ValueError(
-                    f"The supplied USS path '{uss_uri_path}' contains a backslash \\ character. "
-                    "When a backslash is present, z/OSMF and API-ML servers fail with an HTTP 400 "
-                    "or 500 error code, or the backslash is ignored. This request was not sent."
-                )
-            if next_char == '"':
-                # Both encoded and unencoded double-quotes fail in REST requests
-                self.logger.error(f"The USS path '{uss_uri_path}' contains a double-quote character.")
-                raise ValueError(
-                    f'The supplied USS path \'{uss_uri_path}\' contains a double-quote " character. '
-                    "When a double-quote is present, z/OSMF and API-ML servers fail with an HTTP 400 "
-                    "or 500 error code. This request was not sent."
-                )
             if next_char in _USS_CHARS_TO_ENCODE:
                 encoded_path.append(_USS_CHARS_TO_ENCODE[next_char])
             elif encode_for_apiml and next_char in _APIML_CHARS_TO_ENCODE:

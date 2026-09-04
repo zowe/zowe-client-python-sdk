@@ -192,3 +192,54 @@ class TestSdkApiClass(TestCase):
         with self.assertRaises(ValueError) as double_quote:
             sdk_api._encode_uri_path_for_uss('/u/a"b')
         self.assertIn("double-quote", str(double_quote.exception))
+
+    def test_is_uri_encoded(self):
+        """Only a percent sign followed by two hex digits counts as an encoded sequence."""
+        sdk_api = SdkApi(self.basic_props, self.default_url)
+
+        self.assertTrue(sdk_api._is_uri_encoded("u/my%20file.txt"))
+        self.assertTrue(sdk_api._is_uri_encoded("MY.DS%23NAME"))
+        self.assertTrue(sdk_api._is_uri_encoded("u/a%2fb"))
+        self.assertFalse(sdk_api._is_uri_encoded("u/my file.txt"))
+        self.assertFalse(sdk_api._is_uri_encoded("u/100% done"))
+        self.assertFalse(sdk_api._is_uri_encoded("u/a%zzb"))
+
+    def test_encode_uri_path_for_zos_skips_encoded_path(self):
+        """An already-encoded z/OS path must not be encoded a second time."""
+        sdk_api = SdkApi({**self.basic_props, "basePath": "/api/v1"}, self.default_url)
+
+        self.assertEqual(sdk_api._encode_uri_path_for_zos("MY.DS%23NAME$HERE"), "MY.DS%23NAME$HERE")
+        self.assertEqual(sdk_api._encode_uri_path_for_zos("X%3Ffsname=Y"), "X%3Ffsname=Y")
+
+    def test_encode_uri_path_for_zos_resolves_dot_segments_in_encoded_path(self):
+        """An already-encoded z/OS path is still normalized against the service root."""
+        sdk_api = SdkApi(self.basic_props, self.default_url)
+
+        self.assertEqual(
+            sdk_api._encode_uri_path_for_zos("../../restjobs/jobs/OTHER%23JOB/JOB00001"),
+            "restjobs/jobs/OTHER%23JOB/JOB00001",
+        )
+
+    def test_encode_uri_path_for_uss_skips_encoded_path(self):
+        """An already-encoded USS path must not be encoded a second time."""
+        sdk_api = SdkApi(self.basic_props, self.default_url)
+        apiml_api = SdkApi({**self.basic_props, "basePath": "/api/v1"}, self.default_url)
+
+        self.assertEqual(sdk_api._encode_uri_path_for_uss("/u/my%20file.txt"), "u/my%20file.txt")
+        self.assertEqual(sdk_api._encode_uri_path_for_uss("/u/a%25b"), "u/a%25b")
+        self.assertEqual(apiml_api._encode_uri_path_for_uss("/u/a%23b;c"), "u/a%23b;c")
+
+    def test_encode_uri_path_for_uss_normalizes_and_validates_encoded_path(self):
+        """An already-encoded USS path is still normalized and checked for unusable characters."""
+        sdk_api = SdkApi(self.basic_props, self.default_url)
+
+        self.assertEqual(sdk_api._encode_uri_path_for_uss("/u/user/..//other%20dir/f"), "u/other%20dir/f")
+        self.assertEqual(sdk_api._encode_uri_path_for_uss("/u/a/../../../../etc/pass%20wd"), "etc/pass%20wd")
+
+        with self.assertRaises(ValueError) as backslash:
+            sdk_api._encode_uri_path_for_uss("/u/a%20b\\c")
+        self.assertIn("backslash", str(backslash.exception))
+
+        with self.assertRaises(ValueError) as double_quote:
+            sdk_api._encode_uri_path_for_uss('/u/a%20b"c')
+        self.assertIn("double-quote", str(double_quote.exception))
