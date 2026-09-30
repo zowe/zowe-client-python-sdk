@@ -10,6 +10,7 @@ All notable changes to the Zowe Client Python SDK will be documented in this fil
 
 ### Bug Fixes
 
+- Fixed `_encode_uri_path_for_uss` and `_encode_uri_path_for_zos` double-encoding paths that were already percent-encoded. Encoded paths are now normalized and validated, but not encoded again. [#415](https://github.com/zowe/zowe-client-python-sdk/pull/415)
 - **Breaking**: Removed support for loading a JSON schema from a remote `http(s)://` URL via the `$schema` config property. Local schema files are still supported. [#412](https://github.com/zowe/zowe-client-python-sdk/pull/412)
 - Fixed secure `user`/`password` properties not being loaded for team-config profiles nested more than one level deep which caused 401 errors. [#411](https://github.com/zowe/zowe-client-python-sdk/pull/411)
 - Redacted request headers and restricted log directory/file to owner-only access. [#404](https://github.com/zowe/zowe-client-python-sdk/pull/404)
