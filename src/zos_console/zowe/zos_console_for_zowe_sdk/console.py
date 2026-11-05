@@ -149,12 +149,10 @@ class Console(SdkApi):  # type: ignore
             )
             time = None
         if time is not None:
-            if time.tzinfo is not None and time.tzinfo != timezone.utc:
-                self.logger.warning(
-                    f'"time" query parameter is not in UTC timezone ({time.tzinfo}). Conversion to UTC will occur'
-                )
-                time = time.astimezone(timezone.utc)
-            params["time"] = time
+            if time.tzinfo is None:
+                self.logger.warning(f'"time" query parameter has no timezone specified. UTC will be set')
+                time = time.replace(tzinfo=timezone.utc)
+            params["time"] = time.isoformat(timespec="milliseconds")
         if timestamp:
             params["timestamp"] = timestamp
         if time_range:

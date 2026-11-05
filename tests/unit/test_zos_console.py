@@ -271,7 +271,46 @@ class TestConsoleClass(unittest.TestCase):
             assert len(result.items) == 1
     
     @mock.patch("requests.Session.send")
-    def test_get_log_messages_should_return_by_time_with_custom_timezone(self, mock_send_request):
+    def test_get_log_messages_should_return_by_time_without_timezone(self, mock_send_request):
+        """Log messages should be returned from the specified time with the timezone not specified (set to UTC by default)."""
+        mock_response = mock.Mock()
+        mock_response.headers = {"Content-Type": "application/json"}
+        mock_response.status_code = 200
+        mock_response.json.return_value = {
+            'items': [
+                {
+                    'cart': '0',
+                    'color': 'green',
+                    'jobName': 'TSTJOB1 ',
+                    'message': ' XYZ1234I Some Test Log Message 1',
+                    'messageId': '12568902641',
+                    'replyId': '0',
+                    'subType': 'NULL',
+                    'system': 'TSTSYS  ',
+                    'time': 'Thu Apr 30 15:37:03 GMT 2026',
+                    'timestamp': 1777563423710,
+                    'type': 'HARDCOPY'
+                }
+            ],
+            'nextTimestamp': 1777563396310,
+            'source': 'OPERLOG',
+            'timezone': 2,
+            'totalitems': 1
+        }
+        mock_send_request.return_value = mock_response
+        console = Console(self.session_details)
+        with patch.object(console.logger, "warning") as mock_warning:
+            test_datetime = datetime.now()
+            result = console.get_log_messages(direction="forward", time=test_datetime)
+            mock_warning.assert_called_once_with(
+                f'"time" query parameter has no timezone specified. UTC will be set'
+            )
+            mock_send_request.assert_called_once()
+            assert isinstance(result, GetLogMessagesResponse)
+            assert len(result.items) == 1
+
+    @mock.patch("requests.Session.send")
+    def test_get_log_messages_should_return_by_time_with_timezone(self, mock_send_request):
         """Log messages should be returned from the specified time with the timezone specified."""
         mock_response = mock.Mock()
         mock_response.headers = {"Content-Type": "application/json"}
@@ -302,9 +341,7 @@ class TestConsoleClass(unittest.TestCase):
         with patch.object(console.logger, "warning") as mock_warning:
             test_datetime = datetime.now(tz=timezone(timedelta(hours=3)))
             result = console.get_log_messages(direction="forward", time=test_datetime)
-            mock_warning.assert_called_once_with(
-                f'"time" query parameter is not in UTC timezone ({test_datetime.tzinfo}). Conversion to UTC will occur'
-            )
+            mock_warning.assert_not_called()
             mock_send_request.assert_called_once()
             assert isinstance(result, GetLogMessagesResponse)
             assert len(result.items) == 1
