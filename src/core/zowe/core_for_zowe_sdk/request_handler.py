@@ -10,6 +10,7 @@ SPDX-License-Identifier: EPL-2.0
 Copyright Contributors to the Zowe Project.
 """
 
+import copy
 from typing import Union, Any
 from requests import Response
 
@@ -18,6 +19,30 @@ import urllib3
 
 from .exceptions import InvalidRequestMethod, RequestFailed, UnexpectedStatus
 from .logger import Log
+
+SENSITIVE_HEADERS = {"authorization", "cookie", "proxy-authorization"}
+REDACTED = "****"
+
+
+def _redact_headers(headers: Any) -> dict[str, Any]:
+    """Return a copy of the given headers with sensitive values redacted."""
+    if not headers:
+        return {}
+    return {key: (REDACTED if key.lower() in SENSITIVE_HEADERS else value) for key, value in headers.items()}
+
+
+def _redact_request_arguments(request_arguments: dict[str, Any]) -> dict[str, Any]:
+    """Return a copy of request_arguments safe to log, with credentials and headers redacted."""
+    safe_arguments = copy.copy(request_arguments)
+    if "auth" in safe_arguments:
+        safe_arguments["auth"] = REDACTED
+    if "headers" in safe_arguments:
+        safe_arguments["headers"] = _redact_headers(safe_arguments["headers"])
+    if "json" in safe_arguments:
+        safe_arguments["json"] = REDACTED
+    if "data" in safe_arguments:
+        safe_arguments["data"] = REDACTED
+    return safe_arguments
 
 
 class RequestHandler:
@@ -69,7 +94,9 @@ class RequestHandler:
         self.__request_arguments = request_arguments
         self.__expected_code = expected_code
         self.__logger.debug(
-            f"Request method: {self.__method}, Request arguments: {self.__request_arguments}, Expected code: {expected_code}"
+            f"Request method: {self.__method}, "
+            f"Request arguments: {_redact_request_arguments(self.__request_arguments)}, "
+            f"Expected code: {expected_code}"
         )
         self.__validate_method()
         self.__send_request(stream=stream)
@@ -129,8 +156,8 @@ class RequestHandler:
                 raise UnexpectedStatus(self.__expected_code, self.__response.status_code, self.__response.text)
         else:
             output_str = str(self.__response.request.url)
-            output_str += "\n" + str(self.__response.request.headers)
-            output_str += "\n" + str(self.__response.request.body)
+            output_str += "\n" + str(_redact_headers(self.__response.request.headers))
+            output_str += "\n" + (REDACTED if self.__response.request.body else "")
             output_str += "\n" + str(self.__response.text)
             self.__logger.error(
                 f"HTTP Request has failed with status code {self.__response.status_code}. \n {output_str}"

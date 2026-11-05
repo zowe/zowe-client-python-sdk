@@ -98,8 +98,8 @@ class TestRenameClass(TestCase):
                 custom_args = files_test_profile.ds._create_custom_request_arguments()
                 custom_args["json"] = data
                 ds_path = "{}({})".format(test_case[0][0], test_case[0][2])
-                ds_path_adjusted = files_test_profile._encode_uri_component(ds_path)
-                self.assertNotRegex(ds_path_adjusted, r"[\$\@\#]")
+                ds_path_adjusted = files_test_profile.ds._encode_uri_path_for_zos(ds_path)
+                self.assertEqual(ds_path_adjusted, ds_path)
                 self.assertRegex(ds_path_adjusted, r"[\(" + re.escape(test_case[0][2]) + r"\)]")
                 custom_args["url"] = "https://mock-url.com:443/zosmf/restfiles/ds/{}".format(ds_path_adjusted)
                 files_test_profile.ds.request_handler.perform_request.assert_called_once_with(

@@ -14,6 +14,7 @@ import os
 from typing import Optional, Any
 
 from zowe.core_for_zowe_sdk import SdkApi
+from zowe.core_for_zowe_sdk.validators import reject_unsafe_component, reject_unsafe_path
 
 from .response import JobResponse, SpoolResponse, StatusResponse
 
@@ -53,7 +54,7 @@ class Jobs(SdkApi):  # type: ignore
         """
         custom_args = self._create_custom_request_arguments()
         job_url = "{}/{}".format(jobname, jobid)
-        request_url = "{}{}".format(self._request_endpoint, self._encode_uri_component(job_url))
+        request_url = "{}{}".format(self._request_endpoint, self._encode_uri_path_for_zos(job_url))
         custom_args["url"] = request_url
         response_json = self.request_handler.perform_request("GET", custom_args)
         return JobResponse(response_json)
@@ -88,7 +89,7 @@ class Jobs(SdkApi):  # type: ignore
 
         custom_args = self._create_custom_request_arguments()
         job_url = "{}/{}".format(jobname, jobid)
-        request_url = "{}{}".format(self._request_endpoint, self._encode_uri_component(job_url))
+        request_url = "{}{}".format(self._request_endpoint, self._encode_uri_path_for_zos(job_url))
         custom_args["url"] = request_url
         custom_args["json"] = {"request": "cancel", "version": modify_version}
 
@@ -125,7 +126,7 @@ class Jobs(SdkApi):  # type: ignore
 
         custom_args = self._create_custom_request_arguments()
         job_url = "{}/{}".format(jobname, jobid)
-        request_url = "{}{}".format(self._request_endpoint, self._encode_uri_component(job_url))
+        request_url = "{}{}".format(self._request_endpoint, self._encode_uri_path_for_zos(job_url))
         custom_args["url"] = request_url
         custom_args["headers"]["X-IBM-Job-Modify-Version"] = modify_version
 
@@ -155,7 +156,7 @@ class Jobs(SdkApi):  # type: ignore
         """
         custom_args = self._create_custom_request_arguments()
         job_url = "{}/{}".format(jobname, jobid)
-        request_url = "{}{}".format(self._request_endpoint, self._encode_uri_component(job_url))
+        request_url = "{}{}".format(self._request_endpoint, self._encode_uri_path_for_zos(job_url))
         custom_args["url"] = request_url
         custom_args["json"] = {**req, "version": modify_version}
 
@@ -387,7 +388,7 @@ class Jobs(SdkApi):  # type: ignore
         """
         custom_args = self._create_custom_request_arguments()
         job_url = "{}/files".format(correlator)
-        request_url = "{}{}".format(self._request_endpoint, self._encode_uri_component(job_url))
+        request_url = "{}{}".format(self._request_endpoint, self._encode_uri_path_for_zos(job_url))
         custom_args["url"] = request_url
         response_json = self.request_handler.perform_request("GET", custom_args)
         response = []
@@ -411,7 +412,7 @@ class Jobs(SdkApi):  # type: ignore
         """
         custom_args = self._create_custom_request_arguments()
         job_url = "{}/files/JCL/records".format(correlator)
-        request_url = "{}{}".format(self._request_endpoint, self._encode_uri_component(job_url))
+        request_url = "{}{}".format(self._request_endpoint, self._encode_uri_path_for_zos(job_url))
         custom_args["url"] = request_url
         response_json: str = self.request_handler.perform_request("GET", custom_args)
         return response_json
@@ -435,7 +436,7 @@ class Jobs(SdkApi):  # type: ignore
         """
         custom_args = self._create_custom_request_arguments()
         job_url = "{}/files/{}/records".format(correlator, id)
-        request_url = "{}{}".format(self._request_endpoint, self._encode_uri_component(job_url))
+        request_url = "{}{}".format(self._request_endpoint, self._encode_uri_path_for_zos(job_url))
         custom_args["url"] = request_url
         response_json: str = self.request_handler.perform_request("GET", custom_args)
         return response_json
@@ -469,9 +470,16 @@ class Jobs(SdkApi):  # type: ignore
         job_id = status["jobid"]
         job_correlator = status["job-correlator"]
 
-        output_dir = os.path.join(output_dir, job_name, job_id)
-        os.makedirs(output_dir, exist_ok=True)
-        output_file = os.path.join(output_dir, job_name, job_id, "jcl.txt")
+        # Fixed root that every generated path must stay within
+        base_dir = os.path.realpath(output_dir)
+
+        reject_unsafe_component(job_name)
+        reject_unsafe_component(job_id)
+        job_dir = os.path.join(output_dir, job_name, job_id)
+        reject_unsafe_path(base_dir, job_dir)
+        os.makedirs(job_dir, exist_ok=True)
+        output_file = os.path.join(job_dir, "jcl.txt")
+        reject_unsafe_path(base_dir, output_file)
         data_spool_file = self.get_jcl_text(job_correlator)
         dataset_content = data_spool_file
         with open(output_file, "w", encoding="utf-8") as out_file:
@@ -482,10 +490,14 @@ class Jobs(SdkApi):  # type: ignore
             stepname = spool_file["stepname"]
             ddname = spool_file["ddname"]
             spoolfile_id = spool_file["id"]
-            output_dir = os.path.join(output_dir, job_name, job_id, stepname)
-            os.makedirs(output_dir, exist_ok=True)
+            reject_unsafe_component(stepname)
+            reject_unsafe_component(ddname)
+            step_dir = os.path.join(job_dir, stepname)
+            reject_unsafe_path(base_dir, step_dir)
+            os.makedirs(step_dir, exist_ok=True)
 
-            output_file = os.path.join(output_dir, job_name, job_id, stepname, ddname)
+            output_file = os.path.join(step_dir, ddname)
+            reject_unsafe_path(base_dir, output_file)
             data_spool_file = self.get_spool_file_contents(job_correlator, spoolfile_id)
             dataset_content = data_spool_file
             with open(output_file, "w", encoding="utf-8") as out_file:

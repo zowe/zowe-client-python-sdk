@@ -375,7 +375,7 @@ class Datasets(BaseFilesApi):  # type: ignore[misc]
         if member_pattern is not None:
             additional_parms["pattern"] = member_pattern
         custom_args["params"] = additional_parms
-        custom_args["url"] = "{}ds/{}/member".format(self._request_endpoint, self._encode_uri_component(dataset_name))
+        custom_args["url"] = "{}ds/{}/member".format(self._request_endpoint, self._encode_uri_path_for_zos(dataset_name))
         custom_args["headers"]["X-IBM-Max-Items"] = "{}".format(limit)
         custom_args["headers"]["X-IBM-Attributes"] = attributes
         response_json = self.request_handler.perform_request("GET", custom_args)
@@ -439,7 +439,7 @@ class Datasets(BaseFilesApi):  # type: ignore[misc]
 
         custom_args = self._create_custom_request_arguments()
         custom_args["json"] = data
-        custom_args["url"] = "{}ds/{}".format(self._request_endpoint, self._encode_uri_component(path_to_member))
+        custom_args["url"] = "{}ds/{}".format(self._request_endpoint, self._encode_uri_path_for_zos(path_to_member))
         self.request_handler.perform_request("PUT", custom_args, expected_code=[200])
 
     def create(self, dataset_name: str, options: Optional[DatasetOption] = None) -> None:
@@ -483,7 +483,7 @@ class Datasets(BaseFilesApi):  # type: ignore[misc]
                     break
 
         custom_args = self._create_custom_request_arguments()
-        custom_args["url"] = "{}ds/{}".format(self._request_endpoint, self._encode_uri_component(dataset_name))
+        custom_args["url"] = "{}ds/{}".format(self._request_endpoint, self._encode_uri_path_for_zos(dataset_name))
         custom_args["json"] = options.to_dict() if options else {}
         self.request_handler.perform_request("POST", custom_args, expected_code=[201])
 
@@ -561,7 +561,7 @@ class Datasets(BaseFilesApi):  # type: ignore[misc]
                 "dirblk": 25,
             }
 
-        custom_args["url"] = "{}ds/{}".format(self._request_endpoint, self._encode_uri_component(dataset_name))
+        custom_args["url"] = "{}ds/{}".format(self._request_endpoint, self._encode_uri_path_for_zos(dataset_name))
         self.request_handler.perform_request("POST", custom_args, expected_code=[201])
 
     def retrieve_content(
@@ -577,10 +577,10 @@ class Datasets(BaseFilesApi):  # type: ignore[misc]
         ----------
         dataset_name: str
             The name of the dataset
-        content_type: ContentType, optional
+        content_type: ContentType
             The content type to receive
             ("text", "binary" or "record" (include a 4 byte big endian record len prefix), "text" by default)
-        as_stream: bool, optional
+        as_stream: bool
             Specifies whether the response is streamed. Default: False
 
         Returns
@@ -590,7 +590,7 @@ class Datasets(BaseFilesApi):  # type: ignore[misc]
             or a Response object with content of the file if `as_stream == True`
         """
         custom_args = self._create_custom_request_arguments()
-        custom_args["url"] = "{}ds/{}".format(self._request_endpoint, self._encode_uri_component(dataset_name))
+        custom_args["url"] = "{}ds/{}".format(self._request_endpoint, self._encode_uri_path_for_zos(dataset_name))
         custom_args["headers"]["X-IBM-Data-Type"] = content_type.value
         if content_type == ContentType.RECORD or content_type == ContentType.BINARY:
             custom_args["headers"]["Accept"] = "application/octet-stream"
@@ -600,7 +600,7 @@ class Datasets(BaseFilesApi):  # type: ignore[misc]
     def get_content(self, dataset_name: str, stream: bool = False) -> Union[str, None, Response]:
         """Use `retrieve_content()` instead of this deprecated function."""
         custom_args = self._create_custom_request_arguments()
-        custom_args["url"] = "{}ds/{}".format(self._request_endpoint, self._encode_uri_component(dataset_name))
+        custom_args["url"] = "{}ds/{}".format(self._request_endpoint, self._encode_uri_path_for_zos(dataset_name))
         response: Union[str, Response] = self.request_handler.perform_request("GET", custom_args, stream=stream)
         return response
 
@@ -609,7 +609,7 @@ class Datasets(BaseFilesApi):  # type: ignore[misc]
     ) -> Union[bytes, Response]:
         """Use `retrieve_content(content_type=ContentType.BINARY)` instead of this deprecated function."""
         custom_args = self._create_custom_request_arguments()
-        custom_args["url"] = "{}ds/{}".format(self._request_endpoint, self._encode_uri_component(dataset_name))
+        custom_args["url"] = "{}ds/{}".format(self._request_endpoint, self._encode_uri_path_for_zos(dataset_name))
         custom_args["headers"]["Accept"] = "application/octet-stream"
         if with_prefixes:
             custom_args["headers"]["X-IBM-Data-Type"] = "record"
@@ -637,7 +637,7 @@ class Datasets(BaseFilesApi):  # type: ignore[misc]
             Data must be either a string or bytes.
         """
         custom_args = self._create_custom_request_arguments()
-        custom_args["url"] = "{}ds/{}".format(self._request_endpoint, self._encode_uri_component(dataset_name))
+        custom_args["url"] = "{}ds/{}".format(self._request_endpoint, self._encode_uri_path_for_zos(dataset_name))
 
         # Check if the data is a string (text content)
         if isinstance(data, str):
@@ -667,7 +667,7 @@ class Datasets(BaseFilesApi):  # type: ignore[misc]
             Name of the dataset to be downloaded
         local_file_path: str
             Name of the file to be saved locally
-        content_type: ContentType, optional
+        content_type: ContentType
             The content type to receive
             ("text", "binary" or "record" (include a 4 byte big endian record len prefix), "text" by default)
 
@@ -719,10 +719,10 @@ class Datasets(BaseFilesApi):  # type: ignore[misc]
             Name of the file to be uploaded
         dataset_name: str
             Name of the dataset to be created
-        content_type: ContentType, optional
+        content_type: ContentType
             The content type to receive
             ("text", "binary" or "record" (include a 4 byte big endian record len prefix), "text" by default)
-        upload_in_encoding: str, optional
+        upload_in_encoding: str
             Specifies the encoding to upload the content in (e.g. IBM-1047, "utf-8" by default)
 
         Raises
@@ -768,7 +768,7 @@ class Datasets(BaseFilesApi):  # type: ignore[misc]
 
         custom_args = self._create_custom_request_arguments()
         custom_args["json"] = data
-        custom_args["url"] = "{}ds/{}".format(self._request_endpoint, self._encode_uri_component(dataset_name))
+        custom_args["url"] = "{}ds/{}".format(self._request_endpoint, self._encode_uri_path_for_zos(dataset_name))
 
         self.request_handler.perform_request("PUT", custom_args, expected_code=[200])
 
@@ -793,7 +793,7 @@ class Datasets(BaseFilesApi):  # type: ignore[misc]
 
         custom_args = self._create_custom_request_arguments()
         custom_args["json"] = data
-        custom_args["url"] = "{}ds/{}".format(self._request_endpoint, self._encode_uri_component(dataset_name))
+        custom_args["url"] = "{}ds/{}".format(self._request_endpoint, self._encode_uri_path_for_zos(dataset_name))
 
         self.request_handler.perform_request("PUT", custom_args, expected_code=[200])
 
@@ -812,7 +812,7 @@ class Datasets(BaseFilesApi):  # type: ignore[misc]
 
         custom_args = self._create_custom_request_arguments()
         custom_args["json"] = data
-        custom_args["url"] = "{}ds/{}".format(self._request_endpoint, self._encode_uri_component(dataset_name))
+        custom_args["url"] = "{}ds/{}".format(self._request_endpoint, self._encode_uri_path_for_zos(dataset_name))
 
         self.request_handler.perform_request("PUT", custom_args, expected_code=[200])
 
@@ -833,7 +833,7 @@ class Datasets(BaseFilesApi):  # type: ignore[misc]
         custom_args = self._create_custom_request_arguments()
         custom_args["json"] = data
         custom_args["url"] = "{}ds/{}".format(
-            self._request_endpoint, self._encode_uri_component(after_dataset_name).strip()
+            self._request_endpoint, self._encode_uri_path_for_zos(after_dataset_name).strip()
         )
 
         self.request_handler.perform_request("PUT", custom_args, expected_code=[200])
@@ -877,7 +877,7 @@ class Datasets(BaseFilesApi):  # type: ignore[misc]
 
         custom_args = self._create_custom_request_arguments()
         custom_args["json"] = data
-        custom_args["url"] = "{}ds/{}".format(self._request_endpoint, self._encode_uri_component(path_to_member))
+        custom_args["url"] = "{}ds/{}".format(self._request_endpoint, self._encode_uri_path_for_zos(path_to_member))
 
         self.request_handler.perform_request("PUT", custom_args, expected_code=[200])
 
@@ -897,9 +897,13 @@ class Datasets(BaseFilesApi):  # type: ignore[misc]
         custom_args = self._create_custom_request_arguments()
         if member_name is not None:
             dataset_name = f"{dataset_name}({member_name})"
-        url = "{}ds/{}".format(self._request_endpoint, self._encode_uri_component(dataset_name))
+        url = "{}ds/{}".format(self._request_endpoint, self._encode_uri_path_for_zos(dataset_name))
         if volume is not None:
-            url = "{}ds/-{}/{}".format(self._request_endpoint, volume, self._encode_uri_component(dataset_name))
+            url = "{}ds/-{}/{}".format(
+                self._request_endpoint,
+                self._encode_uri_path_for_zos(str(volume)),
+                self._encode_uri_path_for_zos(dataset_name),
+            )
         custom_args["url"] = url
         self.request_handler.perform_request("DELETE", custom_args, expected_code=[200, 202, 204])
 
@@ -936,5 +940,5 @@ class Datasets(BaseFilesApi):  # type: ignore[misc]
         path_to_member = f"{to_dataset_name}({to_member_name})" if to_member_name else to_dataset_name
         custom_args = self._create_custom_request_arguments()
         custom_args["json"] = data
-        custom_args["url"] = "{}ds/{}".format(self._request_endpoint, self._encode_uri_component(path_to_member))
+        custom_args["url"] = "{}ds/{}".format(self._request_endpoint, self._encode_uri_path_for_zos(path_to_member))
         self.request_handler.perform_request("PUT", custom_args, expected_code=[200])

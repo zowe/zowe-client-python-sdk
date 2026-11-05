@@ -73,7 +73,7 @@ class USSFiles(BaseFilesApi):  # type: ignore
             If specified as True, all the files and sub-directories will be deleted.
         """
         custom_args = self._create_custom_request_arguments()
-        custom_args["url"] = "{}fs/{}".format(self._request_endpoint, filepath_name.lstrip("/"))
+        custom_args["url"] = "{}fs/{}".format(self._request_endpoint, self._encode_uri_path_for_uss(filepath_name))
         if recursive:
             custom_args["headers"]["X-IBM-Option"] = "recursive"
 
@@ -96,7 +96,7 @@ class USSFiles(BaseFilesApi):  # type: ignore
 
         custom_args = self._create_custom_request_arguments()
         custom_args["json"] = data
-        custom_args["url"] = "{}fs/{}".format(self._request_endpoint, file_path.lstrip("/"))
+        custom_args["url"] = "{}fs/{}".format(self._request_endpoint, self._encode_uri_path_for_uss(file_path))
         self.request_handler.perform_request("POST", custom_args, expected_code=[201])
 
     def write(self, filepath_name: str, data: Union[str, bytes], encoding: str = _ZOWE_FILES_DEFAULT_ENCODING) -> None:
@@ -118,7 +118,7 @@ class USSFiles(BaseFilesApi):  # type: ignore
             Data must be either a string or bytes.
         """
         custom_args = self._create_custom_request_arguments()
-        custom_args["url"] = "{}fs/{}".format(self._request_endpoint, filepath_name.lstrip("/"))
+        custom_args["url"] = "{}fs/{}".format(self._request_endpoint, self._encode_uri_path_for_uss(filepath_name))
         custom_args["data"] = data
 
         # Check if the data is a string (text content)
@@ -149,13 +149,13 @@ class USSFiles(BaseFilesApi):  # type: ignore
         ----------
         file_path: str
             Path of the file
-        content_type: ContentType, optional
+        content_type: ContentType
             The content type to receive ("text" or "binary", "text" by default)
-        remote_file_encoding: str, optional
+        remote_file_encoding: str
             Encoding file content originally in (to convert from; by default, it is always being converted from "IBM-1047")
-        receive_in_encoding: str, optional
+        receive_in_encoding: str
             Encoding to convert file content to (to convert to; by default, it is always being converted to "ISO8859-1")
-        as_stream: bool, optional
+        as_stream: bool
             Specifies whether the response is streamed. Default: False
 
         Returns
@@ -172,7 +172,7 @@ class USSFiles(BaseFilesApi):  # type: ignore
         custom_args = self._create_custom_request_arguments()
         custom_args["url"] = "{}fs/{}".format(
             self._request_endpoint,
-            self._encode_uri_component(file_path.lstrip("/"))
+            self._encode_uri_path_for_uss(file_path)
         )
         if content_type == ContentType.BINARY:
             custom_args["headers"]["X-IBM-Data-Type"] = "binary"
@@ -196,7 +196,7 @@ class USSFiles(BaseFilesApi):  # type: ignore
     ) -> Optional[str]:
         """Use `retrieve_content()` instead of this deprecated function."""
         custom_args = self._create_custom_request_arguments()
-        custom_args["url"] = "{}fs{}".format(self._request_endpoint, filepath_name)
+        custom_args["url"] = "{}fs/{}".format(self._request_endpoint, self._encode_uri_path_for_uss(filepath_name))
         custom_args["headers"]["X-IBM-Data-Type"] = "text;fileEncoding={}".format(file_encoding)
         custom_args["headers"]["Content-Type"] = "text/plain; charset={}".format(receive_encoding)
         response_json = self.request_handler.perform_request("GET", custom_args)
@@ -211,7 +211,7 @@ class USSFiles(BaseFilesApi):  # type: ignore
     ) -> Response:
         """Use `retrieve_content(as_stream=True)` instead of this deprecated function."""
         custom_args = self._create_custom_request_arguments()
-        custom_args["url"] = "{}fs/{}".format(self._request_endpoint, self._encode_uri_component(file_path.lstrip("/")))
+        custom_args["url"] = "{}fs/{}".format(self._request_endpoint, self._encode_uri_path_for_uss(file_path))
         if binary:
             custom_args["headers"]["X-IBM-Data-Type"] = "binary"
         else:
@@ -237,11 +237,11 @@ class USSFiles(BaseFilesApi):  # type: ignore
             Path of the file to be downloaded
         local_file_path: str
             Name of the file to be saved locally
-        content_type: ContentType, optional
+        content_type: ContentType
             Specifies the content type to fetch ("text" or "binary", "text" by default)
-        remote_file_encoding: str, optional
+        remote_file_encoding: str
             Encoding file content originally in (to convert from; by default, it is always being converted from "IBM-1047")
-        receive_in_encoding: str, optional
+        receive_in_encoding: str
             Encoding to convert file content to (to convert to; by default,
             it is always being converted to "UTF-8" during download). Ignored when "binary" is True
 
@@ -311,7 +311,7 @@ class USSFiles(BaseFilesApi):  # type: ignore
             Name of the file to be uploaded
         remote_file_path: str
             Path of the file where it will be created
-        content_type: ContentType, optional
+        content_type: ContentType
             Specifies the content type to fetch ("text" or "binary", "text" by default)
         upload_in_encoding: str
             Specifies encoding schema of the uploaded file
@@ -372,7 +372,7 @@ class USSFiles(BaseFilesApi):  # type: ignore
             Tag info of a given file.
         """
         custom_args = self._create_custom_request_arguments()
-        custom_args["url"] = "{}fs{}".format(self._request_endpoint, filepath_name)
+        custom_args["url"] = "{}fs/{}".format(self._request_endpoint, self._encode_uri_path_for_uss(filepath_name))
         custom_args["json"] = { "request": "chtag", "action": "list" }
         response_json = self.request_handler.perform_request("PUT", custom_args)
         return USSFileTag(response_json)

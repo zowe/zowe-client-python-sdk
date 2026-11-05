@@ -399,6 +399,16 @@ class TestUssClass(TestCase):
         mock_is_file.assert_called_once()
 
     @mock.patch("requests.Session.send")
+    def test_create_uss(self, mock_send_request):
+        """Test creating a USS file sends request"""
+        mock_send_request.return_value = mock.Mock(headers={"Content-Type": "application/json"}, status_code=201)
+
+        Files(self.test_profile).uss.create("/some/test/path", "file", mode="rwxr-xr-x")
+        mock_send_request.assert_called_once()
+        prepared_request = mock_send_request.call_args[0][0]
+        self.assertEqual(prepared_request.method, "POST")
+
+    @mock.patch("requests.Session.send")
     def test_get_file_tag(self, mock_send_request):
         """Test get a USS file tag sends request"""
         mock_response = mock.Mock()

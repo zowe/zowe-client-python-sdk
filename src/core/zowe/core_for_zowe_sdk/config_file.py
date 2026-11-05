@@ -22,14 +22,13 @@ from dataclasses import dataclass, field
 from typing import Any, NamedTuple, Optional, Union
 
 import json5
-import requests
 
 from .credential_manager import CredentialManager
 from .custom_warnings import ProfileNotFoundWarning, ProfileParsingWarning
 from .exceptions import ProfileNotFound
 from .logger import Log
 from .profile_constants import GLOBAL_CONFIG_NAME, TEAM_CONFIG, USER_CONFIG
-from .validators import validate_config_json
+from .validators import REMOTE_SCHEMA_UNSUPPORTED, validate_config_json
 
 HOME = os.path.expanduser("~")
 GLOBAL_CONFIG_LOCATION = os.path.join(HOME, ".zowe")
@@ -174,6 +173,11 @@ class ConfigFile:
         -------
         list[dict[str, Any]]
             properties from schema
+
+        Raises
+        ------
+        ValueError
+            When the $schema property points to a remote URL, which is not supported
         """
         schema: Optional[Union[str, dict[str, Any]]] = self.schema_property
 
@@ -184,15 +188,8 @@ class ConfigFile:
         schema_json: dict[str, Any] = {}
 
         if schema.startswith(("https://", "http://")):
-            try:
-                response = requests.get(schema)
-                response.raise_for_status()  # Ensure it's a valid response
-                schema_json = response.json()
-            except requests.RequestException as e:
-                if not self.__suppress_config_file_warnings:
-                    warnings.warn(f"Invalid schema request: {e}")
-                    self.__logger.warning(f"Invalid schema request: {e}")
-                return []
+            # remote schema loading is not supported
+            raise ValueError(f"{REMOTE_SCHEMA_UNSUPPORTED}: {schema}")
 
         elif schema.startswith("file://") or os.path.isfile(schema):
             try:
@@ -457,7 +454,7 @@ class ConfigFile:
         for k, v in profiles.items():
             if not isinstance(v, dict):  # Ensure v is a dictionary
                 if not self.__suppress_config_file_warnings:
-                    self.__logger.warning("Invalid profile passed when schame validation is off")
+                    self.__logger.warning("Invalid profile passed when schema validation is off")
                 continue  # Skip invalid entries
 
             if segments[0] == k:
@@ -517,20 +514,10 @@ class ConfigFile:
         secure_props = CredentialManager.secure_props.get(self.filepath or "", {})
         for key, value in secure_props.items():
             segments = [name for i, name in enumerate(key.split(".")) if i % 2 == 1]
-            profiles_obj = self.profiles
             property_name = segments.pop()
-            for i, profile_name in enumerate(segments):
-                if profiles_obj is None or not isinstance(profiles_obj, dict):
-                    break
-                if profile_name in profiles_obj:
-                    profiles_obj = profiles_obj[profile_name]
-                    if not isinstance(profiles_obj, dict):
-                        break
-                    if i == len(segments) - 1:
-                        profiles_obj.setdefault("properties", {})
-                        profiles_obj["properties"][property_name] = value
-                else:
-                    break
+            profile = self.find_profile(".".join(segments), self.profiles)
+            if profile is not None:
+                profile.setdefault("properties", {})[property_name] = value
 
     def __extract_secure_properties(
         self, profiles_obj: dict[str, Any], json_path: Optional[str] = "profiles"
