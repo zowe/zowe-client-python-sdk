@@ -14,7 +14,7 @@ import os
 import os.path
 import warnings
 from copy import deepcopy
-from typing import Optional, Any
+from typing import Any, Callable, Optional
 
 from deepmerge import always_merger
 from jsonschema.exceptions import (
@@ -64,14 +64,23 @@ class ProfileManager:
         Name of the app
     show_warnings : bool
         Indicates whether warnings are shown
+    trust_prompt_fn : Optional[Callable[[str], bool]]
+        Called with a directory path when a project config file is found in a directory that
+        is not yet trusted. Return True to load the config from that directory. If not
+        provided, config files in untrusted directories are skipped.
     """
 
-    def __init__(self, appname: str = "zowe", show_warnings: bool = True):
+    def __init__(
+        self,
+        appname: str = "zowe",
+        show_warnings: bool = True,
+        trust_prompt_fn: Optional[Callable[[str], bool]] = None,
+    ):
         self.__appname = appname
         self.__show_warnings = show_warnings
 
-        self.__project_config = ConfigFile(type=TEAM_CONFIG, name=self.__appname)
-        self.__project_user_config = ConfigFile(type=USER_CONFIG, name=self.__appname)
+        self.__project_config = ConfigFile(type=TEAM_CONFIG, name=self.__appname, trust_prompt_fn=trust_prompt_fn)
+        self.__project_user_config = ConfigFile(type=USER_CONFIG, name=self.__appname, trust_prompt_fn=trust_prompt_fn)
 
         self.__logger = Log.register_logger(__name__)
 
@@ -235,7 +244,7 @@ class ProfileManager:
                     env_var[k] = v if v is not None else ""
 
                 elif prop_type == "boolean":
-                    env_var[k] = v.lower() in ["true", "1", "yes"] if isinstance(v, str) else bool(v)      
+                    env_var[k] = v.lower() in ["true", "1", "yes"] if isinstance(v, str) else bool(v)
                 else:
                     env_var[k] = v
 
@@ -418,9 +427,7 @@ class ProfileManager:
                     cfg_layer.init_from_file(layer_validate_schema)
 
                 except SecureProfileLoadFailed:
-                    self.__logger.warning(
-                        f"Could not load secure properties for {cfg_layer.filepath}"
-                    )
+                    self.__logger.warning(f"Could not load secure properties for {cfg_layer.filepath}")
 
                     warnings.warn(
                         f"Could not load secure properties for {cfg_layer.filepath}",

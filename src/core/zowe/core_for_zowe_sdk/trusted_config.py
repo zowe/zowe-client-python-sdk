@@ -78,7 +78,7 @@ class TrustedConfigManager:
         A directory is trusted if any of the following apply:
             - running in CI, or ZOWE_CONFIG_ALLOW_UNTRUSTED_DIRS is enabled
             - it is the current working directory
-            - it is outside the user's home directory
+            - it is inside the user's home directory
             - it was previously added to the trusted list
 
         Otherwise, `prompt_fn` is called to ask the user; with no `prompt_fn` the directory is untrusted.
@@ -99,7 +99,7 @@ class TrustedConfigManager:
             return True
         if dir_path == os.getcwd():
             return True
-        if not Path(dir_path).is_relative_to(Path.home()):
+        if Path(dir_path).is_relative_to(Path.home()):
             return True
         if dir_path in self.list_trusted():
             return True
@@ -133,6 +133,7 @@ class TrustedConfigManager:
         settings_json = self.__load_settings_json()
         if dir_path not in settings_json[self.__settings_key]:
             settings_json[self.__settings_key].append(dir_path)
+            os.makedirs(os.path.dirname(self.local_storage_path), exist_ok=True)
             with open(self.local_storage_path, "w", encoding="utf-8") as fp:
                 fp.write(json.dumps(settings_json, indent=2) + "\n")
 

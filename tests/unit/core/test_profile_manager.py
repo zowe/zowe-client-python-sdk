@@ -19,6 +19,7 @@ from zowe.core_for_zowe_sdk import (
     custom_warnings,
     exceptions,
 )
+from zowe.core_for_zowe_sdk.trusted_config import TrustedConfigManager
 
 FIXTURES_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "fixtures")
 CWD = os.getcwd()
@@ -43,6 +44,10 @@ class TestZosmfProfileManager(TestCase):
         # setup pyfakefs
         self.session_arguments = {"verify": False}
         self.setUpPyfakefs()
+        # trust all directories by default so tests don't depend on the CI environment variable
+        env_patcher = mock.patch.dict(os.environ, {"ZOWE_CONFIG_ALLOW_UNTRUSTED_DIRS": "1"})
+        env_patcher.start()
+        self.addCleanup(env_patcher.stop)
         self.original_file_path = os.path.join(FIXTURES_PATH, "zowe.config.json")
         self.original_user_file_path = os.path.join(FIXTURES_PATH, "zowe.config.user.json")
         self.original_nested_file_path = os.path.join(FIXTURES_PATH, "nested.zowe.config.json")
@@ -113,26 +118,117 @@ class TestZosmfProfileManager(TestCase):
         }
         self.assertEqual(props, expected_props)
 
-    def test_autodiscover_config_dir_untrusted_directory(self):
-        """Test that autodiscover_config_dir raises PermissionError when the directory is not owned by the current user."""
+    def _setup_autodiscover_config(self):
+        """Copy the team config one directory above the CWD and return that directory."""
         cwd_up_dir_path = os.path.dirname(CWD)
-        cwd_up_file_path = os.path.join(cwd_up_dir_path, "zowe.config.json")
-        shutil.copy(self.original_file_path, cwd_up_file_path)
+        shutil.copy(self.original_file_path, os.path.join(cwd_up_dir_path, "zowe.config.json"))
+        return cwd_up_dir_path
 
-        config_file = ConfigFile(type="team_config", name="zowe")
-        with mock.patch("os.getuid", return_value=os.getuid() + 1):
-            with self.assertRaises(PermissionError):
+    def _setup_outside_home_config(self):
+        """Copy the team config to a directory outside the home directory, make autodiscovery start there, and return it."""
+        outside_dir = "/opt/zowe_project"
+        self.fs.create_dir(outside_dir)
+        shutil.copy(self.original_file_path, os.path.join(outside_dir, "zowe.config.json"))
+        patcher = mock.patch("zowe.core_for_zowe_sdk.config_file.CURRENT_DIR", outside_dir)
+        patcher.start()
+        self.addCleanup(patcher.stop)
+        return outside_dir
+
+    def test_autodiscover_config_dir_skips_world_writable_directory(self):
+        """Test that autodiscover_config_dir skips a config in a world-writable directory and logs a warning."""
+        cwd_up_dir_path = self._setup_autodiscover_config()
+        os.chmod(cwd_up_dir_path, 0o777)
+
+        with mock.patch.dict(os.environ, {"ZOWE_CONFIG_ALLOW_UNTRUSTED_DIRS": "1"}):
+            config_file = ConfigFile(type="team_config", name="zowe")
+            with self.assertLogs("zowe.core_for_zowe_sdk.config_file", level="WARNING") as log:
+                with self.assertRaises(FileNotFoundError):
+                    config_file.autodiscover_config_dir()
+        self.assertIn("world-writable", log.output[0])
+
+    def test_autodiscover_config_dir_world_writable_bypassed(self):
+        """Test that ZOWE_CONFIG_ALLOW_WORLD_WRITABLE allows loading a config from a world-writable directory."""
+        cwd_up_dir_path = self._setup_autodiscover_config()
+        os.chmod(cwd_up_dir_path, 0o777)
+
+        env = {"ZOWE_CONFIG_ALLOW_UNTRUSTED_DIRS": "1", "ZOWE_CONFIG_ALLOW_WORLD_WRITABLE": "1"}
+        with mock.patch.dict(os.environ, env):
+            config_file = ConfigFile(type="team_config", name="zowe")
+            config_file.autodiscover_config_dir()
+
+        self.assertEqual(config_file.location, cwd_up_dir_path)
+
+    def test_autodiscover_config_dir_skips_untrusted_directory(self):
+        """Test that autodiscover_config_dir skips a config in an untrusted directory outside home and logs a warning."""
+        self._setup_outside_home_config()
+
+        with mock.patch.dict(os.environ, {"ZOWE_CONFIG_ALLOW_UNTRUSTED_DIRS": "0"}):
+            os.environ.pop("CI", None)
+            config_file = ConfigFile(type="team_config", name="zowe")
+            with self.assertLogs("zowe.core_for_zowe_sdk.config_file", level="WARNING") as log:
+                with self.assertRaises(FileNotFoundError):
+                    config_file.autodiscover_config_dir()
+        self.assertIn("not inside a trusted directory", log.output[0])
+
+    def test_autodiscover_config_dir_trusted_directory(self):
+        """Test that autodiscover_config_dir loads a config from a directory in the trusted list."""
+        cwd_up_dir_path = self._setup_outside_home_config()
+        trusted_config = TrustedConfigManager()
+        self.fs.create_dir(os.path.dirname(trusted_config.local_storage_path))
+        trusted_config.add_trusted(cwd_up_dir_path)
+
+        with mock.patch.dict(os.environ, {"ZOWE_CONFIG_ALLOW_UNTRUSTED_DIRS": "0"}):
+            os.environ.pop("CI", None)
+            config_file = ConfigFile(type="team_config", name="zowe")
+            config_file.autodiscover_config_dir()
+
+        self.assertEqual(config_file.location, cwd_up_dir_path)
+
+    def test_autodiscover_config_dir_trust_prompt_accepted(self):
+        """Test that trust_prompt_fn is called with the directory and allows loading when it returns True."""
+        cwd_up_dir_path = self._setup_outside_home_config()
+        prompt_fn = mock.Mock(return_value=True)
+
+        with mock.patch.dict(os.environ, {"ZOWE_CONFIG_ALLOW_UNTRUSTED_DIRS": "0"}):
+            os.environ.pop("CI", None)
+            config_file = ConfigFile(type="team_config", name="zowe", trust_prompt_fn=prompt_fn)
+            config_file.autodiscover_config_dir()
+
+        prompt_fn.assert_called_once_with(cwd_up_dir_path)
+        self.assertEqual(config_file.location, cwd_up_dir_path)
+
+    def test_autodiscover_config_dir_trust_prompt_rejected(self):
+        """Test that a config file is skipped when trust_prompt_fn returns False."""
+        self._setup_outside_home_config()
+        prompt_fn = mock.Mock(return_value=False)
+
+        with mock.patch.dict(os.environ, {"ZOWE_CONFIG_ALLOW_UNTRUSTED_DIRS": "0"}):
+            os.environ.pop("CI", None)
+            config_file = ConfigFile(type="team_config", name="zowe", trust_prompt_fn=prompt_fn)
+            with self.assertRaises(FileNotFoundError):
                 config_file.autodiscover_config_dir()
 
-    def test_autodiscover_config_dir_untrusted_directory_bypassed(self):
-        """Test that trust_all_directories(True) allows loading a config from a directory not owned by the current user."""
-        cwd_up_dir_path = os.path.dirname(CWD)
-        cwd_up_file_path = os.path.join(cwd_up_dir_path, "zowe.config.json")
-        shutil.copy(self.original_file_path, cwd_up_file_path)
+        prompt_fn.assert_called_once()
 
-        config_file = ConfigFile(type="team_config", name="zowe")
-        config_file.trust_all_directories(True)
-        with mock.patch("os.getuid", return_value=os.getuid() + 1):
+    def test_profile_manager_passes_trust_prompt_fn(self):
+        """Test that ProfileManager forwards trust_prompt_fn to the project config files."""
+        cwd_up_dir_path = self._setup_outside_home_config()
+        prompt_fn = mock.Mock(return_value=True)
+
+        with mock.patch.dict(os.environ, {"ZOWE_CONFIG_ALLOW_UNTRUSTED_DIRS": "0"}):
+            os.environ.pop("CI", None)
+            prof_manager = ProfileManager(trust_prompt_fn=prompt_fn)
+            prof_manager.load(profile_type="base", validate_schema=False)
+
+        prompt_fn.assert_called_with(cwd_up_dir_path)
+        self.assertEqual(prof_manager.config_dir, cwd_up_dir_path)
+
+    def test_autodiscover_config_dir_untrusted_directory_bypassed(self):
+        """Test that ZOWE_CONFIG_ALLOW_UNTRUSTED_DIRS allows loading a config from an untrusted directory."""
+        cwd_up_dir_path = self._setup_outside_home_config()
+
+        with mock.patch.dict(os.environ, {"ZOWE_CONFIG_ALLOW_UNTRUSTED_DIRS": "1"}):
+            config_file = ConfigFile(type="team_config", name="zowe")
             config_file.autodiscover_config_dir()
 
         self.assertEqual(config_file.location, cwd_up_dir_path)

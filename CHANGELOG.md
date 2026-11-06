@@ -7,7 +7,11 @@ All notable changes to the Zowe Client Python SDK will be documented in this fil
 ### Enhancements
 
 - Allowed the profile manager to only validate schemas at the project level with the new `validate_only_project_config` parameter. [#393](https://github.com/zowe/zowe-client-python-sdk/pull/393)
-- Updated the `ConfigFile.autodiscover_config_dir` method to refuse loading a potentially untrusted config file whose parent directory is not owned by the current user. This check can be disabled by calling `trust_all_directories(True)`.
+- **Breaking**: Updated the `ConfigFile.autodiscover_config_dir` method to skip config files in world-writable directories and in directories that are not trusted.
+  - These checks can be bypassed with the `ZOWE_CONFIG_ALLOW_WORLD_WRITABLE` and `ZOWE_CONFIG_ALLOW_UNTRUSTED_DIRS` environment variables.
+  - In CI environments, the trusted directory check is skipped.
+  - The current directory and any location inside the user's home directory are automatically trusted. Other trusted directories can be stored in the `trustedConfigDirs` setting of Zowe CLI's `~/.zowe/settings/imperative.json`.
+  - Users can be prompted interactively to trust a config directory by passing `trust_prompt_fn` to the `ProfileManager` or `ConfigFile` classes.
 
 ### Bug Fixes
 

@@ -16,7 +16,7 @@ import re
 import warnings
 from copy import deepcopy
 from dataclasses import dataclass, field
-from typing import Any, NamedTuple, Optional, Union
+from typing import Any, Callable, NamedTuple, Optional, Union
 
 import json5
 
@@ -62,6 +62,8 @@ class ConfigFile:
             4.2 Defaults
             4.3 Schema Property
         5. Secure Properties associated with the file.
+        6. Optional `trust_prompt_fn`, called with a directory path when autodiscovery finds a config
+           file in an untrusted directory. Return True to load it; if unset, such files are skipped.
     """
 
     type: str
@@ -73,6 +75,7 @@ class ConfigFile:
     secure_props: Optional[dict[str, Any]] = None
     jsonc: Optional[dict[str, Any]] = None
     _missing_secure_props: list[str] = field(default_factory=list)
+    trust_prompt_fn: Optional[Callable[[str], bool]] = None
 
     __suppress_config_file_warnings: bool = True
     __trusted_config = TrustedConfigManager()
@@ -301,11 +304,11 @@ class ConfigFile:
                         "loading config from this location, either remove world-writable permissions with the "
                         "command 'chmod o-w <path>' or set the environment variable ZOWE_CONFIG_ALLOW_WORLD_WRITABLE=1."
                     )
-                elif not self.__trusted_config.is_dir_trusted(current_dir):
+                elif not self.__trusted_config.is_dir_trusted(current_dir, self.trust_prompt_fn):
                     is_trusted = False
                     self.__logger.warning(
                         f"Skipping config file at {path} because it is not inside a trusted directory. To enable "
-                        "loading config from this location, either add the path to the 'trustedDirs' array in "
+                        "loading config from this location, either add the path to the 'trustedConfigDirs' array in "
                         f"{self.__trusted_config.local_storage_path} or set the environment variable "
                         "ZOWE_CONFIG_ALLOW_UNTRUSTED_DIRS=1."
                     )
