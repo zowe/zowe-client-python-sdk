@@ -30,7 +30,7 @@ setup(
     license="EPL-2.0",
     classifiers=[
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
         "License :: OSI Approved :: Eclipse Public License 2.0 (EPL-2.0)",
     ],
     install_requires=[

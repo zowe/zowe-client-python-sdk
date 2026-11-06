@@ -6,6 +6,8 @@ import importlib.util
 import json
 import os
 import shutil
+import sys
+import unittest
 from unittest import mock
 
 import json5
@@ -126,7 +128,7 @@ class TestZosmfProfileManager(TestCase):
 
     def _setup_outside_home_config(self):
         """Copy the team config to a directory outside the home directory, make autodiscovery start there, and return it."""
-        outside_dir = "/opt/zowe_project"
+        outside_dir = os.path.abspath(os.path.join(os.sep, "opt", "zowe_project"))
         self.fs.create_dir(outside_dir)
         shutil.copy(self.original_file_path, os.path.join(outside_dir, "zowe.config.json"))
         patcher = mock.patch("zowe.core_for_zowe_sdk.config_file.CURRENT_DIR", outside_dir)
@@ -134,6 +136,7 @@ class TestZosmfProfileManager(TestCase):
         self.addCleanup(patcher.stop)
         return outside_dir
 
+    @unittest.skipIf(sys.platform == "win32", "POSIX permissions only")
     def test_autodiscover_config_dir_skips_world_writable_directory(self):
         """Test that autodiscover_config_dir skips a config in a world-writable directory and logs a warning."""
         cwd_up_dir_path = self._setup_autodiscover_config()
@@ -146,6 +149,7 @@ class TestZosmfProfileManager(TestCase):
                     config_file.autodiscover_config_dir()
         self.assertIn("world-writable", log.output[0])
 
+    @unittest.skipIf(sys.platform == "win32", "POSIX permissions only")
     def test_autodiscover_config_dir_world_writable_bypassed(self):
         """Test that ZOWE_CONFIG_ALLOW_WORLD_WRITABLE allows loading a config from a world-writable directory."""
         cwd_up_dir_path = self._setup_autodiscover_config()

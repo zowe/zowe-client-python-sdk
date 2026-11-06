@@ -2,7 +2,8 @@
 
 import json
 import os
-import stat
+import sys
+import unittest
 from unittest import mock
 
 from pyfakefs.fake_filesystem_unittest import TestCase
@@ -18,12 +19,15 @@ class TestTrustedConfigManager(TestCase):
         self.cli_home = os.path.join(os.path.expanduser("~"), ".zowe")
         self.settings_path = os.path.join(self.cli_home, "settings", "imperative.json")
         self.manager = TrustedConfigManager()
-        self.outside_dir = "/opt/shared"
+        self.outside_dir = os.path.abspath(os.path.join(os.sep, "opt", "shared"))
 
         # start from a clean environment so results don't depend on the host
-        env_patcher = mock.patch.dict(os.environ, {}, clear=True)
+        # (don't clear the whole environment: Windows needs USERPROFILE to expand "~")
+        env_patcher = mock.patch.dict(os.environ)
         env_patcher.start()
         self.addCleanup(env_patcher.stop)
+        for var in ("CI", "ZOWE_CLI_HOME", *list(ZoweConfigEnvVar)):
+            os.environ.pop(var, None)
 
     def _write_settings(self, content):
         """Write the given dict to the fake settings file."""
@@ -35,16 +39,16 @@ class TestTrustedConfigManager(TestCase):
 
     def test_cli_home_dir_from_env(self):
         """Test that cli_home_dir honors ZOWE_CLI_HOME"""
-        with mock.patch.dict(os.environ, {"ZOWE_CLI_HOME": "/custom/home"}):
-            self.assertEqual(self.manager.cli_home_dir, "/custom/home")
-            self.assertEqual(
-                self.manager.local_storage_path, os.path.join("/custom/home", "settings", "imperative.json")
-            )
+        custom_home = os.path.abspath(os.path.join(os.sep, "custom", "home"))
+        with mock.patch.dict(os.environ, {"ZOWE_CLI_HOME": custom_home}):
+            self.assertEqual(self.manager.cli_home_dir, custom_home)
+            self.assertEqual(self.manager.local_storage_path, os.path.join(custom_home, "settings", "imperative.json"))
 
     def test_local_storage_path(self):
         """Test that local_storage_path points to the imperative.json settings file"""
         self.assertEqual(self.manager.local_storage_path, self.settings_path)
 
+    @unittest.skipIf(sys.platform == "win32", "POSIX permissions only")
     def test_is_world_writable_true(self):
         """Test that is_world_writable detects the world-writable permission bit"""
         self.fs.create_dir("/data")
@@ -57,6 +61,7 @@ class TestTrustedConfigManager(TestCase):
         os.chmod("/data", 0o755)
         self.assertFalse(self.manager.is_world_writable("/data"))
 
+    @unittest.skipIf(sys.platform == "win32", "POSIX permissions only")
     def test_is_world_writable_bypassed_by_env(self):
         """Test that ZOWE_CONFIG_ALLOW_WORLD_WRITABLE disables the world-writable check"""
         self.fs.create_dir("/data")
@@ -65,6 +70,7 @@ class TestTrustedConfigManager(TestCase):
             with mock.patch.dict(os.environ, {ZoweConfigEnvVar.ALLOW_WORLD_WRITABLE: value}):
                 self.assertFalse(self.manager.is_world_writable("/data"))
 
+    @unittest.skipIf(sys.platform == "win32", "POSIX permissions only")
     def test_is_world_writable_env_ignores_other_values(self):
         """Test that env var values other than 1/true do not bypass the check"""
         self.fs.create_dir("/data")
