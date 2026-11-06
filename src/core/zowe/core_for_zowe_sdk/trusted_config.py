@@ -16,6 +16,7 @@ import stat
 import sys
 from enum import StrEnum
 from pathlib import Path
+from typing import Callable, Optional
 
 
 class ZoweConfigEnvVar(StrEnum):
@@ -50,7 +51,7 @@ class TrustedConfigManager:
         value = os.environ.get(env_var)
         return value is not None and (value == "1" or value.lower() == "true")
 
-    def is_world_writable(self, file_path) -> bool:
+    def is_world_writable(self, file_path: str) -> bool:
         """
         Check whether a file is writable by all users.
 
@@ -70,7 +71,7 @@ class TrustedConfigManager:
             return False
         return bool(os.stat(file_path).st_mode & stat.S_IWOTH)
 
-    def is_dir_trusted(self, dir_path, prompt_fn=None) -> bool:
+    def is_dir_trusted(self, dir_path: str, prompt_fn: Optional[Callable[[str], bool]] = None) -> bool:
         """
         Determine whether config files in a directory can be trusted.
 
@@ -120,7 +121,7 @@ class TrustedConfigManager:
         settings_json = self.__load_settings_json()
         return set(settings_json[self.__settings_key])
 
-    def add_trusted(self, dir_path) -> None:
+    def add_trusted(self, dir_path: str) -> None:
         """
         Add a directory to the trusted list and save it to the settings file.
 
@@ -135,7 +136,7 @@ class TrustedConfigManager:
             with open(self.local_storage_path, "w", encoding="utf-8") as fp:
                 fp.write(json.dumps(settings_json, indent=2) + "\n")
 
-    def remove_trusted(self, dir_path) -> None:
+    def remove_trusted(self, dir_path: str) -> None:
         """
         Remove a directory from the trusted list and save the settings file.
 
