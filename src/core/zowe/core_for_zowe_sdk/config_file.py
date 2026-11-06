@@ -10,12 +10,9 @@ SPDX-License-Identifier: EPL-2.0
 Copyright Contributors to the Zowe Project.
 """
 
-import getpass
 import json
 import os.path
 import re
-import subprocess
-import sys
 import warnings
 from copy import deepcopy
 from dataclasses import dataclass, field
@@ -28,6 +25,7 @@ from .custom_warnings import ProfileNotFoundWarning, ProfileParsingWarning
 from .exceptions import ProfileNotFound
 from .logger import Log
 from .profile_constants import GLOBAL_CONFIG_NAME, TEAM_CONFIG, USER_CONFIG
+from .trusted_config import TrustedConfigManager
 from .validators import REMOTE_SCHEMA_UNSUPPORTED, validate_config_json
 
 HOME = os.path.expanduser("~")
@@ -77,7 +75,7 @@ class ConfigFile:
     _missing_secure_props: list[str] = field(default_factory=list)
 
     __suppress_config_file_warnings: bool = True
-    __trust_all_directories: bool = False
+    __trusted_config = TrustedConfigManager()
     __logger = Log.register_logger(__name__)
 
     @property
@@ -278,95 +276,43 @@ class ConfigFile:
 
         return Profile(props, profile_name, self._missing_secure_props)
 
-    @staticmethod
-    def __is_owned_by_current_user(path: str) -> bool:
-        """
-        Check whether the given file or directory is owned by the current user.
-
-        This mirrors the ownership check behind Git's `safe.directory` protection
-        (CVE-2022-24765): only ownership is verified, not permission bits, since an
-        owner can freely change permissions at will, so mode bits say nothing about
-        whether a different, non-owning user could have tampered with the path.
-
-        Parameters
-        ----------
-        path: str
-            The file or directory to check
-
-        Returns
-        -------
-        bool
-            True if the path is owned by the current user
-        """
-        if not os.path.exists(path):
-            return False
-
-        try:
-            if sys.platform == "win32":
-                # Passing path as its own argv element (rather than interpolating it into
-                # the -Command string) keeps it out of PowerShell's parser entirely, so paths
-                # containing quotes or other special characters can't affect the script.
-                # -Command already ignores the local execution policy (it only restricts
-                # running saved .ps1 script files, not inline commands), so no
-                # -ExecutionPolicy override is needed here.
-                result = subprocess.run(
-                    [
-                        "powershell",
-                        "-NoProfile",
-                        "-Command",
-                        "& {param($p) (Get-Acl -LiteralPath $p).Owner}",
-                        path,
-                    ],
-                    capture_output=True,
-                    text=True,
-                    check=False,
-                )
-                identity = result.stdout.strip().lower()
-                if not identity:
-                    return False
-
-                username = getpass.getuser().lower()
-                return identity == username or identity.endswith(f"\\{username}")
-            else:
-                return os.stat(path).st_uid == os.getuid()
-        except OSError:
-            return False
-
     def autodiscover_config_dir(self) -> None:
         """
         Autodiscover Zowe z/OSMF Team Config files by going up the path from current working directory.
 
         Sets path if it finds the config directory, Else, it raises an Exception.
 
-        To prevent loading a config file placed by another user in a shared directory
-        (e.g. /tmp) that happens to be an ancestor of the current working directory, the directory
-        containing the config file must be owned by the current user. This check can be disabled
-        by calling `trust_all_directories(True)`.
-
         Raises
         ------
         FileNotFoundError
             Cannot find file in directory.
-        PermissionError
-            Found a config file, but its directory is not owned by the current user
-            and directory trust has not been enabled via `trust_all_directories`.
         """
         current_dir = CURRENT_DIR
 
         while True:
             path = os.path.join(current_dir, self.filename)
+            is_trusted = True
 
             if os.path.isfile(path):
-                if not self.__trust_all_directories and not self.__is_owned_by_current_user(current_dir):
-                    self.__logger.error(
-                        f"Refusing to load config file {path}: {current_dir} is not owned by the current user"
+                if self.__trusted_config.is_world_writable(current_dir):
+                    is_trusted = False
+                    self.__logger.warning(
+                        f"Skipping config file at {path} because it is in a world-writable directory. To enable "
+                        "loading config from this location, either remove world-writable permissions with the "
+                        "command 'chmod o-w <path>' or set the environment variable ZOWE_CONFIG_ALLOW_WORLD_WRITABLE=1."
                     )
-                    raise PermissionError(
-                        f"Found config file at {path}, but the directory {current_dir} is not owned by "
-                        "the current user. Call trust_all_directories(True) to bypass this check."
+                elif not self.__trusted_config.is_dir_trusted(current_dir):
+                    is_trusted = False
+                    self.__logger.warning(
+                        f"Skipping config file at {path} because it is not inside a trusted directory. To enable "
+                        "loading config from this location, either add the path to the 'trustedDirs' array in "
+                        f"{self.__trusted_config.local_storage_path} or set the environment variable "
+                        "ZOWE_CONFIG_ALLOW_UNTRUSTED_DIRS=1."
                     )
-                self.location = current_dir
-                return
+
+                if is_trusted:
+                    self.location = current_dir
+                    return
 
             # check if have arrived at the root directory
             if current_dir == os.path.dirname(current_dir):
@@ -734,14 +680,3 @@ class ConfigFile:
             Warnings are shown or not
         """
         self.__suppress_config_file_warnings = value
-
-    def trust_all_directories(self, value: bool) -> None:
-        """
-        Disable (or re-enable) the directory ownership check performed by autodiscover_config_dir.
-
-        Parameters
-        ----------
-        value: bool
-            If True, a discovered config file is loaded regardless of who owns its directory
-        """
-        self.__trust_all_directories = value
