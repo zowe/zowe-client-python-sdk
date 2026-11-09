@@ -1,4 +1,4 @@
-name: Audit
+name: Lint
 
 on:
   pull_request:
@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  audit:
+  lint:
     runs-on: ubuntu-latest
 
     steps:
@@ -15,6 +15,9 @@ jobs:
 
     - name: Set up Python
       uses: actions/setup-python@v5
+
+    - name: Install system packages
+      run: sudo apt-get update && sudo apt-get install -y libglib2.0-dev libsecret-1-dev
 
     - name: Install dependencies
       run: |
