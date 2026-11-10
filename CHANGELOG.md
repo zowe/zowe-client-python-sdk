@@ -7,6 +7,7 @@ All notable changes to the Zowe Client Python SDK will be documented in this fil
 ### Enhancements
 
 - Allowed the profile manager to only validate schemas at the project level with the new `validate_only_project_config` parameter. [#393](https://github.com/zowe/zowe-client-python-sdk/pull/393)
+- Updated the minimum Python version to 3.11. [#418](https://github.com/zowe/zowe-client-python-sdk/pull/418)
 - **Breaking**: Updated the `ConfigFile.autodiscover_config_dir` method to skip config files in world-writable directories and in directories that are not trusted.
   - These checks can be bypassed with the `ZOWE_CONFIG_ALLOW_WORLD_WRITABLE` and `ZOWE_CONFIG_ALLOW_UNTRUSTED_DIRS` environment variables.
   - In CI environments, the trusted directory check is skipped.
@@ -90,7 +91,7 @@ All notable changes to the Zowe Client Python SDK will be documented in this fil
 
 ### Bug Fixes
 
-- Fixed Core SDK package referencing a non-existent version of Secrets SDK. 
+- Fixed Core SDK package referencing a non-existent version of Secrets SDK.
 
 ## `1.0.0-dev20`
 
