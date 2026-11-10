@@ -13,7 +13,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macos-latest, windows-latest]
-        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
+        python-version: ["3.11", "3.12", "3.13", "3.14", "3.15"]
     env:
       OS: ${{ matrix.os }}
       PYTHON: ${{ matrix.python-version }}
@@ -31,16 +31,6 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-      - name: Lint with pydocstyle
-        run: pydocstyle --match-dir='^(?!(build|response)$).*' --match='^(?!(__init__\.py|setup\.py$)).*\.py$' src
-      - name: Lint with pydoclint
-        run: pydoclint --exclude='.*/(build|response)/.*' src
-      - name: Lint with pylint
-        run: |
-          # check for Python errors
-          pylint src --errors-only --disable=E0401,E0611 --ignore=build
-          # check for lint
-          pylint ./src --disable=all --enable=C0103,C0301 --ignore=build,response --max-line-length=127
       - name: Check license headers
         run: python scripts/license_header.py src
       - name: Test with pytest

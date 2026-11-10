@@ -12,7 +12,7 @@ Copyright Contributors to the Zowe Project.
 
 import base64
 import sys
-from typing import Optional, Any
+from typing import Any, Optional
 
 import json5
 
@@ -20,11 +20,11 @@ from .constants import constants
 from .exceptions import SecureProfileLoadFailed
 from .logger import Log
 
-HAS_KEYRING = True
+HAS_KEYRING = True  # pylint: disable=invalid-name
 try:
     from zowe.secrets_for_zowe_sdk import keyring
 except ImportError:
-    HAS_KEYRING = False
+    HAS_KEYRING = False  # pylint: disable=invalid-name
 
 
 class CredentialManager:
