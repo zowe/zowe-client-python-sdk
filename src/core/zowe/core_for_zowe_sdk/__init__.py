@@ -21,4 +21,5 @@ from .request_handler import RequestHandler
 from .sdk_api import SdkApi
 from .session import Session
 from .session_constants import *
+from .trusted_config import TrustedConfigManager
 from .zosmf_profile import ZosmfProfile
