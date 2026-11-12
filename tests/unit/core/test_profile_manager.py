@@ -195,8 +195,8 @@ class TestZosmfProfileManager(TestCase):
 
         with mock.patch.dict(os.environ, {"ZOWE_CONFIG_ALLOW_UNTRUSTED_DIRS": "0"}):
             os.environ.pop("CI", None)
-            config_file = ConfigFile(type="team_config", name="zowe", trust_prompt_fn=prompt_fn)
-            config_file.autodiscover_config_dir()
+            config_file = ConfigFile(type="team_config", name="zowe")
+            config_file.autodiscover_config_dir(prompt_fn)
 
         prompt_fn.assert_called_once_with(cwd_up_dir_path)
         self.assertEqual(config_file.location, cwd_up_dir_path)
@@ -208,24 +208,39 @@ class TestZosmfProfileManager(TestCase):
 
         with mock.patch.dict(os.environ, {"ZOWE_CONFIG_ALLOW_UNTRUSTED_DIRS": "0"}):
             os.environ.pop("CI", None)
-            config_file = ConfigFile(type="team_config", name="zowe", trust_prompt_fn=prompt_fn)
+            config_file = ConfigFile(type="team_config", name="zowe")
             with self.assertRaises(FileNotFoundError):
-                config_file.autodiscover_config_dir()
+                config_file.autodiscover_config_dir(prompt_fn)
 
         prompt_fn.assert_called_once()
 
     def test_profile_manager_passes_trust_prompt_fn(self):
-        """Test that ProfileManager forwards trust_prompt_fn to the project config files."""
+        """Test that ProfileManager.load forwards trust_prompt_fn to the project config files."""
         cwd_up_dir_path = self._setup_outside_home_config()
         prompt_fn = mock.Mock(return_value=True)
 
         with mock.patch.dict(os.environ, {"ZOWE_CONFIG_ALLOW_UNTRUSTED_DIRS": "0"}):
             os.environ.pop("CI", None)
-            prof_manager = ProfileManager(trust_prompt_fn=prompt_fn)
-            prof_manager.load(profile_type="base", validate_schema=False)
+            prof_manager = ProfileManager()
+            prof_manager.load(profile_type="base", validate_schema=False, trust_prompt_fn=prompt_fn)
 
         prompt_fn.assert_called_with(cwd_up_dir_path)
         self.assertEqual(prof_manager.config_dir, cwd_up_dir_path)
+
+    def test_profile_manager_caches_rejected_trust_prompt(self):
+        """Test that a rejected directory is only prompted for once within a load call, across layers."""
+        cwd_up_dir_path = self._setup_outside_home_config()
+        prompt_fn = mock.Mock(return_value=False)
+
+        with mock.patch.dict(os.environ, {"ZOWE_CONFIG_ALLOW_UNTRUSTED_DIRS": "0"}):
+            os.environ.pop("CI", None)
+            prof_manager = ProfileManager()
+            try:
+                prof_manager.load(profile_type="zosmf", validate_schema=False, trust_prompt_fn=prompt_fn)
+            except Exception:
+                pass
+
+        prompt_fn.assert_called_once_with(cwd_up_dir_path)
 
     def test_autodiscover_config_dir_untrusted_directory_bypassed(self):
         """Test that ZOWE_CONFIG_ALLOW_UNTRUSTED_DIRS allows loading a config from an untrusted directory."""

@@ -62,8 +62,6 @@ class ConfigFile:
             4.2 Defaults
             4.3 Schema Property
         5. Secure Properties associated with the file.
-        6. Optional `trust_prompt_fn`, called with a directory path when autodiscovery finds a config
-           file in an untrusted directory. Return True to load it; if unset, such files are skipped.
     """
 
     type: str
@@ -75,7 +73,6 @@ class ConfigFile:
     secure_props: Optional[dict[str, Any]] = None
     jsonc: Optional[dict[str, Any]] = None
     _missing_secure_props: list[str] = field(default_factory=list)
-    trust_prompt_fn: Optional[Callable[[str], bool]] = None
 
     __suppress_config_file_warnings: bool = True
     __trusted_config = TrustedConfigManager()
@@ -114,7 +111,11 @@ class ConfigFile:
             self.__logger.error(f"given path {dirname} is not valid")
             raise FileNotFoundError(f"given path {dirname} is not valid")
 
-    def init_from_file(self, validate_schema: Optional[bool] = True) -> None:
+    def init_from_file(
+        self,
+        validate_schema: Optional[bool] = True,
+        trust_prompt_fn: Optional[Callable[[str], bool]] = None,
+    ) -> None:
         """
         Initialize the class variable after setting filepath (or if not set, autodiscover the file).
 
@@ -122,10 +123,13 @@ class ConfigFile:
         ----------
         validate_schema: Optional[bool]
             True if validation is preferred, false otherwise
+        trust_prompt_fn: Optional[Callable[[str], bool]]
+            Called with a directory path when autodiscovery finds a config file in an untrusted
+            directory. Return True to load it; if unset, such files are skipped.
         """
         if self.filepath is None:
             try:
-                self.autodiscover_config_dir()
+                self.autodiscover_config_dir(trust_prompt_fn)
             except FileNotFoundError:
                 pass
 
@@ -279,11 +283,17 @@ class ConfigFile:
 
         return Profile(props, profile_name, self._missing_secure_props)
 
-    def autodiscover_config_dir(self) -> None:
+    def autodiscover_config_dir(self, trust_prompt_fn: Optional[Callable[[str], bool]] = None) -> None:
         """
         Autodiscover Zowe z/OSMF Team Config files by going up the path from current working directory.
 
         Sets path if it finds the config directory, Else, it raises an Exception.
+
+        Parameters
+        ----------
+        trust_prompt_fn: Optional[Callable[[str], bool]]
+            Called with a directory path when a config file is found in an untrusted directory.
+            Return True to load it; if unset, such files are skipped.
 
         Raises
         ------
@@ -304,7 +314,7 @@ class ConfigFile:
                         "loading config from this location, either remove world-writable permissions with the "
                         "command 'chmod o-w <path>' or set the environment variable ZOWE_CONFIG_ALLOW_WORLD_WRITABLE=1."
                     )
-                elif not self.__trusted_config.is_dir_trusted(current_dir, self.trust_prompt_fn):
+                elif not self.__trusted_config.is_dir_trusted(current_dir, trust_prompt_fn):
                     is_trusted = False
                     self.__logger.warning(
                         f"Skipping config file at {path} because it is not inside a trusted directory. To enable "

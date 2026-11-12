@@ -69,11 +69,11 @@ def trust_env(isolated_home):
         yield {"root": root, "home": home, "cli_home": cli_home, "project": project}
 
 
-def _autodiscovered_dir(**kwargs):
+def _autodiscovered_dir(trust_prompt_fn=None):
     """Autodiscover the team config and return its directory, or None if it was skipped."""
-    cfg = ConfigFile(type="team_config", name="zowe", **kwargs)
+    cfg = ConfigFile(type="team_config", name="zowe")
     try:
-        cfg.autodiscover_config_dir()
+        cfg.autodiscover_config_dir(trust_prompt_fn)
     except FileNotFoundError:
         return None
     return cfg.location
