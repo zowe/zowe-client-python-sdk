@@ -114,6 +114,13 @@ class TestTrustedConfigManager(TestCase):
         """Test that directories inside the home directory are trusted"""
         self.assertTrue(self.manager.is_dir_trusted(os.path.join(os.path.expanduser("~"), "project")))
 
+    def test_is_dir_trusted_home_symlink_to_outside(self):
+        """Test that a symlink inside home pointing outside it is not trusted"""
+        self.fs.create_dir(self.outside_dir)
+        link = os.path.join(os.path.expanduser("~"), "project")
+        self.fs.create_symlink(link, self.outside_dir)
+        self.assertFalse(self.manager.is_dir_trusted(link))
+
     def test_is_dir_trusted_in_trusted_list(self):
         """Test that a directory in the trusted list is trusted"""
         self._write_settings({"trustedConfigDirs": [self.outside_dir]})
@@ -160,7 +167,7 @@ class TestTrustedConfigManager(TestCase):
             self.assertEqual(self.manager.list_trusted(), {self.dir_a})
         self.assertEqual(len(logs.records), 1)
         self.assertIn("relative/dir", logs.output[0])
-        self.assertIn("cannot be relative or a symbolic link", logs.output[0])
+        self.assertIn("cannot be relative, contain '..', or be a symbolic link", logs.output[0])
 
     def test_list_trusted_skips_symlink_with_warning(self):
         """Test that list_trusted drops symbolic links and logs a warning"""
@@ -182,6 +189,19 @@ class TestTrustedConfigManager(TestCase):
         with self.assertRaises(ValueError):
             self.manager.add_trusted("relative/dir")
         self.assertFalse(os.path.exists(self.settings_path))
+
+    def test_add_trusted_non_normalized_path_raises(self):
+        """Test that add_trusted rejects paths containing ".." without writing the settings file"""
+        with self.assertRaises(ValueError):
+            self.manager.add_trusted(os.path.join(self.dir_a, "..", "b"))
+        self.assertFalse(os.path.exists(self.settings_path))
+
+    def test_list_trusted_skips_non_normalized_path_with_warning(self):
+        """Test that list_trusted drops paths containing ".." and logs a warning"""
+        bad = os.path.join(self.dir_a, "..", "b")
+        self._write_settings({"trustedConfigDirs": [self.dir_a, bad]})
+        with self.assertLogs(level="WARNING"):
+            self.assertEqual(self.manager.list_trusted(), {self.dir_a})
 
     def test_add_trusted_symlink_raises(self):
         """Test that add_trusted rejects symbolic links without writing the settings file"""

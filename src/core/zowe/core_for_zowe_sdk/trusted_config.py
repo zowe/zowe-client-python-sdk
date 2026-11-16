@@ -100,15 +100,15 @@ class TrustedConfigManager:
             return True
         if dir_path == os.getcwd():
             return True
-        if Path(dir_path).is_relative_to(Path.home()):
+        if Path(dir_path).resolve().is_relative_to(Path.home().resolve()):
             return True
         if dir_path in self.list_trusted():
             return True
         return prompt_fn(dir_path) if prompt_fn else False
 
     def __is_valid_path(self, path) -> bool:
-        """Return True if the path is absolute and not a symbolic link."""
-        return os.path.isabs(path) and not os.path.islink(path)
+        """Return True if the path is absolute, normalized, and not a symlink."""
+        return os.path.isabs(path) and os.path.normpath(path) == path and not os.path.islink(path)
 
     def __load_settings_json(self) -> dict:
         """Load the settings file, ensuring the trusted directories key exists."""
@@ -128,7 +128,7 @@ class TrustedConfigManager:
         for dir_path in list(dir_paths):
             if not self.__is_valid_path(dir_path):
                 dir_paths.remove(dir_path)
-                logging.warning(f"Skipping '{dir_path}', trusted directory path cannot be relative or a symbolic link")
+                logging.warning(f"Skipping '{dir_path}', trusted directory path cannot be relative, contain '..', or be a symbolic link")
         return dir_paths
 
     def add_trusted(self, dir_path: str) -> None:
@@ -143,10 +143,10 @@ class TrustedConfigManager:
         Raises
         ------
         ValueError
-            If the path is relative or a symbolic link
+            If the path is relative, contains "..", or is a symbolic link
         """
         if not self.__is_valid_path(dir_path):
-            raise ValueError("Trusted directory path cannot be relative or a symbolic link")
+            raise ValueError("Trusted directory path cannot be relative, contain '..', or be a symbolic link")
         settings_json = self.__load_settings_json()
         if dir_path not in settings_json[self.__settings_key]:
             settings_json[self.__settings_key].append(dir_path)
