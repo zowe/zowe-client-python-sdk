@@ -11,6 +11,7 @@ Copyright Contributors to the Zowe Project.
 """
 
 import json
+import logging
 import os
 import stat
 import sys
@@ -105,6 +106,9 @@ class TrustedConfigManager:
             return True
         return prompt_fn(dir_path) if prompt_fn else False
 
+    def __is_valid_path(self, path) -> bool:
+        return os.path.isabs(path) and not os.path.islink(path)
+
     def __load_settings_json(self) -> dict:
         """Load the settings file, ensuring the trusted directories key exists."""
         settings_json_path = self.local_storage_path
@@ -119,7 +123,12 @@ class TrustedConfigManager:
     def list_trusted(self) -> set[str]:
         """Return the set of directories currently marked as trusted."""
         settings_json = self.__load_settings_json()
-        return set(settings_json[self.__settings_key])
+        dir_paths = set(settings_json[self.__settings_key])
+        for dir_path in list(dir_paths):
+            if not self.__is_valid_path(dir_path):
+                dir_paths.remove(dir_path)
+                logging.warning(f"Skipping '{dir_path}', trusted directory path cannot be relative or a symbolic link")
+        return dir_paths
 
     def add_trusted(self, dir_path: str) -> None:
         """
@@ -130,6 +139,8 @@ class TrustedConfigManager:
         dir_path: str
             Directory to trust
         """
+        if not self.__is_valid_path(dir_path):
+            raise ValueError("Trusted directory path cannot be relative or a symbolic link")
         settings_json = self.__load_settings_json()
         if dir_path not in settings_json[self.__settings_key]:
             settings_json[self.__settings_key].append(dir_path)

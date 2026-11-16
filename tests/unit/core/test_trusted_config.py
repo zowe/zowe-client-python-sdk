@@ -144,6 +144,44 @@ class TestTrustedConfigManager(TestCase):
         self._write_settings({"trustedConfigDirs": ["/a", "/b"]})
         self.assertEqual(self.manager.list_trusted(), {"/a", "/b"})
 
+    def test_list_trusted_skips_relative_path_with_warning(self):
+        """Test that list_trusted drops relative paths and logs a warning"""
+        self._write_settings({"trustedConfigDirs": ["/a", "relative/dir"]})
+        with self.assertLogs(level="WARNING") as logs:
+            self.assertEqual(self.manager.list_trusted(), {"/a"})
+        self.assertEqual(len(logs.records), 1)
+        self.assertIn("relative/dir", logs.output[0])
+        self.assertIn("cannot be relative or a symbolic link", logs.output[0])
+
+    def test_list_trusted_skips_symlink_with_warning(self):
+        """Test that list_trusted drops symbolic links and logs a warning"""
+        self.fs.create_dir("/real")
+        self.fs.create_symlink("/link", "/real")
+        self._write_settings({"trustedConfigDirs": ["/real", "/link"]})
+        with self.assertLogs(level="WARNING") as logs:
+            self.assertEqual(self.manager.list_trusted(), {"/real"})
+        self.assertIn("/link", logs.output[0])
+
+    def test_list_trusted_valid_paths_no_warning(self):
+        """Test that list_trusted logs nothing when all paths are valid"""
+        self._write_settings({"trustedConfigDirs": ["/a"]})
+        with self.assertNoLogs(level="WARNING"):
+            self.manager.list_trusted()
+
+    def test_add_trusted_relative_path_raises(self):
+        """Test that add_trusted rejects relative paths without writing the settings file"""
+        with self.assertRaises(ValueError):
+            self.manager.add_trusted("relative/dir")
+        self.assertFalse(os.path.exists(self.settings_path))
+
+    def test_add_trusted_symlink_raises(self):
+        """Test that add_trusted rejects symbolic links without writing the settings file"""
+        self.fs.create_dir("/real")
+        self.fs.create_symlink("/link", "/real")
+        with self.assertRaises(ValueError):
+            self.manager.add_trusted("/link")
+        self.assertFalse(os.path.exists(self.settings_path))
+
     def test_add_trusted(self):
         """Test that add_trusted persists a directory without duplicating it"""
         self.manager.add_trusted("/a")
