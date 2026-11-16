@@ -96,7 +96,7 @@ class TrustedConfigManager:
         bool
             True if the directory is trusted
         """
-        if os.environ.get("CI") is not None or self.__has_env(ZoweConfigEnvVar.ALLOW_UNTRUSTED_DIRS):
+        if os.environ.get("CI") or self.__has_env(ZoweConfigEnvVar.ALLOW_UNTRUSTED_DIRS):
             return True
         if dir_path == os.getcwd():
             return True
@@ -107,6 +107,7 @@ class TrustedConfigManager:
         return prompt_fn(dir_path) if prompt_fn else False
 
     def __is_valid_path(self, path) -> bool:
+        """Return True if the path is absolute and not a symbolic link."""
         return os.path.isabs(path) and not os.path.islink(path)
 
     def __load_settings_json(self) -> dict:

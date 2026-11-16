@@ -90,6 +90,11 @@ class TestTrustedConfigManager(TestCase):
         with mock.patch.dict(os.environ, {"CI": "true"}):
             self.assertTrue(self.manager.is_dir_trusted(self.outside_dir))
 
+    def test_is_dir_trusted_in_ci_empty_string(self):
+        """Test that CI set to an empty string does not trust all directories"""
+        with mock.patch.dict(os.environ, {"CI": ""}):
+            self.assertFalse(self.manager.is_dir_trusted(self.outside_dir))
+
     def test_is_dir_trusted_bypassed_by_env(self):
         """Test that ZOWE_CONFIG_ALLOW_UNTRUSTED_DIRS trusts all directories"""
         with mock.patch.dict(os.environ, {ZoweConfigEnvVar.ALLOW_UNTRUSTED_DIRS: "1"}):
