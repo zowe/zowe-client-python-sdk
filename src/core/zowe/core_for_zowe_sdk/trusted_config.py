@@ -139,6 +139,11 @@ class TrustedConfigManager:
         ----------
         dir_path: str
             Directory to trust
+
+        Raises
+        ------
+        ValueError
+            If the path is relative or a symbolic link
         """
         if not self.__is_valid_path(dir_path):
             raise ValueError("Trusted directory path cannot be relative or a symbolic link")
