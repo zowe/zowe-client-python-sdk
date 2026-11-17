@@ -27,7 +27,7 @@ from .response import (
 class Workflows(SdkApi):
     """
     Representation of the base z/OSMF Workflows API.
-    
+
     See more at https://www.ibm.com/docs/en/zos/3.1.0?topic=services-zosmf-workflow.
 
     Parameters
@@ -37,13 +37,11 @@ class Workflows(SdkApi):
     version: str
         The supported version of z/OSMF Workflows (1.0 is the only version available for now)
     """
-    
+
     def __init__(self, connection: dict[str, Any], version: str = "1.0"):
         super().__init__(connection, "/zosmf/workflow/rest/{}".format(version))
 
-    def _step_variables_body(
-        self, return_steps_data: bool, return_variables_data: bool
-    ) -> dict[str, Any]:
+    def _step_variables_body(self, return_steps_data: bool, return_variables_data: bool) -> dict[str, Any]:
         """
         Form steps-variables request body.
 
@@ -70,18 +68,18 @@ class Workflows(SdkApi):
         workflow_definition_file_system: Optional[str] = None,
         variable_input_file: Optional[str] = None,
         variables: Optional[list[dict]] = None,
-        resolve_global_conflict_by_using: Literal['global', 'input'] = "global",
+        resolve_global_conflict_by_using: Literal["global", "input"] = "global",
         workflow_archive_safid: Optional[str] = None,
         comments: Optional[str] = None,
         assign_to_owner: bool = True,
-        access_type: Literal['Public', 'Restricted', 'Private'] = "Public",
+        access_type: Literal["Public", "Restricted", "Private"] = "Public",
         account_info: Optional[str] = None,
         job_statement: Optional[str] = None,
         delete_completed_jobs: bool = False,
         jobs_output_directory: Optional[str] = None,
         auto_delete_on_completion: bool = False,
         target_systemuid: Optional[str] = None,
-        target_systempwd: Optional[str] = None
+        target_systempwd: Optional[str] = None,
     ) -> CreateWorkflowResponse:
         """
         You can use this operation to create a z/OSMF workflow on a z/OS system.
@@ -114,7 +112,7 @@ class Workflows(SdkApi):
             Indicates who can access the archived workflow, which is archived from the current workflow
             to a user specified directory. The default value is the current user ID of the workflow owner.
         comments: Optional[str]
-            Specifies any information that you want to associate with the creation of this workflow 
+            Specifies any information that you want to associate with the creation of this workflow
             (up to 500 characters).
         assign_to_owner: bool
             **Optional** Indicates whether the workflow steps are assigned to the workflow owner when
@@ -123,7 +121,7 @@ class Workflows(SdkApi):
             **Optional** Specifies the access type for the workflow. If you omit this property,
             the workflow is "public", by default.
         account_info: Optional[str]
-            For a workflow that submits a job, this property specifies the account information 
+            For a workflow that submits a job, this property specifies the account information
             to use in the JCL JOB statement.
         job_statement: Optional[str]
             For a workflow that submits a job, this property specifies the JOB statement JCL
@@ -168,7 +166,7 @@ class Workflows(SdkApi):
             "jobsOutputDirectory": jobs_output_directory,
             "autoDeleteOnCompletion": auto_delete_on_completion,
             "targetSystemuid": target_systemuid,
-            "targetSystempwd": target_systempwd
+            "targetSystempwd": target_systempwd,
         }
 
         custom_args = self._create_custom_request_arguments()
@@ -176,16 +174,13 @@ class Workflows(SdkApi):
         request_url = "{}/{}".format(self._request_endpoint, "workflows")
         custom_args["url"] = request_url
 
-        custom_args["json"] = { k: v for k, v in body.items() if v not in [None, ""] }
+        custom_args["json"] = {k: v for k, v in body.items() if v not in [None, ""]}
 
         response_json = self.request_handler.perform_request("POST", custom_args, expected_code=[201])
         return CreateWorkflowResponse(response_json)
 
     def get_workflow_properties(
-        self,
-        workflow_key: str,
-        return_steps_data: bool = False,
-        return_variables_data: bool = False
+        self, workflow_key: str, return_steps_data: bool = False, return_variables_data: bool = False
     ) -> GetWorkflowPropertiesResponse:
         """
         You can use this operation to retrieve the properties of a z/OSMF workflow.
@@ -222,11 +217,11 @@ class Workflows(SdkApi):
     def list_workflows(
         self,
         workflow_name: Optional[str] = None,
-        category: Optional[Literal['general', 'configuration']] = None,
+        category: Optional[Literal["general", "configuration"]] = None,
         system: Optional[str] = None,
-        status_name: Optional[Literal['in-progress', 'complete', 'automation-in-progress', 'canceled']] = None,
+        status_name: Optional[Literal["in-progress", "complete", "automation-in-progress", "canceled"]] = None,
         owner: Optional[str] = None,
-        vendor: Optional[str] = None
+        vendor: Optional[str] = None,
     ) -> list[ListWorkflowsResponse]:
         """
         You can use this operation to list the z/OSMF workflows for a system or sysplex.
@@ -271,19 +266,17 @@ class Workflows(SdkApi):
         custom_args["params"] = params
 
         response_json = self.request_handler.perform_request("GET", custom_args)
-        return list(
-            map(lambda workflow_raw: ListWorkflowsResponse(workflow_raw), response_json["workflows"])
-        )
+        return list(map(lambda workflow_raw: ListWorkflowsResponse(workflow_raw), response_json["workflows"]))
 
     def start_workflow(
         self,
         workflow_key: str,
-        resolve_conflict_by_using: Literal['outputFileValue', 'existingValue', 'leaveConflict']="outputFileValue",
+        resolve_conflict_by_using: Literal["outputFileValue", "existingValue", "leaveConflict"] = "outputFileValue",
         step_name: Optional[str] = None,
         perform_subsequent: bool = True,
         notification_url: Optional[str] = None,
         target_systemuid: Optional[str] = None,
-        target_systempwd: Optional[str] = None
+        target_systempwd: Optional[str] = None,
     ):
         """
         You can use this operation to start a z/OSMF workflow on a z/OS system.
@@ -298,12 +291,12 @@ class Workflows(SdkApi):
         workflow_key: str
             Identifies the workflow to be started.
         resolve_conflict_by_using: Literal['outputFileValue', 'existingValue', 'leaveConflict']
-            **Optional** Indicates how variable conflicts, if any, are to be handled when the Workflows task reads 
+            **Optional** Indicates how variable conflicts, if any, are to be handled when the Workflows task reads
             in the output file from a step that runs a REXX exec or UNIX shell script.
         step_name: Optional[str]
             The name of the step at which automation is to begin.
         perform_subsequent: bool
-            **Optional** If the workflow contains any subsequent automated steps, this property indicates whether 
+            **Optional** If the workflow contains any subsequent automated steps, this property indicates whether
             z/OSMF is to perform the steps.
         notification_url: Optional[str]
             A notification URL (up to 2000 characters).
@@ -318,23 +311,21 @@ class Workflows(SdkApi):
             "performSubsequent": perform_subsequent,
             "notificationUrl": notification_url,
             "targetSystemuid": target_systemuid,
-            "targetSystempwd": target_systempwd
+            "targetSystempwd": target_systempwd,
         }
 
         custom_args = self._create_custom_request_arguments()
 
         request_url = "{}/{}/{}/operations/start".format(
-            self._request_endpoint, 
-            "workflows", 
-            self._encode_uri_component(workflow_key)
+            self._request_endpoint, "workflows", self._encode_uri_component(workflow_key)
         )
         custom_args["url"] = request_url
 
-        custom_args["json"] = { k: v for k, v in body.items() if v not in [None, ""] }
+        custom_args["json"] = {k: v for k, v in body.items() if v not in [None, ""]}
 
         self.request_handler.perform_request("PUT", custom_args, expected_code=[202])
 
-    def cancel_workflow(self, workflow_key: str) -> str: 
+    def cancel_workflow(self, workflow_key: str) -> str:
         """
         You can use this operation to cancel a z/OSMF workflow on a z/OS system.
 
@@ -353,15 +344,13 @@ class Workflows(SdkApi):
         custom_args = self._create_custom_request_arguments()
 
         request_url = "{}/{}/{}/operations/cancel".format(
-            self._request_endpoint, 
-            "workflows", 
-            self._encode_uri_component(workflow_key)
+            self._request_endpoint, "workflows", self._encode_uri_component(workflow_key)
         )
         custom_args["url"] = request_url
 
         response_json = self.request_handler.perform_request("PUT", custom_args)
         return response_json["workflowName"]
-    
+
     def delete_workflow(self, workflow_key: str):
         """
         You can use this operation to remove a z/OSMF workflow from a z/OS system.
@@ -385,11 +374,11 @@ class Workflows(SdkApi):
         definition_file_path: str,
         workflow_definition_file_system: Optional[str] = None,
         return_steps_data: bool = False,
-        return_variables_data: bool = False
+        return_variables_data: bool = False,
     ) -> GetWorkflowDefinitionResponse:
         """
         You can use this operation to retrieve the contents of a z/OSMF workflow definition from a z/OS system.
-        
+
         https://www.ibm.com/docs/en/zos/3.1.0?topic=services-retrieve-workflow-definition
         Query parameters definition:
         https://www.ibm.com/docs/en/zos/3.1.0?topic=services-retrieve-workflow-definition#GETMethodRetrieveWorkflowDefinition__QueryParameters__title__1
@@ -397,10 +386,10 @@ class Workflows(SdkApi):
         Parameters
         ----------
         definition_file_path: str
-            Specifies the location of the workflow definition file, which is either a UNIX path name 
+            Specifies the location of the workflow definition file, which is either a UNIX path name
             (including the file name) or a fully qualified z/OS data set name.
         workflow_definition_file_system: Optional[str]
-            Nickname of the system on which the specified workflow definition file and 
+            Nickname of the system on which the specified workflow definition file and
             any related files reside.
         return_steps_data: bool
             **Optional** Response will contain an array of **WorkflowDefinitionStepResponse** objects if True.
@@ -447,9 +436,7 @@ class Workflows(SdkApi):
         custom_args = self._create_custom_request_arguments()
 
         request_url = "{}/{}/{}/operations/archive".format(
-            self._request_endpoint, 
-            "workflows", 
-            self._encode_uri_component(workflow_key)
+            self._request_endpoint, "workflows", self._encode_uri_component(workflow_key)
         )
         custom_args["url"] = request_url
 
@@ -457,9 +444,7 @@ class Workflows(SdkApi):
         return response_json["workflowKey"]
 
     def list_archived_workflows(
-        self, 
-        order_by: Optional[Literal['desc', 'asc']] = None,
-        view: Optional[Literal['user', 'domain']] = None
+        self, order_by: Optional[Literal["desc", "asc"]] = None, view: Optional[Literal["user", "domain"]] = None
     ) -> list[ListArchivedWorkflowsResponse]:
         """
         You can use this operation to list the archived z/OSMF workflows for a system or sysplex.
@@ -467,7 +452,7 @@ class Workflows(SdkApi):
         https://www.ibm.com/docs/en/zos/3.1.0?topic=services-list-archived-workflows-system
         Query parameters definition:
         https://www.ibm.com/docs/en/zos/3.1.0?topic=services-list-archived-workflows-system#GETMethodListArchivedWorkflows__QueryParametersFilters__title__1
-        
+
         Parameters
         ----------
         order_by: Optional[Literal['desc', 'asc']]
@@ -508,7 +493,7 @@ class Workflows(SdkApi):
         https://www.ibm.com/docs/en/zos/3.1.0?topic=services-get-properties-archived-workflow
         Query parameters definition:
         https://www.ibm.com/docs/en/zos/3.1.0?topic=services-get-properties-archived-workflow#GETMethodRetrieveInformationArchived__QueryParameterReturnData__title__1
-        
+
         Parameters
         ----------
         workflow_key: str
@@ -525,7 +510,9 @@ class Workflows(SdkApi):
         """
         custom_args = self._create_custom_request_arguments()
 
-        request_url = "{}/{}/{}".format(self._request_endpoint, "archivedworkflows", self._encode_uri_component(workflow_key))
+        request_url = "{}/{}/{}".format(
+            self._request_endpoint, "archivedworkflows", self._encode_uri_component(workflow_key)
+        )
         custom_args["url"] = request_url
 
         params = self._step_variables_body(return_steps_data, return_variables_data)
@@ -539,7 +526,7 @@ class Workflows(SdkApi):
         You can use this operation to remove an archived z/OSMF workflow from a z/OS system.
 
         https://www.ibm.com/docs/en/zos/3.1.0?topic=services-delete-archived-workflow
-        
+
         Parameters
         ----------
         workflow_key: str
@@ -547,7 +534,9 @@ class Workflows(SdkApi):
         """
         custom_args = self._create_custom_request_arguments()
 
-        request_url = "{}/{}/{}".format(self._request_endpoint, "archivedworkflows", self._encode_uri_component(workflow_key))
+        request_url = "{}/{}/{}".format(
+            self._request_endpoint, "archivedworkflows", self._encode_uri_component(workflow_key)
+        )
         custom_args["url"] = request_url
 
         self.request_handler.perform_request("DELETE", custom_args, expected_code=[204])

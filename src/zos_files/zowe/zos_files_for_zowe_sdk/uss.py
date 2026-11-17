@@ -14,10 +14,9 @@ import os
 from typing import Any, Optional, Union
 
 from requests import Response
-from zowe.core_for_zowe_sdk import SdkApi
 from zowe.core_for_zowe_sdk.exceptions import FileNotFound
-from zowe.zos_files_for_zowe_sdk.constants import ContentType, zos_file_constants
 from zowe.zos_files_for_zowe_sdk.api import BaseFilesApi
+from zowe.zos_files_for_zowe_sdk.constants import ContentType, zos_file_constants
 
 from .response import USSFileTag, USSListResponse
 
@@ -140,7 +139,7 @@ class USSFiles(BaseFilesApi):  # type: ignore
         content_type: ContentType = ContentType.TEXT,
         remote_file_encoding: str = "IBM-1047",
         receive_in_encoding: str = "ISO8859-1",
-        as_stream: bool = False
+        as_stream: bool = False,
     ) -> Union[str, None, Response]:
         """
         Retrieve the content of a filename. The complete path must be specified.
@@ -152,9 +151,11 @@ class USSFiles(BaseFilesApi):  # type: ignore
         content_type: ContentType
             The content type to receive ("text" or "binary", "text" by default)
         remote_file_encoding: str
-            Encoding file content originally in (to convert from; by default, it is always being converted from "IBM-1047")
+            Encoding file content originally in (to convert from; by default, it is always being
+            converted from "IBM-1047")
         receive_in_encoding: str
-            Encoding to convert file content to (to convert to; by default, it is always being converted to "ISO8859-1")
+            Encoding to convert file content to (to convert to; by default, it is always being
+            converted to "ISO8859-1")
         as_stream: bool
             Specifies whether the response is streamed. Default: False
 
@@ -170,29 +171,22 @@ class USSFiles(BaseFilesApi):  # type: ignore
             Content type must be either ContenType.TEXT or ContentType.BINARY.
         """
         custom_args = self._create_custom_request_arguments()
-        custom_args["url"] = "{}fs/{}".format(
-            self._request_endpoint,
-            self._encode_uri_path_for_uss(file_path)
-        )
+        custom_args["url"] = "{}fs/{}".format(self._request_endpoint, self._encode_uri_path_for_uss(file_path))
         if content_type == ContentType.BINARY:
             custom_args["headers"]["X-IBM-Data-Type"] = "binary"
         elif content_type == ContentType.TEXT:
             custom_args["headers"]["X-IBM-Data-Type"] = "text;fileEncoding={}".format(remote_file_encoding)
             custom_args["headers"]["Content-Type"] = "text/plain; charset={}".format(receive_in_encoding)
         else:
-            error_str = "Content type must be either \"{}\" or \"{}\".".format(
-                ContentType.TEXT.value,
-                ContentType.BINARY.value
+            error_str = 'Content type must be either "{}" or "{}".'.format(
+                ContentType.TEXT.value, ContentType.BINARY.value
             )
             raise ValueError(error_str)
         response = self.request_handler.perform_request("GET", custom_args, stream=as_stream)
         return response
 
     def get_content(
-        self, 
-        filepath_name: str,
-        file_encoding: str = "IBM-1047",
-        receive_encoding: str = "ISO8859-1"
+        self, filepath_name: str, file_encoding: str = "IBM-1047", receive_encoding: str = "ISO8859-1"
     ) -> Optional[str]:
         """Use `retrieve_content()` instead of this deprecated function."""
         custom_args = self._create_custom_request_arguments()
@@ -203,11 +197,7 @@ class USSFiles(BaseFilesApi):  # type: ignore
         return response_json
 
     def get_content_streamed(
-        self,
-        file_path: str,
-        binary: bool = False,
-        file_encoding: str = "IBM-1047",
-        receive_encoding: str = "ISO8859-1"
+        self, file_path: str, binary: bool = False, file_encoding: str = "IBM-1047", receive_encoding: str = "ISO8859-1"
     ) -> Response:
         """Use `retrieve_content(as_stream=True)` instead of this deprecated function."""
         custom_args = self._create_custom_request_arguments()
@@ -219,14 +209,14 @@ class USSFiles(BaseFilesApi):  # type: ignore
             custom_args["headers"]["Content-Type"] = "text/plain; charset={}".format(receive_encoding)
         response = self.request_handler.perform_request("GET", custom_args, stream=True)
         return response
-    
+
     def perform_download(
         self,
         remote_file_path: str,
         local_file_path: str,
         content_type: ContentType = ContentType.TEXT,
         remote_file_encoding: str = "IBM-1047",
-        receive_in_encoding: str = "UTF-8"
+        receive_in_encoding: str = "UTF-8",
     ) -> None:
         """
         Retrieve the contents of a USS file and save it to a local file.
@@ -240,7 +230,8 @@ class USSFiles(BaseFilesApi):  # type: ignore
         content_type: ContentType
             Specifies the content type to fetch ("text" or "binary", "text" by default)
         remote_file_encoding: str
-            Encoding file content originally in (to convert from; by default, it is always being converted from "IBM-1047")
+            Encoding file content originally in (to convert from; by default,
+            it is always being converted from "IBM-1047")
         receive_in_encoding: str
             Encoding to convert file content to (to convert to; by default,
             it is always being converted to "UTF-8" during download). Ignored when "binary" is True
@@ -257,7 +248,7 @@ class USSFiles(BaseFilesApi):  # type: ignore
             content_type=content_type,
             remote_file_encoding=remote_file_encoding,
             receive_in_encoding=receive_in_encoding,
-            as_stream=True
+            as_stream=True,
         )
         if not isinstance(response, Response):
             raise TypeError(f"Expected Response, got {type(response)}")
@@ -270,9 +261,8 @@ class USSFiles(BaseFilesApi):  # type: ignore
             write_in_encoding = receive_in_encoding
             decode_unicode = True
         else:
-            error_str = "Content type must be either \"{}\" or \"{}\".".format(
-                ContentType.TEXT.value,
-                ContentType.BINARY.value
+            error_str = 'Content type must be either "{}" or "{}".'.format(
+                ContentType.TEXT.value, ContentType.BINARY.value
             )
             raise ValueError(error_str)
         with open(local_file_path, write_mode, encoding=write_in_encoding) as f:
@@ -285,7 +275,7 @@ class USSFiles(BaseFilesApi):  # type: ignore
         output_file: str,
         binary: bool = False,
         file_encoding: str = "IBM-1047",
-        receive_encoding: str = "UTF-8"
+        receive_encoding: str = "UTF-8",
     ) -> None:
         """Use `perform_download` instead of this deprecated function."""
         response = self.get_content_streamed(file_path, binary, file_encoding, receive_encoding)
@@ -300,7 +290,7 @@ class USSFiles(BaseFilesApi):  # type: ignore
         local_file_path: str,
         remote_file_path: str,
         content_type: ContentType = ContentType.TEXT,
-        upload_in_encoding: str = _ZOWE_FILES_DEFAULT_ENCODING
+        upload_in_encoding: str = _ZOWE_FILES_DEFAULT_ENCODING,
     ) -> None:
         """
         Upload contents of a given file and save it to a file at the given USS path.
@@ -331,9 +321,8 @@ class USSFiles(BaseFilesApi):  # type: ignore
                 read_mode = "r"
                 read_in_encoding = "utf-8"
             else:
-                error_str = "Content type must be either \"{}\" or \"{}\".".format(
-                    ContentType.TEXT.value,
-                    ContentType.BINARY.value
+                error_str = 'Content type must be either "{}" or "{}".'.format(
+                    ContentType.TEXT.value, ContentType.BINARY.value
                 )
                 raise ValueError(error_str)
             with open(local_file_path, read_mode, encoding=read_in_encoding) as in_file:
@@ -359,7 +348,8 @@ class USSFiles(BaseFilesApi):  # type: ignore
 
     def get_file_tag(self, filepath_name: str) -> USSFileTag:
         """
-        Retrieve the file tag if specified for the filename. Raises exception if it is impossible to identify the tag info.
+        Retrieve the file tag if specified for the filename. Raises exception if it is impossible
+        to identify the tag info.
 
         Parameters
         ----------
@@ -373,6 +363,6 @@ class USSFiles(BaseFilesApi):  # type: ignore
         """
         custom_args = self._create_custom_request_arguments()
         custom_args["url"] = "{}fs/{}".format(self._request_endpoint, self._encode_uri_path_for_uss(filepath_name))
-        custom_args["json"] = { "request": "chtag", "action": "list" }
+        custom_args["json"] = {"request": "chtag", "action": "list"}
         response_json = self.request_handler.perform_request("PUT", custom_args)
         return USSFileTag(response_json)

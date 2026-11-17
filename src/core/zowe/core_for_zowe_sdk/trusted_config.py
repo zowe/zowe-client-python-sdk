@@ -128,7 +128,10 @@ class TrustedConfigManager:
         for dir_path in list(dir_paths):
             if not self.__is_valid_path(dir_path):
                 dir_paths.remove(dir_path)
-                logging.warning(f"Skipping '{dir_path}', trusted directory path cannot be relative, contain '..', or be a symbolic link")
+                logging.warning(
+                    f"Skipping '{dir_path}', trusted directory path cannot be relative, "
+                    "contain '..', or be a symbolic link"
+                )
         return dir_paths
 
     def add_trusted(self, dir_path: str) -> None:

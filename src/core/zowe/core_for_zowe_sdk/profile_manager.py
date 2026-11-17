@@ -263,7 +263,8 @@ class ProfileManager:
             The name of the profile to retrieve. If None, the method attempts to fetch
             the profile based only on the type.
         profile_type : Optional[str]
-            The type of the profile to retrieve. If None, the method attempts to fetch the profile based only on the name.
+            The type of the profile to retrieve. If None, the method attempts to fetch
+            the profile based only on the name.
         validate_schema : Optional[bool]
             Whether to validate the profile against the schema present in the configuration file.
 

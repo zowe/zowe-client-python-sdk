@@ -14,7 +14,6 @@ import os
 from typing import Any, Optional, Union
 
 from requests import Response
-from zowe.core_for_zowe_sdk import SdkApi
 from zowe.core_for_zowe_sdk.exceptions import FileNotFound
 from zowe.zos_files_for_zowe_sdk.api import BaseFilesApi
 from zowe.zos_files_for_zowe_sdk.constants import (
@@ -375,7 +374,9 @@ class Datasets(BaseFilesApi):  # type: ignore[misc]
         if member_pattern is not None:
             additional_parms["pattern"] = member_pattern
         custom_args["params"] = additional_parms
-        custom_args["url"] = "{}ds/{}/member".format(self._request_endpoint, self._encode_uri_path_for_zos(dataset_name))
+        custom_args["url"] = "{}ds/{}/member".format(
+            self._request_endpoint, self._encode_uri_path_for_zos(dataset_name)
+        )
         custom_args["headers"]["X-IBM-Max-Items"] = "{}".format(limit)
         custom_args["headers"]["X-IBM-Attributes"] = attributes
         response_json = self.request_handler.perform_request("GET", custom_args)
@@ -565,10 +566,7 @@ class Datasets(BaseFilesApi):  # type: ignore[misc]
         self.request_handler.perform_request("POST", custom_args, expected_code=[201])
 
     def retrieve_content(
-        self,
-        dataset_name: str,
-        content_type: ContentType = ContentType.TEXT,
-        as_stream: bool = False
+        self, dataset_name: str, content_type: ContentType = ContentType.TEXT, as_stream: bool = False
     ) -> Union[str, None, Response]:
         """
         Retrieve the contents of a given dataset.
@@ -679,15 +677,12 @@ class Datasets(BaseFilesApi):  # type: ignore[misc]
         response = self.retrieve_content(dataset_name, content_type=content_type, as_stream=True)
         if not isinstance(response, Response):
             raise TypeError(f"Expected Response, got {type(response)}")
-        (write_mode, write_in_encoding, decode_unicode) = (
-            ("w", "utf-8", True)
-            if content_type == ContentType.TEXT
-            else ("wb", None, False)
+        write_mode, write_in_encoding, decode_unicode = (
+            ("w", "utf-8", True) if content_type == ContentType.TEXT else ("wb", None, False)
         )
         with open(local_file_path, write_mode, encoding=write_in_encoding) as f:
             for chunk in response.iter_content(chunk_size=4096, decode_unicode=decode_unicode):
                 f.write(chunk)
-
 
     def download(self, dataset_name: str, output_file: str) -> None:
         """Use `perform_download(content_type=ContenType.TEXT)` instead of this deprecated function."""
@@ -708,7 +703,7 @@ class Datasets(BaseFilesApi):  # type: ignore[misc]
         local_file_path: str,
         dataset_name: str,
         content_type: ContentType = ContentType.TEXT,
-        upload_in_encoding: str = _ZOWE_FILES_DEFAULT_ENCODING
+        upload_in_encoding: str = _ZOWE_FILES_DEFAULT_ENCODING,
     ) -> None:
         """
         Upload contents of a local file to a data set.
@@ -731,7 +726,7 @@ class Datasets(BaseFilesApi):  # type: ignore[misc]
             Thrown when a file is not found at provided location
         """
         if os.path.isfile(local_file_path):
-            (read_mode, read_in_encoding) = ("r", "utf-8") if content_type == ContentType.TEXT else ("rb", None)
+            read_mode, read_in_encoding = ("r", "utf-8") if content_type == ContentType.TEXT else ("rb", None)
             with open(local_file_path, read_mode, encoding=read_in_encoding) as in_file:
                 self.write(dataset_name, in_file.read(), encoding=upload_in_encoding)
         else:
