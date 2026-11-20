@@ -167,7 +167,7 @@ class TestTrustedConfigManager(TestCase):
             self.assertEqual(self.manager.list_trusted(), {self.dir_a})
         self.assertEqual(len(logs.records), 1)
         self.assertIn("relative/dir", logs.output[0])
-        self.assertIn("cannot be relative, contain '..', or be a symbolic link", logs.output[0])
+        self.assertIn("cannot be relative, contain '..', or contain a symbolic link", logs.output[0])
 
     def test_list_trusted_skips_symlink_with_warning(self):
         """Test that list_trusted drops symbolic links and logs a warning"""
@@ -209,6 +209,24 @@ class TestTrustedConfigManager(TestCase):
         self.fs.create_symlink(self.link_dir, self.real_dir)
         with self.assertRaises(ValueError):
             self.manager.add_trusted(self.link_dir)
+        self.assertFalse(os.path.exists(self.settings_path))
+
+    def test_list_trusted_skips_path_under_symlinked_parent(self):
+        """Test that list_trusted drops paths whose parent directory is a symbolic link"""
+        child = os.path.join(self.link_dir, "child")
+        self.fs.create_dir(os.path.join(self.real_dir, "child"))
+        self.fs.create_symlink(self.link_dir, self.real_dir)
+        self._write_settings({"trustedConfigDirs": [self.dir_a, child]})
+        with self.assertLogs(level="WARNING") as logs:
+            self.assertEqual(self.manager.list_trusted(), {self.dir_a})
+        self.assertIn(child, logs.output[0])
+
+    def test_add_trusted_symlinked_parent_raises(self):
+        """Test that add_trusted rejects paths under a symlinked parent without writing the settings file"""
+        self.fs.create_dir(os.path.join(self.real_dir, "child"))
+        self.fs.create_symlink(self.link_dir, self.real_dir)
+        with self.assertRaises(ValueError):
+            self.manager.add_trusted(os.path.join(self.link_dir, "child"))
         self.assertFalse(os.path.exists(self.settings_path))
 
     def test_add_trusted(self):

@@ -107,8 +107,12 @@ class TrustedConfigManager:
         return prompt_fn(dir_path) if prompt_fn else False
 
     def __is_valid_path(self, path) -> bool:
-        """Return True if the path is absolute, normalized, and not a symlink."""
-        return os.path.isabs(path) and os.path.normpath(path) == path and not os.path.islink(path)
+        """Return True if the path is absolute, normalized, and has no symlinks in any component."""
+        return (
+            os.path.isabs(path)
+            and os.path.normpath(path) == path
+            and os.path.normcase(os.path.realpath(path)) == os.path.normcase(path)
+        )
 
     def __load_settings_json(self) -> dict:
         """Load the settings file, ensuring the trusted directories key exists."""
@@ -130,7 +134,7 @@ class TrustedConfigManager:
                 dir_paths.remove(dir_path)
                 logging.warning(
                     f"Skipping '{dir_path}', trusted directory path cannot be relative, "
-                    "contain '..', or be a symbolic link"
+                    "contain '..', or contain a symbolic link"
                 )
         return dir_paths
 
@@ -146,10 +150,10 @@ class TrustedConfigManager:
         Raises
         ------
         ValueError
-            If the path is relative, contains "..", or is a symbolic link
+            If the path is relative, contains "..", or contains a symbolic link
         """
         if not self.__is_valid_path(dir_path):
-            raise ValueError("Trusted directory path cannot be relative, contain '..', or be a symbolic link")
+            raise ValueError("Trusted directory path cannot be relative, contain '..', or contain a symbolic link")
         settings_json = self.__load_settings_json()
         if dir_path not in settings_json[self.__settings_key]:
             settings_json[self.__settings_key].append(dir_path)
@@ -168,6 +172,8 @@ class TrustedConfigManager:
         """
         settings_json = self.__load_settings_json()
         if dir_path in settings_json[self.__settings_key]:
-            settings_json[self.__settings_key].remove(dir_path)
+            settings_json[self.__settings_key] = [
+                path for path in settings_json[self.__settings_key] if path != dir_path
+            ]
             with open(self.local_storage_path, "w", encoding="utf-8") as fp:
                 fp.write(json.dumps(settings_json, indent=2) + "\n")
