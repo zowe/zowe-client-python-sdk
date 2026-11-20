@@ -12,7 +12,7 @@
     "src:pydoclint": "pydoclint --exclude='.*/(build|response)/.*' src",
     "src:lint": "npm run src:lint:error && npm run src:lint:other",
     "src:lint:error": "pylint src --errors-only --disable=E0401,E0611 --ignore=build",
-    "src:lint:other": "pylint ./src --disable=all --enable=C0103,C0301 --ignore=build,response --max-line-length=127",
+    "src:lint:other": "pylint ./src --disable=all --enable=C0103,C0301 --ignore=build,response --max-line-length=120",
     "src:license": "python scripts/license_header.py src",
     "src:test": "npm run src:test:pytest && npm run src:test:xml",
     "src:test:pytest": "coverage run -m pytest ./tests/unit",

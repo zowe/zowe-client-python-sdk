@@ -35,4 +35,4 @@ jobs:
         # check for Python errors
         pylint src --errors-only --disable=E0401,E0611 --ignore=build
         # check for lint
-        pylint ./src --disable=all --enable=C0103,C0301 --ignore=build,response --max-line-length=127
+        pylint ./src --disable=all --enable=C0103,C0301 --ignore=build,response --max-line-length=120
