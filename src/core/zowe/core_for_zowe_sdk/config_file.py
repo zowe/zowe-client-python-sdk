@@ -73,6 +73,7 @@ class ConfigFile:
     secure_props: Optional[dict[str, Any]] = None
     jsonc: Optional[dict[str, Any]] = None
     _missing_secure_props: list[str] = field(default_factory=list)
+    skipped_files: dict[str, str] = field(default_factory=dict)
 
     __suppress_config_file_warnings: bool = True
     __trusted_config = TrustedConfigManager()
@@ -283,6 +284,11 @@ class ConfigFile:
 
         return Profile(props, profile_name, self._missing_secure_props)
 
+    def __skip(self, path: str, reason: str) -> None:
+        """Log a warning and record a config file that was skipped because it is not trusted."""
+        self.__logger.warning(reason)
+        self.skipped_files[path] = reason
+
     def autodiscover_config_dir(self, trust_prompt_fn: Optional[Callable[[str], bool]] = None) -> None:
         """
         Autodiscover Zowe z/OSMF Team Config files by going up the path from current working directory.
@@ -301,6 +307,7 @@ class ConfigFile:
             Cannot find file in directory.
         """
         current_dir = CURRENT_DIR
+        self.skipped_files = {}
 
         while True:
             path = os.path.join(current_dir, self.filename)
@@ -309,18 +316,20 @@ class ConfigFile:
             if os.path.isfile(path):
                 if self.__trusted_config.is_world_writable(current_dir):
                     is_trusted = False
-                    self.__logger.warning(
+                    self.__skip(
+                        path,
                         f"Skipping config file at {path} because it is in a world-writable directory. To enable "
                         "loading config from this location, either remove world-writable permissions with the "
-                        "command 'chmod o-w <path>' or set the environment variable ZOWE_CONFIG_ALLOW_WORLD_WRITABLE=1."
+                        "command 'chmod o-w <path>' or set the environment variable ZOWE_CONFIG_ALLOW_WORLD_WRITABLE=1.",
                     )
                 elif not self.__trusted_config.is_dir_trusted(current_dir, trust_prompt_fn):
                     is_trusted = False
-                    self.__logger.warning(
+                    self.__skip(
+                        path,
                         f"Skipping config file at {path} because it is not inside a trusted directory. To enable "
                         "loading config from this location, either add the path to the 'trustedProjectDirs' array in "
                         f"{self.__trusted_config.local_storage_path} or set the environment variable "
-                        "ZOWE_CONFIG_ALLOW_UNTRUSTED_DIRS=1."
+                        "ZOWE_CONFIG_ALLOW_UNTRUSTED_DIRS=1.",
                     )
 
                 if is_trusted:

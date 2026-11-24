@@ -37,6 +37,22 @@ class TestTrustedConfigManager(TestCase):
         """Write the given dict to the fake settings file."""
         self.fs.create_file(self.settings_path, contents=json.dumps(content))
 
+    @unittest.skipIf(sys.platform == "win32", "POSIX permissions only")
+    def test_add_trusted_creates_file_with_600(self):
+        """New settings file is created readable/writable only by the current user."""
+        self.manager.add_trusted(self.dir_a)
+        self.assertEqual(os.stat(self.settings_path).st_mode & 0o777, 0o600)
+
+    @unittest.skipIf(sys.platform == "win32", "POSIX permissions only")
+    def test_existing_file_permissions_left_alone(self):
+        """Loading and updating an existing settings file does not change its permissions."""
+        self._write_settings({"trustedProjectDirs": [self.dir_a]})
+        os.chmod(self.settings_path, 0o664)
+        self.assertEqual(self.manager.list_trusted(), {self.dir_a})
+        self.manager.add_trusted(self.dir_b)
+        self.manager.remove_trusted(self.dir_a)
+        self.assertEqual(os.stat(self.settings_path).st_mode & 0o777, 0o664)
+
     def test_cli_home_dir_default(self):
         """Test that cli_home_dir defaults to ~/.zowe"""
         self.assertEqual(self.manager.cli_home_dir, self.cli_home)

@@ -173,6 +173,10 @@ class TestZosmfProfileManager(TestCase):
                 with self.assertRaises(FileNotFoundError):
                     config_file.autodiscover_config_dir()
         self.assertIn("not inside a trusted directory", log.output[0])
+        self.assertEqual(len(config_file.skipped_files), 1)
+        path, reason = next(iter(config_file.skipped_files.items()))
+        self.assertTrue(path.endswith("zowe.config.json"))
+        self.assertIn("not inside a trusted directory", reason)
 
     def test_autodiscover_config_dir_trusted_directory(self):
         """Test that autodiscover_config_dir loads a config from a directory in the trusted list."""
@@ -241,6 +245,22 @@ class TestZosmfProfileManager(TestCase):
                 pass
 
         prompt_fn.assert_called_once_with(cwd_up_dir_path)
+
+    def test_profile_manager_exposes_skipped_config_files(self):
+        """Test that ProfileManager.skipped_config_files lists untrusted config files that were ignored."""
+        self._setup_outside_home_config()
+
+        with mock.patch.dict(os.environ, {"ZOWE_CONFIG_ALLOW_UNTRUSTED_DIRS": "0"}):
+            os.environ.pop("CI", None)
+            prof_manager = ProfileManager()
+            try:
+                prof_manager.load(profile_type="zosmf", validate_schema=False)
+            except Exception:
+                pass
+
+        skipped = prof_manager.skipped_config_files
+        self.assertEqual(len(skipped), 1)
+        self.assertIn("not inside a trusted directory", next(iter(skipped.values())))
 
     def test_autodiscover_config_dir_untrusted_directory_bypassed(self):
         """Test that ZOWE_CONFIG_ALLOW_UNTRUSTED_DIRS allows loading a config from an untrusted directory."""

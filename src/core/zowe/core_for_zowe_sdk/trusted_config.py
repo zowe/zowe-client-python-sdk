@@ -114,6 +114,17 @@ class TrustedConfigManager:
             and os.path.normcase(os.path.realpath(path)) == os.path.normcase(path)
         )
 
+    def __save_settings_json(self, settings_json: dict) -> None:
+        """Write the settings file. A new file is created with 600 permissions; existing permissions are kept."""
+        path = self.local_storage_path
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        if os.path.exists(path):
+            fp = open(path, "w", encoding="utf-8")  # pylint: disable=consider-using-with
+        else:
+            fp = os.fdopen(os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600), "w", encoding="utf-8")
+        with fp:
+            fp.write(json.dumps(settings_json, indent=2) + "\n")
+
     def __load_settings_json(self) -> dict:
         """Load the settings file, ensuring the trusted directories key exists."""
         settings_json_path = self.local_storage_path
@@ -157,9 +168,7 @@ class TrustedConfigManager:
         settings_json = self.__load_settings_json()
         if dir_path not in settings_json[self.__settings_key]:
             settings_json[self.__settings_key].append(dir_path)
-            os.makedirs(os.path.dirname(self.local_storage_path), exist_ok=True)
-            with open(self.local_storage_path, "w", encoding="utf-8") as fp:
-                fp.write(json.dumps(settings_json, indent=2) + "\n")
+            self.__save_settings_json(settings_json)
 
     def remove_trusted(self, dir_path: str) -> None:
         """
@@ -175,5 +184,4 @@ class TrustedConfigManager:
             settings_json[self.__settings_key] = [
                 path for path in settings_json[self.__settings_key] if path != dir_path
             ]
-            with open(self.local_storage_path, "w", encoding="utf-8") as fp:
-                fp.write(json.dumps(settings_json, indent=2) + "\n")
+            self.__save_settings_json(settings_json)

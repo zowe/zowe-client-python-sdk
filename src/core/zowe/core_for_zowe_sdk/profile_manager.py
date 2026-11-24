@@ -112,6 +112,21 @@ class ProfileManager:
         return self.__appname
 
     @property
+    def skipped_config_files(self) -> dict[str, str]:
+        """
+        Return project config files that were found but not loaded because they are not trusted.
+
+        Callers can use this to explain a connection failure or missing profile, e.g. in an error message.
+        Populated when the config files are loaded (e.g. by `load`).
+
+        Returns
+        -------
+        dict[str, str]
+            Maps the path of each skipped file to the reason it was skipped
+        """
+        return {**self.__project_config.skipped_files, **self.__project_user_config.skipped_files}
+
+    @property
     def config_dir(self) -> Optional[str]:
         """
         Return the folder path where the Zowe z/OSMF Team Project Config files are stored.
