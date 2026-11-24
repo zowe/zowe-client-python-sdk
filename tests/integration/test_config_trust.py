@@ -96,11 +96,11 @@ def test_config_inside_home_is_trusted(trust_env):
 
 
 def test_config_loaded_after_trusting_directory(trust_env):
-    """A config is loaded once its directory is listed in trustedConfigDirs."""
+    """A config is loaded once its directory is listed in trustedProjectDirs."""
     settings_dir = os.path.join(trust_env["cli_home"], "settings")
     os.makedirs(settings_dir)
     with open(os.path.join(settings_dir, "imperative.json"), "w", encoding="utf-8") as fp:
-        json.dump({"trustedConfigDirs": [trust_env["project"]]}, fp)
+        json.dump({"trustedProjectDirs": [trust_env["project"]]}, fp)
 
     assert _autodiscovered_dir() == trust_env["project"]
 

@@ -318,7 +318,7 @@ class ConfigFile:
                     is_trusted = False
                     self.__logger.warning(
                         f"Skipping config file at {path} because it is not inside a trusted directory. To enable "
-                        "loading config from this location, either add the path to the 'trustedConfigDirs' array in "
+                        "loading config from this location, either add the path to the 'trustedProjectDirs' array in "
                         f"{self.__trusted_config.local_storage_path} or set the environment variable "
                         "ZOWE_CONFIG_ALLOW_UNTRUSTED_DIRS=1."
                     )

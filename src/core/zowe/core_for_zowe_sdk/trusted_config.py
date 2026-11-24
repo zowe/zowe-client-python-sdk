@@ -31,11 +31,11 @@ class TrustedConfigManager:
     """
     Manage the list of directories whose Zowe config files are trusted.
 
-    Trusted directories are persisted under the "trustedConfigDirs" key in
+    Trusted directories are persisted under the "trustedProjectDirs" key in
     `<ZOWE_CLI_HOME>/settings/imperative.json`, which is shared with Zowe CLI.
     """
 
-    __settings_key = "trustedConfigDirs"
+    __settings_key = "trustedProjectDirs"
 
     @property
     def cli_home_dir(self) -> str:

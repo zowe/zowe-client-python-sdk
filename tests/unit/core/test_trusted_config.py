@@ -123,7 +123,7 @@ class TestTrustedConfigManager(TestCase):
 
     def test_is_dir_trusted_in_trusted_list(self):
         """Test that a directory in the trusted list is trusted"""
-        self._write_settings({"trustedConfigDirs": [self.outside_dir]})
+        self._write_settings({"trustedProjectDirs": [self.outside_dir]})
         self.assertTrue(self.manager.is_dir_trusted(self.outside_dir))
 
     def test_is_dir_trusted_untrusted(self):
@@ -157,12 +157,12 @@ class TestTrustedConfigManager(TestCase):
 
     def test_list_trusted(self):
         """Test that list_trusted returns the directories saved in the settings file"""
-        self._write_settings({"trustedConfigDirs": [self.dir_a, self.dir_b]})
+        self._write_settings({"trustedProjectDirs": [self.dir_a, self.dir_b]})
         self.assertEqual(self.manager.list_trusted(), {self.dir_a, self.dir_b})
 
     def test_list_trusted_skips_relative_path_with_warning(self):
         """Test that list_trusted drops relative paths and logs a warning"""
-        self._write_settings({"trustedConfigDirs": [self.dir_a, "relative/dir"]})
+        self._write_settings({"trustedProjectDirs": [self.dir_a, "relative/dir"]})
         with self.assertLogs(level="WARNING") as logs:
             self.assertEqual(self.manager.list_trusted(), {self.dir_a})
         self.assertEqual(len(logs.records), 1)
@@ -173,14 +173,14 @@ class TestTrustedConfigManager(TestCase):
         """Test that list_trusted drops symbolic links and logs a warning"""
         self.fs.create_dir(self.real_dir)
         self.fs.create_symlink(self.link_dir, self.real_dir)
-        self._write_settings({"trustedConfigDirs": [self.real_dir, self.link_dir]})
+        self._write_settings({"trustedProjectDirs": [self.real_dir, self.link_dir]})
         with self.assertLogs(level="WARNING") as logs:
             self.assertEqual(self.manager.list_trusted(), {self.real_dir})
         self.assertIn(self.link_dir, logs.output[0])
 
     def test_list_trusted_valid_paths_no_warning(self):
         """Test that list_trusted logs nothing when all paths are valid"""
-        self._write_settings({"trustedConfigDirs": [self.dir_a]})
+        self._write_settings({"trustedProjectDirs": [self.dir_a]})
         with self.assertNoLogs(level="WARNING"):
             self.manager.list_trusted()
 
@@ -199,7 +199,7 @@ class TestTrustedConfigManager(TestCase):
     def test_list_trusted_skips_non_normalized_path_with_warning(self):
         """Test that list_trusted drops paths containing ".." and logs a warning"""
         bad = os.path.join(self.dir_a, "..", "b")
-        self._write_settings({"trustedConfigDirs": [self.dir_a, bad]})
+        self._write_settings({"trustedProjectDirs": [self.dir_a, bad]})
         with self.assertLogs(level="WARNING"):
             self.assertEqual(self.manager.list_trusted(), {self.dir_a})
 
@@ -216,7 +216,7 @@ class TestTrustedConfigManager(TestCase):
         child = os.path.join(self.link_dir, "child")
         self.fs.create_dir(os.path.join(self.real_dir, "child"))
         self.fs.create_symlink(self.link_dir, self.real_dir)
-        self._write_settings({"trustedConfigDirs": [self.dir_a, child]})
+        self._write_settings({"trustedProjectDirs": [self.dir_a, child]})
         with self.assertLogs(level="WARNING") as logs:
             self.assertEqual(self.manager.list_trusted(), {self.dir_a})
         self.assertIn(child, logs.output[0])
@@ -234,7 +234,7 @@ class TestTrustedConfigManager(TestCase):
         self.manager.add_trusted(self.dir_a)
         self.manager.add_trusted(self.dir_a)
         with open(self.settings_path, encoding="utf-8") as fp:
-            self.assertEqual(json.load(fp), {"trustedConfigDirs": [self.dir_a]})
+            self.assertEqual(json.load(fp), {"trustedProjectDirs": [self.dir_a]})
 
     def test_add_trusted_creates_settings_dir(self):
         """Test that add_trusted creates the settings directory if it doesn't exist"""
@@ -244,19 +244,19 @@ class TestTrustedConfigManager(TestCase):
 
     def test_add_trusted_preserves_other_settings(self):
         """Test that add_trusted keeps unrelated settings in the file"""
-        self._write_settings({"other": "value", "trustedConfigDirs": [self.dir_a]})
+        self._write_settings({"other": "value", "trustedProjectDirs": [self.dir_a]})
         self.manager.add_trusted(self.dir_b)
         with open(self.settings_path, encoding="utf-8") as fp:
-            self.assertEqual(json.load(fp), {"other": "value", "trustedConfigDirs": [self.dir_a, self.dir_b]})
+            self.assertEqual(json.load(fp), {"other": "value", "trustedProjectDirs": [self.dir_a, self.dir_b]})
 
     def test_remove_trusted(self):
         """Test that remove_trusted deletes a directory from the settings file"""
-        self._write_settings({"trustedConfigDirs": [self.dir_a, self.dir_b]})
+        self._write_settings({"trustedProjectDirs": [self.dir_a, self.dir_b]})
         self.manager.remove_trusted(self.dir_a)
         self.assertEqual(self.manager.list_trusted(), {self.dir_b})
 
     def test_remove_trusted_not_in_list(self):
         """Test that remove_trusted leaves the file unchanged for an unknown directory"""
-        self._write_settings({"trustedConfigDirs": [self.dir_a]})
+        self._write_settings({"trustedProjectDirs": [self.dir_a]})
         self.manager.remove_trusted(self.dir_missing)
         self.assertEqual(self.manager.list_trusted(), {self.dir_a})
