@@ -14,7 +14,7 @@ import os
 import os.path
 import warnings
 from copy import deepcopy
-from typing import Optional, Any
+from typing import Any, Callable, Optional
 
 from deepmerge import always_merger
 from jsonschema.exceptions import (
@@ -66,7 +66,11 @@ class ProfileManager:
         Indicates whether warnings are shown
     """
 
-    def __init__(self, appname: str = "zowe", show_warnings: bool = True):
+    def __init__(
+        self,
+        appname: str = "zowe",
+        show_warnings: bool = True,
+    ):
         self.__appname = appname
         self.__show_warnings = show_warnings
 
@@ -106,6 +110,21 @@ class ProfileManager:
             The name of the application as configured in the current instance.
         """
         return self.__appname
+
+    @property
+    def skipped_config_files(self) -> dict[str, str]:
+        """
+        Return project config files that were found but not loaded because they are not trusted.
+
+        Callers can use this to explain a connection failure or missing profile, e.g. in an error message.
+        Populated when the config files are loaded (e.g. by `load`).
+
+        Returns
+        -------
+        dict[str, str]
+            Maps the path of each skipped file to the reason it was skipped
+        """
+        return {**self.__project_config.skipped_files, **self.__project_user_config.skipped_files}
 
     @property
     def config_dir(self) -> Optional[str]:
@@ -235,7 +254,7 @@ class ProfileManager:
                     env_var[k] = v if v is not None else ""
 
                 elif prop_type == "boolean":
-                    env_var[k] = v.lower() in ["true", "1", "yes"] if isinstance(v, str) else bool(v)      
+                    env_var[k] = v.lower() in ["true", "1", "yes"] if isinstance(v, str) else bool(v)
                 else:
                     env_var[k] = v
 
@@ -259,7 +278,8 @@ class ProfileManager:
             The name of the profile to retrieve. If None, the method attempts to fetch
             the profile based only on the type.
         profile_type : Optional[str]
-            The type of the profile to retrieve. If None, the method attempts to fetch the profile based only on the name.
+            The type of the profile to retrieve. If None, the method attempts to fetch
+            the profile based only on the name.
         validate_schema : Optional[bool]
             Whether to validate the profile against the schema present in the configuration file.
 
@@ -340,6 +360,7 @@ class ProfileManager:
         validate_schema: Optional[bool] = True,
         validate_only_project_config: Optional[bool] = False,
         override_with_env: Optional[bool] = False,
+        trust_prompt_fn: Optional[Callable[[str], bool]] = None,
     ) -> dict[str, Any]:
         """
         Load connection details from a team config profile.
@@ -368,6 +389,11 @@ class ProfileManager:
             Whether to only load from project-level configs (project and project user), ignoring global configs.
         override_with_env : Optional[bool]
             If True, overrides profile properties with values from environment variables.
+        trust_prompt_fn : Optional[Callable[[str], bool]]
+            Called with a directory path when a project config file is found in a directory that
+            is not yet trusted. Return True to load the config from that directory. If not
+            provided, config files in untrusted directories are skipped. Each directory is
+            prompted for at most once per call, whichever layer finds it.
 
         Raises
         ------
@@ -390,6 +416,16 @@ class ProfileManager:
 
         if not self.__show_warnings:
             warnings.simplefilter("ignore")
+
+        # remember answers so a directory is only prompted for once, however many layers find it
+        prompt_fn: Optional[Callable[[str], bool]] = None
+        if trust_prompt_fn is not None:
+            trust_answers: dict[str, bool] = {}
+
+            def prompt_fn(dir_path: str) -> bool:
+                if dir_path not in trust_answers:
+                    trust_answers[dir_path] = trust_prompt_fn(dir_path)
+                return trust_answers[dir_path]
 
         profile_props: dict[str, Any] = {}
         env_var: dict[str, Any] = {}
@@ -415,12 +451,10 @@ class ProfileManager:
                     layer_validate_schema = cfg_layer == self.__project_config
 
                 try:
-                    cfg_layer.init_from_file(layer_validate_schema)
+                    cfg_layer.init_from_file(layer_validate_schema, prompt_fn)
 
                 except SecureProfileLoadFailed:
-                    self.__logger.warning(
-                        f"Could not load secure properties for {cfg_layer.filepath}"
-                    )
+                    self.__logger.warning(f"Could not load secure properties for {cfg_layer.filepath}")
 
                     warnings.warn(
                         f"Could not load secure properties for {cfg_layer.filepath}",
@@ -471,6 +505,7 @@ class ProfileManager:
                     validate_schema=validate_schema,
                     validate_only_project_config=validate_only_project_config,
                     override_with_env=override_with_env,
+                    trust_prompt_fn=prompt_fn,
                 ),
                 **profile_props,
             }
