@@ -350,6 +350,8 @@ class USSFiles(BaseFilesApi):  # type: ignore
         """
         Retrieve the file tag if specified for the filename.
 
+        An exception is raised by the request handler if it is impossible to identify the tag info.
+
         Parameters
         ----------
         filepath_name: str
@@ -359,12 +361,7 @@ class USSFiles(BaseFilesApi):  # type: ignore
         -------
         USSFileTag
             Tag info of a given file.
-
-        Raises
-        ------
-        Exception
-            Thrown when it is impossible to identify the tag info.
-        """  # noqa: DOC502
+        """
         custom_args = self._create_custom_request_arguments()
         custom_args["url"] = "{}fs/{}".format(self._request_endpoint, self._encode_uri_path_for_uss(filepath_name))
         custom_args["json"] = {"request": "chtag", "action": "list"}

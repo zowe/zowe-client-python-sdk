@@ -320,7 +320,8 @@ class ConfigFile:
                         path,
                         f"Skipping config file at {path} because it is in a world-writable directory. To enable "
                         "loading config from this location, either remove world-writable permissions with the "
-                        "command 'chmod o-w <path>' or set the environment variable ZOWE_CONFIG_ALLOW_WORLD_WRITABLE=1.",
+                        "command 'chmod o-w <path>' or set the environment variable "
+                        "ZOWE_CONFIG_ALLOW_WORLD_WRITABLE=1.",
                     )
                 elif not self.__trusted_config.is_dir_trusted(current_dir, trust_prompt_fn):
                     is_trusted = False
